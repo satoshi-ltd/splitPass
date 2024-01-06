@@ -1,0 +1,30 @@
+{
+  "name": "qr-vault",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "lint": "eslint --cache --fix --format codeframe --ext .jsx,.js src"
+  },
+  "dependencies": {
+    "@expo/webpack-config": "^19.0.0",
+    "expo": "~49.0.15",
+    "expo-font": "^11.6.0",
+    "expo-status-bar": "~1.6.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.72.6",
+    "react-native-extended-stylesheet": "^0.12.0",
+    "react-native-qrcode-styled": "^0.3.0",
+    "react-native-svg": "^14.1.0",
+    "react-native-web": "~0.19.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@mirai/eslint": "^0.1"
+  },
+  "private": true
+}
