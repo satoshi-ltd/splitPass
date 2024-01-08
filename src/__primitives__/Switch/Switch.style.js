@@ -1,29 +1,29 @@
-import StyleSheet from "react-native-extended-stylesheet";
+import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   switch: {
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "$borderRadius / 2",
-    borderColor: "$colorContent",
-    borderStyle: "$borderStyle",
-    borderWidth: "$borderWidth",
-    height: "$spaceL",
-    width: "$spaceL",
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '$borderRadius / 2',
+    borderColor: '$colorContent',
+    borderStyle: '$borderStyle',
+    borderWidth: '$borderWidth',
+    height: '$spaceL',
+    width: '$spaceL',
   },
 
   disabled: {
-    borderColor: "$colorContentLight",
+    borderColor: '$colorContentLight',
   },
 
   check: {
-    backgroundColor: "$colorContent",
-    borderRadius: "$borderRadius / 4",
-    height: "$spaceM",
-    width: "$spaceM",
+    backgroundColor: '$colorContent',
+    borderRadius: '$borderRadius / 4',
+    height: '$spaceM',
+    width: '$spaceM',
   },
 
   checkDisabled: {
-    backgroundColor: "$colorContentLight",
+    backgroundColor: '$colorContentLight',
   },
 });

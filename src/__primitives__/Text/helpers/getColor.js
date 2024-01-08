@@ -1,10 +1,6 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
-export const style = StyleSheet.create({
-  icon: {
-    fontSize: '$spaceL',
-  },
-
+const style = StyleSheet.create({
   accent: {
     color: '$colorAccent',
   },
@@ -25,3 +21,9 @@ export const style = StyleSheet.create({
     color: '$colorContentLight',
   },
 });
+
+const COLORS = ['accent', 'alert', 'base', 'content', 'contentLight'];
+
+const getColor = (value) => style[value] || style.content;
+
+export { COLORS, getColor };

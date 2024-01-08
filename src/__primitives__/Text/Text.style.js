@@ -1,29 +1,29 @@
-import StyleSheet from "react-native-extended-stylesheet";
+import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   text: {
-    fontFamily: "font-default",
-    fontWeight: "$fontWeightDefault",
+    fontFamily: 'font-default',
+    fontWeight: '$fontWeightDefault',
   },
 
   bold: {
-    fontFamily: "font-bold",
-    fontWeight: "$fontWeightBold",
+    fontFamily: 'font-bold',
+    fontWeight: '$fontWeightBold',
   },
 
   // align
   left: {
-    alignSelf: "flex-start",
-    textAlign: "flex-start",
+    alignSelf: 'flex-start',
+    textAlign: 'flex-start',
   },
 
   center: {
-    alignSelf: "center",
-    textAlign: "center",
+    alignSelf: 'center',
+    textAlign: 'center',
   },
 
   right: {
-    alignSelf: "flex-end",
-    textAlign: "right",
+    alignSelf: 'flex-end',
+    textAlign: 'right',
   },
 });

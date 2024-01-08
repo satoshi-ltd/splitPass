@@ -1,42 +1,42 @@
-import { Platform } from "react-native";
-import StyleSheet from "react-native-extended-stylesheet";
+import { Platform } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   input: {
-    borderColor: "$colorContentLight",
-    borderRadius: "$borderRadius",
-    borderStyle: "$borderStyle",
-    borderWidth: "$borderWidth",
-    color: "$colorContent",
-    fontFamily: "$inputFontFamily",
-    fontSize: "$inputFontSize",
-    lineHeight: "$inputFontFamily",
-    paddingHorizontal: "$spaceM",
-    paddingVertical: "$spaceM",
-    placeholderTextColor: "$colorContentLight",
-    textAlignVertical: "center",
+    borderColor: '$colorContentLight',
+    borderRadius: '$borderRadius',
+    borderStyle: '$borderStyle',
+    borderWidth: '$borderWidth',
+    color: '$colorContent',
+    fontFamily: '$inputFontFamily',
+    fontSize: '$inputFontSize',
+    // lineHeight: '$inputFontSize * 1.5',
+    paddingLeft: '$spaceM',
+    paddingRight: '$spaceM',
+    paddingBottom: '$spaceM',
+    paddingTop: '$spaceM',
     ...Platform.select({
       web: {
         outlineWidth: 0,
       },
     }),
-    width: "100%",
+    width: '100%',
   },
 
   focus: {
-    borderColor: "$colorContent",
+    borderColor: '$colorContent',
   },
 
   // align
   left: {
-    textAlign: "left",
+    textAlign: 'left',
   },
 
   center: {
-    textAlign: "center",
+    textAlign: 'center',
   },
 
   right: {
-    textAlign: "right",
+    textAlign: 'right',
   },
 });

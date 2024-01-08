@@ -1,12 +1,18 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    // backgroundColor: '$colorBase',
+  },
+
   view: {
+    flex: 1,
     display: 'flex',
   },
 
   gap: {
-    gap: '$spaceM',
+    gap: '$spaceS',
   },
 
   left: {
@@ -35,7 +41,6 @@ export const style = StyleSheet.create({
   },
 
   wide: {
-    justifyContent: 'space-between',
     flex: 1,
   },
 });

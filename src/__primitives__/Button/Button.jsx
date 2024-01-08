@@ -1,18 +1,11 @@
-import PropTypes from "prop-types";
-import React from "react";
+import PropTypes from 'prop-types';
+import React from 'react';
 
-import { style } from "./Button.style";
-import { Pressable } from "../Pressable";
-import { Text } from "../Text";
+import { style } from './Button.style';
+import { Pressable } from '../Pressable';
+import { Text } from '../Text';
 
-const Button = ({
-  children,
-  disabled,
-  secondary = false,
-  small = false,
-  onPress = () => {},
-  ...others
-}) => (
+const Button = ({ children, disabled, secondary = false, small = false, onPress = () => {}, ...others }) => (
   <Pressable
     disabled={disabled}
     feedback
@@ -25,7 +18,7 @@ const Button = ({
       others.style,
     ]}
   >
-    <Text bold color={disabled ? "base" : undefined} caption={small}>
+    <Text bold color={disabled ? 'base' : secondary ? 'content' : 'base'} caption={small}>
       {children}
     </Text>
   </Pressable>
