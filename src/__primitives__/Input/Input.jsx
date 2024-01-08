@@ -5,49 +5,59 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Input.style';
 
-const Input = ({ align, keyboard = 'text', placeholder = '...', value = '', onChange, ...others }) => {
-  const [rows, setRows] = useState(1);
-  const [focus, setFocus] = useState(false);
+const Input = React.forwardRef(
+  ({ align, keyboard = 'text', placeholder, valid, value = '', onChange, ...others }, ref) => {
+    const [rows, setRows] = useState(1);
+    const [focus, setFocus] = useState(false);
 
-  const handleChange = (next = '') => {
-    onChange && onChange(next.toString().length > 0 ? next : undefined);
-  };
+    const handleChange = (next = '') => {
+      onChange && onChange(next.toString().length > 0 ? next : undefined);
+    };
 
-  const handleContentSizeChange = ({ nativeEvent: { contentSize: { height } = {} } = {} }) => {
-    const spaceM = StyleSheet.value('$spaceM');
-    const fontSize = StyleSheet.value('$inputFontSize');
+    const handleContentSizeChange = ({ nativeEvent: { contentSize: { height } = {} } = {} }) => {
+      const spaceM = StyleSheet.value('$spaceM');
+      const fontSize = StyleSheet.value('$inputFontSize');
 
-    setRows(Math.floor(height / (fontSize + spaceM)) + 1);
-  };
+      setRows(Math.floor(height / (fontSize + spaceM)) + 1);
+    };
 
-  return (
-    <TextInput
-      {...others}
-      autoCapitalize="none"
-      autoComplete="off"
-      autoCorrect={false}
-      blurOnSubmit
-      inputMode={keyboard}
-      placeholder={!focus ? placeholder : undefined}
-      placeholderTextColor={StyleSheet.value('$colorContentLight')}
-      rows={rows}
-      textAlignVertical="center"
-      underlineColorAndroid="transparent"
-      value={value}
-      onBlur={() => setFocus(false)}
-      onChangeText={handleChange}
-      onContentSizeChange={others.multiline && value?.length ? handleContentSizeChange : undefined}
-      onFocus={() => setFocus(true)}
-      onSubmitEditing={Keyboard.dismiss}
-      style={[style.input, align && style[align], focus && style.focus]}
-    />
-  );
-};
+    return (
+      <TextInput
+        {...others}
+        autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect={false}
+        blurOnSubmit
+        inputMode={keyboard}
+        placeholder={!focus ? placeholder : undefined}
+        placeholderTextColor={StyleSheet.value('$colorContentLight')}
+        ref={ref}
+        rows={rows}
+        textAlignVertical="center"
+        underlineColorAndroid="transparent"
+        value={value?.toString()}
+        onBlur={() => setFocus(false)}
+        onChangeText={handleChange}
+        onContentSizeChange={others.multiline && value?.length ? handleContentSizeChange : undefined}
+        onFocus={() => setFocus(true)}
+        onSubmitEditing={Keyboard.dismiss}
+        style={[
+          style.input,
+          align && style[align],
+          (focus || value?.length) && style.focus,
+          valid && style.valid,
+          others.style,
+        ]}
+      />
+    );
+  },
+);
 
 Input.propTypes = {
   align: PropTypes.oneOf(['left', 'center', 'right']),
   keyboard: PropTypes.string,
   placeholder: PropTypes.string,
+  valid: PropTypes.bool,
   value: PropTypes.string,
   onChange: PropTypes.func,
 };

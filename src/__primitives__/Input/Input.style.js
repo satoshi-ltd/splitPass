@@ -3,6 +3,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   input: {
+    backgroundColor: 'transparent',
     borderColor: '$colorContentLight',
     borderRadius: '$borderRadius',
     borderStyle: '$borderStyle',
@@ -10,7 +11,7 @@ export const style = StyleSheet.create({
     color: '$colorContent',
     fontFamily: '$inputFontFamily',
     fontSize: '$inputFontSize',
-    // lineHeight: '$inputFontSize * 1.5',
+    fontWeight: '$inputFontWeight',
     paddingLeft: '$spaceM',
     paddingRight: '$spaceM',
     paddingBottom: '$spaceM',
@@ -25,6 +26,10 @@ export const style = StyleSheet.create({
 
   focus: {
     borderColor: '$colorContent',
+  },
+
+  valid: {
+    borderColor: '$colorAccent',
   },
 
   // align
