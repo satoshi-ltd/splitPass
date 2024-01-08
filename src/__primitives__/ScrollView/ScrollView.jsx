@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { ScrollView as NativeScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView as NativeScrollView } from 'react-native';
 
 import { style } from './ScrollView.style';
 import { View } from '../View';
 
 const ScrollView = ({ ...others }) => (
   <NativeScrollView style={style.scrollView}>
-    <View {...others} />
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
+      <View {...others} />
+    </KeyboardAvoidingView>
   </NativeScrollView>
 );
 
