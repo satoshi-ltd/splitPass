@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
-import { Platform, Keyboard } from "react-native";
+import { useEffect, useState } from 'react';
+import { Platform, Keyboard } from 'react-native';
 
 export const useKeyboard = () => {
   const [isKeyboardOpen, setKeyboardOpen] = useState(false);
 
   useEffect(() => {
-    const IOS = Platform.OS === "ios";
+    const IOS = Platform.OS === 'ios';
 
-    const showEvent = IOS ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent = IOS ? "keyboardWillHide" : "keyboardDidHide";
+    const showEvent = IOS ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = IOS ? 'keyboardWillHide' : 'keyboardDidHide';
 
     Keyboard.addListener(showEvent, handleShow);
     Keyboard.addListener(hideEvent, handleHide);
