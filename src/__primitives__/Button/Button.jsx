@@ -5,7 +5,15 @@ import { style } from './Button.style';
 import { Pressable } from '../Pressable';
 import { Text } from '../Text';
 
-const Button = ({ children, disabled, secondary = false, small = false, onPress = () => {}, ...others }) => (
+const Button = ({
+  children,
+  disabled,
+  secondary = false,
+  small = false,
+  wide = false,
+  onPress = () => {},
+  ...others
+}) => (
   <Pressable
     disabled={disabled}
     feedback
@@ -15,6 +23,7 @@ const Button = ({ children, disabled, secondary = false, small = false, onPress 
       disabled && style.disabled,
       secondary && !disabled && style.secondary,
       small && style.small,
+      wide && style.wide,
       others.style,
     ]}
   >
@@ -31,6 +40,7 @@ Button.propTypes = {
   disabled: PropTypes.bool,
   secondary: PropTypes.bool,
   small: PropTypes.bool,
+  wide: PropTypes.bool,
   onPress: PropTypes.func,
 };
 

@@ -29,4 +29,8 @@ export const style = StyleSheet.create({
     maxHeight: '$buttonSmallHeight',
     paddingHorizontal: '$buttonSmallHeight / 2',
   },
+
+  wide: {
+    flex: 1,
+  },
 });
