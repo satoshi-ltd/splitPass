@@ -34,8 +34,11 @@ export const style = StyleSheet.create({
     flexDirection: 'row',
   },
 
-  wide: {
+  spaceBetween: {
     justifyContent: 'space-between',
+  },
+
+  wide: {
     flex: 1,
   },
 });
