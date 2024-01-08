@@ -1,21 +1,26 @@
-import StyleSheet from "react-native-extended-stylesheet";
+import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   option: {
-    alignItems: "center",
-    borderRadius: "$borderRadius",
+    borderColor: 'transparent',
+    borderStyle: '$borderStyle',
+    borderWidth: '$borderWidth',
+    borderRadius: '$borderRadius',
     flex: 1,
-    gap: "$spaceS",
-    padding: "$spaceS",
+    padding: '$spaceS',
   },
 
   checked: {
-    borderColor: "$colorContent",
-    borderStyle: "$borderStyle",
-    borderWidth: "$borderWidth",
+    borderColor: '$colorContent',
   },
 
   disabled: {
-    borderColor: "$colorContentLight",
+    borderColor: '$colorContentLight',
+  },
+
+  content: {
+    alignItems: 'center',
+    gap: '$spaceS',
+    paddingBottom: '$spaceXS',
   },
 });
