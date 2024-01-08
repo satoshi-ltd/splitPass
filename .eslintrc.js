@@ -1,3 +1,3 @@
-const Linter = require("@mirai/eslint");
+const Linter = require('@mirai/eslint');
 
 module.exports = Linter;
