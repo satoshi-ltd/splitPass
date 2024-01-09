@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { style } from './LoginScreen.style';
+import { style } from './Onboarding.style';
 import { Button, Text, ScrollView } from '../../__primitives__';
 
 // eslint-disable-next-line react/prop-types
-export const LoginScreen = ({ navigation: { navigate } }) => {
+export const OnboardingScreen = ({ navigation: { navigate } }) => {
   return (
     <ScrollView style={style.screen}>
       <Text bold subtitle>
-        /Vault
+        /Onboarding
       </Text>
-      <Button onPress={() => navigate('main')}>faceId</Button>
+      <Button onPress={() => navigate('main')}>Go to App</Button>
     </ScrollView>
   );
 };

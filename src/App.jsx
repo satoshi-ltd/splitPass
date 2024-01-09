@@ -10,13 +10,13 @@ import { Icon } from './__primitives__';
 import { SCREEN_OPTIONS, TAB_OPTIONS, MODAL_OPTIONS } from './App.constants';
 import { getNavigationTheme } from './helpers';
 import {
-  LoginScreen,
   ScanScreen,
   GenerateScreen,
   ImportScreen,
-  VaultScreen,
-  SettingsScreen,
   ModalGenerate,
+  OnboardingScreen,
+  SettingsScreen,
+  VaultScreen,
 } from './screens';
 import { defaultTheme } from './themes/default.theme';
 
@@ -72,8 +72,8 @@ export const App = () => {
     <NavigationContainer theme={getNavigationTheme()}>
       <StatusBar style="light" />
 
-      <Stack.Navigator initialRouteName="auth" screenOptions={SCREEN_OPTIONS}>
-        <Stack.Screen name="auth" component={LoginScreen} />
+      <Stack.Navigator initialRouteName="onboarding" screenOptions={SCREEN_OPTIONS}>
+        <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
 
         {/* -- modals */}

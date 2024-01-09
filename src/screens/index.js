@@ -1,5 +1,5 @@
 // -- screens
-export * from './Login';
+export * from './Onboarding';
 export * from './Generate';
 export * from './Scan';
 export * from './Vault';
