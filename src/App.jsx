@@ -72,7 +72,7 @@ export const App = () => {
     <NavigationContainer theme={getNavigationTheme()}>
       <StatusBar style="light" />
 
-      <Stack.Navigator initialRouteName="onboarding" screenOptions={SCREEN_OPTIONS}>
+      <Stack.Navigator initialRouteName="main" screenOptions={SCREEN_OPTIONS}>
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
 

@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { style } from './SettingsScreen.style';
-import { Text, View } from '../../__primitives__';
+import { Text } from '../../__primitives__';
+import { Screen } from '../../components';
 
 export const SettingsScreen = () => {
   return (
-    <View style={style.screen}>
+    <Screen>
       <Text bold subtitle>
         /settings
       </Text>
-    </View>
+    </Screen>
   );
 };

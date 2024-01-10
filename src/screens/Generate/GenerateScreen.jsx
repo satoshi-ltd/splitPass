@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 import { style } from './GenerateScreen.style';
-import { Button, Icon, Input, ScrollView, Switch, Text, View } from '../../__primitives__';
+import { Button, Icon, Input, Switch, Text, View } from '../../__primitives__';
 import { GUARDIANS } from '../../App.constants';
-import { Card, InputPin, Option } from '../../components';
+import { Card, InputPin, Option, Screen } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
@@ -17,7 +17,7 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
   }, [guardians]);
 
   return (
-    <ScrollView style={style.screen}>
+    <Screen>
       <View>
         <Text align="center" bold subtitle>
           Select Guardians amount
@@ -76,19 +76,12 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
           </Text>
         </View>
 
-        <Input
-          align="center"
-          multiline
-          placeholder="Type your secret..."
-          // secureTextEntry
-          value={secret}
-          onChange={setSecret}
-        />
+        <Input align="center" multiline placeholder="Type your secret..." value={secret} onChange={setSecret} />
       </Card>
 
       <Button disabled={!secret} onPress={() => navigate('modal', { pin, secret })}>
         Continue
       </Button>
-    </ScrollView>
+    </Screen>
   );
 };

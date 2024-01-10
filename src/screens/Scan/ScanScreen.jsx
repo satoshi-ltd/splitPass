@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { style } from './ScanScreen.style';
-import { Button, ScrollView, Text } from '../../__primitives__';
-import { Card } from '../../components';
+import { Button, Text } from '../../__primitives__';
+import { Card, Screen } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const ScanScreen = ({ navigation: { navigate } }) => {
   return (
-    <ScrollView style={style.screen}>
+    <Screen>
       <Card>
         <Text bold subtitle>
           Become a Guardian
@@ -22,6 +21,6 @@ export const ScanScreen = ({ navigation: { navigate } }) => {
       </Card>
 
       <Button onPress={() => navigate('generate', {})}>Create a new secret</Button>
-    </ScrollView>
+    </Screen>
   );
 };

@@ -3,7 +3,8 @@ import React from 'react';
 import QRCodeStyled from 'react-native-qrcode-styled';
 
 import { style } from './ModalGenerate.style';
-import { Button, ScrollView } from '../../__primitives__';
+import { Button } from '../../__primitives__';
+import { Screen } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const ModalGenerate = ({ route: { params: { secret } = {} }, navigation: { goBack } }) => {
@@ -16,7 +17,7 @@ export const ModalGenerate = ({ route: { params: { secret } = {} }, navigation: 
   };
 
   return (
-    <ScrollView style={style.screen}>
+    <Screen style={style.screen}>
       <QRCodeStyled
         data={secret}
         style={{ backgroundColor: 'white' }}
@@ -37,6 +38,6 @@ export const ModalGenerate = ({ route: { params: { secret } = {} }, navigation: 
       <Button secondary onPress={handleShare}>
         Share Code
       </Button>
-    </ScrollView>
+    </Screen>
   );
 };

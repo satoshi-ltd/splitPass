@@ -25,6 +25,7 @@ export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { g
   );
 
   const handleBarCodeScanned = ({ data }) => {
+    // ! TODO: decode(qr)
     setValue(data);
   };
 
