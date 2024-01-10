@@ -53,7 +53,7 @@ export const defaultTheme = {
   $importBackgroundColor: 'rgba(0, 0, 0, 0.33)',
   $importColor: '#ffffff',
 
-  $qrBackgroundColor: '$colorBase',
-  $qrColor: '$colorContent',
+  $qrBackgroundColor: '#fff',
+  $qrColor: '#111',
   $qrSize: Dimensions.get('window').width * 0.66,
 };

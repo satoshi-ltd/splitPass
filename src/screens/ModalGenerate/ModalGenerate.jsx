@@ -4,7 +4,7 @@ import QRCodeStyled from 'react-native-qrcode-styled';
 
 import { style } from './ModalGenerate.style';
 import { Button } from '../../__primitives__';
-import { Screen } from '../../components';
+import { QR, Screen } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const ModalGenerate = ({ route: { params: { secret } = {} }, navigation: { goBack } }) => {
@@ -18,16 +18,7 @@ export const ModalGenerate = ({ route: { params: { secret } = {} }, navigation: 
 
   return (
     <Screen style={style.screen}>
-      <QRCodeStyled
-        data={secret}
-        style={{ backgroundColor: 'white' }}
-        padding={16}
-        pieceSize={8}
-        isPiecesGlued={true}
-        pieceBorderRadius={4}
-        // pieceLiquidRadius={1}
-        pieceCornerType="rounded"
-      />
+      <QR value={secret} />
 
       <Button onPress={() => goBack()}>Back</Button>
 

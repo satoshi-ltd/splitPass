@@ -1,17 +1,22 @@
 import React from 'react';
 
-import { Button, Text } from '../../__primitives__';
-import { Card, Screen } from '../../components';
+import { Button, Text, View } from '../../__primitives__';
+import { Card, Screen, QR } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const ScanScreen = ({ navigation: { navigate } }) => {
   return (
     <Screen>
       <Card>
-        <Text bold subtitle>
-          Become a Guardian
-        </Text>
-        <Text caption>Add a QR code to become a guardian of a Secret</Text>
+        <View gap row spaceBetween>
+          <View>
+            <Text bold subtitle>
+              Become a Guardian
+            </Text>
+            <Text caption>Add a QR code to become a guardian of a Secret</Text>
+          </View>
+          <QR size={48} value="Become a guardian" style={{ flex: 1 }} />
+        </View>
         <Button wide onPress={() => navigate('import', { type: 'QR' })}>
           Add via a QR Code
         </Button>
@@ -19,8 +24,6 @@ export const ScanScreen = ({ navigation: { navigate } }) => {
           Add via a Text Code
         </Button>
       </Card>
-
-      <Button onPress={() => navigate('generate', {})}>Create a new secret</Button>
     </Screen>
   );
 };
