@@ -3,6 +3,8 @@ import { Cypher } from '../cypher';
 describe('helpers/cypher', () => {
   test('alive', () => {
     expect(Cypher).toBeDefined();
+    expect(Cypher.encrypt).toBeDefined();
+    expect(Cypher.decrypt).toBeDefined();
   });
 
   describe('encrypt', () => {
