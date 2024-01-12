@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+
 import App from './App';
 
 document.querySelectorAll('input[type="password"]').forEach((passwordField) => {
