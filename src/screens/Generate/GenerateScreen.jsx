@@ -2,19 +2,44 @@ import React, { useEffect, useState } from 'react';
 
 import { style } from './GenerateScreen.style';
 import { Button, Icon, Input, Switch, Text, View } from '../../__primitives__';
-import { GUARDIANS } from '../../App.constants';
+import { GUARDIANS, QR_TYPE } from '../../App.constants';
 import { Card, InputPin, Option, Screen } from '../../components';
+import { Cypher, isSeedPhrase, QRParser } from '../../helpers';
+
+const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 // eslint-disable-next-line react/prop-types
 export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
   const [guardians, setGuardians] = useState(GUARDIANS[1]);
   const [pin, setPin] = useState();
-  const [secret, setSecret] = useState('abandon bridge buddy supreme exclude milk consider tail expand wasp pattern');
+  // const [secret, setSecret] = useState('cousin wolf rice march upgrade chief doll mystery jelly mango icon country');
+  const [secret, setSecret] = useState();
   const [encrypted, setEncrypted] = useState(false);
 
-  useEffect(() => {
-    setEncrypted(guardians === 1);
-  }, [guardians]);
+  useEffect(() => setEncrypted(guardians === 1), [guardians]);
+
+  useEffect(() => setPin(), [encrypted]);
+
+  const handlePressContinue = () => {
+    const qr = QRParser.encode(secret);
+    const seedPhrase = isSeedPhrase(secret);
+    let qrs = guardians === 1 ? [qr] : QRParser.split(qr);
+
+    qrs = qrs.map((secret, index) => {
+      const mustEncrypt = index === 0 && encrypted;
+      const type = seedPhrase
+        ? mustEncrypt
+          ? SEED_PHRASE_ENCRYPTED
+          : SEED_PHRASE
+        : mustEncrypt
+        ? PASSWORD_ENCRYPTED
+        : PASSWORD;
+
+      return `${type}${mustEncrypt ? Cypher.encrypt(secret, pin) : secret}`;
+    });
+
+    navigate('modal', { qrs });
+  };
 
   return (
     <Screen>
@@ -30,56 +55,63 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
       <Card>
         <View gap row>
           {GUARDIANS.map((amount) => (
-            <Option checked={amount === guardians} key={amount} value={amount} onPress={setGuardians}>
-              {`${amount} ${amount === 1 ? 'Guardian' : 'Guardians'}`}
+            <Option
+              checked={amount === guardians}
+              disabled={amount === 5}
+              key={amount}
+              value={amount}
+              onPress={setGuardians}
+            >
+              {`${amount} ${amount === 1 ? 'Guardian' : `Guardians`}`}
             </Option>
           ))}
         </View>
 
         <View style={style.anchor} />
 
-        <View gap row wide style={style.rowEncryptedShard}>
-          <Text color="contentLight" tiny>
-            Keep one Shard (encrypted part of the Secret) on this device.
+        <View row spaceBetween style={style.rowSecure}>
+          <Text color="contentLight" tiny style={style.textGuardiansHint}>
+            {guardians === 1
+              ? `If you don't shard the secret, it will be securely encrypted on this device.`
+              : `Keep one shard of the secret securely encrypted on this device.`}
           </Text>
-          <Switch checked={encrypted} disabled={guardians === 1} onChange={setEncrypted} />
+          {guardians > 1 && <Switch checked={encrypted} disabled={guardians === 1} onChange={setEncrypted} />}
         </View>
       </Card>
 
+      {guardians > 1 && (
+        <Card align="center" style={style.reduceGap}>
+          <Icon color="content" name="alert" />
+          <Text align="center" caption>
+            {`Recovering this secret will require the approval of at least `}
+            <Text bold caption>{`${guardians - 1 - (encrypted ? 1 : 0)} out of ${
+              guardians - (encrypted ? 1 : 0)
+            }`}</Text>
+            {` guardians.`}
+          </Text>
+        </Card>
+      )}
+
       {encrypted && (
-        <Card>
-          <Text align="center" bold caption>
+        <Card outlined style={style.reduceGap}>
+          <Text align="center" bold>
             Pin Code
           </Text>
           <InputPin onChange={setPin} />
         </Card>
       )}
 
-      {guardians > 1 && (
-        <Card align="center">
-          <Icon color="content" name="info" />
-          <Text align="center" caption>
-            {`Recovering this secret will require the approval of at least `}
-            <Text bold>{`${guardians - 1 - (encrypted ? 1 : 0)} out of ${guardians - (encrypted ? 1 : 0)}`}</Text>
-            {` guardians.`}
-          </Text>
-        </Card>
-      )}
-
-      <Card outlined>
+      <Card outlined style={style.reduceGap}>
+        <Text align="center" bold>
+          Secret
+        </Text>
         <View>
-          <Text align="center" bold subtitle>
-            Secret
-          </Text>
-          <Text align="center" caption>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-          </Text>
+          <Input align="center" multiline placeholder="Type your secret..." value={secret} onChange={setSecret} />
+          <Text align="right" tiny>{`isSeedPhrase ${isSeedPhrase(secret)}`}</Text>
         </View>
-
-        <Input align="center" multiline placeholder="Type your secret..." value={secret} onChange={setSecret} />
       </Card>
 
-      <Button disabled={!secret} onPress={() => navigate('modal', { pin, secret })}>
+      <Button disabled={!secret || (encrypted && !pin)} onPress={handlePressContinue}>
         Continue
       </Button>
     </Screen>

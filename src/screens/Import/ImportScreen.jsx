@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native';
 
 import { style } from './ImportScreen.style';
-import { Button, Pressable, Text, View } from '../../__primitives__';
+import { Action, Button, Text, View } from '../../__primitives__';
 
 // eslint-disable-next-line react/prop-types
 export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { goBack } }) => {
@@ -72,16 +72,10 @@ export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { g
           )}
 
           <View row spaceBetween>
-            <Pressable onPress={value ? () => setValue() : undefined}>
-              <Text bold style={[style.text, !value && style.textDisabled]}>
-                Restart
-              </Text>
-            </Pressable>
-            <Pressable onPress={() => goBack()}>
-              <Text bold style={style.text}>
-                Cancel
-              </Text>
-            </Pressable>
+            <Action disabled={!value} onPress={value ? () => setValue() : undefined}>
+              Restart
+            </Action>
+            <Action onPress={() => goBack()}>Cancel</Action>
           </View>
         </View>
       </SafeAreaView>

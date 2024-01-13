@@ -75,8 +75,4 @@ export const style = StyleSheet.create({
   text: {
     color: '$importColor',
   },
-
-  textDisabled: {
-    opacity: 0.5,
-  },
 });

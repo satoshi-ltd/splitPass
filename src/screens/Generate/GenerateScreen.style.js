@@ -10,7 +10,11 @@ export const style = StyleSheet.create({
     opacity: 0.25,
   },
 
-  rowEncryptedShard: {
-    alignItems: 'center',
+  textGuardiansHint: {
+    marginTop: '$spaceXS',
+  },
+
+  reduceGap: {
+    gap: '$spaceS',
   },
 });
