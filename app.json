@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "qr-vault",
-    "slug": "satoshi-ltd-qr-vault",
+    "name": "ShardQR",
+    "slug": "satoshi-ltd-shardqr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

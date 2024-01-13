@@ -34,7 +34,6 @@ const Button = ({
 );
 
 Button.propTypes = {
-  action: PropTypes.bool,
   bold: PropTypes.bool,
   children: PropTypes.node,
   disabled: PropTypes.bool,

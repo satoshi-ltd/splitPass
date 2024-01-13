@@ -6,6 +6,7 @@ export const style = StyleSheet.create({
     borderRadius: '$borderRadius',
     gap: '$spaceM',
     padding: '$spaceM',
+    width: '100%',
   },
 
   outlined: {
