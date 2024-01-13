@@ -1,5 +1,6 @@
-import { SEED_PHRASE_LENGTH } from './constants';
 import { bip39 } from './repositories/bip39';
+
+const SEED_PHRASE_LENGTH = [12, 24];
 
 export const isSeedPhrase = (value = '') => {
   const words = Array.isArray(value) ? value : value.trim().split(' ');

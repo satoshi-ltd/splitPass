@@ -1,35 +1,44 @@
-import { QR_TYPE } from './constants';
-import { Cypher } from './cypher';
 import { isSeedPhrase } from './isSeedPhrase';
 import { bip39, chars } from './repositories';
+import { QR_TYPE } from '../App.constants';
 
-const { DEFAULT, DEFAULT_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+const { SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 export const QRParser = {
-  encode: (value = '', pin) => {
-    let digits = Array.isArray(value) ? value.join(' ') : value.trim();
-    let type;
+  encode: (secret = '') => {
+    let digits = Array.isArray(secret) ? secret.join(' ') : secret.trim();
 
     if (isSeedPhrase(digits)) {
       const words = digits.split(' ');
-      type = pin ? SEED_PHRASE_ENCRYPTED : SEED_PHRASE;
       digits = words.map((word) => String(bip39.findIndex((item) => item === word) + 1).padStart(4, '0')).join('');
     } else {
-      type = pin ? DEFAULT_ENCRYPTED : DEFAULT;
-      digits = Array.from(digits, (char) => chars.indexOf(char).toString().padStart(2, '0')).join('');
+      digits = Array.from(digits, (char) => (chars.indexOf(char) + 1).toString().padStart(2, '0')).join('');
     }
 
-    if (pin) digits = Cypher.encrypt(digits, pin);
-
-    return `${type}${digits}`;
+    return digits;
   },
 
-  decode: (qr = '', pin) => {
-    const [type, ...digits] = qr.toString();
-    const encrypted = pin ? Cypher.decrypt(digits.join(''), pin) : digits.join('');
+  decode: (qr = '') => {
+    const [type, ...digits] = qr;
+    let secret = digits.join('');
 
-    return [SEED_PHRASE, SEED_PHRASE_ENCRYPTED].includes(type)
-      ? (encrypted.match(/.{1,4}/g) || []).map((index) => bip39[parseInt(index - 1)]).join(' ')
-      : (encrypted.match(/.{1,2}/g) || []).map((index) => chars[parseInt(index)]).join('');
+    secret = [SEED_PHRASE, SEED_PHRASE_ENCRYPTED].includes(type)
+      ? (secret.match(/.{1,4}/g) || []).map((index) => bip39[parseInt(index - 1)]).join(' ')
+      : (secret.match(/.{1,2}/g) || []).map((index) => chars[parseInt(index - 1)]).join('');
+
+    return secret;
+  },
+
+  split: (qr = '', shares = 3) => {
+    return Array.from({ length: shares }, (_, shareIndex) =>
+      Array.from({ length: qr.length }, (_, index) => ((shareIndex + index) % shares !== 0 ? qr[index] : '0')).join(''),
+    );
+  },
+
+  combine: (...qrs) => {
+    return qrs[0]
+      .split('')
+      .map((_, index) => qrs.map((qr) => qr[index]).find((digit) => digit !== '0') || '0')
+      .join('');
   },
 };

@@ -7,7 +7,7 @@ import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Icon } from './__primitives__';
-import { SCREEN_OPTIONS, TAB_OPTIONS, MODAL_OPTIONS } from './App.constants';
+import { OPTIONS } from './App.constants';
 import { getNavigationTheme } from './helpers';
 import {
   ScanScreen,
@@ -26,7 +26,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export const Tabs = () => (
-  <Tab.Navigator initialRouteName="scan" shifting screenOptions={{ ...TAB_OPTIONS }}>
+  <Tab.Navigator initialRouteName="generate" shifting screenOptions={{ ...OPTIONS.TAB }}>
     <Tab.Screen
       name="scan"
       component={ScanScreen}
@@ -72,13 +72,13 @@ export const App = () => {
     <NavigationContainer theme={getNavigationTheme()}>
       <StatusBar style="light" />
 
-      <Stack.Navigator initialRouteName="main" screenOptions={SCREEN_OPTIONS}>
+      <Stack.Navigator initialRouteName="main" screenOptions={OPTIONS.SCREEN}>
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
 
         {/* -- modals */}
-        <Stack.Screen name="modal" component={ModalGenerate} options={MODAL_OPTIONS} />
-        <Stack.Screen name="import" component={ImportScreen} options={{ ...MODAL_OPTIONS, headerShown: false }} />
+        <Stack.Screen name="modal" component={ModalGenerate} options={{ ...OPTIONS.MODAL }} />
+        <Stack.Screen name="import" component={ImportScreen} options={{ ...OPTIONS.MODAL, headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   ) : null;
