@@ -13,7 +13,7 @@ const Option = ({ checked, children, disabled, value, onPress = () => {}, ...oth
     style={[style.option, checked && style.checked, checked && disabled && style.disabled, others.style]}
   >
     <View style={style.content}>
-      <Text bold color={disabled ? 'contentLight' : undefined} caption>
+      <Text bold color={disabled ? 'disabled' : undefined} caption>
         {children}
       </Text>
       <Switch checked={checked} disabled={disabled} />

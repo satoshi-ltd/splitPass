@@ -20,9 +20,13 @@ const style = StyleSheet.create({
   contentLight: {
     color: '$colorContentLight',
   },
+
+  disabled: {
+    color: '$colorDisabled',
+  },
 });
 
-const COLORS = ['accent', 'alert', 'base', 'content', 'contentLight'];
+const COLORS = ['accent', 'alert', 'base', 'content', 'contentLight', 'disabled'];
 
 const getColor = (value) => style[value] || style.content;
 

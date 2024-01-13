@@ -8,9 +8,11 @@ export const defaultTheme = {
   // $colorBase: '#f8f8f8',
   // $colorContent: '#333333',
   // $colorContentLight: '#777777',
+  // $colorDisabled: '#999999',
   $colorBase: '#111111',
   $colorContent: '#ffffff',
   $colorContentLight: '#bbbbbb',
+  $colorDisabled: '#666666',
   $colorModal: '$colorBase',
 
   // -- typography

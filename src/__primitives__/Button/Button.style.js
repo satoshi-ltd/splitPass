@@ -14,7 +14,7 @@ export const style = StyleSheet.create({
   },
 
   disabled: {
-    backgroundColor: '$colorContentLight',
+    backgroundColor: '$colorDisabled',
   },
 
   secondary: {

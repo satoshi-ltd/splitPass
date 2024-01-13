@@ -30,7 +30,7 @@ const Input = React.forwardRef(
         blurOnSubmit
         inputMode={keyboard}
         placeholder={!focus ? placeholder : undefined}
-        placeholderTextColor={StyleSheet.value('$colorContentLight')}
+        placeholderTextColor={StyleSheet.value('$colorDisabled')}
         ref={ref}
         rows={rows}
         textAlignVertical="center"

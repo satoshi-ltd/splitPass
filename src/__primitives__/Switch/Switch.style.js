@@ -13,7 +13,7 @@ export const style = StyleSheet.create({
   },
 
   disabled: {
-    borderColor: '$colorContentLight',
+    borderColor: '$colorDisabled',
   },
 
   check: {
