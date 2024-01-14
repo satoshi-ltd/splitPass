@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "QR-Vault Extension",
+  "name": "ShardQR Extension",
   "version": "1.0",
   "permissions": [],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["./index.js"],
+      "js": ["./index.jsx"],
       "run_at": "document_idle"
     }
   ],
