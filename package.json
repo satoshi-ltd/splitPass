@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "start-extension": "parcel serve src/extension/index.html",
-    "build-extension": "parcel build src/extension/index.jsx --no-source-maps && cp -R src/extension/manifest.json dist/manifest.json",
+    "build-extension": "parcel build src/extension/manifest.json --config @parcel/config-webextension",
     "lint": "eslint --cache --fix --format codeframe --ext .jsx,.js src",
     "test": "jest"
   },
@@ -41,6 +41,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@mirai/eslint": "0.1.3",
+    "@parcel/config-webextension": "^2.11.0",
     "parcel": "^2.11.0",
     "process": "^0.11.10"
   },
