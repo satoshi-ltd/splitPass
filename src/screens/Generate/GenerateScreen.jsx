@@ -10,11 +10,10 @@ const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_
 
 // eslint-disable-next-line react/prop-types
 export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
+  const [encrypted, setEncrypted] = useState(false);
   const [guardians, setGuardians] = useState(GUARDIANS[1]);
   const [pin, setPin] = useState();
-  // const [secret, setSecret] = useState('cousin wolf rice march upgrade chief doll mystery jelly mango icon country');
   const [secret, setSecret] = useState();
-  const [encrypted, setEncrypted] = useState(false);
 
   useEffect(() => setEncrypted(guardians === 1), [guardians]);
 
@@ -22,20 +21,17 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
   const handlePressContinue = () => {
     const qr = QRParser.encode(secret);
-    const seedPhrase = isSeedPhrase(secret);
     let qrs = guardians === 1 ? [qr] : QRParser.split(qr);
 
-    qrs = qrs.map((secret, index) => {
+    qrs = qrs.map((qr, index) => {
       const mustEncrypt = index === 0 && encrypted;
-      const type = seedPhrase
-        ? mustEncrypt
-          ? SEED_PHRASE_ENCRYPTED
-          : SEED_PHRASE
-        : mustEncrypt
-        ? PASSWORD_ENCRYPTED
-        : PASSWORD;
+      if (!mustEncrypt) return qr;
 
-      return `${type}${mustEncrypt ? Cypher.encrypt(secret, pin) : secret}`;
+      let [type, ...digits] = qr;
+      if (type === PASSWORD) type = PASSWORD_ENCRYPTED;
+      else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
+
+      return `${type}${Cypher.encrypt(digits.join(''), pin)}`;
     });
 
     navigate('modal', { qrs });

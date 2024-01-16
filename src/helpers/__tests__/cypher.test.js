@@ -1,5 +1,7 @@
 import { Cypher } from '../cypher';
 
+// ! TODO: Test big numbers with 00/0000
+
 describe('helpers/cypher', () => {
   test('alive', () => {
     expect(Cypher).toBeDefined();
