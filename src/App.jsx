@@ -62,10 +62,9 @@ export const Tabs = () => (
 
 export const App = () => {
   const [ready] = useFonts({
-    'font-default': require('../assets/fonts/Roobert-400.ttf'),
-    // 'font-bold': require('../assets/fonts/Roobert-700.ttf'),
-    // 'font-default': require('../assets/fonts/Rebond-Grotesque-600.ttf'),
-    'font-bold': require('../assets/fonts/Rebond-Grotesque-700.ttf'),
+    'font-default': require('../assets/fonts/Poppins-Regular.ttf'),
+    'font-medium': require('../assets/fonts/Poppins-Medium.ttf'),
+    'font-bold': require('../assets/fonts/Poppins-Bold.ttf'),
   });
 
   return ready ? (
@@ -75,8 +74,6 @@ export const App = () => {
       <Stack.Navigator initialRouteName="main" screenOptions={OPTIONS.SCREEN}>
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
-
-        {/* -- modals */}
         <Stack.Screen name="modal" component={ModalGenerate} options={{ ...OPTIONS.MODAL }} />
         <Stack.Screen name="import" component={ImportScreen} options={{ ...OPTIONS.MODAL, headerShown: false }} />
       </Stack.Navigator>
