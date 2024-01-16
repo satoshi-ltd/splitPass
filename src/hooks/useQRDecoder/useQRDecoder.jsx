@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Cypher } from '../../helpers/Cypher';
+import { Cypher } from '../../helpers/cypher';
 import { QRParser } from '../../helpers/QRParser';
 import { QR_TYPE, STEPS } from '../../App.constants';
 
@@ -8,8 +8,8 @@ const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_
 
 const hasAllData = (secret, type) => {
   if (
-    (type === PASSWORD_ENCRYPTED && secret.includes('00')) ||
-    (type === SEED_PHRASE_ENCRYPTED && secret.includes('0000'))
+    (type === PASSWORD && secret.includes('00')) ||
+    (type === SEED_PHRASE && secret.includes('0000'))
   ) {
     return false;
   }
@@ -22,15 +22,16 @@ export const useQRDecoder = (onDataDecoded) => {
 
   const decodeData = (newData) => {
     const shards = newData.map(({ secret }) => secret);
-    const secretDecrypted = QRParser.decode(QRParser.combine(...shards));
-    return secretDecrypted;
+    const secret = QRParser.combine(...shards);
+    return secret;
   };
 
   const checkData = (newData) => {
     const secret = decodeData(newData);
 
     if (hasAllData(secret, newData[0].type)) {
-      onDataDecoded(secret);
+      const secretDecrypted = QRParser.decode(secret);
+      onDataDecoded(secretDecrypted);
       setDecodedData([]);
     }
 

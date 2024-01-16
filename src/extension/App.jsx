@@ -6,29 +6,42 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { style } from './App.style';
 import IconPNG from './assets/icon.png';
 import { getPositionIconStyle } from './helpers/getPositionIconStyle';
+import { STEPS } from '../App.constants';
+import { InputPin } from '../components/InputPin';
 import { Popup } from '../components/Popup';
+import { useQRDecoder } from '../hooks';
 import { defaultTheme } from '../themes/default.theme';
 
 StyleSheet.build(defaultTheme);
 
 function App({ passwordField }) {
   const [isOpen, setIsOpen] = useState(false);
-
   const iconStyle = getPositionIconStyle(passwordField);
 
-  const onDecode = (result) => {
-    console.log(result);
+  const onDataDecoded = (secret) => {
     setIsOpen(false);
-    passwordField.value = result;
+    passwordField.value = secret;
   };
-  const onError = (error) => {
-    console.log(error?.message);
-  };
+  const { currentStep, handleQRDecoding, handlePinChange } =
+    useQRDecoder(onDataDecoded);
 
   return (
     <>
       <Popup
-        content={<QrScanner onDecode={onDecode} onError={onError} scanDelay={2000} stopDecoding={!isOpen} />}
+        content={
+          <>
+            {currentStep === STEPS.QR ? (
+              <QrScanner
+                onDecode={handleQRDecoding}
+                scanDelay={2000}
+                stopDecoding={!isOpen}
+              />
+            ) : null}
+            {currentStep === STEPS.PIN ? (
+              <InputPin align="center" onChange={handlePinChange} />
+            ) : null}
+          </>
+        }
         isOpen={isOpen}
         popupStyle={style.container}
         style={iconStyle}
