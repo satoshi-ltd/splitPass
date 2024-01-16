@@ -5,10 +5,9 @@ const seed12 = 'roast soon winter over sentence shaft shock side mango select sc
 const seed24 =
   'fluid say radar bring attend rice artefact miracle rifle afraid swarm trend afford atom dash cheap acid absorb brief add cause stadium rack moon';
 
-const passwordDigits = '144113633161838623108595650665107';
-const seed12Digits = '3149716592017126415681576158716001082156315491186';
-const seed24Digits =
-  '3071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149';
+const qrPassword = '144113633161838623108595650665107';
+const qrSeed12 = '3149716592017126415681576158716001082156315491186';
+const qrSeed24 = '3071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149';
 
 describe('helpers/QRParser', () => {
   test('alive', () => {
@@ -21,78 +20,89 @@ describe('helpers/QRParser', () => {
 
   describe('encode', () => {
     test('should encode default value', () => {
-      expect(QRParser.encode(password)).toEqual('44113633161838623108595650665107');
+      expect(QRParser.encode(password)).toEqual(qrPassword);
     });
 
     test('should encode seed phrase value', () => {
-      expect(QRParser.encode(seed12)).toEqual('149716592017126415681576158716001082156315491186');
-      expect(QRParser.encode(seed12.split(' '))).toEqual('149716592017126415681576158716001082156315491186');
-      expect(QRParser.encode(seed24)).toEqual(
-        '071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
-      );
-      expect(QRParser.encode(seed24.split(' '))).toEqual(
-        '071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
-      );
+      expect(QRParser.encode(seed12)).toEqual(qrSeed12);
+      expect(QRParser.encode(seed12.split(' '))).toEqual(qrSeed12);
+      expect(QRParser.encode(seed24)).toEqual(qrSeed24);
+      expect(QRParser.encode(seed24.split(' '))).toEqual(qrSeed24);
     });
   });
 
   describe('decode', () => {
     test('should decode default value', () => {
-      expect(QRParser.decode(passwordDigits)).toEqual('RkJGprL9Eh63X$Yg');
+      expect(QRParser.decode(qrPassword)).toEqual('RkJGprL9Eh63X$Yg');
     });
 
     test('should decode seed phrase value', () => {
-      expect(QRParser.decode(seed12Digits)).toEqual(
-        'roast soon winter over sentence shaft shock side mango select screen neither',
-      );
-      expect(QRParser.decode(seed24Digits)).toEqual(
-        'fluid say radar bring attend rice artefact miracle rifle afraid swarm trend afford atom dash cheap acid absorb brief add cause stadium rack moon',
-      );
+      expect(QRParser.decode(qrSeed12)).toEqual(seed12);
+      expect(QRParser.decode(qrSeed24)).toEqual(seed24);
     });
   });
 
   describe('split', () => {
     test('should split value in 3 shards', () => {
-      let shards = QRParser.split(passwordDigits);
+      let shards = QRParser.split(qrPassword);
       expect(shards.length).toEqual(3);
-      expect(shards[0]).toEqual('044013033061038023008095050065007');
-      expect(shards[1]).toEqual('140110630160830620100590650660100');
-      expect(shards[2]).toEqual('104103603101808603108505600605107');
+      expect(shards[0]).toEqual('100113600161800623100595600665100');
+      expect(shards[1]).toEqual('144110033160038620008590050660007');
+      expect(shards[2]).toEqual('144003633001838003108005650005107');
 
-      shards = QRParser.split(seed12Digits);
+      shards = QRParser.split(qrSeed12);
       expect(shards.length).toEqual(3);
-      expect(shards[0]).toEqual('0140710590010120410680570150710000080150310490180');
-      expect(shards[1]).toEqual('3109706502007106405601506108706001002106305401106');
-      expect(shards[2]).toEqual('3049016092017026015081076058016001082056015091086');
+      expect(shards[0]).toEqual('3000016592017000015681576000016001082000015491186');
+      expect(shards[1]).toEqual('3149716590000126415680000158716000000156315490000');
+      expect(shards[2]).toEqual('3149700002017126400001576158700001082156300001186');
 
-      shards = QRParser.split(seed24Digits);
+      shards = QRParser.split(qrSeed24);
       expect(shards.length).toEqual(3);
       expect(shards[0]).toEqual(
-        '0070810360410020600170480010410320480000710560850000600150440030200160000020400260290160610130140',
+        '3000015361414000001171482000011321486000017561857000001150446000000160007000000260293000014131149',
       );
       expect(shards[1]).toEqual(
-        '3001805301404002601101402000401301406003707501807003601100406001200100007002400200203109604101109',
+        '3071815360000022601170000010411320000003717560000003601150000031200160000022400260000169614130000',
       );
       expect(shards[2]).toEqual(
-        '3071015061014022001071082010011021086003017061057003001050046031000060007022000060093069014031049',
+        '3071800001414022600001482010400001486003700001857003600000446031200000007022400000293169600001149',
       );
     });
   });
 
   describe('combined', () => {
     test('should combine n shards in a value', () => {
-      [passwordDigits, seed12Digits, seed24Digits].forEach((digits) => {
-        const shards = QRParser.split(digits);
+      [qrPassword, qrSeed12, qrSeed24].forEach((qr) => {
+        const shards = QRParser.split(qr);
 
         expect(shards.length).toEqual(3);
-        expect(QRParser.combine(shards[0], shards[1])).toEqual(digits);
-        expect(QRParser.combine(shards[0], shards[2])).toEqual(digits);
-        expect(QRParser.combine(shards[1], shards[2])).toEqual(digits);
+        expect(QRParser.combine(shards[0], shards[1])).toEqual(qr);
+        expect(QRParser.combine(shards[0], shards[2])).toEqual(qr);
+        expect(QRParser.combine(shards[1], shards[2])).toEqual(qr);
 
-        expect(QRParser.combine(shards[0], shards[0])).not.toEqual(digits);
-        expect(QRParser.combine(shards[1], shards[1])).not.toEqual(digits);
-        expect(QRParser.combine(shards[2], shards[2])).not.toEqual(digits);
+        expect(QRParser.combine(shards[0], shards[0])).not.toEqual(qr);
+        expect(QRParser.combine(shards[1], shards[1])).not.toEqual(qr);
+        expect(QRParser.combine(shards[2], shards[2])).not.toEqual(qr);
       });
     });
+  });
+
+  test('workflow', () => {
+    let qr = QRParser.encode(password);
+
+    expect(qr).toEqual(qrPassword);
+    let shards = QRParser.split(qr);
+    expect(QRParser.decode(QRParser.combine(shards[0], shards[1]))).toEqual(password);
+    expect(QRParser.decode(qr)).toEqual(password);
+
+    qr = QRParser.encode(seed12);
+    shards = QRParser.split(qr);
+    expect(QRParser.decode(QRParser.combine(shards[0], shards[1]))).toEqual(seed12);
+    expect(QRParser.decode(qr)).toEqual(seed12);
+
+    qr = QRParser.encode(seed24);
+    shards = QRParser.split(qr);
+    expect(QRParser.decode(QRParser.combine(shards[0], shards[1]))).toEqual(seed24);
+    expect(QRParser.decode(qr)).toEqual(seed24);
   });
 });

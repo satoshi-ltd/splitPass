@@ -6,6 +6,7 @@ import { style } from './Icon.style';
 
 const NAMES = {
   alert: 'alert-box-outline',
+  guardians: 'account-group',
   info: 'information-outline',
   qr: 'qrcode',
   scan: 'line-scan',
