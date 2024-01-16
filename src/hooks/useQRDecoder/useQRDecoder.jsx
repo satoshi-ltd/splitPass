@@ -1,11 +1,20 @@
 import { useState } from 'react';
 
-import { hasAllData } from '../../helpers/hasAllData';
 import { Cypher } from '../../helpers/Cypher';
 import { QRParser } from '../../helpers/QRParser';
 import { QR_TYPE, STEPS } from '../../App.constants';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+
+const hasAllData = (secret, type) => {
+  if (
+    (type === PASSWORD_ENCRYPTED && secret.includes('00')) ||
+    (type === SEED_PHRASE_ENCRYPTED && secret.includes('0000'))
+  ) {
+    return false;
+  }
+  return true;
+};
 
 export const useQRDecoder = (onDataDecoded) => {
   const [decodedData, setDecodedData] = useState([]);
@@ -18,12 +27,14 @@ export const useQRDecoder = (onDataDecoded) => {
   };
 
   const checkData = (newData) => {
-    if (hasAllData(newData)) {
-      const secret = decodeData(newData);
+    const secret = decodeData(newData);
+
+    if (hasAllData(secret, newData[0].type)) {
       onDataDecoded(secret);
       setDecodedData([]);
-      setCurrentStep(STEPS.QR);
     }
+
+    setCurrentStep(STEPS.QR);
   };
 
   const handleQRDecoding = (result) => {
