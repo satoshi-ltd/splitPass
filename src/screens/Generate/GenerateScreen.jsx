@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { style } from './GenerateScreen.style';
 import { Button, Icon, Input, Switch, Text, View } from '../../__primitives__';
@@ -13,11 +14,20 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
   const [encrypted, setEncrypted] = useState(false);
   const [guardians, setGuardians] = useState(GUARDIANS[1]);
   const [pin, setPin] = useState();
-  const [secret, setSecret] = useState();
+  const [secret, setSecret] = useState('roast soon winter over sentence shaft shock side mango select screen neither');
 
   useEffect(() => setEncrypted(guardians === 1), [guardians]);
 
   useEffect(() => setPin(), [encrypted]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setEncrypted(false);
+      setGuardians(GUARDIANS[1]);
+      setPin();
+      setSecret();
+    }, []),
+  );
 
   const handlePressContinue = () => {
     const qr = QRParser.encode(secret);
@@ -49,7 +59,7 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
       </View>
 
       <Card>
-        <View gap row>
+        <View row>
           {GUARDIANS.map((amount) => (
             <Option
               checked={amount === guardians}

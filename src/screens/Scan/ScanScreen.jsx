@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Button, Text, View } from '../../__primitives__';
-import { Card, Screen, QR } from '../../components';
+import { Card, QR, Screen } from '../../components';
 
 // eslint-disable-next-line react/prop-types
 export const ScanScreen = ({ navigation: { navigate } }) => {

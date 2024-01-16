@@ -1,28 +1,20 @@
 /* eslint-disable react/prop-types */
 import * as Sharing from 'expo-sharing';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SafeAreaView, useWindowDimensions } from 'react-native';
 
 import { style } from './ModalGenerate.style';
 import { Action, Button, Input, ScrollView, Text, View } from '../../__primitives__';
+import { QR_TYPE } from '../../App.constants';
 import { QR } from '../../components';
+import { VaultService } from '../../services';
+
+const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const QR_SIZE = 256;
 
-export const ModalGenerate = ({
-  route: {
-    params: {
-      qrs = [
-        // '14310353',
-        // '143103532151737613007585549655006',
-        // '3149716592017126415681576158716001082156315491186',
-        // '4194261484860145057294838133867444832126163684203126057273892154656283453145856383649282060254595',
-        // '4194261484860145057294838133867444832126163684203126057273892154656283453145856383649282060254595',
-      ],
-    } = {},
-  },
-  navigation: { goBack },
-}) => {
+export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } = {} }, navigation: { goBack } }) => {
+  const scrollViewRef = useRef(null);
   const { width } = useWindowDimensions();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,19 +24,33 @@ export const ModalGenerate = ({
     setCurrentIndex(Math.round(x / width));
   };
 
+  const handleNext = () => {
+    if (currentIndex < qrs.length - 1) next();
+    else goBack();
+  };
+
+  const handleSave = async () => {
+    const qr = qrs[currentIndex];
+
+    await VaultService.addQr(qr, name);
+    next();
+  };
+
   const handleShare = async () => {
     try {
       await Sharing.shareAsync('¡Hola! Estoy compartiendo este mensaje.', {});
     } catch (error) {
-      console.error('Error al intentar compartir:', error.message);
+      alert(error);
     }
   };
 
-  const handleNext = () => {
-    if (currentIndex === qrs.length - 1) return goBack();
+  const next = () => {
+    if (!scrollViewRef.current) return;
+    scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
   };
 
-  const isStandalone = currentIndex === 0;
+  const [type] = qrs[currentIndex];
+  const encrypted = [PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type);
 
   return (
     <SafeAreaView style={style.screen}>
@@ -60,6 +66,7 @@ export const ModalGenerate = ({
         decelerationRate="fast"
         horizontal
         pagingEnabled
+        ref={scrollViewRef}
         scrollEventThrottle={10}
         showsHorizontalScrollIndicator={false}
         snapToInterval={width}
@@ -67,7 +74,7 @@ export const ModalGenerate = ({
       >
         {qrs.map((qr, index) => (
           <View align="center" key={index} style={[style.item, { width }]}>
-            {index === 0 ? (
+            {encrypted ? (
               <Input
                 align="center"
                 placeholder="Give a name..."
@@ -82,23 +89,21 @@ export const ModalGenerate = ({
               </Text>
             )}
             <QR size={QR_SIZE} value={qr} />
-            <Text tiny>{qr}</Text>
-            <Text tiny>{index === 0 ? 'This is your shard.' : ' '}</Text>
+            {!readMode && <Text tiny>{encrypted ? 'This is your shard.' : ' '}</Text>}
           </View>
         ))}
       </ScrollView>
 
       <View style={style.buttons}>
-        {isStandalone && (
-          <Button disabled={!name || name?.length < 1} onPress={handleShare}>
+        {encrypted && !readMode && (
+          <Button disabled={!name || name?.length < 1} onPress={handleSave}>
             Save in vault
           </Button>
         )}
 
-        {/*
         <Button secondary onPress={handleShare}>
           Share QR
-        </Button> */}
+        </Button>
 
         <Button secondary onPress={handleShare}>
           Share Code
@@ -106,7 +111,7 @@ export const ModalGenerate = ({
 
         <View row spaceBetween>
           <Action onPress={() => goBack()}>Cancel</Action>
-          <Action onPress={handleNext}>Next</Action>
+          {qrs.length > 1 && <Action onPress={handleNext}>Next</Action>}
         </View>
       </View>
     </SafeAreaView>
