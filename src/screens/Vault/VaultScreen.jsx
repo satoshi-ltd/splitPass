@@ -2,7 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 
 import { style } from './VaultScreen.style';
-import { Button, Text, View } from '../../__primitives__';
+import { Pressable, Text, View } from '../../__primitives__';
 import { QR_TYPE } from '../../App.constants';
 import { QR, Screen } from '../../components';
 import { VaultService } from '../../services';
@@ -20,31 +20,27 @@ export const VaultScreen = ({ navigation: { navigate } = {} }) => {
   );
 
   const handlePress = (qr, name) => {
-    navigate('modal', { qrs: [qr], names: [name], readMode: true });
+    navigate('export', { qrs: [qr], names: [name], readMode: true });
   };
 
   return (
     <Screen>
-      {dataSource.map(({ qr, name, timestamp } = {}, index) => {
+      {dataSource.map(({ qr, name } = {}, index) => {
         const [type] = qr;
 
         return (
-          <View row key={qr} style={style.item}>
-            <QR size={40} value={index.toString()} />
+          <Pressable key={`${qr}:${index}`} onPress={() => handlePress(qr, name)}>
+            <View row style={style.item}>
+              <QR inline rounded={false} size={44} value={index.toString().padStart(8, 0)} />
 
-            <View style={style.texts}>
-              <Text bold>{name}</Text>
-              <Text color="contentLight" tiny>
-                {type === SEED_PHRASE_ENCRYPTED ? 'Seedphrase' : 'Password'}
-                {` - `}
-                {new Date(timestamp).toLocaleDateString()}
-              </Text>
+              <View style={style.texts}>
+                <Text bold>{name}</Text>
+                <Text color="contentLight" caption>
+                  {type === SEED_PHRASE_ENCRYPTED ? 'Secured' : 'Password'}
+                </Text>
+              </View>
             </View>
-
-            <Button small onPress={() => handlePress(qr, name)}>
-              View
-            </Button>
-          </View>
+          </Pressable>
         );
       })}
     </Screen>
