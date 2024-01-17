@@ -52,7 +52,7 @@ export const defaultTheme = {
   // $cardColor: '#e5e5e5',
   $cardColor: '#222222',
 
-  $importBackgroundColor: 'rgba(0, 0, 0, 0.33)',
+  $importBackgroundColor: 'rgba(0, 0, 0, 0.5)',
   $importColor: '#ffffff',
 
   $qrBackgroundColor: '#fff',

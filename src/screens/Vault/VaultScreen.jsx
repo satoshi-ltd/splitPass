@@ -7,7 +7,7 @@ import { QR_TYPE } from '../../App.constants';
 import { QR, Screen } from '../../components';
 import { VaultService } from '../../services';
 
-const { SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+const { DEFAULT_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 // eslint-disable-next-line react/prop-types
 export const VaultScreen = ({ navigation: { navigate } = {} }) => {
@@ -36,7 +36,11 @@ export const VaultScreen = ({ navigation: { navigate } = {} }) => {
               <View style={style.texts}>
                 <Text bold>{name}</Text>
                 <Text color="contentLight" caption>
-                  {type === SEED_PHRASE_ENCRYPTED ? 'Secured' : 'Password'}
+                  {[DEFAULT_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type)
+                    ? 'Secured'
+                    : qr.includes('00') || qr.includes('0000')
+                    ? 'Guardian'
+                    : 'Root'}
                 </Text>
               </View>
             </View>

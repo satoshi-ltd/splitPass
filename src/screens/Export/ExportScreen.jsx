@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import * as Sharing from 'expo-sharing';
 import React, { useRef, useState } from 'react';
 import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
@@ -14,7 +13,10 @@ const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const QR_SIZE = 256;
 
-const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, navigation: { goBack } }) => {
+const ExportScreen = ({
+  route: { params: { qrs = [], names = [], readMode = false } = {} },
+  navigation: { goBack, navigate },
+}) => {
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
   const { width } = useWindowDimensions();
@@ -26,36 +28,24 @@ const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, 
     setCurrentIndex(Math.round(x / width));
   };
 
-  const handleNext = () => {
-    if (currentIndex < qrs.length - 1) next();
-    else goBack();
-  };
-
   const handleSave = async () => {
     const qr = qrs[currentIndex];
 
     await VaultService.addQr(qr, name);
-    next();
+    if (qrs.length > 1) next();
+    else {
+      // goBack();
+      navigate('vault');
+    }
   };
 
   const handleShareQr = async () => {
-    try {
-      const uri = await captureRef(qrRef, {
-        format: 'png',
-        quality: 0.8,
-      });
-      await Sharing.shareAsync(uri);
-    } catch (error) {
-      console.error('Error al intentar compartir:', error.message);
-    }
+    const uri = await captureRef(qrRef, { format: 'png', quality: 0.8 }).catch(() => {});
+    await Sharing.shareAsync(uri);
   };
 
   const handleShareCode = async () => {
-    try {
-      await Share.share({ message: qrs[currentIndex] });
-    } catch (error) {
-      console.error('Error al intentar compartir:', error.message);
-    }
+    await Share.share({ message: `shardqr://${qrs[currentIndex]}` }).catch(() => {});
   };
 
   const next = () => {
@@ -67,11 +57,11 @@ const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, 
   const encrypted = [PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type);
 
   return (
-    <SafeAreaView style={style.screen}>
+    <SafeAreaView style={[style.screen, readMode && style.readMode]}>
       {qrs.length > 1 && (
-        <View row style={style.steps}>
+        <View row style={style.breadcrumbs}>
           {qrs.map((_, index) => (
-            <View key={index} wide style={[style.step, index !== currentIndex && style.stepDisabled]} />
+            <View key={index} wide style={[style.breadcrumb, index !== currentIndex && style.disabled]} />
           ))}
         </View>
       )}
@@ -81,6 +71,7 @@ const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, 
         horizontal
         pagingEnabled
         ref={scrollViewRef}
+        scrollEnabled={!readMode}
         scrollEventThrottle={10}
         showsHorizontalScrollIndicator={false}
         snapToInterval={width}
@@ -88,7 +79,7 @@ const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, 
       >
         {qrs.map((qr, index) => (
           <View align="center" key={index} style={[style.item, { width }]}>
-            {encrypted ? (
+            {encrypted && !readMode ? (
               <Input
                 align="center"
                 placeholder="Give a name..."
@@ -98,35 +89,34 @@ const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, 
                 style={{ width: QR_SIZE }}
               />
             ) : (
-              <Text bold subtitle style={style.title}>
-                {`Shard ${index + 1} / ${qrs.length}`}
+              <Text bold color={readMode ? 'base' : undefined} subtitle style={[!readMode && style.title]}>
+                {readMode ? names[index] : `Shard ${index + 1} / ${qrs.length}`}
               </Text>
             )}
-            <QR ref={currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
+            <QR ref={!readMode && currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
             {!readMode && <Text tiny>{encrypted ? 'This is your shard.' : ' '}</Text>}
           </View>
         ))}
       </ScrollView>
 
-      <View style={style.buttons}>
+      <View style={[style.footer, !readMode && style.footerFixed]}>
         {encrypted && !readMode && (
           <Button disabled={!name || name?.length < 1} onPress={handleSave}>
             Save in vault
           </Button>
         )}
 
-        <Button secondary onPress={handleShareQr}>
+        <Button contrast={readMode} secondary onPress={handleShareQr}>
           Share QR
         </Button>
 
-        <Button secondary onPress={handleShareCode}>
+        <Button contrast={readMode} secondary onPress={handleShareCode}>
           Share Code
         </Button>
 
-        <View row spaceBetween>
-          <Action onPress={() => goBack()}>Cancel</Action>
-          {qrs.length > 1 && <Action onPress={handleNext}>Next</Action>}
-        </View>
+        <Action color={readMode ? 'base' : undefined} onPress={() => goBack()}>
+          Cancel
+        </Action>
       </View>
     </SafeAreaView>
   );

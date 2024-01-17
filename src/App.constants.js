@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Text } from './__primitives__';
+import { Text, View } from './__primitives__';
 
 const headerTitle = (props) => <Text bold caption {...props} color="contentLight" />;
 
@@ -15,10 +15,11 @@ const QR_TYPE = {
 
 const OPTIONS = {
   MODAL: {
-    headerShown: true,
+    cardOverlayEnabled: true,
+    gestureEnabled: true,
+    headerShown: false,
     headerTitle,
     presentation: 'modal',
-    cardStyle: { backgroundColor: 'transparent' },
   },
 
   SCREEN: {

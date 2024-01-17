@@ -1,44 +1,57 @@
-import { Dimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
+    backgroundColor: '$colorBase',
     height: '100%',
-    width: Dimensions.get('window').width,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 
-  steps: {
+  readMode: {
+    backgroundColor: '$colorContent',
+    borderRadius: '$borderRadius * 2',
+    height: 'auto',
+  },
+
+  breadcrumbs: {
     gap: '$spaceXS',
-    marginHorizontal: '$spaceM',
+    marginHorizontal: '$spaceXL',
     marginVertical: '$spaceS',
   },
 
-  step: {
+  breadcrumb: {
     backgroundColor: '$colorAccent',
     borderRadius: '$borderRadius',
     height: '$spaceXS',
   },
 
-  stepDisabled: {
+  disabled: {
     backgroundColor: '$colorDisabled',
   },
 
   item: {
-    gap: '$spaceM',
-    marginTop: '$spaceXL',
+    alignSelf: 'flex-end',
     flex: 1,
+    gap: '$spaceS',
+    justifyContent: 'flex-end',
+    paddingTop: '$spaceL',
   },
 
   title: {
     padding: '$spaceM',
   },
 
-  buttons: {
-    // backgroundColor: 'blue',
-    gap: '$spaceL',
+  footer: {
+    gap: '$spaceS',
     justifyContent: 'flex-end',
-    height: '$spaceXL * 8',
+    paddingBottom: '$spaceS',
     paddingHorizontal: '$spaceXL',
-    paddingVertical: '$spaceM',
+  },
+
+  footerFixed: {
+    height: '$spaceXL * 9',
   },
 });

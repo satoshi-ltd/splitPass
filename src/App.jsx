@@ -8,7 +8,6 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Icon } from './__primitives__';
 import { OPTIONS } from './App.constants';
-import { Modal } from './components/Modal/Modal';
 import { getNavigationTheme } from './helpers';
 import { ScanScreen, GenerateScreen, ImportScreen, ExportScreen, OnboardingScreen, VaultScreen } from './screens';
 import { defaultTheme } from './themes/default.theme';
@@ -17,8 +16,6 @@ StyleSheet.build(defaultTheme);
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-console.log({ Modal });
 
 export const Tabs = () => (
   <Tab.Navigator initialRouteName="vault" shifting screenOptions={{ ...OPTIONS.TAB }}>
@@ -63,8 +60,12 @@ export const App = () => {
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
 
-        <Stack.Screen name="import" component={ImportScreen} options={{ ...OPTIONS.MODAL, headerShown: false }} />
-        <Stack.Screen name="export" component={ExportScreen} options={{ ...OPTIONS.MODAL }} />
+        <Stack.Screen name="import" component={ImportScreen} options={OPTIONS.MODAL} />
+        <Stack.Screen
+          name="export"
+          component={ExportScreen}
+          options={{ ...OPTIONS.MODAL, presentation: 'transparentModal' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   ) : null;

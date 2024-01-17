@@ -1,7 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native';
 
 import { style } from './ImportScreen.style';
 import { Action, Button, Text, View } from '../../__primitives__';
@@ -40,7 +39,7 @@ export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { g
       ) : (
         <View style={style.scanner} />
       )}
-      <SafeAreaView style={style.screen}>
+      <View style={style.screen}>
         <View style={[style.section, style.header]}>
           <Text align="center" bold subtitle style={style.text}>
             Scan QR Code
@@ -78,7 +77,7 @@ export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { g
             <Action onPress={() => goBack()}>Cancel</Action>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
