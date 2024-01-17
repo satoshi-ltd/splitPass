@@ -44,7 +44,7 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
       return `${type}${Cypher.encrypt(digits.join(''), pin)}`;
     });
 
-    navigate('modal', { qrs });
+    navigate('export', { qrs });
   };
 
   return (

@@ -8,16 +8,9 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Icon } from './__primitives__';
 import { OPTIONS } from './App.constants';
+import { Modal } from './components/Modal/Modal';
 import { getNavigationTheme } from './helpers';
-import {
-  ScanScreen,
-  GenerateScreen,
-  ImportScreen,
-  ModalGenerate,
-  OnboardingScreen,
-  SettingsScreen,
-  VaultScreen,
-} from './screens';
+import { ScanScreen, GenerateScreen, ImportScreen, ExportScreen, OnboardingScreen, VaultScreen } from './screens';
 import { defaultTheme } from './themes/default.theme';
 
 StyleSheet.build(defaultTheme);
@@ -25,8 +18,10 @@ StyleSheet.build(defaultTheme);
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+console.log({ Modal });
+
 export const Tabs = () => (
-  <Tab.Navigator initialRouteName="generate" shifting screenOptions={{ ...OPTIONS.TAB }}>
+  <Tab.Navigator initialRouteName="vault" shifting screenOptions={{ ...OPTIONS.TAB }}>
     <Tab.Screen
       name="scan"
       component={ScanScreen}
@@ -50,13 +45,6 @@ export const Tabs = () => (
         tabBarIcon: ({ color }) => <Icon name="vault" color={color} />,
       }}
     />
-    <Tab.Screen
-      name="settings"
-      component={SettingsScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="settings" color={color} />,
-      }}
-    />
   </Tab.Navigator>
 );
 
@@ -74,8 +62,9 @@ export const App = () => {
       <Stack.Navigator initialRouteName="main" screenOptions={OPTIONS.SCREEN}>
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
-        <Stack.Screen name="modal" component={ModalGenerate} options={{ ...OPTIONS.MODAL }} />
+
         <Stack.Screen name="import" component={ImportScreen} options={{ ...OPTIONS.MODAL, headerShown: false }} />
+        <Stack.Screen name="export" component={ExportScreen} options={{ ...OPTIONS.MODAL }} />
       </Stack.Navigator>
     </NavigationContainer>
   ) : null;

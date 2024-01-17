@@ -4,7 +4,7 @@ import React, { useRef, useState } from 'react';
 import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
-import { style } from './ModalGenerate.style';
+import { style } from './ExportScreen.style';
 import { Action, Button, Input, ScrollView, Text, View } from '../../__primitives__';
 import { QR_TYPE } from '../../App.constants';
 import { QR } from '../../components';
@@ -14,7 +14,7 @@ const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const QR_SIZE = 256;
 
-export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } = {} }, navigation: { goBack } }) => {
+const ExportScreen = ({ route: { params: { qrs = [], readMode = false } = {} }, navigation: { goBack } }) => {
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
   const { width } = useWindowDimensions();
@@ -41,7 +41,7 @@ export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } 
   const handleShareQr = async () => {
     try {
       const uri = await captureRef(qrRef, {
-        format: "png",
+        format: 'png',
         quality: 0.8,
       });
       await Sharing.shareAsync(uri);
@@ -131,3 +131,5 @@ export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } 
     </SafeAreaView>
   );
 };
+
+export { ExportScreen };
