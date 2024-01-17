@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
 import * as Sharing from 'expo-sharing';
 import React, { useRef, useState } from 'react';
-import { SafeAreaView, useWindowDimensions } from 'react-native';
+import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
+import { captureRef } from 'react-native-view-shot';
 
 import { style } from './ModalGenerate.style';
 import { Action, Button, Input, ScrollView, Text, View } from '../../__primitives__';
@@ -14,6 +15,7 @@ const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 const QR_SIZE = 256;
 
 export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } = {} }, navigation: { goBack } }) => {
+  const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
   const { width } = useWindowDimensions();
 
@@ -36,11 +38,23 @@ export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } 
     next();
   };
 
-  const handleShare = async () => {
+  const handleShareQr = async () => {
     try {
-      await Sharing.shareAsync('¡Hola! Estoy compartiendo este mensaje.', {});
+      const uri = await captureRef(qrRef, {
+        format: "png",
+        quality: 0.8,
+      });
+      await Sharing.shareAsync(uri);
     } catch (error) {
-      alert(error);
+      console.error('Error al intentar compartir:', error.message);
+    }
+  };
+
+  const handleShareCode = async () => {
+    try {
+      await Share.share({ message: qrs[currentIndex] });
+    } catch (error) {
+      console.error('Error al intentar compartir:', error.message);
     }
   };
 
@@ -88,7 +102,7 @@ export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } 
                 {`Shard ${index + 1} / ${qrs.length}`}
               </Text>
             )}
-            <QR size={QR_SIZE} value={qr} />
+            <QR ref={currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
             {!readMode && <Text tiny>{encrypted ? 'This is your shard.' : ' '}</Text>}
           </View>
         ))}
@@ -101,11 +115,11 @@ export const ModalGenerate = ({ route: { params: { qrs = [], readMode = false } 
           </Button>
         )}
 
-        <Button secondary onPress={handleShare}>
+        <Button secondary onPress={handleShareQr}>
           Share QR
         </Button>
 
-        <Button secondary onPress={handleShare}>
+        <Button secondary onPress={handleShareCode}>
           Share Code
         </Button>
 
