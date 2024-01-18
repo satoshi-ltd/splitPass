@@ -88,7 +88,7 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
       {guardians > 1 && (
         <Card align="center" style={style.cardAlert}>
-          <Icon color="content" name="alert" />
+          <Icon color="$colorContent" name="alert" />
           <Text align="center" caption>
             {`Recovering this secret will require the approval of at least `}
             <Text bold caption>{`${guardians - 1 - (encrypted ? 1 : 0)} out of ${
