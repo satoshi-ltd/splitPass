@@ -7,6 +7,7 @@ import { Text } from '../Text';
 
 const Button = ({
   children,
+  contrast = false,
   disabled,
   secondary = false,
   small = false,
@@ -22,12 +23,13 @@ const Button = ({
       style.button,
       disabled && style.disabled,
       secondary && !disabled && style.secondary,
+      contrast && style.contrast,
       small && style.small,
       wide && style.wide,
       others.style,
     ]}
   >
-    <Text bold color={disabled ? 'base' : secondary ? 'content' : 'base'} caption={small}>
+    <Text bold color={disabled || contrast ? 'base' : secondary ? 'content' : 'base'} caption={small}>
       {children}
     </Text>
   </Pressable>
@@ -36,6 +38,7 @@ const Button = ({
 Button.propTypes = {
   bold: PropTypes.bool,
   children: PropTypes.node,
+  contrast: PropTypes.bool,
   disabled: PropTypes.bool,
   secondary: PropTypes.bool,
   small: PropTypes.bool,

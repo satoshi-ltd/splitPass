@@ -24,6 +24,10 @@ export const style = StyleSheet.create({
     borderWidth: '$borderWidth',
   },
 
+  contrast: {
+    borderColor: '$colorBase',
+  },
+
   small: {
     minHeight: '$buttonSmallHeight',
     maxHeight: '$buttonSmallHeight',

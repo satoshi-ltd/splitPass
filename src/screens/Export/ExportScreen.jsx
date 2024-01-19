@@ -1,4 +1,5 @@
 import * as Sharing from 'expo-sharing';
+import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
 import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
@@ -93,7 +94,7 @@ const ExportScreen = ({
                 {readMode ? names[index] : `Shard ${index + 1} / ${qrs.length}`}
               </Text>
             )}
-            <QR ref={!readMode && currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
+            <QR ref={readMode || currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
             {!readMode && <Text tiny>{encrypted ? 'This is your shard.' : ' '}</Text>}
           </View>
         ))}
@@ -115,11 +116,16 @@ const ExportScreen = ({
         </Button>
 
         <Action color={readMode ? 'base' : undefined} onPress={() => goBack()}>
-          Cancel
+          {readMode ? 'Close' : 'Cancel'}
         </Action>
       </View>
     </SafeAreaView>
   );
+};
+
+ExportScreen.propTypes = {
+  route: PropTypes.any,
+  navigation: PropTypes.any,
 };
 
 export { ExportScreen };

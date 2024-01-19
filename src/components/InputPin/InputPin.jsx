@@ -45,8 +45,8 @@ const InputPin = ({ length = 6, onChange = () => {}, ...others }) => {
           maxLength={1}
           ref={inputRef}
           secureTextEntry
-          value={values[index]}
           valid={values[index] !== ''}
+          value={values[index]}
           onChange={(value) => handleChange(value, index)}
           onKeyPress={(event) => handleKeyPress(event, index)}
           style={style.input}

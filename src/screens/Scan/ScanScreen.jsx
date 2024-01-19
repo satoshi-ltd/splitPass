@@ -1,12 +1,21 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import { Button, Text, View } from '../../__primitives__';
 import { Card, Screen } from '../../components';
 
-// eslint-disable-next-line react/prop-types
-export const ScanScreen = ({ navigation: { navigate } }) => {
+const ScanScreen = ({ navigation: { navigate } }) => {
   return (
     <Screen>
+      <View>
+        <Text align="center" bold subtitle>
+          Lorem ipsum dolor sit amet
+        </Text>
+        <Text align="center" caption>
+          consectetur adipisicing elit. Doloribus omnis accusamus nostrum provident eveniet, sed cum tempore
+        </Text>
+      </View>
+
       <Card>
         <View gap row spaceBetween>
           <View>
@@ -26,3 +35,9 @@ export const ScanScreen = ({ navigation: { navigate } }) => {
     </Screen>
   );
 };
+
+ScanScreen.propTypes = {
+  navigation: PropTypes.any,
+};
+
+export { ScanScreen };

@@ -1,8 +1,6 @@
 import React from 'react';
 
-import { Text, View } from './__primitives__';
-
-const headerTitle = (props) => <Text bold caption {...props} color="contentLight" />;
+import { Text } from './__primitives__';
 
 const GUARDIANS = [1, 3, 5];
 
@@ -18,7 +16,6 @@ const OPTIONS = {
     cardOverlayEnabled: true,
     gestureEnabled: true,
     headerShown: false,
-    headerTitle,
     presentation: 'modal',
   },
 
@@ -27,8 +24,8 @@ const OPTIONS = {
   },
 
   TAB: {
-    headerShown: true,
-    headerTitle,
+    headerShown: false,
+    headerTitle: (props) => <Text bold caption {...props} color="contentLight" />,
   },
 };
 

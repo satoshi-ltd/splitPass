@@ -1,4 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './VaultScreen.style';
@@ -9,8 +10,7 @@ import { VaultService } from '../../services';
 
 const { DEFAULT_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
-// eslint-disable-next-line react/prop-types
-export const VaultScreen = ({ navigation: { navigate } = {} }) => {
+const VaultScreen = ({ navigation: { navigate } = {} }) => {
   const [dataSource, setDataSource] = useState([]);
 
   useFocusEffect(
@@ -39,8 +39,8 @@ export const VaultScreen = ({ navigation: { navigate } = {} }) => {
                   {[DEFAULT_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type)
                     ? 'Secured'
                     : qr.includes('00') || qr.includes('0000')
-                    ? 'Guardian'
-                    : 'Root'}
+                    ? 'Shard'
+                    : 'Master'}
                 </Text>
               </View>
             </View>
@@ -50,3 +50,9 @@ export const VaultScreen = ({ navigation: { navigate } = {} }) => {
     </Screen>
   );
 };
+
+VaultScreen.propTypes = {
+  navigation: PropTypes.any,
+};
+
+export { VaultScreen };

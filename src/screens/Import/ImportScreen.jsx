@@ -1,12 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './ImportScreen.style';
 import { Action, Button, Text, View } from '../../__primitives__';
 
-// eslint-disable-next-line react/prop-types
-export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { goBack } }) => {
+const ImportScreen = ({ route: { params: { type } = {} }, navigation: { goBack } }) => {
   const [hasPermission, setHasPermission] = useState(false);
   // const [scanned, setScanned] = useState(false);
   const [value, setValue] = useState();
@@ -81,3 +81,10 @@ export const ImportScreen = ({ route: { params: { type } = {} }, navigation: { g
     </>
   );
 };
+
+ImportScreen.propTypes = {
+  route: PropTypes.any,
+  navigation: PropTypes.any,
+};
+
+export { ImportScreen };

@@ -1,10 +1,10 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import { Button, Text } from '../../__primitives__';
 import { Screen } from '../../components';
 
-// eslint-disable-next-line react/prop-types
-export const SubscribeScreen = ({ navigation: { navigate } }) => {
+const SubscribeScreen = ({ navigation: { navigate } }) => {
   return (
     <Screen>
       <Text bold subtitle>
@@ -14,3 +14,9 @@ export const SubscribeScreen = ({ navigation: { navigate } }) => {
     </Screen>
   );
 };
+
+SubscribeScreen.propTypes = {
+  navigation: PropTypes.any,
+};
+
+export { SubscribeScreen };

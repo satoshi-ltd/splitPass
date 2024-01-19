@@ -18,7 +18,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export const Tabs = () => (
-  <Tab.Navigator initialRouteName="vault" shifting screenOptions={{ ...OPTIONS.TAB }}>
+  <Tab.Navigator initialRouteName="generate" shifting screenOptions={{ ...OPTIONS.TAB }}>
     <Tab.Screen
       name="scan"
       component={ScanScreen}

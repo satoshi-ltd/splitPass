@@ -1,20 +1,21 @@
 import { useFocusEffect } from '@react-navigation/native';
+import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { style } from './GenerateScreen.style';
 import { Button, Icon, Input, Switch, Text, View } from '../../__primitives__';
 import { GUARDIANS, QR_TYPE } from '../../App.constants';
 import { Card, InputPin, Option, Screen } from '../../components';
-import { Cypher, isSeedPhrase, QRParser } from '../../helpers';
+import { Cypher, QRParser } from '../../helpers';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
-// eslint-disable-next-line react/prop-types
-export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
+const GenerateScreen = ({ navigation: { navigate } = {} }) => {
   const [encrypted, setEncrypted] = useState(false);
   const [guardians, setGuardians] = useState(GUARDIANS[1]);
   const [pin, setPin] = useState();
-  const [secret, setSecret] = useState('roast soon winter over sentence shaft shock side mango select screen neither');
+  // const [secret, setSecret] = useState('roast soon winter over sentence shaft shock side mango select screen neither');
+  const [secret, setSecret] = useState();
 
   useEffect(() => setEncrypted(guardians === 1), [guardians]);
 
@@ -22,10 +23,10 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
   useFocusEffect(
     useCallback(() => {
-      setEncrypted(false);
-      setGuardians(GUARDIANS[1]);
-      setPin();
-      setSecret();
+      // setEncrypted(false);
+      // setGuardians(GUARDIANS[1]);
+      // setPin();
+      // setSecret();
     }, []),
   );
 
@@ -75,18 +76,18 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
         <View style={style.anchor} />
 
-        <View row spaceBetween style={style.rowSecure}>
-          <Text color="contentLight" tiny style={style.textGuardiansHint}>
+        <View gap row spaceBetween style={style.rowSecure}>
+          <Text tiny>
             {guardians === 1
-              ? `If you don't shard the secret, it will be securely encrypted on this device.`
-              : `Keep one shard of the secret securely encrypted on this device.`}
+              ? `If you choose not to shard the secret, it will be automatically securely encrypted on this device.`
+              : `Keep one shard of the secret encrypted on this device.`}
           </Text>
           {guardians > 1 && <Switch checked={encrypted} disabled={guardians === 1} onChange={setEncrypted} />}
         </View>
       </Card>
 
       {guardians > 1 && (
-        <Card align="center" style={style.reduceGap}>
+        <Card align="center" style={style.cardAlert}>
           <Icon color="content" name="alert" />
           <Text align="center" caption>
             {`Recovering this secret will require the approval of at least `}
@@ -99,7 +100,7 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
       )}
 
       {encrypted && (
-        <Card outlined style={style.reduceGap}>
+        <Card style={style.cardInput}>
           <Text align="center" bold>
             Pin Code
           </Text>
@@ -107,14 +108,18 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
         </Card>
       )}
 
-      <Card outlined style={style.reduceGap}>
+      <Card style={style.cardInput}>
         <Text align="center" bold>
           Secret
         </Text>
-        <View>
-          <Input align="center" multiline placeholder="Type your secret..." value={secret} onChange={setSecret} />
-          <Text align="right" tiny>{`isSeedPhrase ${isSeedPhrase(secret)}`}</Text>
-        </View>
+        <Input
+          align="center"
+          multiline
+          placeholder="Type your secret..."
+          valid={secret?.length > 8}
+          value={secret}
+          onChange={setSecret}
+        />
       </Card>
 
       <Button disabled={!secret || (encrypted && !pin)} onPress={handlePressContinue}>
@@ -123,3 +128,9 @@ export const GenerateScreen = ({ navigation: { navigate } = {} }) => {
     </Screen>
   );
 };
+
+GenerateScreen.propTypes = {
+  navigation: PropTypes.any,
+};
+
+export { GenerateScreen };

@@ -1,7 +1,7 @@
 import { Dimensions } from 'react-native';
 
 export const defaultTheme = {
-  // -- palette
+  // -- palette ----------------------------------------------------------------
   // $colorAccent: '#6b52ae',
   $colorAccent: '#FBD90C',
   $colorAlert: '#ff5c5c',
@@ -13,9 +13,9 @@ export const defaultTheme = {
   $colorContent: '#ffffff',
   $colorContentLight: '#bbbbbb',
   $colorDisabled: '#666666',
-  $colorModal: '$colorBase',
+  $colorModal: '$colorContent',
 
-  // -- typography
+  // -- typography -------------------------------------------------------------
   $fontWeightDefault: 400,
   $fontWeightBold: 700,
   $fontSizeTitle: 36,
@@ -24,38 +24,49 @@ export const defaultTheme = {
   $fontSizeCaption: 13,
   $fontSizeTiny: 10,
 
-  // -- spacing
+  // -- spacing ----------------------------------------------------------------
   $spaceXS: 4,
   $spaceS: 8,
   $spaceM: 16,
   $spaceL: 24,
   $spaceXL: 32,
 
-  // -- border
+  // -- border -----------------------------------------------------------------
   $borderRadius: '$spaceS',
   $borderStyle: 'solid',
   $borderWidth: '$spaceXS / 2',
 
-  // -- primitives
+  // -- <primitives> -----------------------------------------------------------
   $buttonHeight: '$spaceXL + $spaceL',
   $buttonSmallHeight: '$spaceXL',
   $buttonRadius: '$spaceS',
 
-  $pressableColor: 'rgba(0, 0, 0, 0.1)',
-
+  $inputBackgroundColor: 'rgba(255,255,255,0.05)',
+  $inputBorderColor: '$colorContentLight',
+  $inputBorderColorFocus: '$colorContent',
+  $inputBorderColorValid: '$colorAccent',
+  $inputBorderStyle: '$borderStyle',
+  $inputBorderWidth: '$borderWidth',
   $inputFontFamily: 'font-bold',
   $inputFontWeight: '$fontWeightBold',
   $inputFontSize: '$fontSizeBody',
   $inputHeight: '$spaceXL',
 
-  // -- components
-  // $cardColor: '#e5e5e5',
-  $cardColor: '#222222',
+  $pressableColor: 'rgba(0, 0, 0, 0.1)',
 
-  $importBackgroundColor: 'rgba(0, 0, 0, 0.5)',
-  $importColor: '#ffffff',
+  // -- <components> -----------------------------------------------------------
+  // $cardBackgroundColor: '#e5e5e5',
+  // $cardBorderColor: 'transparent',
+  $cardBackgroundColor: '$colorBase',
+  $cardBorderColor: '$colorContent',
+  $cardBorderStyle: '$borderStyle',
+  $cardBorderWidth: '$borderWidth',
 
   $qrBackgroundColor: '#fff',
   $qrColor: '#111',
   $qrSize: Dimensions.get('window').width * 0.66,
+
+  // -- <screens> --------------------------------------------------------------
+  $importBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+  $importColor: '#ffffff',
 };
