@@ -35,6 +35,8 @@ const Button = ({
   </Pressable>
 );
 
+Button.displayName = 'Button';
+
 Button.propTypes = {
   bold: PropTypes.bool,
   children: PropTypes.node,

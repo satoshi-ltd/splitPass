@@ -5,7 +5,6 @@ export const style = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '$colorAccent',
     borderRadius: '$buttonRadius',
-    flex: 0,
     justifyContent: 'center',
     minHeight: '$buttonHeight',
     maxHeight: '$buttonHeight',

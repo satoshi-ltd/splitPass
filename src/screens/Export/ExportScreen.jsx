@@ -46,7 +46,7 @@ const ExportScreen = ({
   };
 
   const handleShareCode = async () => {
-    await Share.share({ message: `shardqr://${qrs[currentIndex]}` }).catch(() => {});
+    await Share.share({ message: `secretqr://${qrs[currentIndex]}` }).catch(() => {});
   };
 
   const next = () => {
