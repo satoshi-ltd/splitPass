@@ -11,18 +11,29 @@
       "resizeMode": "contain",
       "backgroundColor": "#111"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.satoshi-ltd.secretqr",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111"
-      }
+      },
+      "package": "com.satoshi-ltd.secretqr",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ff857f0d-a99f-4faa-b783-dd4786993626"
+      }
     }
   }
 }
