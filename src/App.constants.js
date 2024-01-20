@@ -11,6 +11,11 @@ const QR_TYPE = {
   SEED_PHRASE_ENCRYPTED: '4',
 };
 
+const STEPS = {
+  QR: 'qr',
+  PIN: 'pin',
+};
+
 const OPTIONS = {
   MODAL: {
     cardOverlayEnabled: true,
@@ -29,4 +34,4 @@ const OPTIONS = {
   },
 };
 
-export { GUARDIANS, QR_TYPE, OPTIONS };
+export { GUARDIANS, QR_TYPE, STEPS, OPTIONS };

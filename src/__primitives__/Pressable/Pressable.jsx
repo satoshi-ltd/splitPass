@@ -3,7 +3,7 @@ import React from 'react';
 import { Platform, Pressable as PressableBase, View as ViewBase } from 'react-native';
 
 import { style } from './Pressable.style';
-import { useKeyboard } from '../../hooks';
+import { useKeyboard } from '../../hooks/useKeyboard';
 
 const Pressable = ({ children, feedback = true, onPress, ...others }) => {
   const { isKeyboardOpen, closeKeyboard } = useKeyboard();
