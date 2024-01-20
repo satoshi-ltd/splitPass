@@ -56,7 +56,7 @@ export const App = () => {
     <NavigationContainer theme={getNavigationTheme()}>
       <StatusBar style="light" />
 
-      <Stack.Navigator initialRouteName="main" screenOptions={OPTIONS.SCREEN}>
+      <Stack.Navigator initialRouteName="onboarding" screenOptions={OPTIONS.SCREEN}>
         <Stack.Screen name="onboarding" component={OnboardingScreen} />
         <Stack.Screen name="main" component={Tabs} />
 
