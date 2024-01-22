@@ -1,6 +1,6 @@
 {
-  "name": "secretqr",
-  "version": "1.0.0",
+  "name": "@satoshi-ltd/secretqr",
+  "version": "1.0.1",
   "main": "node_modules/expo/AppEntry.js",
   "private": false,
   "scripts": {
