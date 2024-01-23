@@ -2,6 +2,7 @@
   "expo": {
     "name": "SecretQR",
     "slug": "satoshi-ltd-secretqr",
+    "owner": "satoshi-ltd",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
