@@ -1,27 +1,23 @@
-import { useFocusEffect } from '@react-navigation/native';
 import PropTypes from 'prop-types';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { groupByType } from './modules';
 import { style } from './VaultScreen.style';
 import { Input, Pressable, Screen, Text, View } from '../../../__nano-design__';
 import { QR_TYPE } from '../../../App.constants';
 import { QR } from '../../../components';
-import { VaultService } from '../../../services';
+import { useStore } from '../../../contexts';
 
 const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const VaultScreen = ({ navigation: { navigate } = {} }) => {
-  const [dataSource, setDataSource] = useState([]);
+  const { qrs = [] } = useStore();
+
   const [search, setSearch] = useState();
 
-  useFocusEffect(
-    useCallback(() => {
-      setSearch();
-      (async () => setDataSource(await VaultService.get()))();
-    }, []),
-    [],
-  );
+  useEffect(() => {
+    setSearch();
+  }, [qrs]);
 
   const handlePress = (qr, name) => {
     navigate('export', { qrs: [qr], names: [name], readMode: true });
@@ -31,7 +27,7 @@ const VaultScreen = ({ navigation: { navigate } = {} }) => {
     <Screen gap offset>
       <Input placeholder="Search..." value={search} onChange={setSearch} />
 
-      {Object.entries(groupByType(dataSource, search)).map(([type, qrs = []]) => {
+      {Object.entries(groupByType(qrs, search)).map(([type, qrs = []]) => {
         return (
           <View key={type}>
             <View row>

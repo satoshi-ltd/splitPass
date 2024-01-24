@@ -7,9 +7,11 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
 import { Button, Pagination, ScrollView, Text, View } from '../../__nano-design__';
+import { useStore } from '../../contexts';
 
 const OnboardingScreen = ({ navigation: { navigate } }) => {
   const scrollViewRef = useRef(null);
+  const { setOnboarded } = useStore();
   const { width } = useWindowDimensions();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -20,9 +22,9 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
     setCurrentIndex(index);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (lastSlide) {
-      // ! TODO: Should save the user is onboarded
+      await setOnboarded(true);
       navigate('main');
     } else if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });

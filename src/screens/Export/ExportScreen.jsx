@@ -1,14 +1,14 @@
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
-import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
+import { Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { style } from './ExportScreen.style';
-import { Action, Button, Input, Modal, Screen, ScrollView, Text, View } from '../../__nano-design__';
+import { Action, Button, Input, Modal, Pagination, ScrollView, Text, View } from '../../__nano-design__';
 import { QR_TYPE } from '../../App.constants';
 import { QR } from '../../components';
-import { VaultService } from '../../services';
+import { useStore } from '../../contexts';
 
 const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
@@ -20,6 +20,7 @@ const ExportScreen = ({
 }) => {
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
+  const { addQr } = useStore();
   const { width } = useWindowDimensions();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,7 +33,7 @@ const ExportScreen = ({
   const handleSave = async () => {
     const qr = qrs[currentIndex];
 
-    await VaultService.addQr(qr, name);
+    await addQr(qr, name);
     if (qrs.length > 1) next();
     else {
       // goBack();
@@ -54,60 +55,55 @@ const ExportScreen = ({
     scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
   };
 
+  const hasEncrypted = qrs.some((qr) => {
+    const [type] = qr;
+    return [PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type);
+  });
+
   const [type] = qrs[currentIndex];
   const encrypted = [PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type);
 
   return (
-    <SafeAreaView style={[style.screen, readMode && style.readMode]}>
-      {qrs.length > 1 && (
-        <View row style={style.breadcrumbs}>
-          {qrs.map((_, index) => (
-            <View key={index} wide style={[style.breadcrumb, index !== currentIndex && style.disabled]} />
-          ))}
-        </View>
-      )}
-
+    <Modal gap>
       <ScrollView
-        decelerationRate="fast"
         horizontal
-        pagingEnabled
         ref={scrollViewRef}
         scrollEnabled={!readMode}
-        scrollEventThrottle={10}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={width}
+        snap={width}
         onScroll={handleScroll}
+        style={style.scrollView}
       >
         {qrs.map((qr, index) => (
           <View align="center" key={index} style={[style.item, { width }]}>
             {encrypted && !readMode ? (
               <Input
                 align="center"
-                placeholder="Give a name..."
+                placeholder="Name your shard..."
                 valid={name?.length > 1}
                 value={name}
                 onChange={setName}
                 style={{ width: QR_SIZE }}
               />
             ) : (
-              <Text bold color={readMode ? 'base' : undefined} subtitle style={[!readMode && style.title]}>
+              <Text bold title style={style.title}>
                 {readMode ? names[index] : `Shard ${index + 1} / ${qrs.length}`}
               </Text>
             )}
             <QR ref={readMode || currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
-            {!readMode && <Text tiny>{encrypted ? 'This is your shard.' : ' '}</Text>}
           </View>
         ))}
       </ScrollView>
 
-      <View style={[style.footer, !readMode && style.footerFixed]}>
+      {qrs.length > 1 && <Pagination currentIndex={currentIndex} length={qrs.length} />}
+
+      <View style={[style.footer, hasEncrypted && !readMode && style.footerMaximize]}>
         {encrypted && !readMode && (
           <Button secondary disabled={!name || name?.length < 1} onPress={handleSave}>
             Save in vault
           </Button>
         )}
 
-        <Button outlined onPress={handleShareQr}>
+        <Button outlined={!readMode} onPress={handleShareQr}>
           Share QR
         </Button>
 
@@ -119,7 +115,7 @@ const ExportScreen = ({
           {readMode ? 'Close' : 'Cancel'}
         </Action>
       </View>
-    </SafeAreaView>
+    </Modal>
   );
 };
 

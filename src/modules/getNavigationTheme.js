@@ -9,7 +9,7 @@ export const getNavigationTheme = () => ({
     primary: StyleSheet.value('$colorAccent'),
     background: StyleSheet.value('$colorBase'),
     card: StyleSheet.value('$colorBase'),
-    text: StyleSheet.value('$colorContentLight'),
+    text: StyleSheet.value('$colorContent'),
     border: 'transparent',
   },
 });

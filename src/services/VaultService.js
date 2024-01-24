@@ -1,22 +1,29 @@
 import { AsyncStorageService } from './AsyncStorageService';
+import { STORAGE_DOMAIN } from '../App.constants';
 
-const STORAGE_KEY = 'vault';
+const STORAGE_KEY = `${STORAGE_DOMAIN}:vault`;
 
 export const VaultService = {
-  get: async () => (await AsyncStorageService.get(STORAGE_KEY)) || [],
+  get: async () => {
+    return (await AsyncStorageService.get(STORAGE_KEY)) || [];
+  },
 
-  addQr: async (qr, name, timestamp = new Date().getTime()) => {
+  add: async (qr, name, timestamp = new Date().getTime()) => {
     const vault = await VaultService.get();
 
     AsyncStorageService.set(STORAGE_KEY, [...vault, { qr, name, timestamp }]);
   },
 
-  removeQr: async (qr) => {
+  remove: async (qr) => {
     let vault = await VaultService.get();
 
-    AsyncStorageService.set(
+    await AsyncStorageService.set(
       STORAGE_KEY,
       vault.filter((item = {}) => item.qr === qr),
     );
+  },
+
+  wipe: async () => {
+    AsyncStorageService.remove(STORAGE_KEY);
   },
 };

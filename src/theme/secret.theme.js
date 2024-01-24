@@ -6,14 +6,13 @@ export const SecretTheme = {
   ...DefaultTheme,
 
   // -- palette ----------------------------------------------------------------
-  $colorBase: '#FFFFFF',
-  $colorBorder: '#E2E2E2',
   $colorAccent: '#E1D558',
-  // $colorAccent: '#E3CDF4',
+  $colorBorder: '#EAE8E7',
   $colorContent: '#16161C',
   $colorContentLight: '#D5D2CE',
   // -- border -----------------------------------------------------------------
-  $borderRadius: '$spaceS',
+  $borderRadius: '$spaceXS',
+  $borderWidth: '$spaceXXS',
   // -- <Button> ---------------------------------------------------------------
 
   // -- <components> -----------------------------------------------------------

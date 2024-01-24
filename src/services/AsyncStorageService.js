@@ -21,4 +21,18 @@ export const AsyncStorageService = {
 
     return await AsyncStorageService.get(key);
   },
+
+  remove: async (key) => {
+    try {
+      await AsyncStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing data to AsyncStorage:', error);
+    }
+
+    return await AsyncStorageService.get(key);
+  },
+
+  wipe: async () => {
+    
+  }
 };

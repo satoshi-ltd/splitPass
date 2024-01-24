@@ -12,4 +12,6 @@ const STEPS = {
   PIN: 'pin',
 };
 
-export { GUARDIANS, QR_TYPE, STEPS };
+const STORAGE_DOMAIN = 'com.satoshi-ltd.aliceqr';
+
+export { GUARDIANS, QR_TYPE, STEPS, STORAGE_DOMAIN };

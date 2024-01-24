@@ -1,33 +1,9 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  screen: {
-    backgroundColor: '$colorBase',
-    height: '100%',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-
-  readMode: {
-    height: 'auto',
-  },
-
-  breadcrumbs: {
-    gap: '$spaceXS',
-    marginHorizontal: '$spaceXL',
-    marginVertical: '$spaceS',
-  },
-
-  breadcrumb: {
-    backgroundColor: '$colorAccent',
-    borderRadius: '$borderRadius',
-    height: '$spaceXS',
-  },
-
-  disabled: {
-    backgroundColor: '$colorDisabled',
+  scrollView: {
+    marginLeft: '$viewOffset * -1',
+    marginRight: '$viewOffset * -1',
   },
 
   item: {
@@ -38,18 +14,12 @@ export const style = StyleSheet.create({
     paddingTop: '$spaceL',
   },
 
-  title: {
-    padding: '$spaceM',
-  },
-
   footer: {
-    gap: '$spaceS',
+    gap: '$spaceM',
     justifyContent: 'flex-end',
-    paddingBottom: '$spaceS',
-    paddingHorizontal: '$spaceXL',
   },
 
-  footerFixed: {
-    height: '$spaceXL * 9',
+  footerMaximize: {
+    height: '$spaceXL * 8',
   },
 });

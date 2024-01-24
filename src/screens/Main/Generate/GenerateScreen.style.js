@@ -4,10 +4,9 @@ export const style = StyleSheet.create({
   anchor: {
     borderColor: '$colorContent',
     borderStyle: '$borderStyle',
-    borderTopWidth: 2,
+    borderTopWidth: '$borderWidth',
     marginLeft: '$spaceM * -1',
     marginRight: '$spaceM * -1',
-    // opacity: 0.5,
   },
 
   rowSecure: {
@@ -15,8 +14,6 @@ export const style = StyleSheet.create({
   },
 
   cardAlert: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderWidth: 0,
     gap: '$spaceXS',
   },
 

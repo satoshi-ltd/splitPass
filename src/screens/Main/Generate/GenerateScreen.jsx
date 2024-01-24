@@ -50,14 +50,12 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
   return (
     <Screen gap offset>
-      <View>
-        <Text align="center" bold subtitle>
-          Select Guardians amount
-        </Text>
-        <Text align="center" caption>
-          Pick amount of Guardians which will be responsible for keepin the Shards of your Secret.
-        </Text>
-      </View>
+      <Text align="center" bold subtitle>
+        Select Guardians amount
+      </Text>
+      <Text align="center" caption>
+        Pick amount of Guardians which will be responsible for keepin the Shards of your Secret.
+      </Text>
 
       <Card gap outlined>
         <View row>
@@ -87,7 +85,7 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
       </Card>
 
       {guardians > 1 && (
-        <Card align="center" style={style.cardAlert}>
+        <Card align="center" color="background" style={style.cardAlert}>
           <Icon color="$colorContent" name="alert" />
           <Text align="center" caption>
             {`Recovering this secret will require the approval of at least `}
