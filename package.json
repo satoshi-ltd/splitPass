@@ -20,6 +20,7 @@
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
     "@yudiel/react-qr-scanner": "^1.2.4",
+    "color": "^4.2.3",
     "expo": "~49.0.15",
     "expo-barcode-scanner": "~12.5.3",
     "expo-sharing": "~11.5.0",

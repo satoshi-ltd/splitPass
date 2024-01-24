@@ -1,8 +1,8 @@
-// -- screens
+// -- presentation=screen
 export * from './Onboarding';
-export * from './Generate';
-export * from './Scan';
-export * from './Vault';
-// -- modals
+export * from './Main/Scan';
+export * from './Main/Generate';
+export * from './Main/Vault';
+// -- presentation=modal
 export * from './Export';
 export * from './Import';

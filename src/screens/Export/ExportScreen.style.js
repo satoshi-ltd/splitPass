@@ -11,8 +11,6 @@ export const style = StyleSheet.create({
   },
 
   readMode: {
-    backgroundColor: '$colorContent',
-    borderRadius: '$borderRadius * 2',
     height: 'auto',
   },
 

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './ImportScreen.style';
-import { Action, Button, Text, View } from '../../__primitives__';
+import { Action, Button, Text, View } from '../../__nano-design__';
 
 const ImportScreen = ({ route: { params: { type } = {} }, navigation: { goBack } }) => {
   const [hasPermission, setHasPermission] = useState(false);

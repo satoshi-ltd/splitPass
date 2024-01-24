@@ -10,9 +10,9 @@ import { STEPS } from '../App.constants';
 import { InputPin } from '../components/InputPin';
 import { Popup } from '../components/Popup';
 import { useQRDecoder } from '../hooks';
-import { defaultTheme } from '../themes/default.theme';
+import { SecretTheme } from '../theme/secret.theme';
 
-StyleSheet.build(defaultTheme);
+StyleSheet.build(SecretTheme);
 
 function App({ passwordField }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,8 +22,7 @@ function App({ passwordField }) {
     setIsOpen(false);
     passwordField.value = secret;
   };
-  const { currentStep, handleQRDecoding, handlePinChange } =
-    useQRDecoder(onDataDecoded);
+  const { currentStep, handleQRDecoding, handlePinChange } = useQRDecoder(onDataDecoded);
 
   return (
     <>
@@ -31,15 +30,9 @@ function App({ passwordField }) {
         content={
           <>
             {currentStep === STEPS.QR ? (
-              <QrScanner
-                onDecode={handleQRDecoding}
-                scanDelay={2000}
-                stopDecoding={!isOpen}
-              />
+              <QrScanner onDecode={handleQRDecoding} scanDelay={2000} stopDecoding={!isOpen} />
             ) : null}
-            {currentStep === STEPS.PIN ? (
-              <InputPin align="center" onChange={handlePinChange} />
-            ) : null}
+            {currentStep === STEPS.PIN ? <InputPin align="center" onChange={handlePinChange} /> : null}
           </>
         }
         isOpen={isOpen}

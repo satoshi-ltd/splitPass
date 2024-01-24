@@ -6,8 +6,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
-import { Button, ScrollView, Text, View } from '../../__primitives__';
-import { Pagination } from '../../components';
+import { Button, Pagination, ScrollView, Text, View } from '../../__nano-design__';
 
 const OnboardingScreen = ({ navigation: { navigate } }) => {
   const scrollViewRef = useRef(null);
@@ -22,9 +21,12 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
   };
 
   const handleNext = () => {
-    // currentIndex === SLIDES.length - 1
-    if (lastSlide) navigate('main');
-    else if (scrollViewRef.current) scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
+    if (lastSlide) {
+      // ! TODO: Should save the user is onboarded
+      navigate('main');
+    } else if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
+    }
   };
 
   const spaceXL = StyleSheet.value('$spaceXL');
@@ -50,10 +52,10 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
               source={image}
               style={[style.image, { height: slideSize * 1.2, width: slideSize }]}
             />
-            <Text bold color="base" title>
+            <Text bold title>
               {title}
             </Text>
-            <Text color="base">{message}</Text>
+            <Text>{message}</Text>
           </View>
         ))}
       </ScrollView>
@@ -61,7 +63,7 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
       <View row style={style.footer}>
         <Pagination currentIndex={currentIndex} length={SLIDES.length} />
 
-        <Button _secondary={!lastSlide} small onPress={handleNext}>
+        <Button onPress={handleNext} style={style.button}>
           {lastSlide ? 'Start' : 'Next'}
         </Button>
       </View>

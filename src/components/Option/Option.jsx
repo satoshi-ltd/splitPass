@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Option.style';
-import { Pressable, Switch, Text, View } from '../../__primitives__';
+import { Pressable, Switch, Text, View } from '../../__nano-design__';
 
 const Option = ({ checked, children, disabled, value, onPress = () => {}, ...others }) => (
   <Pressable

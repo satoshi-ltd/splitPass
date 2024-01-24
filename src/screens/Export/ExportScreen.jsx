@@ -5,7 +5,7 @@ import { SafeAreaView, Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { style } from './ExportScreen.style';
-import { Action, Button, Input, ScrollView, Text, View } from '../../__primitives__';
+import { Action, Button, Input, Modal, Screen, ScrollView, Text, View } from '../../__nano-design__';
 import { QR_TYPE } from '../../App.constants';
 import { QR } from '../../components';
 import { VaultService } from '../../services';
@@ -102,20 +102,20 @@ const ExportScreen = ({
 
       <View style={[style.footer, !readMode && style.footerFixed]}>
         {encrypted && !readMode && (
-          <Button disabled={!name || name?.length < 1} onPress={handleSave}>
+          <Button secondary disabled={!name || name?.length < 1} onPress={handleSave}>
             Save in vault
           </Button>
         )}
 
-        <Button contrast={readMode} secondary onPress={handleShareQr}>
+        <Button outlined onPress={handleShareQr}>
           Share QR
         </Button>
 
-        <Button contrast={readMode} secondary onPress={handleShareCode}>
+        <Button outlined onPress={handleShareCode}>
           Share Code
         </Button>
 
-        <Action color={readMode ? 'base' : undefined} onPress={() => goBack()}>
+        <Action color="content" onPress={() => goBack()}>
           {readMode ? 'Close' : 'Cancel'}
         </Action>
       </View>

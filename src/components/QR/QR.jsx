@@ -4,20 +4,17 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import QRCodeStyled from 'react-native-qrcode-styled';
 
 import { style } from './Qr.style';
-import { View } from '../../__primitives__';
+import { View } from '../../__nano-design__';
 
 const QR = React.forwardRef(({ inline = false, rounded = true, size = 128, value = '', ...others }, ref) => {
   const { length = 1 } = value;
-  const pieceSize = parseInt((size / (length >= 96 ? 42 : length >= 48 ? 34 : 28)) * (inline ? 1.5 : 1));
+  // const pieceSize = parseInt((size / (length >= 96 ? 42 : length >= 48 ? 34 : 28)) * (inline ? 1.45 : 1));
+  const pieceSize = parseInt((size / (length >= 96 ? 42 : length >= 48 ? 34 : 28)) * (inline ? 1.45 : 1));
 
   return (
-    <View
-      {...others}
-      ref={ref}
-      style={[style.container, inline ? style.inline : style.solid, { height: size, width: size }, others.className]}
-    >
+    <View {...others} ref={ref} style={[style.container, style.solid, { height: size, width: size }, others.className]}>
       <QRCodeStyled
-        color={inline ? StyleSheet.value('$qrBackgroundColor') : StyleSheet.value('$qrColor')}
+        color={StyleSheet.value('$qrColor')}
         data={value}
         isPiecesGlued={rounded}
         padding={inline ? 0 : pieceSize * 2}

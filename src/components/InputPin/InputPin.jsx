@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { style } from './InputPin.style';
-import { Input, View } from '../../__primitives__';
+import { Input, View } from '../../__nano-design__';
 
 const InputPin = ({ length = 6, onChange = () => {}, ...others }) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks

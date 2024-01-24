@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, View } from 'react-native';
 
 import { style } from './Popup.style';
@@ -17,23 +17,15 @@ const Popup = ({ children, content, isOpen, ...others }) => {
     <View onLayout={handleLayout} style={[style.target, others.style]}>
       {children}
       {isOpen && (
-        <View
-          style={[
-            style.popup,
-            isBottom ? style.popupUp : style.popupDown,
-            others.popupStyle,
-          ]}
-        >
-          {content}
-        </View>
+        <View style={[style.popup, isBottom ? style.popupUp : style.popupDown, others.popupStyle]}>{content}</View>
       )}
     </View>
   );
 };
 
 Popup.propTypes = {
-  content: PropTypes.node,
   children: PropTypes.node,
+  content: PropTypes.node,
   isOpen: PropTypes.bool,
 };
 

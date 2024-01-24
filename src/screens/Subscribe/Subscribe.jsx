@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { Button, Text } from '../../__primitives__';
-import { Screen } from '../../components';
+import { Button, Screen, Text } from '../../__nano-design__';
 
 const SubscribeScreen = ({ navigation: { navigate } }) => {
   return (

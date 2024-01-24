@@ -2,7 +2,6 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
-    backgroundColor: '$colorContent',
     height: '100%',
     position: 'absolute',
     bottom: 0,
@@ -28,5 +27,9 @@ export const style = StyleSheet.create({
     paddingHorizontal: '$spaceXL',
     paddingTop: '$spaceM',
     justifyContent: 'space-between',
+  },
+
+  button: {
+    width: '33%',
   },
 });
