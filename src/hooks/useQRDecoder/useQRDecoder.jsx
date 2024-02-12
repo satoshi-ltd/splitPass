@@ -1,16 +1,13 @@
 import { useState } from 'react';
 
+import { QR_TYPE, STEPS } from '../../App.constants';
 import { Cypher } from '../../helpers/cypher';
 import { QRParser } from '../../helpers/QRParser';
-import { QR_TYPE, STEPS } from '../../App.constants';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const hasAllData = (secret, type) => {
-  if (
-    (type === PASSWORD && secret.includes('00')) ||
-    (type === SEED_PHRASE && secret.includes('0000'))
-  ) {
+  if ((type === PASSWORD && secret.includes('00')) || (type === SEED_PHRASE && secret.includes('0000'))) {
     return false;
   }
   return true;

@@ -32,7 +32,5 @@ export const AsyncStorageService = {
     return await AsyncStorageService.get(key);
   },
 
-  wipe: async () => {
-    
-  }
+  wipe: async () => {},
 };

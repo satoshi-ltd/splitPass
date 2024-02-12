@@ -1,3 +1,3 @@
-const Linter = require('@mirai/eslint');
+const Linter = require('@satoshi-ltd/eslint');
 
 module.exports = Linter;

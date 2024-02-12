@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { style } from './ImportScreen.style';
 import { Action, Button, Text, View } from '../../__nano-design__';
 
-const ImportScreen = ({ route: { params: { type } = {} }, navigation: { goBack } }) => {
+const ImportScreen = ({ navigation: { goBack } }) => {
   const [hasPermission, setHasPermission] = useState(false);
   // const [scanned, setScanned] = useState(false);
   const [value, setValue] = useState();

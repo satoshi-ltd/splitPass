@@ -11,8 +11,7 @@ StyleSheet.build(SecretTheme);
 export const App = () => {
   const [ready] = useFonts({
     'font-default': require('../assets/fonts/Poppins-Regular.ttf'),
-    'font-bold': require('../assets/fonts/Poppins-Bold.ttf'),
-
+    // 'font-bold': require('../assets/fonts/Poppins-Bold.ttf'),
     'font-bold': require('../assets/fonts/PPFragment-Glare-Regular.otf'),
     // 'font-bold': require('../assets/fonts/PPFragment-Glare-ExtraBold.otf'),
   });
