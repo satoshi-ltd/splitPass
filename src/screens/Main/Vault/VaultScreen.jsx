@@ -31,7 +31,7 @@ const VaultScreen = ({ navigation: { navigate } = {} }) => {
         return (
           <View key={type}>
             <View row>
-              <Text bold subtitle>
+              <Text accentuate subtitle>
                 {`${type} keys`}
               </Text>
               <Text tiny>({qrs.length})</Text>

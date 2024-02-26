@@ -23,10 +23,10 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
   useFocusEffect(
     useCallback(() => {
-      // setEncrypted(false);
-      // setGuardians(GUARDIANS[1]);
-      // setPin();
-      // setSecret();
+      setEncrypted(false);
+      setGuardians(GUARDIANS[1]);
+      setPin();
+      setSecret();
     }, []),
   );
 
@@ -50,7 +50,7 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
 
   return (
     <Screen gap offset>
-      <Text align="center" bold subtitle>
+      <Text accentuate align="center" subtitle>
         Select Guardians amount
       </Text>
       <Text align="center" caption>
@@ -84,19 +84,6 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
         </View>
       </Card>
 
-      {guardians > 1 && (
-        <Card align="center" color="background" style={style.cardAlert}>
-          <Icon color="$colorContent" name="alert" />
-          <Text align="center" caption>
-            {`Recovering this secret will require the approval of at least `}
-            <Text bold caption>{`${guardians - 1 - (encrypted ? 1 : 0)} out of ${
-              guardians - (encrypted ? 1 : 0)
-            }`}</Text>
-            {` guardians.`}
-          </Text>
-        </Card>
-      )}
-
       {encrypted && (
         <Card outlined style={style.cardInput}>
           <Text align="center" bold>
@@ -112,13 +99,25 @@ const GenerateScreen = ({ navigation: { navigate } = {} }) => {
         </Text>
         <Input
           align="center"
-          multiline
+          multiline={secret?.includes(' ')}
           placeholder="Type your secret..."
+          secureTextEntry
           valid={secret?.length > 8}
           value={secret}
           onChange={setSecret}
         />
       </Card>
+
+      {guardians > 1 && (
+        <Card row color="background" style={style.cardAlert}>
+          <Icon color="$colorContent" name="alert" />
+          <Text tiny style={style.textAlert}>
+            {`Recovering this secret will require the approval of at least `}
+            <Text bold tiny>{`${guardians - 1 - (encrypted ? 1 : 0)} out of ${guardians - (encrypted ? 1 : 0)}`}</Text>
+            {` guardians.`}
+          </Text>
+        </Card>
+      )}
 
       <Button disabled={!secret || (encrypted && !pin)} onPress={handlePressContinue}>
         Continue

@@ -4,5 +4,6 @@ export const style = StyleSheet.create({
   input: {
     height: '$spaceL * 2',
     maxWidth: '$spaceL * 2',
+    minWidth: '$spaceL * 2',
   },
 });

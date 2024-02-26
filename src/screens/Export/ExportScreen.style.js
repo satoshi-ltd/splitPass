@@ -14,6 +14,10 @@ export const style = StyleSheet.create({
     paddingTop: '$spaceL',
   },
 
+  title: {
+    marginRight: '$spaceXS',
+  },
+
   footer: {
     gap: '$spaceM',
     justifyContent: 'flex-end',

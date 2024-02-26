@@ -17,7 +17,7 @@ const ScanScreen = ({ navigation: { navigate } }) => {
       <Card gap>
         <View gap row spaceBetween>
           <View>
-            <Text bold subtitle>
+            <Text accentuate subtitle>
               Become a Guardian
             </Text>
             <Text caption>Add a QR code to become a guardian of a Secret</Text>

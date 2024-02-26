@@ -1,19 +1,15 @@
+import { DefaultTheme } from '@satoshi-ltd/nano-design/build/module/theme';
 import { Dimensions } from 'react-native';
-
-import { DefaultTheme } from '../__nano-design__/theme';
 
 export const SecretTheme = {
   ...DefaultTheme,
 
   // -- palette ----------------------------------------------------------------
-  $colorAccent: '#E1D558',
-  $colorBorder: '#EAE8E7',
-  $colorContent: '#16161C',
-  $colorContentLight: '#D5D2CE',
+  // $colorAccent: '#E1D558',
+
   // -- border -----------------------------------------------------------------
-  $borderRadius: '$spaceXS',
-  $borderWidth: '$spaceXXS',
-  // -- <Button> ---------------------------------------------------------------
+  // $borderRadius: '$spaceXS',
+  // $borderWidth: '$spaceXXS',
 
   // -- <components> -----------------------------------------------------------
   $qrBackgroundColor: '#fff',

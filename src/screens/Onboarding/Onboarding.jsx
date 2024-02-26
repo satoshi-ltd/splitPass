@@ -54,7 +54,7 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
               source={image}
               style={[style.image, { height: slideSize * 1.2, width: slideSize }]}
             />
-            <Text bold title>
+            <Text accentuate title>
               {title}
             </Text>
             <Text>{message}</Text>

@@ -85,16 +85,23 @@ const ExportScreen = ({
                 style={{ width: QR_SIZE }}
               />
             ) : (
-              <Text bold title style={style.title}>
-                {readMode ? names[index] : `Shard ${index + 1} / ${qrs.length}`}
-              </Text>
+              <View row>
+                <Text bold subtitle style={style.title}>
+                  {readMode ? names[index] : `Shard`}
+                </Text>
+                {!readMode && <Text tiny>{`[${index + 1}]`}</Text>}
+              </View>
             )}
             <QR ref={readMode || currentIndex === index ? qrRef : undefined} size={QR_SIZE} value={qr} />
           </View>
         ))}
       </ScrollView>
 
-      {qrs.length > 1 && <Pagination currentIndex={currentIndex} length={qrs.length} />}
+      {qrs.length > 1 && (
+        <View align="center" wide>
+          <Pagination currentIndex={currentIndex} length={qrs.length} />
+        </View>
+      )}
 
       <View style={[style.footer, hasEncrypted && !readMode && style.footerMaximize]}>
         {encrypted && !readMode && (

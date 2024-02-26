@@ -14,7 +14,11 @@ export const style = StyleSheet.create({
   },
 
   cardAlert: {
-    gap: '$spaceXS',
+    gap: '$spaceS',
+  },
+
+  textAlert: {
+    flex: 1,
   },
 
   cardInput: {
