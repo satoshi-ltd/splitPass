@@ -1,3 +1,4 @@
+import { Action, Button, Input, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
@@ -5,7 +6,6 @@ import { Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
 import { style } from './ExportScreen.style';
-import { Action, Button, Input, Modal, Pagination, ScrollView, Text, View } from '../../__nano-design__';
 import { QR_TYPE } from '../../App.constants';
 import { QR } from '../../components';
 import { useStore } from '../../contexts';

@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^6.5.11",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
+    "@satoshi-ltd/nano-design": "^0.1",
     "@yudiel/react-qr-scanner": "^1.2.4",
     "color": "^4.2.3",
     "expo": "~49.0.15",

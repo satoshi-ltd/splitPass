@@ -1,11 +1,11 @@
 import { useFocusEffect } from '@react-navigation/native';
+import { Button, Card, Input, Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { style } from './GenerateScreen.style';
-import { Button, Card, Input, Screen, Switch, Text, View } from '../../../__nano-design__';
 import { GUARDIANS, QR_TYPE } from '../../../App.constants';
-import { Icon, InputPin, Option } from '../../../components';
+import { Icon, InputPin, Option, Switch } from '../../../components';
 import { Cypher, QRParser } from '../../../modules';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;

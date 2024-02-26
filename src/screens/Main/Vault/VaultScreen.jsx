@@ -1,9 +1,9 @@
+import { Input, Pressable, Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 import { groupByType } from './modules';
 import { style } from './VaultScreen.style';
-import { Input, Pressable, Screen, Text, View } from '../../../__nano-design__';
 import { QR_TYPE } from '../../../App.constants';
 import { QR } from '../../../components';
 import { useStore } from '../../../contexts';

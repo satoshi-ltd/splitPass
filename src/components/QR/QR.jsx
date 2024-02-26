@@ -1,10 +1,10 @@
+import { View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 import QRCodeStyled from 'react-native-qrcode-styled';
 
 import { style } from './Qr.style';
-import { View } from '../../__nano-design__';
 
 const QR = React.forwardRef(({ inline = false, rounded = true, size = 128, value = '', ...others }, ref) => {
   const { length = 1 } = value;

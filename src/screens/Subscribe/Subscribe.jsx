@@ -1,7 +1,6 @@
+import { Button, Screen, Text } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
-
-import { Button, Screen, Text } from '../../__nano-design__';
 
 const SubscribeScreen = ({ navigation: { navigate } }) => {
   return (

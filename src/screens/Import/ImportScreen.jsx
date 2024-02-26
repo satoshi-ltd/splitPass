@@ -1,10 +1,10 @@
 import { useFocusEffect } from '@react-navigation/native';
+import { Action, Button, Text, View } from '@satoshi-ltd/nano-design';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './ImportScreen.style';
-import { Action, Button, Text, View } from '../../__nano-design__';
 
 const ImportScreen = ({ navigation: { goBack } }) => {
   const [hasPermission, setHasPermission] = useState(false);

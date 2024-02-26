@@ -1,8 +1,9 @@
+import { Pressable, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Option.style';
-import { Pressable, Switch, Text, View } from '../../__nano-design__';
+import { Switch } from '../Switch';
 
 const Option = ({ checked, children, disabled, value, onPress = () => {}, ...others }) => (
   <Pressable

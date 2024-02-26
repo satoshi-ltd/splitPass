@@ -1,3 +1,4 @@
+import { Button, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
 import { SafeAreaView, useWindowDimensions } from 'react-native';
@@ -6,7 +7,6 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
-import { Button, Pagination, ScrollView, Text, View } from '../../__nano-design__';
 import { useStore } from '../../contexts';
 
 const OnboardingScreen = ({ navigation: { navigate } }) => {

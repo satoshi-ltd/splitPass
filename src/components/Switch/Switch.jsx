@@ -1,8 +1,8 @@
+import { Pressable, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Switch.style';
-import { Pressable, View } from '../../primitives';
 
 const Switch = ({ checked = false, disabled, onChange, ...others }) => (
   <Pressable
