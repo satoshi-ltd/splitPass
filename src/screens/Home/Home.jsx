@@ -24,7 +24,7 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     setTimeout(() => {
       // navigation.navigate('create');
-      const { qr, name } = qrs[0];
+      // const { qr, name } = qrs[0];
 
       // navigation.navigate('viewer', { qrs: [qr], name });
     }, 10);

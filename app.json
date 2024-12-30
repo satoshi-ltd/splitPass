@@ -3,11 +3,11 @@
     "name": "SecretQR",
     "slug": "satoshi-ltd-secretqr",
     "owner": "satoshi-ltd",
-    "version": "1.0.1",
+    "scheme": "secretqr",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,8 +16,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.satoshi-ltd.secretqr",
-      "buildNumber": "2"
+      "bundleIdentifier": "com.satoshi-limited.secretqr",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +25,7 @@
         "backgroundColor": "#111"
       },
       "package": "com.satoshilimited.secretqr",
-      "versionCode": 2
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
