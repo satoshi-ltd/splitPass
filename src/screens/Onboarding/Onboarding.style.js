@@ -12,7 +12,7 @@ export const style = StyleSheet.create({
   slide: {
     alignItems: 'flex-start',
     flex: 1,
-    gap: '$spaceL',
+    gap: '$viewOffset / 2',
     justifyContent: 'flex-end',
     padding: '$spaceXL',
   },

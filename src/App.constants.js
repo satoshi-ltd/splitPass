@@ -1,4 +1,4 @@
-const GUARDIANS = [1, 3, 5];
+const GUARDIANS = [1, 3];
 
 const QR_TYPE = {
   PASSWORD: '1',

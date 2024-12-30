@@ -6,10 +6,25 @@ export const SecretTheme = {
 
   // -- palette ----------------------------------------------------------------
   // $colorAccent: '#E1D558',
+  $colorAccent: '#FEF984',
+
+  // $colorBase: '#000000',
+  // $colorBorder: '#222222',
+  // $colorContent: '#ffffff',
+  // $colorContentLight: '#999999',
 
   // -- border -----------------------------------------------------------------
   // $borderRadius: '$spaceXS',
   // $borderWidth: '$spaceXXS',
+  $borderRadius: 2,
+  $borderWidth: 1,
+
+  $buttonRadius: 2,
+
+  // -- <Ipput> -----------------------------------------------------------------
+  $inputBackgroundColor: 'transparent',
+  $inputBackgroundColorFocus: 'transparent',
+  $inputBorderColorFocus: 'transparent',
 
   // -- <components> -----------------------------------------------------------
   $qrBackgroundColor: '#fff',

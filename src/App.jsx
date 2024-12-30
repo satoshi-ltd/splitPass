@@ -10,9 +10,10 @@ StyleSheet.build(SecretTheme);
 
 export const App = () => {
   const [ready] = useFonts({
-    'font-default': require('../assets/fonts/Poppins-Regular.ttf'),
-    'font-bold': require('../assets/fonts/Poppins-Bold.ttf'),
-    'font-accentuate': require('../assets/fonts/PPFragment-Glare-Regular.otf'),
+    'font-default': require('../assets/fonts/EuclidCircularA-Regular.ttf'),
+    'font-bold': require('../assets/fonts/EuclidCircularA-SemiBold.ttf'),
+    'font-default-secondary': require('../assets/fonts/CanelaText-Regular.otf'),
+    'font-bold-secondary': require('../assets/fonts/CanelaText-Bold.otf'),
   });
 
   return ready ? (

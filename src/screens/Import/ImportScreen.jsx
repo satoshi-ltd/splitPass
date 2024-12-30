@@ -1,27 +1,32 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Action, Button, Text, View } from '@satoshi-ltd/nano-design';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+
+// import { BarCodeScanner } from 'expo-barcode-scanner';
+
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './ImportScreen.style';
 
 const ImportScreen = ({ navigation: { goBack } }) => {
-  const [hasPermission, setHasPermission] = useState(false);
+  // const [hasPermission, setHasPermission] = useState(false);
   // const [scanned, setScanned] = useState(false);
   const [value, setValue] = useState();
 
-  useFocusEffect(
-    React.useCallback(() => {
-      (async () => {
-        const { status } = await BarCodeScanner.requestPermissionsAsync();
-        setHasPermission(status === 'granted');
-        setValue();
-      })();
+  const [permission, requestPermission] = useCameraPermissions();
 
-      return () => setHasPermission(false);
-    }, []),
-  );
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     (async () => {
+  //       const { status } = await BarCodeScanner.requestPermissionsAsync();
+  //       setHasPermission(status === 'granted');
+  //       setValue();
+  //     })();
+
+  //     return () => setHasPermission(false);
+  //   }, []),
+  // );
 
   const handleBarCodeScanned = ({ data }) => {
     // ! TODO: decode(qr)
@@ -34,8 +39,9 @@ const ImportScreen = ({ navigation: { goBack } }) => {
 
   return (
     <>
-      {hasPermission ? (
-        <BarCodeScanner onBarCodeScanned={value ? undefined : handleBarCodeScanned} style={style.scanner} />
+      {permission ? (
+        // <BarCodeScanner onBarCodeScanned={value ? undefined : handleBarCodeScanned} style={style.scanner} />
+        <CameraView barcodeScannerSettings={{ barcodeTypes: ['qr'] }} />
       ) : (
         <View style={style.scanner} />
       )}

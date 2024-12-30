@@ -7,14 +7,13 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#111"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.satoshi-ltd.secretqr",
@@ -25,7 +24,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111"
       },
-      "package": "com.satoshi-ltd.secretqr",
+      "package": "com.satoshilimited.secretqr",
       "versionCode": 2
     },
     "web": {
@@ -35,6 +34,16 @@
       "eas": {
         "projectId": "ff857f0d-a99f-4faa-b783-dd4786993626"
       }
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": false
+        }
+      ]
+    ]
   }
 }

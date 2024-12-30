@@ -1,6 +1,3 @@
-export * from './Icon';
-export * from './InputPin';
-export * from './Option';
-export * from './Popup';
+export * from './Logo';
 export * from './QR';
 export * from './Switch';

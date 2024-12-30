@@ -9,7 +9,7 @@ import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
 import { useStore } from '../../contexts';
 
-const OnboardingScreen = ({ navigation: { navigate } }) => {
+const Onboarding = ({ navigation: { navigate } }) => {
   const scrollViewRef = useRef(null);
   const { setOnboarded } = useStore();
   const { width } = useWindowDimensions();
@@ -25,7 +25,7 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
   const handleNext = async () => {
     if (lastSlide) {
       await setOnboarded(true);
-      navigate('main');
+      navigate('home');
     } else if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
     }
@@ -54,7 +54,7 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
               source={image}
               style={[style.image, { height: slideSize * 1.2, width: slideSize }]}
             />
-            <Text accentuate title>
+            <Text secondary bold title>
               {title}
             </Text>
             <Text>{message}</Text>
@@ -65,7 +65,7 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
       <View row style={style.footer}>
         <Pagination currentIndex={currentIndex} length={SLIDES.length} />
 
-        <Button onPress={handleNext} style={style.button}>
+        <Button secondary={lastSlide} onPress={handleNext} style={style.button}>
           {lastSlide ? 'Start' : 'Next'}
         </Button>
       </View>
@@ -73,8 +73,8 @@ const OnboardingScreen = ({ navigation: { navigate } }) => {
   );
 };
 
-OnboardingScreen.propTypes = {
+Onboarding.propTypes = {
   navigation: PropTypes.any,
 };
 
-export { OnboardingScreen };
+export { Onboarding };

@@ -1,16 +1,25 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Button, Icon, Text } from '@satoshi-ltd/nano-design';
+import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import StyleSheet from 'react-native-extended-stylesheet';
 
-import { Icon } from './components';
+import { Logo } from './components';
 import { useStore } from './contexts';
-import { getNavigationTheme } from './modules';
-import { ScanScreen, GenerateScreen, ImportScreen, ExportScreen, OnboardingScreen, VaultScreen } from './screens';
+import { getNavigationTheme, ICON } from './modules';
+import {
+  //
+  Onboarding,
+  Home,
+  // Modal
+  Create,
+  ImportScreen,
+  Viewer,
+} from './screens';
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
 
 const OPTIONS = {
   MODAL: { cardOverlayEnabled: true, gestureEnabled: true, headerShown: false, presentation: 'modal' },
@@ -18,56 +27,72 @@ const OPTIONS = {
   TAB: { headerShown: false },
 };
 
-export const Tabs = () => (
-  <Tab.Navigator initialRouteName="generate" shifting screenOptions={{ ...OPTIONS.TAB }}>
-    <Tab.Screen
-      name="scan"
-      component={ScanScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="scan" color={color} />,
-        tabBarLabel: 'Scan',
-        title: 'Title Scan',
-      }}
-    />
-    <Tab.Screen
-      name="generate"
-      component={GenerateScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="qr" color={color} />,
-      }}
-    />
-    <Tab.Screen
-      name="vault"
-      component={VaultScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="vault" color={color} />,
-      }}
-    />
-    <Tab.Screen
-      name="settings"
-      component={() => null}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="settings" color={color} />,
-      }}
-    />
-  </Tab.Navigator>
-);
+const commonScreenOptions = (theme = 'light') => ({
+  headerBackground: () => <BlurView intensity={60} tint={theme} style={{ flex: 1 }} />,
+  headerShown: true,
+  // headerStyle: {},
+  headerTintColor: StyleSheet.value('$colorAccent'),
+  headerTitle: () => <Logo />,
+  headerTitleAlign: 'center',
+  // headerTitleStyle: {},
+  headerTransparent: true,
+});
 
 export const Navigator = () => {
-  const { ready, onboarded } = useStore();
+  const { ready, onboarded, session, settings: { theme = 'light' } = {} } = useStore();
+
+  // const navigation = useNavigation();
+
+  const screenOptions = {
+    ...commonScreenOptions(theme),
+    headerRight: () =>
+      !session?.subscription?.productIdentifier ? (
+        <Button
+          icon={ICON.STAR}
+          secondary
+          small
+          onPress={() => navigation.navigate('subscription')}
+          style={{ marginRight: StyleSheet.value('$viewOffset') }}
+        >
+          <Text bold tiny>
+            $Premium
+          </Text>
+        </Button>
+      ) : (
+        <></>
+      ),
+  };
 
   return ready ? (
     <NavigationContainer theme={getNavigationTheme()}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} translucent />
 
-      <Stack.Navigator initialRouteName={onboarded ? 'main' : 'onboarding'} screenOptions={OPTIONS.SCREEN}>
-        <Stack.Screen name="onboarding" component={OnboardingScreen} />
-        <Stack.Screen name="main" component={Tabs} />
+      <Stack.Navigator initialRouteName={onboarded ? 'home' : 'onboarding'} screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" component={Onboarding} />
+        <Stack.Screen name="home" component={Home} options={screenOptions} />
+
+        {/*  */}
+        <Stack.Screen
+          name="create"
+          component={Create}
+          options={{ ...OPTIONS.MODAL, presentation: 'transparentModal' }}
+        />
+
+        <Stack.Screen
+          name="settings"
+          component={() => null}
+          options={{
+            tabBarIcon: ({ color }) => <Icon name="settings" color={color} />,
+          }}
+        />
+
+        {/* <Stack.Screen name="main" component={Tabs} /> */}
 
         <Stack.Screen name="import" component={ImportScreen} options={OPTIONS.MODAL} />
+
         <Stack.Screen
-          name="export"
-          component={ExportScreen}
+          name="viewer"
+          component={Viewer}
           options={{ ...OPTIONS.MODAL, presentation: 'transparentModal' }}
         />
       </Stack.Navigator>
