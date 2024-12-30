@@ -15,7 +15,7 @@ import {
   Home,
   // Modal
   Create,
-  ImportScreen,
+  Reader,
   Viewer,
 } from './screens';
 
@@ -88,7 +88,7 @@ export const Navigator = () => {
 
         {/* <Stack.Screen name="main" component={Tabs} /> */}
 
-        <Stack.Screen name="import" component={ImportScreen} options={OPTIONS.MODAL} />
+        <Stack.Screen name="reader" component={Reader} options={OPTIONS.MODAL} />
 
         <Stack.Screen
           name="viewer"

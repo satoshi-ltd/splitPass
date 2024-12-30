@@ -25,7 +25,6 @@ const Home = ({ navigation }) => {
     setTimeout(() => {
       // navigation.navigate('create');
       // const { qr, name } = qrs[0];
-
       // navigation.navigate('viewer', { qrs: [qr], name });
     }, 10);
   }, []);
@@ -55,10 +54,10 @@ const Home = ({ navigation }) => {
               <Text caption>Add a QR code to become a guardian of a Secret</Text>
             </View>
           </View>
-          <Button wide onPress={() => navigation.navigate('import', { type: 'QR' })}>
+          <Button wide onPress={() => navigation.navigate('reader', { type: 'QR' })}>
             Add via a QR Code
           </Button>
-          {/* <Button secondary wide onPress={() => navigation.navigate('import', { type: 'text' })}>
+          {/* <Button secondary wide onPress={() => navigation.navigate('reader', { type: 'text' })}>
             Add via a Text Code
           </Button> */}
         </Card>
@@ -71,7 +70,7 @@ const Home = ({ navigation }) => {
               </Text>
               <Text caption>Add a QR code to become a guardian of a Secret</Text>
             </View>
-            <Button secondary wide onPress={() => navigation.navigate('import', { type: 'QR' })}>
+            <Button secondary wide onPress={() => navigation.navigate('reader', { type: 'QR' })}>
               Your first SecretQR
             </Button>
           </Card>

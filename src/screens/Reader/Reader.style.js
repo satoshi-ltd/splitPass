@@ -18,6 +18,8 @@ export const style = StyleSheet.create({
 
   section: {
     backgroundColor: '$importBackgroundColor',
+    flex: 1,
+    height: '100%',
     padding: '$spaceXL',
   },
 
