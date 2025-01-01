@@ -22,14 +22,14 @@ const Home = ({ navigation }) => {
     setTimeout(() => {
       // navigation.navigate('create');
       // const { qr, name } = qrs[0];
-      // navigation.navigate('viewer', { qrs: [qr], name });
+      // navigation.navigate('viewer', { values: [qr], name });
     }, 10);
   }, []);
 
   const favorites = getFavorites(secrets);
   const vaults = groupByVault(secrets);
 
-  const [lastViewedSecret] = (secrets.length && secrets.sort((a, b) => b.readAt - a.readAt)) || [];
+  const [lastViewed] = (secrets.length && secrets.sort((a, b) => b.readAt - a.readAt)) || [];
 
   return (
     <Screen disableScroll style={style.screen}>
@@ -44,17 +44,17 @@ const Home = ({ navigation }) => {
             tiny="Add an external SecretQR to become a guardian."
             onPress={() => navigation.navigate('scanner')}
           />
-          {secrets.length ? (
+          {lastViewed ? (
             <CardAction
               caption="Last used"
-              icon={ICON[lastViewedSecret.vault]}
-              text={lastViewedSecret.name}
+              icon={ICON[lastViewed.vault]}
+              text={lastViewed.name}
               tiny={new Intl.DateTimeFormat('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
-              }).format(lastViewedSecret.readAt)}
-              onPress={() => navigation.navigate('viewer', lastViewedSecret)}
+              }).format(lastViewed.readAt)}
+              onPress={() => navigation.navigate('viewer', { ...lastViewed, values: [lastViewed.value] })}
             />
           ) : (
             <CardAction
@@ -104,7 +104,7 @@ const Home = ({ navigation }) => {
               <SecretItem
                 key={secret.hash}
                 {...secret}
-                onPress={() => navigation.navigate('viewer', { ...secret, qrs: [secret.value], readMode: true })}
+                onPress={() => navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true })}
               />
             ))}
           </>

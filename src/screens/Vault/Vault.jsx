@@ -17,13 +17,15 @@ const Vault = ({ navigation, route: { params: { type, secrets } = {} } }) => {
         <Text bold caption secondary>
           {type}
         </Text>
-        {secrets.map((secret = {}) => (
-          <SecretItem
-            key={secret.hash}
-            {...secret}
-            onPress={() => navigation.navigate('viewer', { ...secret, qrs: [secret.value], readMode: true })}
-          />
-        ))}
+        {secrets
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((secret = {}) => (
+            <SecretItem
+              key={secret.hash}
+              {...secret}
+              onPress={() => navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true })}
+            />
+          ))}
       </View>
     </Screen>
   );

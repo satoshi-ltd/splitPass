@@ -15,7 +15,7 @@ import { ICON } from '../../modules';
 const QR_SIZE = 256;
 
 const Viewer = ({
-  route: { params: { hash, favorite = false, qrs = [], name, readMode = false } = {} },
+  route: { params: { hash, favorite = false, name, readMode = false, values = [] } = {} },
   navigation = {},
 }) => {
   const qrRef = useRef(null);
@@ -33,8 +33,8 @@ const Viewer = ({
   };
 
   const handleSave = async () => {
-    await createSecret({ name, value: qrs[currentIndex] });
-    if (qrs.length > 1) next();
+    await createSecret({ name, value: values[currentIndex] });
+    if (values.length > 1) next();
     else navigation.goBack();
   };
 
@@ -49,7 +49,7 @@ const Viewer = ({
   };
 
   const handleShareCode = async () => {
-    await Share.share({ message: `secretqr://${qrs[currentIndex]}` }).catch(() => {});
+    await Share.share({ message: `secretqr://${values[currentIndex]}` }).catch(() => {});
   };
 
   const handleFavorite = async () => {
@@ -84,22 +84,22 @@ const Viewer = ({
         onScroll={handleScroll}
         style={style.scrollView}
       >
-        {qrs.map((qr, index) => (
+        {values.map((value, index) => (
           <View align="center" key={index} style={[style.item, { width }]}>
-            {qrs.length > 1 && <Text caption color="contentLight">{`[Shard ${index + 1}]`}</Text>}
+            {values.length > 1 && <Text caption color="contentLight">{`[Shard ${index + 1}]`}</Text>}
             <QR
               //
               ref={readMode || currentIndex === index ? qrRef : undefined}
               size={QR_SIZE}
-              value={qr}
+              value={value}
             />
           </View>
         ))}
       </ScrollView>
 
-      {qrs.length > 1 && (
+      {values.length > 1 && (
         <View align="center" wide style={style.pagination}>
-          <Pagination currentIndex={currentIndex} length={qrs.length} />
+          <Pagination currentIndex={currentIndex} length={values.length} />
         </View>
       )}
 
