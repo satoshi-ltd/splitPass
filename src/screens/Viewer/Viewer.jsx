@@ -4,7 +4,6 @@ import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
 import { Share, useWindowDimensions } from 'react-native';
-import { captureRef } from 'react-native-view-shot';
 
 import { CardOption } from './components';
 import { style } from './Viewer.style';
@@ -44,7 +43,7 @@ const Viewer = ({
   };
 
   const handleShareQr = async () => {
-    const uri = await captureRef(qrRef, { format: 'png', quality: 0.8 }).catch(() => {});
+    const uri = await qrRef.current.capture();
     await Sharing.shareAsync(uri);
   };
 
