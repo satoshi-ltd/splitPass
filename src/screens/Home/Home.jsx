@@ -5,18 +5,12 @@ import React, { useEffect, useState } from 'react';
 import { CardAction, VaultItem } from './components';
 import { style } from './Home.style';
 import { getFavorites, groupByVault } from './modules';
-import { Header, SecretItem } from '../../components';
+import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
 import { ICON } from '../../modules';
 
 const Home = ({ navigation }) => {
-  const { session, secrets = [] } = useStore();
-
-  const [search, setSearch] = useState();
-
-  useEffect(() => {
-    setSearch();
-  }, [secrets]);
+  const { settings: { subscription } = {}, secrets = [] } = useStore();
 
   useEffect(() => {
     setTimeout(() => {
@@ -33,8 +27,6 @@ const Home = ({ navigation }) => {
 
   return (
     <Screen disableScroll style={style.screen}>
-      <Header {...{ navigation }} showPremium showSettings />
-
       <ScrollView style={style.scrollview}>
         <View row spaceBetween style={[style.section, style.cardActions]}>
           <CardAction
@@ -65,7 +57,7 @@ const Home = ({ navigation }) => {
             />
           )}
         </View>
-        {!session?.subscription?.productIdentifier && (
+        {!subscription?.productIdentifier && (
           <Card gap style={style.section}>
             <View row>
               <Text caption>What's new</Text>

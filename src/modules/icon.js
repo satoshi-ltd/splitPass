@@ -20,6 +20,15 @@ export const ICON = {
 
   WIFI: 'wifi',
 
+  // Settings
+  INVERT_COLORS: 'invert-colors',
+  FILE: 'file-document-outline',
+  STAR: 'star',
+  CART: 'cart-outline',
+  DOWNLOAD: 'file-download',
+  UPLOAD: 'file-upload',
+  BELL: 'bell',
+
   // VAULT_TYPE
   [VAULT_TYPE[0]]: 'web',
   [VAULT_TYPE[1]]: 'wallet-outline',

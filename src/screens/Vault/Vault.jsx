@@ -3,15 +3,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Vault.style';
-import { Header, SecretItem } from '../../components';
+import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
 
 const Vault = ({ navigation, route: { params: { type } = {} } }) => {
   const { secrets = [] } = useStore();
   return (
     <Screen gap style={style.screen}>
-      <Header {...{ navigation }} onBack={navigation.goBack} />
-
       {/* ! TODO */}
       <Input disabled placeholder="Search..." type="search" />
 
