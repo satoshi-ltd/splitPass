@@ -6,7 +6,7 @@ export const style = StyleSheet.create({
   },
 
   image: {
-    height: '$fontSizeTitle * 0.85',
-    width: '$fontSizeTitle * 3.8',
+    height: '$fontSizeTitle * 0.8',
+    width: '$fontSizeTitle * 4.2',
   },
 });

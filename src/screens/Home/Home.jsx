@@ -1,25 +1,22 @@
-import { Button, Card, Input, ScrollView, Pressable, Screen, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Icon, ScrollView, Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import { BlurView } from 'expo-blur';
 
+import { CardAction, VaultItem } from './components';
 import { style } from './Home.style';
-import { groupByType } from './modules';
-import { QR_TYPE } from '../../App.constants';
+import { getFavorites, groupByVault } from './modules';
+import { Header, SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-
-import { Logo } from '../../components';
-
-const { PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+import { ICON } from '../../modules';
 
 const Home = ({ navigation }) => {
-  const { qrs = [] } = useStore();
+  const { session, secrets = [] } = useStore();
 
   const [search, setSearch] = useState();
 
   useEffect(() => {
     setSearch();
-  }, [qrs]);
+  }, [secrets]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -29,107 +26,92 @@ const Home = ({ navigation }) => {
     }, 10);
   }, []);
 
-  const handlePress = (qr, name) => {
-    navigation.navigate('viewer', { qrs: [qr], name, readMode: true });
-  };
+  const favorites = getFavorites(secrets);
+  const vaults = groupByVault(secrets);
+
+  const [lastViewedSecret] = (secrets.length && secrets.sort((a, b) => b.readAt - a.readAt)) || [];
 
   return (
     <Screen disableScroll style={style.screen}>
-      {/* <BlurView intensity={60} tint={'light'} style={style.header}>
-        <View row spaceBetween wide>
-          <Logo />
+      <Header {...{ navigation }} showPremium showSettings />
 
-          <View gap>
-            <Button />
-          </View>
-        </View>
-      </BlurView> */}
       <ScrollView style={style.scrollview}>
-        <Card gap style={style.section}>
-          <View gap row spaceBetween>
-            <View>
-              <Text bold secondary subtitle>
-                Become a Guardian
-              </Text>
-              <Text caption>Add a QR code to become a guardian of a Secret</Text>
-            </View>
-          </View>
-          <Button wide onPress={() => navigation.navigate('reader', { type: 'QR' })}>
-            Add via a QR Code
-          </Button>
-          {/* <Button secondary wide onPress={() => navigation.navigate('reader', { type: 'text' })}>
-            Add via a Text Code
-          </Button> */}
-        </Card>
-
-        {!qrs.length && (
+        <View row spaceBetween style={[style.section, style.cardActions]}>
+          <CardAction
+            color="accent"
+            icon={ICON.SCAN}
+            text="Scan Secret"
+            tiny="Add an external SecretQR to become a guardian."
+            onPress={() => navigation.navigate('scanner')}
+          />
+          {secrets.length ? (
+            <CardAction
+              caption="Last used"
+              icon={ICON[lastViewedSecret.vault]}
+              text={lastViewedSecret.name}
+              tiny={new Intl.DateTimeFormat('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              }).format(lastViewedSecret.readAt)}
+              onPress={() => navigation.navigate('viewer', lastViewedSecret)}
+            />
+          ) : (
+            <CardAction
+              icon={ICON.ADD}
+              text="First secret"
+              tiny="Create your first secret"
+              onPress={() => navigation.navigate('create')}
+            />
+          )}
+        </View>
+        {!session?.subscription?.productIdentifier && (
           <Card gap style={style.section}>
-            <View>
-              <Text bold secondary subtitle>
-                Become a Guardian
-              </Text>
-              <Text caption>Add a QR code to become a guardian of a Secret</Text>
+            <View row>
+              <Text caption>What's new</Text>
+              <Icon name={ICON.ADD} />
             </View>
-            <Button secondary wide onPress={() => navigation.navigate('reader', { type: 'QR' })}>
-              Your first SecretQR
-            </Button>
+
+            <Text bold secondary title style={{ maxWidth: '55%' }}>
+              New features in SecretQR
+            </Text>
+
+            <Text caption color="contentLight">
+              Explore the new features that make SecretQR much better.
+            </Text>
           </Card>
         )}
 
-        <Input placeholder="Search..." value={search} onChange={setSearch} style={style.section} />
+        <Text bold caption secondary style={style.caption}>
+          My Vaults
+        </Text>
+        <View horizontal row style={[style.vaults, style.section]}>
+          {Object.entries(vaults).map(([type, secrets = []]) => (
+            <VaultItem
+              key={type}
+              {...{ type, secrets }}
+              onPress={() => navigation.navigate('vault', { type, secrets })}
+            />
+          ))}
+        </View>
 
-        {Object.entries(groupByType(qrs, search)).map(([type, qrs = []]) => {
-          return (
-            <View key={type}>
-              <View row>
-                <Text bold caption secondary>{`${type} keys `}</Text>
-                <Text tiny>[{qrs.length}]</Text>
-              </View>
-
-              <View gap style={style.items}>
-                {qrs.map(({ qr, name, timestamp } = {}, index) => {
-                  const [type] = qr;
-
-                  return (
-                    <Pressable key={`${qr}:${index}`} onPress={() => handlePress(qr, name)}>
-                      <View row style={style.item}>
-                        <View style={style.thumbnail} />
-
-                        <View flex>
-                          <View flex row spaceBetween>
-                            <Text bold caption>
-                              {name}
-                            </Text>
-                            <Text color="contentLight" tiny>
-                              {new Intl.DateTimeFormat('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              }).format(timestamp)}
-                            </Text>
-                          </View>
-
-                          <Text color="contentLight" tiny>
-                            {[PASSWORD_ENCRYPTED, SEED_PHRASE_ENCRYPTED].includes(type)
-                              ? 'Secured'
-                              : qr.includes('00') || qr.includes('0000')
-                              ? 'Shard'
-                              : 'Master'}
-                          </Text>
-                        </View>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          );
-        })}
+        {favorites.length > 0 && (
+          <>
+            <Text bold caption secondary style={style.caption}>
+              Favorites
+            </Text>
+            {favorites.map((secret = {}) => (
+              <SecretItem
+                key={secret.hash}
+                {...secret}
+                onPress={() => navigation.navigate('viewer', { ...secret, qrs: [secret.value], readMode: true })}
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
 
-      <View gap style={style.buttons}>
-        <Button icon="plus" large rounded color="base" onPress={() => navigation.navigate('create')} />
-      </View>
+      <Button icon={ICON.SCAN} large secondary onPress={() => navigation.navigate('scanner')} style={style.buttonAdd} />
     </Screen>
   );
 };

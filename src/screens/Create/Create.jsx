@@ -33,8 +33,6 @@ const Create = ({ navigation = {} }) => {
       const mustEncrypt = index === 0 && passphrase;
       if (!mustEncrypt) return qr;
 
-      console.log('>>>');
-
       let [type, ...digits] = qr;
       if (type === PASSWORD) type = PASSWORD_ENCRYPTED;
       else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
@@ -88,7 +86,7 @@ const Create = ({ navigation = {} }) => {
             align="right"
             multiline={form.secret?.includes(' ')}
             placeholder="secret..."
-            secureTextEntry
+            // secureTextEntry
             value={form.secret}
             onChange={(secret) => setForm({ ...form, secret })}
             style={style.input}
@@ -119,7 +117,7 @@ const Create = ({ navigation = {} }) => {
             keyboard="numeric"
             maxLength={6}
             placeholder="passphrase"
-            secureTextEntry
+            // secureTextEntry
             value={form.passphrase}
             onChange={(passphrase) => setForm({ ...form, passphrase })}
             style={style.input}

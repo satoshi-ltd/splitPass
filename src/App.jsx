@@ -4,9 +4,9 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Navigator } from './App.Navigator';
 import { StoreProvider } from './contexts';
-import { SecretTheme } from './theme/secret.theme';
+import { LightTheme } from './theme';
 
-StyleSheet.build(SecretTheme);
+StyleSheet.build(LightTheme);
 
 export const App = () => {
   const [ready] = useFonts({
@@ -19,6 +19,7 @@ export const App = () => {
   return ready ? (
     <StoreProvider>
       <Navigator />
+      {/* <Notification /> */}
     </StoreProvider>
   ) : null;
 };

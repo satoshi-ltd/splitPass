@@ -21,22 +21,13 @@ export const style = StyleSheet.create({
     marginVertical: '$viewOffset / 2',
   },
 
-  footer: {
-    gap: '$spaceM',
+  cardOptions: {
+    gap: '$viewOffset / 2',
     marginTop: '$viewOffset',
     paddingHorizontal: '$viewOffset / 2',
   },
 
-  option: {
-    flex: 1,
-  },
-
   pagination: {
     top: `$viewOffset * -1.5`,
-  },
-
-  optionCard: {
-    gap: '$viewOffset / 4',
-    paddingHorizontal: '$viewOffset',
   },
 });

@@ -1,1 +1,2 @@
-export * from './groupByType';
+export * from './getFavorites';
+export * from './groupByVault';

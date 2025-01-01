@@ -1,10 +1,12 @@
-import { Button, Card, Icon, Modal, Pagination, Pressable, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { useFocusEffect } from '@react-navigation/native';
+import { Icon, Modal, Pagination, Pressable, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Share, useWindowDimensions } from 'react-native';
 import { captureRef } from 'react-native-view-shot';
 
+import { CardOption } from './components';
 import { style } from './Viewer.style';
 import { QR } from '../../components';
 import { useStore } from '../../contexts';
@@ -12,38 +14,33 @@ import { ICON } from '../../modules';
 
 const QR_SIZE = 256;
 
-const Option = ({ color, icon, text, ...others }) => (
-  <Pressable {...others} style={style.option}>
-    <Card color={color} outlined={!color} small style={style.optionCard}>
-      <Icon name={icon} title />
-      <Text bold tiny>
-        {text}
-      </Text>
-    </Card>
-  </Pressable>
-);
-
-const Viewer = ({ route: { params: { qrs = [], name, readMode = false } = {} }, navigation = {} }) => {
+const Viewer = ({
+  route: { params: { hash, favorite = false, qrs = [], name, readMode = false } = {} },
+  navigation = {},
+}) => {
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
-  const { addQr } = useStore();
+  const { createSecret, deleteSecret, readSecret, updateSecret } = useStore();
   const { width } = useWindowDimensions();
 
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useFocusEffect(useCallback(() => readSecret({ hash }), []));
 
   const handleScroll = ({ nativeEvent: { contentOffset: { x } = {} } = {} }) => {
     setCurrentIndex(Math.round(x / width));
   };
 
   const handleSave = async () => {
-    const qr = qrs[currentIndex];
-
-    await addQr(qr, name);
+    await createSecret({ name, value: qrs[currentIndex] });
     if (qrs.length > 1) next();
-    else {
-      // ! TODO: if is !readMode
-      navigation.goBack();
-    }
+    else navigation.goBack();
+  };
+
+  const handleDelete = async () => {
+    await deleteSecret({ hash });
+    navigation.goBack();
   };
 
   const handleShareQr = async () => {
@@ -55,6 +52,11 @@ const Viewer = ({ route: { params: { qrs = [], name, readMode = false } = {} }, 
     await Share.share({ message: `secretqr://${qrs[currentIndex]}` }).catch(() => {});
   };
 
+  const handleFavorite = async () => {
+    await updateSecret({ hash, favorite: !favorite });
+    // !TODO Send notification
+  };
+
   const next = () => {
     if (!scrollViewRef.current) return;
     scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
@@ -62,9 +64,18 @@ const Viewer = ({ route: { params: { qrs = [], name, readMode = false } = {} }, 
 
   return (
     <Modal onClose={navigation.goBack}>
-      <Text align="center" bold secondary title style={style.name}>
-        {name}
-      </Text>
+      <View align="center" row style={style.name}>
+        {readMode && (
+          <Pressable onPress={handleFavorite}>
+            <Icon name={favorite ? ICON.FAVORITE : ICON.UNFAVORITE} title />
+          </Pressable>
+        )}
+
+        <Text bold title>
+          {name}
+        </Text>
+      </View>
+
       <ScrollView
         horizontal
         ref={scrollViewRef}
@@ -92,13 +103,14 @@ const Viewer = ({ route: { params: { qrs = [], name, readMode = false } = {} }, 
         </View>
       )}
 
-      <View row style={style.footer}>
+      <View row style={style.cardOptions}>
         {!readMode && currentIndex === 0 && (
-          <Option color={'accent'} icon={ICON.DATABASE_ADD} text="Save in vault" onPress={handleSave} />
+          <CardOption color="accent" icon={ICON.DATABASE_ADD} text="Save in vault" onPress={handleSave} />
         )}
+        {readMode && <CardOption color="accent" icon={ICON.DATABASE_REMOVE} text="Delete QR" onPress={handleDelete} />}
 
-        <Option icon={ICON.QRCODE} text="Share QR" onPress={handleShareQr} />
-        <Option icon={ICON.BARCODE} text="Share Code" onPress={handleShareCode} />
+        <CardOption icon={ICON.QRCODE} text="Share QR" onPress={handleShareQr} />
+        <CardOption icon={ICON.BARCODE} text="Share Code" onPress={handleShareCode} />
       </View>
     </Modal>
   );

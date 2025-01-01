@@ -1,37 +1,33 @@
 import { DefaultTheme } from '@satoshi-ltd/nano-design/build/module/theme';
 import { Dimensions } from 'react-native';
 
-export const SecretTheme = {
+export const CommonTheme = {
   ...DefaultTheme,
 
   // -- palette ----------------------------------------------------------------
   // $colorAccent: '#E1D558',
   $colorAccent: '#FEF984',
-
-  // $colorBase: '#000000',
-  // $colorBorder: '#222222',
-  // $colorContent: '#ffffff',
-  // $colorContentLight: '#999999',
+  // $colorAccent: '#FDE835',
 
   // -- border -----------------------------------------------------------------
-  // $borderRadius: '$spaceXS',
-  // $borderWidth: '$spaceXXS',
-  $borderRadius: 2,
+  $borderRadius: '$spaceS',
   $borderWidth: 1,
 
-  $buttonRadius: 2,
+  // -- <Button> ---------------------------------------------------------------
+  $buttonRadius: '$spaceL',
+  $buttonSmallHeight: '$spaceXL',
 
   // -- <Ipput> -----------------------------------------------------------------
-  $inputBackgroundColor: 'transparent',
+  // $inputBackgroundColor: 'transparent',
+  $inputBorderWidth: 0,
   $inputBackgroundColorFocus: 'transparent',
-  $inputBorderColorFocus: 'transparent',
 
   // -- <components> -----------------------------------------------------------
-  $qrBackgroundColor: '#fff',
-  $qrColor: '#111',
+  $qrBackgroundColor: '#ffffff',
+  $qrColor: '#000000',
   $qrSize: Dimensions.get('window').width * 0.66,
 
   // -- <screens> --------------------------------------------------------------
-  $importBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+  $importBackgroundColor: 'rgba(0, 0, 0, 0.66)',
   $importColor: '#ffffff',
 };

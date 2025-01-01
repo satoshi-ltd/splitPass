@@ -4,9 +4,9 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
 
-import { style } from './Reader.style';
+import { style } from './Scanner.style';
 
-const Reader = ({ navigation: { goBack } }) => {
+const Scanner = ({ navigation: { goBack } }) => {
   const [active, setActive] = useState(false);
   const [value, setValue] = useState();
 
@@ -92,9 +92,9 @@ const Reader = ({ navigation: { goBack } }) => {
   );
 };
 
-Reader.propTypes = {
+Scanner.propTypes = {
   route: PropTypes.any,
   navigation: PropTypes.any,
 };
 
-export { Reader };
+export { Scanner };

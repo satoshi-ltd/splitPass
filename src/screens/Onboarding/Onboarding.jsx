@@ -10,8 +10,8 @@ import { style } from './Onboarding.style';
 import { useStore } from '../../contexts';
 
 const Onboarding = ({ navigation: { navigate } }) => {
-  const scrollViewRef = useRef(null);
-  const { setOnboarded } = useStore();
+  const scrollviewRef = useRef(null);
+  const { updateSettings } = useStore();
   const { width } = useWindowDimensions();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,13 +22,13 @@ const Onboarding = ({ navigation: { navigate } }) => {
     setCurrentIndex(index);
   };
 
-  const handleNext = async () => {
-    if (lastSlide) {
-      await setOnboarded(true);
-      navigate('home');
-    } else if (scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
-    }
+  const handleNext = () => {
+    if (scrollviewRef.current) scrollviewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
+  };
+
+  const handleSubmit = async () => {
+    await updateSettings({ onboarded: true });
+    navigate('home');
   };
 
   const spaceXL = StyleSheet.value('$spaceXL');
@@ -41,7 +41,7 @@ const Onboarding = ({ navigation: { navigate } }) => {
         decelerationRate="fast"
         horizontal
         pagingEnabled
-        ref={scrollViewRef}
+        ref={scrollviewRef}
         scrollEventThrottle={10}
         showsHorizontalScrollIndicator={false}
         snapToInterval={width}
@@ -65,7 +65,7 @@ const Onboarding = ({ navigation: { navigate } }) => {
       <View row style={style.footer}>
         <Pagination currentIndex={currentIndex} length={SLIDES.length} />
 
-        <Button secondary={lastSlide} onPress={handleNext} style={style.button}>
+        <Button secondary={lastSlide} onPress={lastSlide ? handleSubmit : handleNext} style={style.button}>
           {lastSlide ? 'Start' : 'Next'}
         </Button>
       </View>

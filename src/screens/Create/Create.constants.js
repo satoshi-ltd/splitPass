@@ -1,7 +1,7 @@
 const DEFAULT_FORM = {
   name: undefined,
   secret: undefined,
-  split: false,
+  split: true,
   passphrase: undefined,
 };
 
