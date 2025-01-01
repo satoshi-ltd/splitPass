@@ -87,11 +87,7 @@ const Home = ({ navigation }) => {
         </Text>
         <View horizontal row style={[style.vaults, style.section]}>
           {Object.entries(vaults).map(([type, secrets = []]) => (
-            <VaultItem
-              key={type}
-              {...{ type, secrets }}
-              onPress={() => navigation.navigate('vault', { type, secrets })}
-            />
+            <VaultItem key={type} {...{ type, secrets }} onPress={() => navigation.navigate('vault', { type })} />
           ))}
         </View>
 

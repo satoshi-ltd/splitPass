@@ -6,12 +6,13 @@ import { style } from './SecretItem.style';
 
 const SecretItem = ({ favorite = false, name, value, vault = 1, createdAt, readAt, onPress }) => {
   const [type] = value;
+  const color = favorite ? 'content' : 'contentLight';
 
   return (
     <Pressable onPress={onPress}>
       <View row style={style.item}>
-        <View style={style.thumbnail}>
-          <Text bold tiny color="contentLight">
+        <View style={[style.thumbnail, favorite && style.favorite]}>
+          <Text bold color={color} tiny>
             {name.substring(0, 1).toUpperCase()}
             {type}
           </Text>

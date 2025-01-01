@@ -27,9 +27,9 @@ const Create = ({ navigation = {} }) => {
   const handlePressContinue = () => {
     const { name, passphrase, secret, split = false } = form;
     const qr = QRParser.encode(secret);
-    let qrs = split ? QRParser.split(qr) : [qr];
+    let values = split ? QRParser.split(qr) : [qr];
 
-    qrs = qrs.map((qr, index) => {
+    values = values.map((qr, index) => {
       const mustEncrypt = index === 0 && passphrase;
       if (!mustEncrypt) return qr;
 
@@ -43,7 +43,7 @@ const Create = ({ navigation = {} }) => {
     navigation.goBack();
 
     setTimeout(() => {
-      navigation.navigate('viewer', { qrs, name });
+      navigation.navigate('viewer', { name, values });
     }, 10);
   };
 

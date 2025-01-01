@@ -4,8 +4,10 @@ import React from 'react';
 
 import { style } from './Vault.style';
 import { Header, SecretItem } from '../../components';
+import { useStore } from '../../contexts';
 
-const Vault = ({ navigation, route: { params: { type, secrets } = {} } }) => {
+const Vault = ({ navigation, route: { params: { type } = {} } }) => {
+  const { secrets = [] } = useStore();
   return (
     <Screen gap style={style.screen}>
       <Header {...{ navigation }} onBack={navigation.goBack} />
@@ -18,6 +20,7 @@ const Vault = ({ navigation, route: { params: { type, secrets } = {} } }) => {
           {type}
         </Text>
         {secrets
+          .filter((item) => item.vault === type)
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((secret = {}) => (
             <SecretItem

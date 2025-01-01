@@ -16,6 +16,10 @@ export const style = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  favorite: {
+    backgroundColor: '$colorAccent',
+  },
+
   name: {
     maxWidth: '75%',
   },
