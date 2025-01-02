@@ -1,7 +1,6 @@
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Button, Icon, Pressable, View } from '@satoshi-ltd/nano-design';
-// import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
@@ -14,8 +13,7 @@ import { Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './sc
 
 const Stack = createNativeStackNavigator();
 
-const commonScreenOptions = (theme) => ({
-  // headerBackground: () => <BlurView intensity={80} tint={theme} style={{ flex: 1 }} />,
+const commonScreenOptions = () => ({
   headerShown: true,
   // headerStyle: {},
   headerTintColor: StyleSheet.value('$colorContent'),

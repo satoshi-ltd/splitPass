@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Icon, Modal, Pagination, Pressable, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';

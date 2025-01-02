@@ -26,13 +26,10 @@ export const style = StyleSheet.create({
     flex: 1,
   },
 
-  caption: {
-    marginBottom: '$viewOffset / 2',
-  },
-
   vaults: {
     flexWrap: 'wrap',
     gap: '$viewOffset / 2',
+    marginTop: '$viewOffset / 2',
   },
 
   buttonAdd: {

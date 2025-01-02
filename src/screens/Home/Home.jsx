@@ -1,6 +1,6 @@
 import { Button, Card, Icon, ScrollView, Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { CardAction, VaultItem } from './components';
 import { style } from './Home.style';
@@ -12,18 +12,21 @@ import { ICON } from '../../modules';
 const Home = ({ navigation }) => {
   const { settings: { subscription } = {}, secrets = [] } = useStore();
 
-  useEffect(() => {
-    setTimeout(() => {
-      // navigation.navigate('create');
-      // const { qr, name } = qrs[0];
-      // navigation.navigate('viewer', { values: [qr], name });
-    }, 10);
-  }, []);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     // const [secret] = secrets;
+  //     // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
+  //     // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
+  //   }, 10);
+  // }, []);
 
   const favorites = getFavorites(secrets);
   const vaults = groupByVault(secrets);
+  const subtitleProps = { bold: true, secondary: true, subtitle: true };
 
   const [lastViewed] = (secrets.length && secrets.sort((a, b) => b.readAt - a.readAt)) || [];
+
+  // !TODO: We should determine if is a shard or not
 
   return (
     <Screen disableScroll style={style.screen}>
@@ -46,7 +49,9 @@ const Home = ({ navigation }) => {
                 month: 'short',
                 day: 'numeric',
               }).format(lastViewed.readAt)}
-              onPress={() => navigation.navigate('viewer', { ...lastViewed, values: [lastViewed.value] })}
+              onPress={() =>
+                navigation.navigate('viewer', { ...lastViewed, values: [lastViewed.value], readMode: true })
+              }
             />
           ) : (
             <CardAction
@@ -74,9 +79,7 @@ const Home = ({ navigation }) => {
           </Card>
         )}
 
-        <Text bold caption secondary style={style.caption}>
-          My Vaults
-        </Text>
+        <Text {...subtitleProps}>My Vaults</Text>
         <View horizontal row style={[style.vaults, style.section]}>
           {Object.entries(vaults).map(([type, secrets = []]) => (
             <VaultItem key={type} {...{ type, secrets }} onPress={() => navigation.navigate('vault', { type })} />
@@ -85,9 +88,7 @@ const Home = ({ navigation }) => {
 
         {favorites.length > 0 && (
           <>
-            <Text bold caption secondary style={style.caption}>
-              Favorites
-            </Text>
+            <Text {...subtitleProps}>Favorites</Text>
             {favorites.map((secret = {}) => (
               <SecretItem
                 key={secret.hash}

@@ -9,7 +9,7 @@ import { useStore } from '../../../contexts';
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
   const { settings: { theme } = {} } = useStore();
 
-  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined };
+  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined, ellipsizeMode: true };
 
   return (
     <Pressable onPress={onPress} style={style.container}>

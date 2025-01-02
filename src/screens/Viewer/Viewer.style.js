@@ -19,6 +19,7 @@ export const style = StyleSheet.create({
 
   name: {
     gap: '$viewOffset / 2',
+    marginTop: '$viewOffset',
   },
 
   shard: {
@@ -41,6 +42,5 @@ export const style = StyleSheet.create({
   cardOptions: {
     gap: '$viewOffset / 2',
     marginTop: '$viewOffset',
-    paddingHorizontal: '$viewOffset / 2',
   },
 });

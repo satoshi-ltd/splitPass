@@ -27,7 +27,7 @@ const OPTIONS = [
 
 const PREFERENCES = [
   {
-  disabled: true,
+    disabled: true,
     icon: ICON.BELL,
     screen: 'reminders',
     text: L10N.REMINDERS,
