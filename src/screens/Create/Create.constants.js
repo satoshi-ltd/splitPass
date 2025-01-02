@@ -1,8 +1,8 @@
 const DEFAULT_FORM = {
   name: undefined,
+  passcode: undefined,
   secret: undefined,
   split: true,
-  passphrase: undefined,
 };
 
 export { DEFAULT_FORM };

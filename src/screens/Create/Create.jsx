@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Card, Icon, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
@@ -18,26 +18,31 @@ const Create = ({ navigation = {} }) => {
     useCallback(() => {
       setForm({
         ...DEFAULT_FORM,
-        name: 'seedsigner 🟠',
+        name: 'Seedsigner',
         secret: 'roast soon winter over sentence shaft shock side mango select screen neither',
       });
     }, []),
   );
 
+  useEffect(() => {
+    setForm({ ...form, passcode: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.split]);
+
   const handlePressContinue = () => {
-    const { name, passphrase, secret, split = false } = form;
-    const qr = QRParser.encode(secret);
+    const { name, passcode, secret, split = false } = form;
+    const qr = QRParser.encode(secret, !!passcode);
     let values = split ? QRParser.split(qr) : [qr];
 
     values = values.map((qr, index) => {
-      const mustEncrypt = index === 0 && passphrase;
+      const mustEncrypt = index === 0 && passcode;
       if (!mustEncrypt) return qr;
 
       let [type, ...digits] = qr;
       if (type === PASSWORD) type = PASSWORD_ENCRYPTED;
       else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
 
-      return `${type}${Cypher.encrypt(digits.join(''), passphrase)}`;
+      return `${type}${Cypher.encrypt(digits.join(''), passcode)}`;
     });
 
     navigation.goBack();
@@ -56,10 +61,6 @@ const Create = ({ navigation = {} }) => {
       <Text align="center" secondary bold title>
         New Secret
       </Text>
-
-      {/* <Text align="center" caption secondary>
-        Pick amount of Guardians which will be responsible for keepin the Shards of your Secret.
-      </Text> */}
 
       <Card outlined style={style.cardForm}>
         <View {...fieldProps}>
@@ -86,7 +87,7 @@ const Create = ({ navigation = {} }) => {
             align="right"
             multiline={form.secret?.includes(' ')}
             placeholder="secret..."
-            // secureTextEntry
+            secureTextEntry
             value={form.secret}
             onChange={(secret) => setForm({ ...form, secret })}
             style={style.input}
@@ -106,39 +107,31 @@ const Create = ({ navigation = {} }) => {
           <Switch checked={form.split} onChange={(split) => setForm({ ...form, split })} />
         </View>
 
-        <View style={style.separator} />
+        {!form.split && (
+          <>
+            <View style={style.separator} />
 
-        <View {...fieldProps}>
-          <Text bold tiny>
-            6-digit passcode
-          </Text>
-          <Input
-            align="right"
-            keyboard="numeric"
-            maxLength={6}
-            placeholder="passphrase"
-            // secureTextEntry
-            value={form.passphrase}
-            onChange={(passphrase) => setForm({ ...form, passphrase })}
-            style={style.input}
-          />
-        </View>
+            <View {...fieldProps}>
+              <Text bold tiny color={form.split ? 'disabled' : undefined}>
+                6-digit passcode
+              </Text>
+              <Input
+                align="right"
+                editable={!form.split}
+                keyboard="numeric"
+                maxLength={6}
+                placeholder="passcode..."
+                secureTextEntry
+                value={form.passcode}
+                onChange={(passcode) => setForm({ ...form, passcode })}
+                style={style.input}
+              />
+            </View>
+          </>
+        )}
       </Card>
 
-      {form.split && (
-        <Card row color="background" style={style.cardAlert}>
-          <Icon color="$colorContent" name="alert" />
-          <Text bold tiny style={style.textAlert}>
-            {`Recovering this secret will require the approval of at least `}
-            <Text bold tiny>
-              2 out of 3
-            </Text>
-            {` guardians.`}
-          </Text>
-        </Card>
-      )}
-
-      <Button disabled={!isValid} secondary onPress={handlePressContinue}>
+      <Button disabled={!isValid} secondary onPress={handlePressContinue} style={style.button}>
         Continue
       </Button>
     </Modal>

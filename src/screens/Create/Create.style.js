@@ -16,18 +16,6 @@ export const style = StyleSheet.create({
     // opacity: 0.33,
   },
 
-  rowSecure: {
-    alignItems: 'center',
-  },
-
-  cardAlert: {
-    gap: '$spaceS',
-  },
-
-  textAlert: {
-    flex: 1,
-  },
-
   cardForm: {
     paddingBottom: '$spaceXS',
     paddingTop: '$spaceXS',
@@ -44,5 +32,9 @@ export const style = StyleSheet.create({
     flex: 1,
     fontSize: '$fontSizeCaption',
     paddingRight: 0,
+  },
+
+  button: {
+    marginTop: '$viewOffset',
   },
 });
