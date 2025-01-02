@@ -1,6 +1,7 @@
 import { isSeedPhrase } from './isSeedPhrase';
 import { bip39, chars } from './repositories';
 import { QR_TYPE } from '../App.constants';
+import { Cypher } from './cypher';
 
 const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, PASSWORD_SHARD, SEED_PHRASE_SHARD } = QR_TYPE;
 
@@ -31,15 +32,17 @@ export const QRParser = {
     return qr;
   },
 
-  decode: (qr = '') => {
+  decode: (qr = '', pin) => {
     const [type, ...digits] = qr;
     const { regexp, set, join } = getConfig(type);
 
-    return digits
+    const value = digits
       .join('')
       .match(regexp || [])
       .map((index) => set[parseInt(index - 1)])
       .join(join);
+
+    return pin ? Cypher.decrypt(value, pin) : value;
   },
 
   split: (qr = '', shares = 3) => {

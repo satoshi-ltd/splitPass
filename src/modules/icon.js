@@ -6,13 +6,22 @@ export const ICON = {
   BACK: 'chevron-left',
   BARCODE: 'barcode',
 
+  CHECK: 'check-bold',
+  CLOSE: 'close',
+
   DATABASE_ADD: 'database-plus-outline',
   DATABASE_REMOVE: 'database-remove-outline',
+
+  EYE: 'eye-outline',
 
   FAVORITE: 'star',
   UNFAVORITE: 'star-outline',
 
+  PASSCODE: 'calculator',
+
   QRCODE: 'qrcode',
+
+  REFRESH: 'refresh',
 
   SCAN: 'qrcode-scan',
   SEARCH: 'magnify',

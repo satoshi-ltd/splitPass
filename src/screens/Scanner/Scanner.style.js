@@ -23,14 +23,12 @@ export const style = StyleSheet.create({
 
   headerLeft: {
     marginLeft: '$viewOffset',
-    justifyContent: 'flex-start',
-    width: '$spaceXXL * 2',
+    width: '$spaceXXL',
   },
 
   headerRight: {
     marginRight: '$viewOffset',
-    justifyContent: 'flex-end',
-    width: '$spaceXXL * 2',
+    width: '$spaceXXL',
   },
 
   section: {
@@ -38,11 +36,6 @@ export const style = StyleSheet.create({
     flex: 1,
     height: '100%',
     padding: '$viewOffset',
-  },
-
-  footer: {
-    flex: 2,
-    paddingVertical: '$viewOffset * 2',
   },
 
   frame: {
@@ -89,7 +82,20 @@ export const style = StyleSheet.create({
     borderRightWidth: '$spaceXS',
   },
 
+  input: {
+    flex: 1,
+  },
+
   text: {
     color: '$qrBackgroundColor',
+  },
+
+  reveal: {
+    height: '100%',
+  },
+
+  footer: {
+    flex: 2,
+    paddingVertical: '$viewOffset * 2',
   },
 });

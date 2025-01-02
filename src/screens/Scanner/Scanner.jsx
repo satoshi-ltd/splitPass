@@ -1,27 +1,26 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Action, Button, Card, Pressable, Input, Text, Modal, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Input, Text, View } from '@satoshi-ltd/nano-design';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
 import { SafeAreaView, useWindowDimensions } from 'react-native';
 
+import { FORM } from './Scanner.constants';
 import { style } from './Scanner.style';
 import { QR_TYPE } from '../../App.constants';
+import { useStore } from '../../contexts';
 import { ICON, QRParser } from '../../modules';
 import { CardOption } from '../Viewer/components';
 
-const { PASSWORD_SHARD, SEED_PHRASE_SHARD } = QR_TYPE;
-
 const SECURE_TYPES = [QR_TYPE.PASSWORD_SECURE, QR_TYPE.SEED_PHRASE_SECURE];
-const qrTypes = Object.values(QR_TYPE);
+const SHARD_TYPES = [QR_TYPE.PASSWORD_SHARD, QR_TYPE.SEED_PHRASE_SHARD];
 
 const Scanner = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
+  const { createSecret } = useStore();
 
   const [active, setActive] = useState(false);
   const [form, setForm] = useState({});
-  const [passcode, setPasscode] = useState();
-  const [valid, setValid] = useState(false);
   const [values, setValues] = useState([]);
   const [reveal, setReveal] = useState(false);
 
@@ -30,47 +29,48 @@ const Scanner = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       setActive(true);
-      setValid(false);
-      setValues([]);
-      setReveal(false);
-
-      // !TODO
-      handleBarcodeScanned();
-      // if (!permission?.granted) return requestPermission();
+      if (!permission?.granted) return requestPermission();
 
       return () => setActive(false);
     }, []),
   );
-
-  const handleBarcodeScanned = ({
-    data = '5071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
-  } = {}) => {
-    const [type] = data;
-
-    if (!qrTypes.includes(type)) return;
-    if ([PASSWORD_SHARD, SEED_PHRASE_SHARD].includes(type)) return alert('read next shard');
-
-    // ! TODO: Should check if is a valid SecretQR
-    setValues([...values, data]);
-    // setValue(data);
-    setValid(true);
-  };
-
-  const handleReset = () => setValues([]);
-
-  const handleImport = () => {};
-
-  const handleSave = () => {
-    // alert(value);
-  };
 
   const handleBack = () => {
     setActive(false);
     navigation.goBack();
   };
 
-  const hasValue = values.length > 0;
+  const handleBarcodeScanned = ({ data } = {}) => {
+    // ! TODO: Should check if is a valid SecretQR
+    const [type] = data;
+
+    if (!Object.values(QR_TYPE).includes(type)) return;
+    if (SHARD_TYPES.includes(type)) return alert('read next shard');
+
+    setValues([...values, data]);
+  };
+
+  const handleReset = () => setValues([]);
+
+  const handleSubmitForm = async () => {
+    setForm({ ...form, [form.name]: form.value });
+
+    if (form.name === 'secret') {
+      await createSecret({ name: form.value, value: values[0] });
+      navigation.goBack();
+      // !TODO
+      // navigation.navigate('vault');
+    }
+  };
+
   const [type] = values[0] || [];
+
+  const is = {
+    empty: !values.length,
+    form: !!form.name && !form[form.name],
+    secure: SECURE_TYPES.includes(type),
+    shard: SHARD_TYPES.includes(type),
+  };
 
   return (
     <>
@@ -80,7 +80,7 @@ const Scanner = ({ navigation }) => {
           autofocus="on"
           barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
           facing="back"
-          onBarcodeScanned={hasValue ? undefined : handleBarcodeScanned}
+          onBarcodeScanned={is.empty ? handleBarcodeScanned : undefined}
           style={style.scanner}
         />
       ) : (
@@ -111,9 +111,11 @@ const Scanner = ({ navigation }) => {
             <View style={[style.corner, style.bottomRight]} />
 
             {reveal && (
-              <Text bold caption align="center">
-                {QRParser.decode(QRParser.combine(...values))}
-              </Text>
+              <View align="center" style={style.reveal}>
+                <Text bold caption align="center">
+                  {QRParser.decode(QRParser.combine(...values), form.passcode)}
+                </Text>
+              </View>
             )}
           </View>
 
@@ -121,50 +123,50 @@ const Scanner = ({ navigation }) => {
         </View>
 
         <View spaceBetween style={[style.section, style.footer]}>
-          {!hasValue && (
-            <Text align="center" caption={!hasValue} style={style.text}>
+          {is.empty && (
+            <Text align="center" caption={is.empty} style={style.text}>
               Place QR code inside the box
             </Text>
           )}
 
           <View style={{ flex: 1 }} />
 
-          <Card>
-            <Input />
-          </Card>
-
-          {hasValue && (
+          {is.form ? (
+            <Card gap outlined row small>
+              <Input {...form} onChange={(value) => setForm({ ...form, value })} style={style.input} />
+              <View gap row>
+                <Button disabled={!form.value} icon={ICON.CHECK} secondary small onPress={handleSubmitForm} />
+                <Button icon={ICON.CLOSE} small onPress={() => setForm({})} />
+              </View>
+            </Card>
+          ) : !is.empty ? (
             <View row wide style={style.cardOptions}>
               {values.length === 1 && (
-                <CardOption color="accent" icon={ICON.DATABASE_ADD} text="Save Secret" onPress={handleSave} />
+                <CardOption
+                  color="accent"
+                  icon={ICON.DATABASE_ADD}
+                  text="Save Secret"
+                  onPress={() => setForm(FORM.NAME)}
+                />
               )}
 
               <CardOption
-                icon={SECURE_TYPES.includes(type) && !passcode ? ICON.PASSCODE : ICON.EYE}
-                onTouchCancel={() => setReveal(false)}
-                onTouchEnd={() => setReveal(false)}
-                onTouchMove={() => setReveal(false)}
-                onTouchStart={() => setReveal(true)}
-                onPress={() => {}}
-                text={SECURE_TYPES.includes(type) && !passcode ? 'Set passcode' : 'Reveal Secret'}
+                icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}
+                text={is.secure && !form.passcode ? 'Set passcode' : 'Reveal Secret'}
+                {...(is.secure && !form.passcode
+                  ? { onPress: () => setForm(FORM.PASSCODE) }
+                  : {
+                      onTouchCancel: () => setReveal(false),
+                      onTouchEnd: () => setReveal(false),
+                      onTouchMove: () => setReveal(false),
+                      onTouchStart: () => setReveal(true),
+                      onPress: () => {},
+                    })}
               />
 
               <CardOption icon={ICON.REFRESH} text="Restart" onPress={handleReset} />
             </View>
-          )}
-
-          {/* {hasValue && (
-            <Card gap>
-              <View>
-                <Text bold>Found</Text>
-                <Text caption>Lorem ipsum dolor sit amet consectetur.</Text>
-              </View>
-              <Input placeholder="Name..." />
-              <Button _disabled secondary _wide onPress={handleSave}>
-                Import
-              </Button>
-            </Card>
-          )} */}
+          ) : null}
         </View>
       </View>
     </>
