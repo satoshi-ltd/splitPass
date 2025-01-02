@@ -62,7 +62,7 @@ const Viewer = ({
   };
 
   return (
-    <Modal onClose={navigation.goBack}>
+    <Modal gap onClose={navigation.goBack}>
       <View align="center" row style={style.name}>
         {readMode && (
           <Pressable onPress={handleFavorite}>
@@ -85,21 +85,33 @@ const Viewer = ({
       >
         {values.map((value, index) => (
           <View align="center" key={index} style={[style.item, { width }]}>
-            {values.length > 1 && <Text caption color="contentLight">{`[Shard ${index + 1}]`}</Text>}
             <QR
-              //
+              key={index}
+              readMode={readMode}
               ref={readMode || currentIndex === index ? qrRef : undefined}
               size={QR_SIZE}
               value={value}
+              onPress={() => {}}
             />
+            {values.length > 1 && (
+              <Text align="center" bold style={style.shard}>
+                {index + 1}
+              </Text>
+            )}
           </View>
         ))}
       </ScrollView>
 
       {values.length > 1 && (
-        <View align="center" wide style={style.pagination}>
+        <View align="center" wide>
           <Pagination currentIndex={currentIndex} length={values.length} />
         </View>
+      )}
+
+      {readMode && (
+        <Text align="center" color="contentLight" tiny>
+          Hold to reveal the secret behind the QR.
+        </Text>
       )}
 
       <View row style={style.cardOptions}>

@@ -1,30 +1,46 @@
-import { View } from '@satoshi-ltd/nano-design';
+import { Pressable, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import ViewShot from 'react-native-view-shot';
 
 import { style } from './Qr.style';
+import { QRParser } from '../../modules';
 
-const QR = React.forwardRef(({ inline = false, rounded = true, size = 128, value = '', ...others }, ref) => {
-  const { length = 1 } = value;
-  // const pieceSize = parseInt((size / (length >= 96 ? 42 : length >= 48 ? 34 : 28)) * (inline ? 1.45 : 1));
-  const pieceSize = parseInt((size / (length >= 96 ? 42 : length >= 48 ? 34 : 28)) * (inline ? 1.45 : 1));
+const QR = React.forwardRef(({ value = '', readMode = false, ...others }, ref) => {
+  const [reveal, setReveal] = useState(false);
+
+  const handlePressStart = () => setReveal(true);
+
+  const handlePressEnd = () => setReveal(false);
 
   return (
     <ViewShot ref={ref} options={{ format: 'png', quality: 0.8 }}>
-      <View {...others} style={[style.container, style.solid, { height: size, width: size }, others.className]}>
+      <Pressable
+        {...others}
+        feedback={false}
+        onTouchCancel={readMode ? handlePressEnd : undefined}
+        onTouchEnd={readMode ? handlePressEnd : undefined}
+        onTouchMove={readMode ? handlePressEnd : undefined}
+        onTouchStart={readMode ? handlePressStart : undefined}
+        style={[style.container, others.className]}
+      >
         <QRCodeStyled
           color={StyleSheet.value('$qrColor')}
           data={value}
-          isPiecesGlued={rounded}
-          padding={inline ? 0 : pieceSize * 2}
-          pieceBorderRadius={rounded ? parseInt(pieceSize / 2) : undefined}
-          pieceCornerType={rounded ? 'rounded' : undefined}
-          pieceSize={pieceSize}
+          isPiecesGlued
+          pieceSize={8}
+          pieceBorderRadius={4}
         />
-      </View>
+        {reveal && (
+          <View align="center" style={style.secret}>
+            <Text align="center" bold caption>
+              {QRParser.decode(value)}
+            </Text>
+          </View>
+        )}
+      </Pressable>
     </ViewShot>
   );
 });
@@ -32,9 +48,7 @@ const QR = React.forwardRef(({ inline = false, rounded = true, size = 128, value
 QR.displayName = 'QR';
 
 QR.propTypes = {
-  inline: PropTypes.bool,
-  rounded: PropTypes.bool,
-  size: PropTypes.number,
+  readMode: PropTypes.bool,
   value: PropTypes.string,
 };
 
