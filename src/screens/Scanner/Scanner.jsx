@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
 import { SafeAreaView, useWindowDimensions } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 import { FORM } from './Scanner.constants';
 import { style } from './Scanner.style';
@@ -24,12 +25,12 @@ const Scanner = ({ navigation }) => {
   const [values, setValues] = useState([]);
   const [reveal, setReveal] = useState(false);
 
-  // const [shard, setShard] = useState();
-
   useFocusEffect(
     useCallback(() => {
       setActive(true);
-      if (!permission?.granted) return requestPermission();
+      // if (!permission?.granted) return requestPermission();
+
+      handleBarcodeScanned();
 
       return () => setActive(false);
     }, []),
@@ -40,7 +41,9 @@ const Scanner = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleBarcodeScanned = ({ data } = {}) => {
+  const handleBarcodeScanned = ({
+    data = '4071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
+  } = {}) => {
     // ! TODO: Should check if is a valid SecretQR
     const [type] = data;
 
@@ -112,7 +115,7 @@ const Scanner = ({ navigation }) => {
 
             {reveal && (
               <View align="center" style={style.reveal}>
-                <Text bold caption align="center">
+                <Text align="center" bold caption color={StyleSheet.value('$qrBackgroundColor')}>
                   {QRParser.decode(QRParser.combine(...values), form.passcode)}
                 </Text>
               </View>

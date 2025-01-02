@@ -6,7 +6,8 @@ export const style = StyleSheet.create({
   },
 
   content: {
-    gap: '$viewOffset / 4',
+    gap: '$viewOffset / 2',
     paddingHorizontal: '$viewOffset',
+    minHeight: '$viewOffset * 4.25',
   },
 });

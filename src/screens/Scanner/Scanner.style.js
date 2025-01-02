@@ -83,6 +83,7 @@ export const style = StyleSheet.create({
   },
 
   input: {
+    backgroundColor: 'transparent',
     flex: 1,
   },
 
