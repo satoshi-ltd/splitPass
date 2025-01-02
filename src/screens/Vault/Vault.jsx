@@ -1,6 +1,6 @@
 import { Input, Screen, View, Text } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { style } from './Vault.style';
 import { SecretItem } from '../../components';
@@ -8,17 +8,19 @@ import { useStore } from '../../contexts';
 
 const Vault = ({ navigation, route: { params: { type } = {} } }) => {
   const { secrets = [] } = useStore();
+
+  const [search, setSearch] = useState();
+
   return (
     <Screen gap style={style.screen}>
-      {/* ! TODO */}
-      <Input disabled placeholder="Search..." type="search" />
+      <Input placeholder="Search..." type="search" value={search} onChange={setSearch} style={style.input} />
 
       <View>
-        <Text bold caption secondary>
+        <Text bold secondary subtitle>
           {type}
         </Text>
         {secrets
-          .filter((item) => item.vault === type)
+          .filter(({ name, vault }) => vault === type && (!search || name.includes(search)))
           .sort((a, b) => a.name.localeCompare(b.name))
           .map((secret = {}) => (
             <SecretItem

@@ -10,8 +10,7 @@ export const style = StyleSheet.create({
     ...Platform.select({ web: { paddingTop: '$viewOffset * 5' } }),
   },
 
-  scrollview: {
-    flex: 1,
-    // paddingTop: '$viewOffset * 4',
+  input: {
+    backgroundColor: '$inputBackgroundColor',
   },
 });
