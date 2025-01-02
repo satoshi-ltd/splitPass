@@ -123,7 +123,7 @@ const Viewer = ({
 
       <View row style={style.cardOptions}>
         {!readMode && currentIndex === 0 && (
-          <CardOption color="accent" icon={ICON.DATABASE_ADD} text="Save in vault" onPress={handleSave} />
+          <CardOption color="accent" icon={ICON.DATABASE_ADD} text="Save Secret" onPress={handleSave} />
         )}
         {readMode && <CardOption color="accent" icon={ICON.DATABASE_REMOVE} text="Delete QR" onPress={handleDelete} />}
 

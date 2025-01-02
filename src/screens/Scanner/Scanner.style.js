@@ -1,14 +1,14 @@
 import { Dimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
+import { Platform } from 'react-native';
 
 export const style = StyleSheet.create({
   screen: {
-    height: '100%',
+    height: Dimensions.get('window').height,
     width: Dimensions.get('window').width,
   },
 
   scanner: {
-    backgroundColor: '$importBackgroundColor',
     height: '100%',
     width: '100%',
     position: 'absolute',
@@ -16,22 +16,33 @@ export const style = StyleSheet.create({
     left: 0,
   },
 
+  header: {
+    backgroundColor: '$importBackgroundColor',
+    ...Platform.select({ web: { paddingTop: '$viewOffset' } }),
+  },
+
+  headerLeft: {
+    marginLeft: '$viewOffset',
+    justifyContent: 'flex-start',
+    width: '$spaceXXL * 2',
+  },
+
+  headerRight: {
+    marginRight: '$viewOffset',
+    justifyContent: 'flex-end',
+    width: '$spaceXXL * 2',
+  },
+
   section: {
     backgroundColor: '$importBackgroundColor',
     flex: 1,
     height: '100%',
-    padding: '$spaceXL',
-  },
-
-  header: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: '$spaceXL * 2',
+    padding: '$viewOffset',
   },
 
   footer: {
     flex: 2,
-    paddingTop: '$spaceXL * 2',
+    paddingVertical: '$viewOffset * 2',
   },
 
   frame: {
@@ -39,42 +50,46 @@ export const style = StyleSheet.create({
     width: '$qrSize',
   },
 
+  cardOptions: {
+    gap: '$viewOffset / 2',
+  },
+
   corner: {
-    borderColor: '$importColor',
-    width: '$qrSize / 4',
-    height: '$qrSize / 4',
+    borderColor: '$qrBackgroundColor',
+    width: '$qrSize / 8',
+    height: '$qrSize / 8',
     position: 'absolute',
   },
 
   topLeft: {
     top: 0,
     left: 0,
-    borderTopWidth: '$borderWidth * 2',
-    borderLeftWidth: '$borderWidth * 2',
+    borderTopWidth: '$spaceXS',
+    borderLeftWidth: '$spaceXS',
   },
 
   topRight: {
     top: 0,
     right: 0,
-    borderTopWidth: '$borderWidth * 2',
-    borderRightWidth: '$borderWidth * 2',
+    borderTopWidth: '$spaceXS',
+    borderRightWidth: '$spaceXS',
   },
 
   bottomLeft: {
     bottom: 0,
     left: 0,
-    borderBottomWidth: '$borderWidth * 2',
-    borderLeftWidth: '$borderWidth * 2',
+    borderBottomWidth: '$spaceXS',
+    borderLeftWidth: '$spaceXS',
   },
 
   bottomRight: {
     bottom: 0,
     right: 0,
-    borderBottomWidth: '$borderWidth * 2',
-    borderRightWidth: '$borderWidth * 2',
+    borderBottomWidth: '$spaceXS',
+    borderRightWidth: '$spaceXS',
   },
 
   text: {
-    color: '$importColor',
+    color: '$qrBackgroundColor',
   },
 });

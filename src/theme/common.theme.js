@@ -14,7 +14,7 @@ export const CommonTheme = {
   $borderWidth: 1,
 
   // -- <Button> ---------------------------------------------------------------
-  $buttonRadius: '$spaceL',
+  $buttonRadius: '$spaceXL',
   $buttonSmallHeight: '$spaceXL',
 
   // -- <Ipput> -----------------------------------------------------------------
@@ -28,6 +28,5 @@ export const CommonTheme = {
   $qrSize: Dimensions.get('window').width * 0.66,
 
   // -- <screens> --------------------------------------------------------------
-  $importBackgroundColor: 'rgba(0, 0, 0, 0.66)',
-  $importColor: '#ffffff',
+  $importBackgroundColor: 'rgba(0, 0, 0, 0.85)',
 };
