@@ -16,7 +16,9 @@ export const ICON = {
 
   SCAN: 'qrcode-scan',
   SEARCH: 'magnify',
+  SECURE: 'lock-outline', // SECURE: 'database-lock-outline',
   SETTINGS: 'cog-outline',
+  SHARD: 'call-split',
 
   WIFI: 'wifi',
 
