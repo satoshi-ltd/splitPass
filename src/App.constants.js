@@ -74,4 +74,9 @@ const VAULTS_KEYWORDS = {
   ],
 };
 
-export { DEFAULT_THEME, QR_TYPE, STEPS, STORAGE_DOMAIN, VAULTS_KEYWORDS, VAULT_TYPE };
+const SATOSHI_URLS = {
+  TERMS: 'https://www.satoshi-ltd.com/terms-of-use/',
+  PRIVACY: 'https://www.satoshi-ltd.com/privacy-policy/',
+};
+
+export { DEFAULT_THEME, QR_TYPE, SATOSHI_URLS, STEPS, STORAGE_DOMAIN, VAULTS_KEYWORDS, VAULT_TYPE };

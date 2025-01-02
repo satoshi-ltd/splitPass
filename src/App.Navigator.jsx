@@ -9,7 +9,7 @@ import { style } from './App.style';
 import { Logo } from './components';
 import { useStore } from './contexts';
 import { getNavigationTheme, ICON } from './modules';
-import { Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './screens';
+import { Confirm, Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './screens';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,6 +56,7 @@ export const Navigator = () => {
         <Stack.Screen name="settings" component={Settings} options={screen} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
         {/* Modal */}
+        <Stack.Screen name="confirm" component={Confirm} options={modal} />
         <Stack.Screen name="create" component={Create} options={modal} />
         <Stack.Screen name="viewer" component={Viewer} options={modal} />
       </Stack.Navigator>

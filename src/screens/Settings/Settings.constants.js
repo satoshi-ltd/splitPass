@@ -1,14 +1,14 @@
-import { PRIVACY_URL, TERMS_URL } from '../../App.constants';
+import { SATOSHI_URLS } from '../../App.constants';
 import { ICON, L10N } from '../../modules';
 
 const OPTIONS = [
-  {
-    callback: 'handleSubscription',
-    // caption: '$$No active subscription',
-    icon: ICON.FAVORITE,
-    id: 1,
-    text: L10N.SUBSCRIPTION,
-  },
+  // {
+  //   callback: 'handleSubscription',
+  //   // caption: '$$No active subscription',
+  //   icon: ICON.FAVORITE,
+  //   id: 1,
+  //   text: L10N.SUBSCRIPTION,
+  // },
   {
     callback: 'handleExport',
     caption: L10N.EXPORT_DATA_CAPTION,
@@ -35,32 +35,32 @@ const PREFERENCES = [
 ];
 
 const ABOUT = (isPremium) => [
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleSubscription',
-          icon: ICON.STAR,
-          text: L10N.GET_MONEY_PREMIUM,
-        },
-      ]
-    : []),
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleRestorePurchases',
-          icon: ICON.CART,
-          text: L10N.RESTORE_PURCHASES,
-        },
-      ]
-    : []),
+  // ...(!isPremium
+  //   ? [
+  //       {
+  //         callback: 'handleSubscription',
+  //         icon: ICON.STAR,
+  //         text: L10N.GET_MONEY_PREMIUM,
+  //       },
+  //     ]
+  //   : []),
+  // ...(!isPremium
+  //   ? [
+  //       {
+  //         callback: 'handleRestorePurchases',
+  //         icon: ICON.CART,
+  //         text: L10N.RESTORE_PURCHASES,
+  //       },
+  //     ]
+  //   : []),
   {
     icon: ICON.FILE,
-    url: TERMS_URL,
+    url: SATOSHI_URLS.TERMS,
     text: L10N.TERMS,
   },
   {
     icon: ICON.FILE,
-    url: PRIVACY_URL,
+    url: SATOSHI_URLS.PRIVACY,
     text: L10N.PRIVACY,
   },
 ];

@@ -22,6 +22,7 @@ export const ICON = {
   QRCODE: 'qrcode',
 
   REFRESH: 'refresh',
+  RIGHT: 'chevron-right',
 
   SCAN: 'qrcode-scan',
   SEARCH: 'magnify',

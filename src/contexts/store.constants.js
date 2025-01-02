@@ -4,9 +4,7 @@ const DEFAULTS = {
   secrets: [],
   settings: {
     onboarded: false,
-    pin: undefined,
-    reminders: [1, 1, 0, 1],
-    syncedAt: undefined,
+    reminders: [1],
     subscription: {},
     theme: DEFAULT_THEME,
   },

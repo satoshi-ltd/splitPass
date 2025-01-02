@@ -26,7 +26,11 @@ const Viewer = ({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useFocusEffect(useCallback(() => readSecret({ hash }), []));
+  useFocusEffect(
+    useCallback(() => {
+      readSecret({ hash });
+    }, []),
+  );
 
   const handleScroll = ({ nativeEvent: { contentOffset: { x } = {} } = {} }) => {
     setCurrentIndex(Math.round(x / width));

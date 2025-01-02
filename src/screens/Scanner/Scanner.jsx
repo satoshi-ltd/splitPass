@@ -32,7 +32,8 @@ const Scanner = ({ navigation }) => {
 
       handleBarcodeScanned();
 
-      return () => setActive(false);
+      // TODO: this can not be done. useFocusEffect not accept return
+      // return () => setActive(false);
     }, []),
   );
 

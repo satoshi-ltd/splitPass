@@ -7,7 +7,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { Setting } from './components';
 import { ABOUT, OPTIONS, PREFERENCES } from './Settings.constants';
 import { style } from './Settings.style';
-import { IS_WEB } from '../../App.constants';
+// import { IS_WEB } from '../../App.constants';
 import { DEFAULT_THEME } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
@@ -33,14 +33,14 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleExport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('export');
+    // if (!IS_WEB && !isPremium) return handleSubscription('export');
 
     const exported = await BackupService.export({ secrets, settings });
     if (exported) alert(L10N.CONFIRM_EXPORT_SUCCESS);
   };
 
   const handleImport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('import');
+    // if (!IS_WEB && !isPremium) return handleSubscription('import');
 
     const backup = await BackupService.import().catch((error) => alert(error));
 
@@ -50,7 +50,7 @@ const Settings = ({ navigation = {} }) => {
         title: L10N.CONFIRM_IMPORT,
         onAccept: async () => {
           await importBackup(backup);
-          navigation.navigate('dashboard');
+          navigation.navigate('home');
           alert(L10N.CONFIRM_IMPORT_SUCCESS);
         },
       });

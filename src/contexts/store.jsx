@@ -5,7 +5,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { StorageService } from '../services';
 import { DarkTheme, LightTheme } from '../theme';
 import { consolidate } from './modules';
-import { createSecret, readSecret, updateSecret, deleteSecret, updateSettings } from './reducers';
+import { createSecret, readSecret, updateSecret, deleteSecret, updateSettings, importBackup } from './reducers';
 import { DEFAULTS, FILENAME } from './store.constants';
 import { DEFAULT_THEME } from '../App.constants';
 
@@ -41,6 +41,7 @@ const StoreProvider = ({ children }) => {
         deleteSecret: (...props) => deleteSecret(...props, [state, setState]),
         //
         updateSettings: (...props) => updateSettings(...props, [state, setState]),
+        importBackup: (...props) => importBackup(...props, [state, setState]),
       }}
     >
       {state.store ? children : undefined}

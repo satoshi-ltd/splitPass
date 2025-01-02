@@ -56,8 +56,8 @@ export const L10N = {
   CONFIRM_DELETION_CAPTION: 'Confirm permanent deletion of this transaction? This action is irreversible.',
   CONFIRM_EXPORT_SUCCESS: 'Export successful! Your data has been saved.',
   CONFIRM_IMPORT: 'Confirm import',
-  CONFIRM_IMPORT_CAPTION: ({ accounts = [], txs = [] }) =>
-    `Ready to import the JSON file? It'll update your finances with ${accounts.length} accounts and ${txs.length} transactions. Just make sure the file is good to go—this action can't be undone!"`,
+  CONFIRM_IMPORT_CAPTION: ({ secrets = [] }) =>
+    `Ready to import the JSON file? It'll update your data with ${secrets.length} secrets. Just make sure the file is good to go—this action can't be undone!"`,
   CONFIRM_IMPORT_SUCCESS: 'Imported successfully.',
   CURRENCY_NAME: {
     AUD: 'Australian Dollar',
