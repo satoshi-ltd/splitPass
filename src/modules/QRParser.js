@@ -2,24 +2,26 @@ import { isSeedPhrase } from './isSeedPhrase';
 import { bip39, chars } from './repositories';
 import { QR_TYPE } from '../App.constants';
 
-const { PASSWORD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, PASSWORD_SHARD, SEED_PHRASE_SHARD } = QR_TYPE;
 
 const CONFIG = {
   password: { regexp: /.{1,2}/g, set: chars, join: '', mask: '00' },
   seedPhrase: { regexp: /.{1,4}/g, set: bip39, join: ' ', mask: '0000' },
 };
 
-const getConfig = (type) => CONFIG[[SEED_PHRASE, SEED_PHRASE_ENCRYPTED].includes(type) ? 'seedPhrase' : 'password'];
+const isTypeSeedPhrase = (type) => [SEED_PHRASE, SEED_PHRASE_SECURE, SEED_PHRASE_SHARD].includes(type);
+
+const getConfig = (type) => CONFIG[isTypeSeedPhrase(type) ? 'seedPhrase' : 'password'];
 
 export const QRParser = {
-  encode: (secret = '') => {
+  encode: (secret = '', secure = false) => {
     let digits = Array.isArray(secret) ? secret.join(' ') : secret.trim();
-    let type = PASSWORD;
+    let type = secure ? PASSWORD_SECURE : PASSWORD;
 
     if (isSeedPhrase(digits)) {
       const words = digits.split(' ');
       digits = words.map((word) => String(bip39.findIndex((item) => item === word) + 1).padStart(4, '0')).join('');
-      type = SEED_PHRASE;
+      type = secure ? SEED_PHRASE_SECURE : SEED_PHRASE;
     } else {
       digits = Array.from(digits, (char) => (chars.indexOf(char) + 1).toString().padStart(2, '0')).join('');
     }
@@ -41,8 +43,9 @@ export const QRParser = {
   },
 
   split: (qr = '', shares = 3) => {
-    const [type, ...digits] = qr;
+    let [type, ...digits] = qr;
     const { regexp, mask } = getConfig(type);
+    type = isTypeSeedPhrase(type) ? SEED_PHRASE_SHARD : PASSWORD_SHARD;
 
     const shards = digits.join('').match(regexp);
 
