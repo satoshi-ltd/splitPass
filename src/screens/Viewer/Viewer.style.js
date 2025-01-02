@@ -18,7 +18,7 @@ export const style = StyleSheet.create({
   },
 
   name: {
-    marginVertical: '$viewOffset / 2',
+    gap: '$viewOffset / 2',
   },
 
   shard: {

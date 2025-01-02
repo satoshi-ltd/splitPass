@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Icon, Modal, Pagination, Pressable, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Icon, Modal, Pagination, Pressable, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
@@ -14,7 +14,7 @@ import { ICON } from '../../modules';
 const QR_SIZE = 256;
 
 const Viewer = ({
-  route: { params: { hash, favorite = false, name, readMode = false, values = [] } = {} },
+  route: { params: { hash, favorite: propFavorite = false, name, readMode = false, values = [] } = {} },
   navigation = {},
 }) => {
   const qrRef = useRef(null);
@@ -22,6 +22,7 @@ const Viewer = ({
   const { createSecret, deleteSecret, readSecret, updateSecret } = useStore();
   const { width } = useWindowDimensions();
 
+  const [favorite, setFavorite] = useState(propFavorite);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,8 +53,10 @@ const Viewer = ({
   };
 
   const handleFavorite = async () => {
-    await updateSecret({ hash, favorite: !favorite });
-    // !TODO Send notification
+    const nextFavorite = !favorite;
+
+    await updateSecret({ hash, favorite: nextFavorite });
+    setFavorite(nextFavorite);
   };
 
   const next = () => {
@@ -64,15 +67,19 @@ const Viewer = ({
   return (
     <Modal gap onClose={navigation.goBack}>
       <View align="center" row style={style.name}>
-        {readMode && (
-          <Pressable onPress={handleFavorite}>
-            <Icon name={favorite ? ICON.FAVORITE : ICON.UNFAVORITE} title />
-          </Pressable>
-        )}
-
-        <Text bold title>
+        <Text bold secondary title>
           {name}
         </Text>
+
+        {readMode && (
+          <Button
+            outlined={!favorite}
+            secondary={favorite}
+            small
+            icon={favorite ? ICON.FAVORITE : ICON.UNFAVORITE}
+            onPress={handleFavorite}
+          />
+        )}
       </View>
 
       <ScrollView

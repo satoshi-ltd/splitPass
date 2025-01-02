@@ -11,12 +11,13 @@ export const style = StyleSheet.create({
   },
 
   secret: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: '$modalOverflowBackgroundColor',
     height: '100%',
     left: 0,
     padding: '$viewOffset',
     margin: '$viewOffset / 2',
+    opacity: 0.75,
+    position: 'absolute',
     top: 0,
     width: '100%',
     ...Platform.select({ web: { margin: 0 } }),
