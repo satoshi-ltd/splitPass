@@ -53,7 +53,7 @@ const Viewer = ({
   };
 
   const handleShareCode = async () => {
-    await Share.share({ message: `secretqr://${values[currentIndex]}` }).catch(() => {});
+    await Share.share({ message: `shardqr://${values[currentIndex]}` }).catch(() => {});
   };
 
   const handleFavorite = async () => {

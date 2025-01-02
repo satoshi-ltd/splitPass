@@ -36,7 +36,7 @@ const Home = ({ navigation }) => {
             color="accent"
             icon={ICON.SCAN}
             text="Scan Secret"
-            tiny="Add an external SecretQR to become a guardian."
+            tiny="Add an external ShardQR to become a guardian."
             onPress={() => navigation.navigate('scanner')}
           />
           {lastViewed ? (
@@ -70,11 +70,11 @@ const Home = ({ navigation }) => {
             </View>
 
             <Text bold secondary title style={{ maxWidth: '55%' }}>
-              New features in SecretQR
+              New features in ShardQR
             </Text>
 
             <Text caption color="contentLight">
-              Explore the new features that make SecretQR much better.
+              Explore the new features that make ShardQR much better.
             </Text>
           </Card>
         )}

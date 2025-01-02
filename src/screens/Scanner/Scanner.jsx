@@ -28,7 +28,7 @@ const Scanner = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       setActive(true);
-      // if (!permission?.granted) return requestPermission();
+      if (!permission?.granted) return requestPermission();
 
       handleBarcodeScanned();
 
@@ -45,7 +45,7 @@ const Scanner = ({ navigation }) => {
   const handleBarcodeScanned = ({
     data = '4071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
   } = {}) => {
-    // ! TODO: Should check if is a valid SecretQR
+    // ! TODO: Should check if is a valid ShardQR
     const [type] = data;
 
     if (!Object.values(QR_TYPE).includes(type)) return;
