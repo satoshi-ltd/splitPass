@@ -1,3 +1,5 @@
+import { DEFAULT_THEME } from '../App.constants';
+
 const DEFAULTS = {
   secrets: [],
   settings: {
@@ -6,7 +8,7 @@ const DEFAULTS = {
     reminders: [1, 1, 0, 1],
     syncedAt: undefined,
     subscription: {},
-    theme: 'light',
+    theme: DEFAULT_THEME,
   },
 };
 

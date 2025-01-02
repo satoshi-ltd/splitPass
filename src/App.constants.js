@@ -1,3 +1,5 @@
+const DEFAULT_THEME = 'light';
+
 const QR_TYPE = {
   PASSWORD: '1',
   PASSWORD_ENCRYPTED: '2',
@@ -72,4 +74,12 @@ const VAULTS_KEYWORDS = {
   ],
 };
 
-export { QR_TYPE, STEPS, STORAGE_DOMAIN, VAULTS_KEYWORDS, VAULT_TYPE };
+export {
+  //
+  DEFAULT_THEME,
+  QR_TYPE,
+  STEPS,
+  STORAGE_DOMAIN,
+  VAULTS_KEYWORDS,
+  VAULT_TYPE,
+};

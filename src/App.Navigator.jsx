@@ -1,11 +1,12 @@
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Button, Icon, Pressable, View } from '@satoshi-ltd/nano-design';
-import { BlurView } from 'expo-blur';
+// import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
+import { style } from './App.style';
 import { Logo } from './components';
 import { useStore } from './contexts';
 import { getNavigationTheme, ICON } from './modules';
@@ -13,8 +14,8 @@ import { Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './sc
 
 const Stack = createNativeStackNavigator();
 
-const commonScreenOptions = (theme = 'light') => ({
-  headerBackground: () => <BlurView intensity={80} tint={theme} style={{ flex: 1 }} />,
+const commonScreenOptions = (theme) => ({
+  // headerBackground: () => <BlurView intensity={80} tint={theme} style={{ flex: 1 }} />,
   headerShown: true,
   // headerStyle: {},
   headerTintColor: StyleSheet.value('$colorContent'),
@@ -25,7 +26,7 @@ const commonScreenOptions = (theme = 'light') => ({
 });
 
 export const Navigator = () => {
-  const { settings: { onboarded, theme = 'light' } = {} } = useStore();
+  const { settings: { onboarded, theme } = {} } = useStore();
 
   const screenOptions = { headerBackTitleVisible: false, headerShadowVisible: false, headerShown: false };
   const screen = {
@@ -35,16 +36,10 @@ export const Navigator = () => {
       const navigation = useNavigation();
 
       return (
-        <View
-          row
-          style={{
-            gap: StyleSheet.value('$viewOffset') / 2,
-            // marginRight: StyleSheet.value('$viewOffset'),
-          }}
-        >
+        <View row style={style.header}>
           <Button icon={ICON.ADD} rounded small squared onPress={() => navigation.navigate('create')} />
-          <Pressable>
-            <Icon _color="contentLight" name={ICON.SETTINGS} title onPress={() => navigation.navigate('settings')} />
+          <Pressable onPress={() => navigation.navigate('settings')}>
+            <Icon name={ICON.SETTINGS} title />
           </Pressable>
         </View>
       );
@@ -60,7 +55,7 @@ export const Navigator = () => {
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="home" component={Home} options={screen} />
         <Stack.Screen name="scanner" component={Scanner} options={{ headerShown: false }} />
-        <Stack.Screen name="settings" component={Settings} />
+        <Stack.Screen name="settings" component={Settings} options={screen} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
         {/* Modal */}
         <Stack.Screen name="create" component={Create} options={modal} />

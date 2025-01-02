@@ -8,6 +8,7 @@ import { Setting } from './components';
 import { ABOUT, OPTIONS, PREFERENCES } from './Settings.constants';
 import { style } from './Settings.style';
 import { IS_WEB } from '../../App.constants';
+import { DEFAULT_THEME } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
 import { BackupService, PurchaseService } from '../../services';
@@ -81,7 +82,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleTheme = () => {
-    StyleSheet.build(StyleSheet.value('$theme') === 'light' ? DarkTheme : LightTheme);
+    StyleSheet.build(StyleSheet.value('$theme') === DEFAULT_THEME ? DarkTheme : LightTheme);
     updateSettings({ theme: StyleSheet.value('$theme') });
   };
 

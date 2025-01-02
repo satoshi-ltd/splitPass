@@ -10,4 +10,7 @@ export const DarkTheme = {
   $colorBorder: '#222222',
   $colorContent: '#ffffff',
   $colorContentLight: '#999999',
+
+  // -- <Button> ---------------------------------------------------------------
+  $buttonChildrenColorSecondary: '$colorBase',
 };

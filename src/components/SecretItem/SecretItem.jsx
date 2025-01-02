@@ -3,10 +3,14 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './SecretItem.style';
+import { DEFAULT_THEME } from '../../App.constants';
+import { useStore } from '../../contexts';
 
-const SecretItem = ({ favorite = false, name, value, vault = 1, createdAt, readAt, onPress }) => {
+const SecretItem = ({ favorite = false, name, value, vault = 1, createdAt, onPress }) => {
+  const { settings: { theme } = {} } = useStore();
+
   const [type] = value;
-  const color = favorite ? 'content' : 'contentLight';
+  const color = theme === DEFAULT_THEME ? 'content' : 'base';
 
   return (
     <Pressable onPress={onPress}>

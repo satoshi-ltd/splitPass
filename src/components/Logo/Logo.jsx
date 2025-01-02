@@ -12,7 +12,7 @@ const IMAGE = {
 };
 
 const Logo = ({ showText = false, ...others }) => {
-  const { settings: { theme = 'light' } = {} } = useStore();
+  const { settings: { theme } = {} } = useStore();
 
   return (
     <View row style={[style.container, others.style]}>

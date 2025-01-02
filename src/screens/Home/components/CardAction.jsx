@@ -3,22 +3,32 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './CardAction.style';
+import { DEFAULT_THEME } from '../../../App.constants';
+import { useStore } from '../../../contexts';
 
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
+  const { settings: { theme } = {} } = useStore();
+
+  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined };
+
   return (
     <Pressable onPress={onPress} style={style.container}>
       <Card color={color} spaceBetween style={style.content}>
         <View row>
-          <Icon name={icon} style={style.icon} />
-          <Text bold caption>
+          <Icon {...common} name={icon} style={style.icon} />
+          <Text {...common} bold caption>
             {text}
           </Text>
         </View>
 
         <View>
-          {caption && <Text caption>{caption}</Text>}
+          {caption && (
+            <Text {...common} caption>
+              {caption}
+            </Text>
+          )}
           {tiny && (
-            <Text color="contentLight" tiny>
+            <Text color="contentLight" {...common} tiny>
               {tiny}
             </Text>
           )}

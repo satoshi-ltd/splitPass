@@ -7,6 +7,7 @@ import { DarkTheme, LightTheme } from '../theme';
 import { consolidate } from './modules';
 import { createSecret, readSecret, updateSecret, deleteSecret, updateSettings } from './reducers';
 import { DEFAULTS, FILENAME } from './store.constants';
+import { DEFAULT_THEME } from '../App.constants';
 
 const StoreContext = createContext(`context:store`);
 
@@ -17,8 +18,8 @@ const StoreProvider = ({ children }) => {
     (async () => {
       const store = await new StorageService({ defaults: DEFAULTS, filename: FILENAME });
 
-      const { theme = 'light' } = await store.get('settings').value;
-      StyleSheet.build(theme === 'light' ? LightTheme : DarkTheme);
+      const { theme } = await store.get('settings').value;
+      StyleSheet.build(theme === DEFAULT_THEME ? LightTheme : DarkTheme);
 
       setState({
         store,

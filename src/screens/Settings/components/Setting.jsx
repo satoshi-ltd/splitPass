@@ -5,35 +5,41 @@ import { ActivityIndicator } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Setting.style';
+import { DEFAULT_THEME } from '../../../App.constants';
+import { useStore } from '../../../contexts';
 import { ICON } from '../../../modules';
 
-const Setting = ({ activity = false, caption, disabled, icon, text, onPress = () => {} } = {}) => (
-  <Pressable onPress={!disabled && !activity ? onPress : undefined}>
-    <View gap row style={style.setting}>
-      {icon && (
-        <Card color={disabled ? 'border' : 'accent'} small style={{ width: 'auto' }}>
-          <Icon name={icon} />
-        </Card>
-      )}
-      <View row style={style.content}>
-        <View flex>
-          <Text color={disabled ? 'contentLight' : undefined}>{text}</Text>
-          {caption && (
-            <Text caption color="contentLight">
-              {caption}
-            </Text>
+const Setting = ({ activity = false, caption, disabled, icon, text, onPress = () => {} } = {}) => {
+  const { settings: { theme } = {} } = useStore();
+
+  return (
+    <Pressable onPress={!disabled && !activity ? onPress : undefined}>
+      <View gap row style={style.setting}>
+        {icon && (
+          <Card color={disabled ? 'border' : 'accent'} small style={{ width: 'auto' }}>
+            <Icon color={theme !== DEFAULT_THEME ? 'base' : undefined} name={icon} />
+          </Card>
+        )}
+        <View row style={style.content}>
+          <View flex>
+            <Text color={disabled ? 'contentLight' : undefined}>{text}</Text>
+            {caption && (
+              <Text caption color="contentLight">
+                {caption}
+              </Text>
+            )}
+          </View>
+
+          {activity ? (
+            <ActivityIndicator size="small" color={StyleSheet.value('$colorContent')} />
+          ) : (
+            <Icon name={ICON.RIGHT} />
           )}
         </View>
-
-        {activity ? (
-          <ActivityIndicator size="small" color={StyleSheet.value('$colorContent')} />
-        ) : (
-          <Icon name={ICON.RIGHT} />
-        )}
       </View>
-    </View>
-  </Pressable>
-);
+    </Pressable>
+  );
+};
 
 Setting.displayName = 'Setting';
 
