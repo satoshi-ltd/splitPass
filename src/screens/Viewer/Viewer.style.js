@@ -22,6 +22,10 @@ export const style = StyleSheet.create({
     marginTop: '$viewOffset',
   },
 
+  caption: {
+    gap: '$viewOffset / 4',
+  },
+
   shard: {
     position: 'absolute',
     backgroundColor: '$qrBackgroundColor',

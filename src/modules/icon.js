@@ -15,7 +15,7 @@ export const ICON = {
   EYE: 'eye-outline',
 
   FAVORITE: 'star',
-  UNFAVORITE: 'star-outline',
+  INFO: 'information-outline',
 
   PASSCODE: 'calculator',
 
@@ -30,6 +30,9 @@ export const ICON = {
   SETTINGS: 'cog-outline',
   SHARD: 'call-split',
 
+  UNFAVORITE: 'star-outline',
+
+  WARNING: 'alert-outline',
   WIFI: 'wifi',
 
   // Settings

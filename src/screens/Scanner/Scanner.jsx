@@ -8,13 +8,10 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { FORM } from './Scanner.constants';
 import { style } from './Scanner.style';
-import { QR_TYPE } from '../../App.constants';
+import { SECURE_TYPES, SHARD_TYPES, QR_TYPE } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, QRParser } from '../../modules';
 import { CardOption } from '../Viewer/components';
-
-const SECURE_TYPES = [QR_TYPE.PASSWORD_SECURE, QR_TYPE.SEED_PHRASE_SECURE];
-const SHARD_TYPES = [QR_TYPE.PASSWORD_SHARD, QR_TYPE.SEED_PHRASE_SHARD];
 
 const Scanner = ({ navigation }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -28,9 +25,8 @@ const Scanner = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       setActive(true);
+      // handleBarcodeScanned();
       if (!permission?.granted) return requestPermission();
-
-      handleBarcodeScanned();
 
       // TODO: this can not be done. useFocusEffect not accept return
       // return () => setActive(false);
@@ -43,7 +39,10 @@ const Scanner = ({ navigation }) => {
   };
 
   const handleBarcodeScanned = ({
-    data = '4071815361414022601171482010411321486003717561857003601150446031200160007022400260293169614131149',
+    data = '',
+    // data = '4000812771161163312421349138600180611163115910353092506140275186700831307139902341880124300411462',
+    // data = '5232192903441395692653629360980312991395495142633224886372555318080063687361282573160356680643742',
+    // data = '6000012771161000012421349000000180611000015910353000006140275000000831307000002341880000000411462',
   } = {}) => {
     // ! TODO: Should check if is a valid ShardQR
     const [type] = data;
@@ -117,7 +116,7 @@ const Scanner = ({ navigation }) => {
             {reveal && (
               <View align="center" style={style.reveal}>
                 <Text align="center" bold caption color={StyleSheet.value('$qrBackgroundColor')}>
-                  {QRParser.decode(QRParser.combine(...values), form.passcode)}
+                  {QRParser.decode(QRParser.combine(...values), form.value)}
                 </Text>
               </View>
             )}

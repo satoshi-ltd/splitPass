@@ -8,7 +8,7 @@ import ViewShot from 'react-native-view-shot';
 import { style } from './Qr.style';
 import { QRParser } from '../../modules';
 
-const QR = React.forwardRef(({ value = '', readMode = false, ...others }, ref) => {
+const QR = React.forwardRef(({ pin = '', readMode = false, value = '', ...others }, ref) => {
   const [reveal, setReveal] = useState(false);
 
   const handlePressStart = () => setReveal(true);
@@ -36,7 +36,7 @@ const QR = React.forwardRef(({ value = '', readMode = false, ...others }, ref) =
         {reveal && (
           <View align="center" style={style.secret}>
             <Text align="center" bold caption>
-              {QRParser.decode(value)}
+              {QRParser.decode(value, pin)}
             </Text>
           </View>
         )}
@@ -48,6 +48,7 @@ const QR = React.forwardRef(({ value = '', readMode = false, ...others }, ref) =
 QR.displayName = 'QR';
 
 QR.propTypes = {
+  pin: PropTypes.string,
   readMode: PropTypes.bool,
   value: PropTypes.string,
 };

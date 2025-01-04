@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Icon, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
@@ -7,6 +7,7 @@ import { Share, useWindowDimensions } from 'react-native';
 
 import { CardOption } from './components';
 import { style } from './Viewer.style';
+import { SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
 import { QR } from '../../components';
 import { useStore } from '../../contexts';
 import { ICON } from '../../modules';
@@ -68,6 +69,8 @@ const Viewer = ({
     scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
   };
 
+  const [type] = values[0];
+
   return (
     <Modal gap onClose={navigation.goBack}>
       <View align="center" row style={style.name}>
@@ -120,9 +123,16 @@ const Viewer = ({
       )}
 
       {readMode && (
-        <Text align="center" color="contentLight" tiny>
-          Hold to reveal the secret behind the QR.
-        </Text>
+        <View align="center" row style={style.caption}>
+          <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
+          <Text align="center" color="contentLight" tiny>
+            {SECURE_TYPES.includes(type)
+              ? 'To reveal the secret, please enter your passcode.'
+              : SHARD_TYPES.includes(type)
+              ? 'This is a shard. Use the scanner to access the full secret.'
+              : 'Hold to reveal the secret behind the QR.'}
+          </Text>
+        </View>
       )}
 
       <View row style={style.cardOptions}>

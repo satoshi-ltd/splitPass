@@ -33,16 +33,18 @@ export const QRParser = {
   },
 
   decode: (qr = '', pin) => {
-    const [type, ...digits] = qr;
+    let [type, ...digits] = qr;
     const { regexp, set, join } = getConfig(type);
 
+    digits = digits.join('');
+    if (pin) digits = Cypher.decrypt(digits, pin);
+
     const value = digits
-      .join('')
       .match(regexp || [])
       .map((index) => set[parseInt(index - 1)])
       .join(join);
 
-    return pin ? Cypher.decrypt(value, pin) : value;
+    return value;
   },
 
   split: (qr = '', shares = 3) => {
