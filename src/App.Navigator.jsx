@@ -51,7 +51,7 @@ export const Navigator = () => {
 
       <Stack.Navigator initialRouteName={onboarded ? 'home' : 'onboarding'} screenOptions={screenOptions}>
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="home" component={Home} options={screen} />
+        <Stack.Screen name="home" component={Home} options={{ ...screen, headerLeft: () => null }} />
         <Stack.Screen name="scanner" component={Scanner} options={{ headerShown: false }} />
         <Stack.Screen name="settings" component={Settings} options={screen} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
