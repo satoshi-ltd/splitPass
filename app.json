@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "ShardQR",
-    "slug": "satoshi-ltd-shardqr",
+    "name": "splitQR",
+    "slug": "satoshi-ltd-splitqr",
     "owner": "satoshi-ltd",
-    "scheme": "shardqr",
+    "scheme": "splitqr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,8 +16,8 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.satoshi-limited.secretqr",
-      "buildNumber": "2",
+      "bundleIdentifier": "com.satoshi-limited.splitqr",
+      "buildNumber": "1",
       "usesIcloudStorage": false
     },
     "android": {
@@ -25,16 +25,15 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#111"
       },
-      "package": "com.satoshilimited.secretqr",
-      "versionCode": 2,
-      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
+      "package": "com.satoshilimited.splitqr",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "8f690de1-fdfd-439b-88ab-ecc69a694d5b"
+        "projectId": "ff857f0d-a99f-4faa-b783-dd4786993626"
       }
     },
     "plugins": [

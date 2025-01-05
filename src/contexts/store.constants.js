@@ -10,6 +10,6 @@ const DEFAULTS = {
   },
 };
 
-const FILENAME = 'com.satoshi-ltd.secretqr';
+const FILENAME = 'com.satoshi-ltd.splitqr';
 
 export { DEFAULTS, FILENAME };
