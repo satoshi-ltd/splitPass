@@ -1,3 +1,4 @@
+export * from './Form';
 export * from './Logo';
 export * from './QR';
 export * from './SecretItem';
