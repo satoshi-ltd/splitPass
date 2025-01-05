@@ -25,9 +25,9 @@ const Scanner = ({ navigation }) => {
   const [reveal, setReveal] = useState(false);
 
   useFocusEffect(
-    useCallback(() => {
-      setActive(true);
+    useCallback(async () => {
       // handleBarcodeScanned();
+      setActive(true);
       if (!permission?.granted) return requestPermission();
 
       // TODO: this can not be done. useFocusEffect not accept return
@@ -46,7 +46,6 @@ const Scanner = ({ navigation }) => {
     // data = '5232192903441395692653629360980312991395495142633224886372555318080063687361282573160356680643742',
     // data = '6000012771161000012421349000000180611000015910353000006140275000000831307000002341880000000411462',
   } = {}) => {
-    // ! TODO: Should check if is a valid ShardQR
     const [type] = data;
 
     if (!Object.values(QR_TYPE).includes(type)) return;
@@ -84,7 +83,7 @@ const Scanner = ({ navigation }) => {
         <CameraView
           active={active}
           autofocus="on"
-          barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+          barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
           facing="back"
           onBarcodeScanned={is.empty ? handleBarcodeScanned : undefined}
           style={style.scanner}
