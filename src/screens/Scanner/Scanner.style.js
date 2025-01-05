@@ -48,7 +48,7 @@ export const style = StyleSheet.create({
   },
 
   corner: {
-    borderColor: '$qrBackgroundColor',
+    borderColor: '$colorAccent',
     width: '$qrSize / 8',
     height: '$qrSize / 8',
     position: 'absolute',

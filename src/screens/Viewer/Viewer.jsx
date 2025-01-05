@@ -56,7 +56,7 @@ const Viewer = ({
   };
 
   const handleShareCode = async () => {
-    await Share.share({ message: `shardqr://${values[currentIndex]}` }).catch(() => {});
+    await Share.share({ message: `splitqr://${values[currentIndex]}` }).catch(() => {});
   };
 
   const handleFavorite = async () => {
@@ -144,7 +144,7 @@ const Viewer = ({
       )}
 
       {fields && !is.form ? (
-        <Form fields={fields} onCancel={setFields} onSubmit={setForm} />
+        <Form fields={fields} onCancel={setFields} onSubmit={setForm} style={style.cardOptions} />
       ) : (
         <View row style={style.cardOptions}>
           {!readMode && currentIndex === 0 ? (

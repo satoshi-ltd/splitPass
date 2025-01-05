@@ -129,7 +129,7 @@ const Scanner = ({ navigation }) => {
 
         <View spaceBetween style={[style.section, style.footer]}>
           {is.empty && (
-            <Text align="center" caption={is.empty} style={style.text}>
+            <Text align="center" caption={is.empty} color="contentLight" style={style.text}>
               Place QR code inside the box
             </Text>
           )}

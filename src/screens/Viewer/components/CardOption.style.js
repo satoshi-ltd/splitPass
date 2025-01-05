@@ -8,6 +8,6 @@ export const style = StyleSheet.create({
   content: {
     gap: '$viewOffset / 2',
     paddingHorizontal: '$viewOffset',
-    minHeight: '$viewOffset * 4.25',
+    minHeight: '$viewOffset * 4.35',
   },
 });
