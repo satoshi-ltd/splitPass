@@ -13,7 +13,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#111"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.satoshi-limited.splitpass",
@@ -26,14 +28,18 @@
         "backgroundColor": "#111"
       },
       "package": "com.satoshilimited.splitpass",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "ff857f0d-a99f-4faa-b783-dd4786993626"
+        "projectId": "d4863ee6-c3f5-46b2-ab09-0a13ee11711e"
       }
     },
     "plugins": [
