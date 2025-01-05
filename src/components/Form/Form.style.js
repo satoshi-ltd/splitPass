@@ -1,12 +1,9 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  container: {
-    backgroundColor: 'orange',
-  },
+  container: {},
 
-  input: {
-    backgroundColor: 'transparent',
+  inputs: {
     flex: 1,
   },
 });

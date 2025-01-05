@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { style } from './Form.style';
 import { ICON } from '../../modules';
 
-const Form = ({ fields, onCancel = () => {}, onSubmit = () => {} }) => {
+const Form = ({ fields, onCancel = () => {}, onSubmit = () => {}, ...others }) => {
   const [value, setValue] = useState([]);
 
   useEffect(() => {
@@ -21,15 +21,14 @@ const Form = ({ fields, onCancel = () => {}, onSubmit = () => {} }) => {
   };
 
   return (
-    <Card gap outlined row small style={style.container}>
-      <View gap>
+    <Card gap outlined row small style={[style.container, others.style]}>
+      <View gap style={style.inputs}>
         {fields?.map((field) => (
           <Input
             {...field}
             key={field.name}
             value={value[field.name]}
             onChange={(fieldValue) => setValue({ ...value, [field.name]: fieldValue })}
-            style={style.input}
           />
         ))}
       </View>
