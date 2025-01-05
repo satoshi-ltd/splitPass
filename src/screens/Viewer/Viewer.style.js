@@ -1,11 +1,6 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  modan: {
-    paddingTop: '$spaceXXL',
-    backgroundColor: 'blue',
-  },
-
   scrollView: {
     marginLeft: '$viewOffset * -1',
     marginRight: '$viewOffset * -1',
