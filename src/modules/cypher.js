@@ -8,17 +8,25 @@ export const Cypher = {
     if (invalidInputs(value, pin)) return;
     const pinDigits = convertToDigits(pin);
 
-    return convertToDigits(value)
-      .map((digit, index) => (digit + pinDigits[index % 6]) % 10)
-      .join('');
+    try {
+      return convertToDigits(value)
+        .map((digit, index) => (digit + pinDigits[index % 6]) % 10)
+        .join('');
+    } catch {
+      return;
+    }
   },
 
   decrypt: (value = '', pin = '') => {
     if (invalidInputs(value, pin)) return;
     const pinDigits = convertToDigits(pin);
 
-    return convertToDigits(value)
-      .map((digit, index) => (digit - pinDigits[index % 6] + 10) % 10)
-      .join('');
+    try {
+      return convertToDigits(value)
+        .map((digit, index) => (digit - pinDigits[index % 6] + 10) % 10)
+        .join('');
+    } catch {
+      return;
+    }
   },
 };
