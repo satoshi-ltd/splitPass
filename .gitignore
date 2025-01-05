@@ -1,0 +1,7 @@
+node_modules/
+.eslintcache
+.expo
+.DS_Store
+
+dist/
+.parcel-cache/
