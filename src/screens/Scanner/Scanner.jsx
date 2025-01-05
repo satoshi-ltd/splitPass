@@ -15,25 +15,27 @@ import { ICON, L10N, QRParser } from '../../modules';
 import { CardOption } from '../Viewer/components';
 
 const IS_WEB = Platform.OS === 'web';
+let busy = false;
 
-const Scanner = ({ navigation }) => {
+const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {} } }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
 
   const [active, setActive] = useState(false);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
-  const [values, setValues] = useState([]);
+  const [values, setValues] = useState(propValues);
   const [reveal, setReveal] = useState(false);
 
   useFocusEffect(
     useCallback(async () => {
-      handleBarcodeScanned();
+      busy = false;
+      // handleBarcodeScanned();
       setActive(true);
       if (!permission?.granted) return requestPermission();
 
       // TODO: this can not be done. useFocusEffect not accept return
-      // return () => setActive(false);
+      return () => setActive(false);
     }, []),
   );
 
@@ -42,17 +44,23 @@ const Scanner = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const handleBarcodeScanned = ({
-    // data = '',
-    // data = '4000812771161163312421349138600180611163115910353092506140275186700831307139902341880124300411462',
-    data = '5232192903441395692653629360980312991395495142633224886372555318080063687361282573160356680643742',
-    // data = '6000012771161000012421349000000180611000015910353000006140275000000831307000002341880000000411462',
-  } = {}) => {
+  const handleBarcodeScanned = ({ data = '' } = {}) => {
+    console.log('>>>>>handleBarcodeScanned', data);
+    busy = true;
     const [type] = data;
 
     if (!Object.values(QR_TYPE).includes(type)) return;
-    if (SHARD_TYPES.includes(type)) return alert('read next shard');
-
+    if (SHARD_TYPES.includes(type)) {
+      if (values.includes(data)) {
+        setTimeout(() => {
+          busy = false;
+        }, 1000);
+        // ! TODO: Make it a notification
+        return alert('Alert: Same shard');
+      }
+    } else {
+      busy = false;
+    }
     setValues([...values, data]);
   };
 
@@ -75,11 +83,14 @@ const Scanner = ({ navigation }) => {
     empty: !values.length,
     fields: fields?.length > 0,
     form: !!Object.values(form).length,
+    scanning: busy || !values.length,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
   };
 
   const Wrapper = IS_WEB ? React.Fragment : KeyboardAvoidingView;
+
+  console.log(is, values, { busy });
 
   return (
     <>
@@ -89,7 +100,7 @@ const Scanner = ({ navigation }) => {
           autofocus="on"
           barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
           facing="back"
-          onBarcodeScanned={is.empty ? handleBarcodeScanned : undefined}
+          onBarcodeScanned={(is.shard ? !busy : is.empty) ? handleBarcodeScanned : undefined}
           style={style.scanner}
         />
       ) : (
@@ -133,10 +144,17 @@ const Scanner = ({ navigation }) => {
           </View>
 
           <View spaceBetween style={[style.section, style.footer]}>
-            {is.empty && (
-              <Text align="center" caption={is.empty} color="contentLight" style={style.text}>
-                Place QR code inside the box
-              </Text>
+            {is.scanning && (
+              <>
+                {is.shard && (
+                  <Text align="center" bold>
+                    First shard scanned
+                  </Text>
+                )}
+                <Text align="center" caption={is.scanning} color="contentLight">
+                  {is.shard ? 'Scan the second shard to continue' : 'Place QR code inside the box'}
+                </Text>
+              </>
             )}
 
             <View style={{ flex: 1 }} />
@@ -154,19 +172,21 @@ const Scanner = ({ navigation }) => {
                   />
                 )}
 
-                <CardOption
-                  icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}
-                  text={is.secure && !form.passcode ? L10N.SET_PASSCODE : L10N.REVEAL_SECRET}
-                  {...(is.secure && !form.passcode
-                    ? { onPress: () => setFields([FIELD.PASSCODE]) }
-                    : {
-                        onTouchCancel: () => setReveal(false),
-                        onTouchEnd: () => setReveal(false),
-                        onTouchMove: () => setReveal(false),
-                        onTouchStart: () => setReveal(true),
-                        onPress: () => {},
-                      })}
-                />
+                {(!is.shard || values.length > 1) && (
+                  <CardOption
+                    icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}
+                    text={is.secure && !form.passcode ? L10N.SET_PASSCODE : L10N.REVEAL_SECRET}
+                    {...(is.secure && !form.passcode
+                      ? { onPress: () => setFields([FIELD.PASSCODE]) }
+                      : {
+                          onTouchCancel: () => setReveal(false),
+                          onTouchEnd: () => setReveal(false),
+                          onTouchMove: () => setReveal(false),
+                          onTouchStart: () => setReveal(true),
+                          onPress: () => {},
+                        })}
+                  />
+                )}
 
                 <CardOption icon={ICON.REFRESH} text={L10N.RESCAN} onPress={handleReset} />
               </View>
