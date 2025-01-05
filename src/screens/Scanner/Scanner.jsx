@@ -15,13 +15,13 @@ import { ICON, L10N, QRParser } from '../../modules';
 import { CardOption } from '../Viewer/components';
 
 const IS_WEB = Platform.OS === 'web';
-let busy = false;
 
 const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {} } }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
 
   const [active, setActive] = useState(false);
+  const [scanning, setScanning] = useState(true);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
   const [values, setValues] = useState(propValues);
@@ -29,13 +29,11 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
 
   useFocusEffect(
     useCallback(async () => {
-      busy = false;
       // handleBarcodeScanned();
       setActive(true);
-      if (!permission?.granted) return requestPermission();
+      setScanning(true);
 
-      // TODO: this can not be done. useFocusEffect not accept return
-      // return () => setActive(false);
+      if (!permission?.granted) return requestPermission();
     }, []),
   );
 
@@ -45,26 +43,25 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
   };
 
   const handleBarcodeScanned = ({ data = '' } = {}) => {
-    console.log('>>>>>handleBarcodeScanned', data);
-    busy = true;
     const [type] = data;
 
     if (!Object.values(QR_TYPE).includes(type)) return;
+
+    setScanning(false);
     if (SHARD_TYPES.includes(type)) {
+      if (values.length < 2) setTimeout(() => setScanning(true), 1000);
       if (values.includes(data)) {
-        setTimeout(() => {
-          busy = false;
-        }, 1000);
         // ! TODO: Make it a notification
         return alert('Alert: Same shard');
       }
-    } else {
-      busy = false;
     }
     setValues([...values, data]);
   };
 
-  const handleReset = () => setValues([]);
+  const handleReset = () => {
+    setScanning(true);
+    setValues([]);
+  };
 
   const handleSubmitForm = async (nextForm) => {
     setForm(nextForm);
@@ -83,14 +80,11 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
     empty: !values.length,
     fields: fields?.length > 0,
     form: !!Object.values(form).length,
-    scanning: busy || !values.length,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
   };
 
   const Wrapper = IS_WEB ? React.Fragment : KeyboardAvoidingView;
-
-  console.log(is, values, { busy });
 
   return (
     <>
@@ -100,7 +94,7 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
           autofocus="on"
           barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
           facing="back"
-          onBarcodeScanned={(is.shard ? !busy : is.empty) ? handleBarcodeScanned : undefined}
+          onBarcodeScanned={scanning ? handleBarcodeScanned : undefined}
           style={style.scanner}
         />
       ) : (
@@ -147,7 +141,7 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
             {is.scanning && (
               <>
                 {is.shard && (
-                  <Text align="center" bold>
+                  <Text align="center" bold style={style.text}>
                     First shard scanned
                   </Text>
                 )}
