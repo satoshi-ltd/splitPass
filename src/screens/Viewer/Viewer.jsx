@@ -7,10 +7,10 @@ import { Share, useWindowDimensions } from 'react-native';
 
 import { CardOption } from './components';
 import { style } from './Viewer.style';
-import { SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import { QR } from '../../components';
+import { FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { Form, QR } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON } from '../../modules';
+import { ICON, L10N } from '../../modules';
 
 const QR_SIZE = 256;
 
@@ -24,6 +24,8 @@ const Viewer = ({
   const { width } = useWindowDimensions();
 
   const [favorite, setFavorite] = useState(propFavorite);
+  const [fields, setFields] = useState();
+  const [form, setForm] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,6 +73,12 @@ const Viewer = ({
 
   const [type] = values[0];
 
+  const is = {
+    form: !!Object.values(form).length,
+    secure: SECURE_TYPES.includes(type),
+    shard: SHARD_TYPES.includes(type),
+  };
+
   return (
     <Modal gap onClose={navigation.goBack}>
       <View align="center" row style={style.name}>
@@ -101,7 +109,7 @@ const Viewer = ({
           <View align="center" key={index} style={[style.item, { width }]}>
             <QR
               key={index}
-              readMode={readMode}
+              {...{ passcode: form.passcode, readMode }}
               ref={readMode || currentIndex === index ? qrRef : undefined}
               size={QR_SIZE}
               value={value}
@@ -126,24 +134,35 @@ const Viewer = ({
         <View align="center" row style={style.caption}>
           <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
           <Text align="center" color="contentLight" tiny>
-            {SECURE_TYPES.includes(type)
-              ? 'To reveal the secret, please enter your passcode.'
-              : SHARD_TYPES.includes(type)
-              ? 'This is a shard. Use the scanner to access the full secret.'
-              : 'Hold to reveal the secret behind the QR.'}
+            {is.secure
+              ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
+              : is.shard
+              ? L10N.VIEWER_CAPTION_SHARD_SCANNER
+              : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
           </Text>
         </View>
       )}
 
-      <View row style={style.cardOptions}>
-        {!readMode && currentIndex === 0 && (
-          <CardOption color="accent" icon={ICON.DATABASE_ADD} text="Save Secret" onPress={handleSave} />
-        )}
-        {readMode && <CardOption color="accent" icon={ICON.DATABASE_REMOVE} text="Delete QR" onPress={handleDelete} />}
+      {fields && !is.form ? (
+        <Form fields={fields} onCancel={setFields} onSubmit={setForm} />
+      ) : (
+        <View row style={style.cardOptions}>
+          {!readMode && currentIndex === 0 ? (
+            <CardOption color="accent" icon={ICON.DATABASE_ADD} text={L10N.SAVE_SECRET} onPress={handleSave} />
+          ) : readMode ? (
+            <CardOption color="accent" icon={ICON.DATABASE_REMOVE} text={L10N.DELETE_SECRET} onPress={handleDelete} />
+          ) : null}
 
-        <CardOption icon={ICON.QRCODE} text="Share QR" onPress={handleShareQr} />
-        <CardOption icon={ICON.BARCODE} text="Share Code" onPress={handleShareCode} />
-      </View>
+          {readMode && is.secure && !form.passcode ? (
+            <CardOption icon={ICON.PASSCODE} text={L10N.SET_PASSCODE} onPress={() => setFields([FIELD.PASSCODE])} />
+          ) : (
+            <>
+              <CardOption icon={ICON.QRCODE} text={L10N.SHARE_QR} onPress={handleShareQr} />
+              <CardOption icon={ICON.BARCODE} text={L10N.SHARE_CODE} onPress={handleShareCode} />
+            </>
+          )}
+        </View>
+      )}
     </Modal>
   );
 };

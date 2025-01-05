@@ -1,16 +1,17 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Card, Input, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Text, View } from '@satoshi-ltd/nano-design';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
-import { SafeAreaView, useWindowDimensions } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
-import { FORM } from './Scanner.constants';
 import { style } from './Scanner.style';
-import { SECURE_TYPES, SHARD_TYPES, QR_TYPE } from '../../App.constants';
+import { FIELD, SECURE_TYPES, SHARD_TYPES, QR_TYPE } from '../../App.constants';
+import { Form } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON, QRParser } from '../../modules';
+import { ICON, L10N, QRParser } from '../../modules';
+// ! TODO: Refacto
 import { CardOption } from '../Viewer/components';
 
 const Scanner = ({ navigation }) => {
@@ -18,6 +19,7 @@ const Scanner = ({ navigation }) => {
   const { createSecret } = useStore();
 
   const [active, setActive] = useState(false);
+  const [fields, setFields] = useState();
   const [form, setForm] = useState({});
   const [values, setValues] = useState([]);
   const [reveal, setReveal] = useState(false);
@@ -55,11 +57,11 @@ const Scanner = ({ navigation }) => {
 
   const handleReset = () => setValues([]);
 
-  const handleSubmitForm = async () => {
-    setForm({ ...form, [form.name]: form.value });
+  const handleSubmitForm = async (nextForm) => {
+    setForm(nextForm);
 
-    if (form.name === 'secret') {
-      await createSecret({ name: form.value, value: values[0] });
+    if (nextForm.secret) {
+      await createSecret({ name: nextForm.secret, value: values[0] });
       navigation.goBack();
       // !TODO
       // navigation.navigate('vault');
@@ -70,7 +72,8 @@ const Scanner = ({ navigation }) => {
 
   const is = {
     empty: !values.length,
-    form: !!form.name && !form[form.name],
+    fields: fields?.length > 0,
+    form: !!Object.values(form).length,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
   };
@@ -116,7 +119,7 @@ const Scanner = ({ navigation }) => {
             {reveal && (
               <View align="center" style={style.reveal}>
                 <Text align="center" bold caption color={StyleSheet.value('$qrBackgroundColor')}>
-                  {QRParser.decode(QRParser.combine(...values), form.value)}
+                  {QRParser.decode(QRParser.combine(...values), form.passcode)}
                 </Text>
               </View>
             )}
@@ -134,30 +137,24 @@ const Scanner = ({ navigation }) => {
 
           <View style={{ flex: 1 }} />
 
-          {is.form ? (
-            <Card gap outlined row small>
-              <Input {...form} onChange={(value) => setForm({ ...form, value })} style={style.input} />
-              <View gap row>
-                <Button disabled={!form.value} icon={ICON.CHECK} secondary small onPress={handleSubmitForm} />
-                <Button icon={ICON.CLOSE} small onPress={() => setForm({})} />
-              </View>
-            </Card>
+          {fields && !is.form ? (
+            <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} />
           ) : !is.empty ? (
             <View row wide style={style.cardOptions}>
               {values.length === 1 && (
                 <CardOption
                   color="accent"
                   icon={ICON.DATABASE_ADD}
-                  text="Save Secret"
-                  onPress={() => setForm(FORM.NAME)}
+                  text={L10N.SAVE_SECRET}
+                  onPress={() => setFields([FIELD.NAME])}
                 />
               )}
 
               <CardOption
                 icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}
-                text={is.secure && !form.passcode ? 'Set passcode' : 'Reveal Secret'}
+                text={is.secure && !form.passcode ? L10N.SET_PASSCODE : L10N.REVEAL_SECRET}
                 {...(is.secure && !form.passcode
-                  ? { onPress: () => setForm(FORM.PASSCODE) }
+                  ? { onPress: () => setFields([FIELD.PASSCODE]) }
                   : {
                       onTouchCancel: () => setReveal(false),
                       onTouchEnd: () => setReveal(false),
@@ -167,7 +164,7 @@ const Scanner = ({ navigation }) => {
                     })}
               />
 
-              <CardOption icon={ICON.REFRESH} text="Restart" onPress={handleReset} />
+              <CardOption icon={ICON.REFRESH} text={L10N.RESCAN} onPress={handleReset} />
             </View>
           ) : null}
         </View>

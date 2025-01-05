@@ -1,5 +1,10 @@
 const DEFAULT_THEME = 'light';
 
+const FIELD = {
+  NAME: { name: 'secret', placeholder: 'name...' },
+  PASSCODE: { name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...' },
+};
+
 const QR_TYPE = {
   PASSWORD: '1',
   PASSWORD_SECURE: '2',
@@ -85,6 +90,7 @@ const SATOSHI_URLS = {
 
 export {
   DEFAULT_THEME,
+  FIELD,
   QR_TYPE,
   SECURE_TYPES,
   SHARD_TYPES,
