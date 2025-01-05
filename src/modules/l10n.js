@@ -1,5 +1,5 @@
 export const L10N = {
-  ABOUT: 'About môney',
+  ABOUT: 'About splitQR',
   APPERANCE_DARK: 'Switch to dark mode',
   APPERANCE_LIGHT: 'Switch to light mode',
 
@@ -14,9 +14,15 @@ export const L10N = {
   IMPORT_DATA: 'Import Data',
   IMPORT_DATA_CAPTION: 'JSON archive',
 
+  OFF: 'Off',
+  ON: 'On',
+
+  PREFERENCES: 'Preferences',
+  PRIVACY: 'Privacy Policy',
   PURCHASE_RESTORED: 'Purchase restored.',
 
-  REMINDERS: 'Reminders',
+  REMINDER_BACKUP: 'Backup Reminder',
+  REMINDER_BACKUP_CAPTION: 'Remember to save your secrets',
   RESTORE_PURCHASES: 'Restore purchases',
   REVEAL_SECRET: 'Reveal Secret',
   RESCAN: 'Rescan',
@@ -27,6 +33,8 @@ export const L10N = {
   SHARE_QR: 'Share QR',
   SHARE_CODE: 'Share code',
   SUBSCRIPTION: 'Subscription',
+
+  TERMS: 'Terms',
 
   VIEWER_CAPTION_ENTER_PASSCODE: 'To reveal the secret, please enter your passcode.',
   VIEWER_CAPTION_HOLD_TO_REVEAL: 'Hold to reveal the secret behind the QR.',

@@ -53,7 +53,7 @@ export const Navigator = () => {
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="home" component={Home} options={screen} />
         <Stack.Screen name="scanner" component={Scanner} options={{ headerShown: false }} />
-        <Stack.Screen name="settings" component={Settings} options={screen} />
+        <Stack.Screen name="settings" component={Settings} options={{ ...screen, headerRight: undefined }} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
         {/* Modal */}
         <Stack.Screen name="confirm" component={Confirm} options={modal} />

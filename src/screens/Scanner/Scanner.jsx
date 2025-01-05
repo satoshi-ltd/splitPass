@@ -35,7 +35,7 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
       if (!permission?.granted) return requestPermission();
 
       // TODO: this can not be done. useFocusEffect not accept return
-      return () => setActive(false);
+      // return () => setActive(false);
     }, []),
   );
 
