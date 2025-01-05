@@ -16,9 +16,9 @@ const SLIDES = [
     image: require('../../../assets/images/alice-bob.png'),
   },
   {
-    title: 'Join Alice with split|QR.',
+    title: 'Join Alice with split|Pass.',
     message:
-      "It's your turn. Just like Alice, discover the security offered by split|QR. Safeguard your secrets effortlessly and reliably.",
+      "It's your turn. Just like Alice, discover the security offered by split|Pass. Safeguard your secrets effortlessly and reliably.",
     image: require('../../../assets/images/alice-join.png'),
   },
 ];

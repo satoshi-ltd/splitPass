@@ -10,6 +10,6 @@ const DEFAULTS = {
   },
 };
 
-const FILENAME = 'com.satoshi-ltd.splitqr';
+const FILENAME = 'com.satoshi-ltd.splitpass';
 
 export { DEFAULTS, FILENAME };

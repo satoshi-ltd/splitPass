@@ -9,14 +9,14 @@ import { useStore } from '../../../contexts';
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
   const { settings: { theme } = {} } = useStore();
 
-  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined, ellipsizeMode: true };
+  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined };
 
   return (
     <Pressable onPress={onPress} style={style.container}>
       <Card color={color} spaceBetween style={style.content}>
         <View row>
           <Icon {...common} name={icon} style={style.icon} />
-          <Text {...common} bold caption>
+          <Text {...common} bold caption ellipsizeMode>
             {text}
           </Text>
         </View>

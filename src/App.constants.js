@@ -23,7 +23,7 @@ const STEPS = {
   PIN: 'pin',
 };
 
-const STORAGE_DOMAIN = 'com.satoshi-ltd.splitqr';
+const STORAGE_DOMAIN = 'com.satoshi-ltd.splitpass';
 
 const VAULT_TYPE = ['Account', 'Finance', 'Social', 'others'];
 

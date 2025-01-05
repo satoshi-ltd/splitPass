@@ -56,7 +56,7 @@ const Viewer = ({
   };
 
   const handleShareCode = async () => {
-    await Share.share({ message: `splitqr://${values[currentIndex]}` }).catch(() => {});
+    await Share.share({ message: `splitpass://${values[currentIndex]}` }).catch(() => {});
   };
 
   const handleFavorite = async () => {

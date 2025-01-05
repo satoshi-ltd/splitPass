@@ -1,5 +1,5 @@
 export const L10N = {
-  ABOUT: 'About splitQR',
+  ABOUT: 'About split|Pass',
   APPERANCE_DARK: 'Switch to dark mode',
   APPERANCE_LIGHT: 'Switch to light mode',
 
