@@ -19,7 +19,8 @@ export const BackupService = {
           const el = document.createElement('a');
           el.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
           el.download = fileName;
-          return el.click();
+          el.click();
+          return resolve();
         }
 
         const isSharingAvailable = await Sharing.isAvailableAsync();
@@ -31,7 +32,7 @@ export const BackupService = {
 
         resolve(true);
 
-        BackupService.scheduleNotification();
+        // BackupService.scheduleNotification();
       } catch (error) {
         reject(`${L10N.ERROR}: ${JSON.stringify(error)}`);
       }
@@ -62,6 +63,8 @@ export const BackupService = {
           if (!secrets.length || !Object.keys(settings).length) return reject(L10N.ERROR_IMPORT);
 
           resolve({ secrets, settings });
+        } else {
+          resolve();
         }
       } catch (error) {
         reject(`${L10N.ERROR}: ${JSON.stringify(error)}`);

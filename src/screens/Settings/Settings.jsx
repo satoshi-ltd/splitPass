@@ -11,11 +11,11 @@ import { style } from './Settings.style';
 import { DEFAULT_THEME } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
-import { BackupService, PurchaseService } from '../../services';
+import { BackupService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
 
 const Settings = ({ navigation = {} }) => {
-  const { secrets, settings, importBackup = () => {}, updateSettings, updateSubscription = () => {} } = useStore();
+  const { secrets, settings, importBackup = () => {}, updateSettings } = useStore();
 
   const [activity, setActivity] = useState();
 
@@ -25,23 +25,26 @@ const Settings = ({ navigation = {} }) => {
   const handleOption = ({ callback, screen, url }) => {
     if (url) Linking.openURL(url);
     if (screen) navigation.navigate(screen);
-    else if (callback === 'handleSubscription') handleSubscription();
+    // else if (callback === 'handleSubscription') handleSubscription();
     else if (callback === 'handleExport') handleExport();
     else if (callback === 'handleImport') handleImport();
-    else if (callback === 'handleRestorePurchases') handleRestorePurchases();
+    // else if (callback === 'handleRestorePurchases') handleRestorePurchases();
     // else if (callback === 'handleSync') handleSync();
   };
 
   const handleExport = async () => {
     // if (!IS_WEB && !isPremium) return handleSubscription('export');
 
+    setActivity({ ...activity, handleExport: true });
     const exported = await BackupService.export({ secrets, settings });
     if (exported) alert(L10N.CONFIRM_EXPORT_SUCCESS);
+    setActivity({ ...activity, handleExport: false });
   };
 
   const handleImport = async () => {
     // if (!IS_WEB && !isPremium) return handleSubscription('import');
 
+    setActivity({ ...activity, handleImport: true });
     const backup = await BackupService.import().catch((error) => alert(error));
 
     if (backup) {
@@ -52,34 +55,37 @@ const Settings = ({ navigation = {} }) => {
           await importBackup(backup);
           navigation.navigate('home');
           alert(L10N.CONFIRM_IMPORT_SUCCESS);
+          setActivity({ ...activity, handleImport: false });
         },
       });
+    } else {
+      setActivity({ ...activity, handleImport: false });
     }
   };
 
-  const handleSubscription = (activityState) => {
-    if (subscription?.productIdentifier) navigation.navigate('subscription');
-    setActivity(activityState);
-    PurchaseService.getProducts()
-      .then((plans) => {
-        navigation.navigate('subscription', { plans });
-        setActivity();
-      })
-      .catch((error) => alert(error));
-  };
+  // const handleSubscription = (activityState) => {
+  //   if (subscription?.productIdentifier) navigation.navigate('subscription');
+  //   setActivity(activityState);
+  //   PurchaseService.getProducts()
+  //     .then((plans) => {
+  //       navigation.navigate('subscription', { plans });
+  //       setActivity();
+  //     })
+  //     .catch((error) => alert(error));
+  // };
 
-  const handleRestorePurchases = () => {
-    setActivity('restore');
-    PurchaseService.restore()
-      .then((activeSubscription) => {
-        if (activeSubscription) {
-          updateSubscription(activeSubscription);
-          alert(L10N.PURCHASE_RESTORED);
-          setActivity();
-        }
-      })
-      .catch((error) => alert(error));
-  };
+  // const handleRestorePurchases = () => {
+  //   setActivity('restore');
+  //   PurchaseService.restore()
+  //     .then((activeSubscription) => {
+  //       if (activeSubscription) {
+  //         updateSubscription(activeSubscription);
+  //         alert(L10N.PURCHASE_RESTORED);
+  //         setActivity();
+  //       }
+  //     })
+  //     .catch((error) => alert(error));
+  // };
 
   const handleTheme = () => {
     StyleSheet.build(StyleSheet.value('$theme') === DEFAULT_THEME ? DarkTheme : LightTheme);
@@ -98,10 +104,9 @@ const Settings = ({ navigation = {} }) => {
         </Text>
         {OPTIONS.map(({ caption, disabled, icon, id, text, ...rest }) => (
           <Setting
-            activity={rest.callback && [rest.callback].sync}
+            activity={activity?.[rest.callback]}
             key={`option-${id}`}
             {...{
-              activity: rest.callback === 'handleUpdateRates' && activity?.updateRates,
               caption,
               disabled,
               icon,
