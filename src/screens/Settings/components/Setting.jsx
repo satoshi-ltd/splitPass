@@ -6,10 +6,21 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Setting.style';
 import { DEFAULT_THEME } from '../../../App.constants';
+import { Tabs } from '../../../components';
 import { useStore } from '../../../contexts';
 import { ICON } from '../../../modules';
 
-const Setting = ({ activity = false, caption, disabled, icon, text, onPress = () => {} } = {}) => {
+const Setting = ({
+  activity = false,
+  caption,
+  disabled,
+  icon,
+  options,
+  selected,
+  text,
+  onChange,
+  onPress = () => {},
+} = {}) => {
   const { settings: { theme } = {} } = useStore();
 
   return (
@@ -32,6 +43,8 @@ const Setting = ({ activity = false, caption, disabled, icon, text, onPress = ()
 
           {activity ? (
             <ActivityIndicator size="small" color={StyleSheet.value('$colorContent')} />
+          ) : options ? (
+            <Tabs {...{ selected, options, onChange }} />
           ) : (
             <Icon name={ICON.RIGHT} />
           )}

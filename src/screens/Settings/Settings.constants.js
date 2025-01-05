@@ -25,13 +25,9 @@ const OPTIONS = [
   },
 ];
 
-const PREFERENCES = [
-  {
-    disabled: true,
-    icon: ICON.BELL,
-    screen: 'reminders',
-    text: L10N.REMINDERS,
-  },
+const REMINDER_BACKUP_OPTIONS = [
+  { text: L10N.OFF, value: 0 },
+  { text: L10N.ON, value: 1 },
 ];
 
 const ABOUT = (isPremium) => [
@@ -65,4 +61,4 @@ const ABOUT = (isPremium) => [
   },
 ];
 
-export { ABOUT, OPTIONS, PREFERENCES };
+export { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS };

@@ -142,6 +142,9 @@ export const L10N = {
   NEXT: 'Next',
   NO_TRANSACTIONS: "You don't have any transaction.",
 
+  OFF: 'Off',
+  ON: 'On',
+
   ONBOARDING_FINANCES: 'Your Finances Anywhere',
   ONBOARDING_FINANCES_CAPTION:
     'Access your accounts and make transactions from your mobile phone, no matter where you are.',
@@ -163,7 +166,8 @@ export const L10N = {
   PURCHASE: 'Purchase',
   PURCHASE_RESTORED: 'Purchase restored.',
 
-  REMINDERS: 'Reminders',
+  REMINDER_BACKUP: 'Backup Reminder',
+  REMINDER_BACKUP_CAPTION: 'Backup Reminder',
   RESTORE_PURCHASES: 'Restore purchases',
 
   SAVE: 'Save',

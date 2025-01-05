@@ -5,13 +5,13 @@ import { Linking } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Setting } from './components';
-import { ABOUT, OPTIONS, PREFERENCES } from './Settings.constants';
+import { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
 // import { IS_WEB } from '../../App.constants';
 import { DEFAULT_THEME } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
-import { BackupService } from '../../services';
+import { BackupService, NotificationsService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
 
 const Settings = ({ navigation = {} }) => {
@@ -19,7 +19,7 @@ const Settings = ({ navigation = {} }) => {
 
   const [activity, setActivity] = useState();
 
-  const { subscription, theme } = settings;
+  const { reminders, subscription, theme } = settings;
   const isPremium = !!subscription?.productIdentifier;
 
   const handleOption = ({ callback, screen, url }) => {
@@ -92,6 +92,11 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ theme: StyleSheet.value('$theme') });
   };
 
+  const handleChangeReminder = (item) => {
+    NotificationsService.reminders([item.value]);
+    updateSettings({ reminders: [item.value] });
+  };
+
   return (
     <Screen gap offset style={style.screen}>
       <Text bold secondary subtitle>
@@ -126,14 +131,14 @@ const Settings = ({ navigation = {} }) => {
           text={theme === 'dark' ? L10N.APPERANCE_LIGHT : L10N.APPERANCE_DARK}
           onPress={handleTheme}
         />
-        {PREFERENCES.map(({ disabled, icon, text, ...rest }, index) => (
-          <Setting
-            activity={activity && activity[rest.callback]}
-            key={`preference-${index}`}
-            {...{ disabled, icon, text }}
-            onPress={() => handleOption(rest)}
-          />
-        ))}
+        <Setting
+          caption={L10N.REMINDER_BACKUP_CAPTION}
+          icon={ICON.BELL}
+          onChange={(value = 0) => handleChangeReminder(value)}
+          options={REMINDER_BACKUP_OPTIONS}
+          selected={reminders[0]}
+          text={L10N.REMINDER_BACKUP}
+        />
       </View>
 
       <View style={style.group}>

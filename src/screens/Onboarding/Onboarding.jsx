@@ -8,8 +8,9 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
 import { useStore } from '../../contexts';
+import { NotificationsService } from '../../services';
 
-const Onboarding = ({ navigation: { navigate } }) => {
+const Onboarding = ({ navigation }) => {
   const scrollviewRef = useRef(null);
   const { updateSettings } = useStore();
   const { width } = useWindowDimensions();
@@ -28,7 +29,8 @@ const Onboarding = ({ navigation: { navigate } }) => {
 
   const handleSubmit = async () => {
     await updateSettings({ onboarded: true });
-    navigate('home');
+    NotificationsService.init();
+    navigation.reset({ index: 0, routes: [{ name: 'home' }] });
   };
 
   const spaceXL = StyleSheet.value('$spaceXL');
