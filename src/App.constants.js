@@ -18,11 +18,6 @@ const SECURE_TYPES = [QR_TYPE.PASSWORD_SECURE, QR_TYPE.SEED_PHRASE_SECURE];
 
 const SHARD_TYPES = [QR_TYPE.PASSWORD_SHARD, QR_TYPE.SEED_PHRASE_SHARD];
 
-const STEPS = {
-  QR: 'qr',
-  PIN: 'pin',
-};
-
 const STORAGE_DOMAIN = 'com.satoshi-ltd.splitpass';
 
 const VAULT_TYPE = ['Account', 'Finance', 'Social', 'others'];
@@ -95,7 +90,6 @@ export {
   SECURE_TYPES,
   SHARD_TYPES,
   SATOSHI_URLS,
-  STEPS,
   STORAGE_DOMAIN,
   VAULTS_KEYWORDS,
   VAULT_TYPE,
