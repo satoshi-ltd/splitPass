@@ -2,7 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text, View } from '@satoshi-ltd/nano-design';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
@@ -16,7 +16,7 @@ import { CardOption } from '../Viewer/components';
 
 const IS_WEB = Platform.OS === 'web';
 
-const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {} } }) => {
+const Scanner = ({ navigation, route: { params: { readMode = false, values: propValues = [] } = {} } }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
 
@@ -24,18 +24,22 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
   const [scanning, setScanning] = useState(true);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
-  const [values, setValues] = useState(propValues);
+  const [values, setValues] = useState([]);
   const [reveal, setReveal] = useState(false);
 
   useFocusEffect(
     useCallback(async () => {
-      // handleBarcodeScanned();
       setActive(true);
       setScanning(true);
 
       if (!permission?.granted) return requestPermission();
     }, []),
   );
+
+  useEffect(() => {
+    if (readMode && propValues.length) handleBarcodeScanned({ data: propValues[0] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [propValues, readMode]);
 
   const handleBack = () => {
     setActive(false);
@@ -138,14 +142,14 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
           </View>
 
           <View spaceBetween style={[style.section, style.footer]}>
-            {is.scanning && (
+            {scanning && (
               <>
                 {is.shard && (
                   <Text align="center" bold style={style.text}>
                     First shard scanned
                   </Text>
                 )}
-                <Text align="center" caption={is.scanning} color="contentLight">
+                <Text align="center" caption={is.scanning}>
                   {is.shard ? 'Scan the second shard to continue' : 'Place QR code inside the box'}
                 </Text>
               </>
@@ -157,7 +161,7 @@ const Scanner = ({ navigation, route: { params: { values: propValues = [] } = {}
               <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} />
             ) : !is.empty ? (
               <View row wide style={style.cardOptions}>
-                {values.length === 1 && (
+                {values.length === 1 && !readMode && (
                   <CardOption
                     color="accent"
                     icon={ICON.DATABASE_ADD}
