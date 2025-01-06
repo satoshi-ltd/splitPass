@@ -1,3 +1,4 @@
+export * from './Confirm';
 export * from './Form';
 export * from './InputMask';
 export * from './Menu';

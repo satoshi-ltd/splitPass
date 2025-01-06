@@ -4,6 +4,9 @@ export const L10N = {
   APPERANCE_LIGHT: 'Switch to light mode',
 
   DELETE_SECRET: 'Delete Secret',
+  DELETE_SECRET_TITLE: 'Confirm Secret Deletion',
+  DELETE_SECRET_CAPTION:
+    'Deleting this secret is permanent and cannot be undone. You will lose access to this secret and its details. Are you sure you want to continue?',
 
   EXPORT_DATA: 'Export Data',
   EXPORT_DATA_CAPTION: 'JSON archive',
@@ -30,8 +33,11 @@ export const L10N = {
   SAVE_SECRET: 'Save Secret',
   SET_PASSCODE: 'Set passcode',
   SETTINGS: 'Settings',
-  SHARE_QR: 'Share QR',
-  SHARE_CODE: 'Share code',
+  SHARE: 'Share...',
+  SHARE_QR: 'Share via QR Code',
+  SHARE_CODE: 'Share via code',
+  SHARE_NFC: 'Share via NFC',
+  SHARE_BLUETOOTH: 'Share via Bluetooth',
   SUBSCRIPTION: 'Subscription',
 
   TERMS: 'Terms',

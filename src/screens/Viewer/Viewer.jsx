@@ -46,8 +46,14 @@ const Viewer = ({
   };
 
   const handleDelete = async () => {
-    await deleteSecret({ hash });
-    navigation.goBack();
+    navigation.navigate('confirm', {
+      caption: L10N.DELETE_SECRET_CAPTION,
+      title: L10N.DELETE_SECRET_TITLE,
+      onAccept: async () => {
+        await deleteSecret({ hash });
+        navigation.goBack();
+      },
+    });
   };
 
   const handleShareQr = async () => {

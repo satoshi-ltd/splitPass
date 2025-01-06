@@ -5,6 +5,7 @@ export const ICON = {
 
   BACK: 'chevron-left',
   BARCODE: 'barcode',
+  BLUETOOTH: 'bluetooth',
 
   CHECK: 'check-bold',
   CLOSE: 'close',
@@ -16,6 +17,8 @@ export const ICON = {
 
   FAVORITE: 'star',
   INFO: 'information-outline',
+
+  NFC: 'nfc-variant',
 
   PASSCODE: 'calculator',
 
@@ -29,6 +32,7 @@ export const ICON = {
   SECURE: 'lock-outline', // SECURE: 'database-lock-outline',
   SETTINGS: 'cog-outline',
   SHARD: 'call-split',
+  SHARE: 'share-outline',
 
   UNFAVORITE: 'star-outline',
 

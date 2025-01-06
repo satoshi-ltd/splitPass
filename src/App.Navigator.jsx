@@ -6,10 +6,10 @@ import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './App.style';
-import { Logo, Menu } from './components';
+import { Confirm, Logo, Menu } from './components';
 import { useStore } from './contexts';
 import { getNavigationTheme, ICON } from './modules';
-import { Confirm, Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './screens';
+import { Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './screens';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,10 +56,10 @@ export const Navigator = () => {
         <Stack.Screen name="settings" component={Settings} options={{ ...screen, headerRight: undefined }} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
         {/* Modal */}
-        <Stack.Screen name="confirm" component={Confirm} options={modal} />
         <Stack.Screen name="create" component={Create} options={modal} />
         <Stack.Screen name="viewer" component={Viewer} options={modal} />
-
+        {/* Wrapper */}
+        <Stack.Screen name="confirm" component={Confirm} options={modal} />
         <Stack.Screen name="menu" component={Menu} options={modal} />
       </Stack.Navigator>
     </NavigationContainer>
