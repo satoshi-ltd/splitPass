@@ -2,7 +2,7 @@ const DEFAULT_THEME = 'light';
 
 const FIELD = {
   NAME: { name: 'secret', placeholder: 'name...' },
-  PASSCODE: { name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...', secureTextEntry: true },
+  PASSCODE: { mask: true, name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...' },
 };
 
 const QR_TYPE = {
