@@ -6,7 +6,7 @@ import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './App.style';
-import { Logo } from './components';
+import { Logo, Menu } from './components';
 import { useStore } from './contexts';
 import { getNavigationTheme, ICON } from './modules';
 import { Confirm, Create, Home, Onboarding, Scanner, Settings, Vault, Viewer } from './screens';
@@ -59,6 +59,8 @@ export const Navigator = () => {
         <Stack.Screen name="confirm" component={Confirm} options={modal} />
         <Stack.Screen name="create" component={Create} options={modal} />
         <Stack.Screen name="viewer" component={Viewer} options={modal} />
+
+        <Stack.Screen name="menu" component={Menu} options={modal} />
       </Stack.Navigator>
     </NavigationContainer>
   );
