@@ -3,6 +3,7 @@ import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Navigator } from './App.Navigator';
+import { Notification } from './components';
 import { StoreProvider } from './contexts';
 import { LightTheme } from './theme';
 
@@ -19,7 +20,7 @@ export const App = () => {
   return ready ? (
     <StoreProvider>
       <Navigator />
-      {/* <Notification /> */}
+      <Notification />
     </StoreProvider>
   ) : null;
 };

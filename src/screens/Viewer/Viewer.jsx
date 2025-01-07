@@ -7,10 +7,10 @@ import { Share, useWindowDimensions } from 'react-native';
 
 import { CardOption } from './components';
 import { style } from './Viewer.style';
-import { FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
 import { Form, QR } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON, L10N } from '../../modules';
+import { eventEmitter, ICON, L10N } from '../../modules';
 
 const QR_SIZE = 256;
 
@@ -51,6 +51,7 @@ const Viewer = ({
       title: L10N.DELETE_SECRET_TITLE,
       onAccept: async () => {
         await deleteSecret({ hash });
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret deleted correctly.' });
         navigation.goBack();
       },
     });

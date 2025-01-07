@@ -1,5 +1,9 @@
 const DEFAULT_THEME = 'light';
 
+const EVENT = {
+  NOTIFICATION: 'notification',
+};
+
 const FIELD = {
   NAME: { name: 'secret', placeholder: 'name...' },
   PASSCODE: { mask: true, name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...' },
@@ -85,6 +89,7 @@ const SATOSHI_URLS = {
 
 export {
   DEFAULT_THEME,
+  EVENT,
   FIELD,
   QR_TYPE,
   SECURE_TYPES,
