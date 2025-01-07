@@ -1,4 +1,5 @@
 export * from './cypher';
+export * from './eventEmitter';
 export * from './getNavigationTheme';
 export * from './icon';
 export * from './isSeedPhrase';
