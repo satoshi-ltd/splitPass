@@ -7,11 +7,14 @@ import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
 import { QR_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
+import { useStore } from '../../contexts';
 import { Cypher, QRParser } from '../../modules';
+import { PurchaseService } from '../../services';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
 
 const Create = ({ navigation = {} }) => {
+  const { subscription, updateSubscription } = useStore();
   const [form, setForm] = useState(DEFAULT_FORM);
 
   useFocusEffect(useCallback(() => setForm({ ...DEFAULT_FORM }), []));
@@ -35,6 +38,12 @@ const Create = ({ navigation = {} }) => {
       else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
 
       return `${type}${Cypher.encrypt(digits.join(''), passcode)}`;
+    });
+
+    PurchaseService.checkSubscription(subscription).then((activeSubscription) => {
+      if (!activeSubscription) {
+        updateSubscription({});
+      }
     });
 
     navigation.goBack();
