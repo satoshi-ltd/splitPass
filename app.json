@@ -46,7 +46,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
+          "cameraPermission": "$(PRODUCT_NAME) needs camera access to scan QR codes."
         }
       ]
     ]
