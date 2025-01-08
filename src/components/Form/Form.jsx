@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import { style } from './Form.style';
 import { ICON } from '../../modules';
+import { InputMask } from '../InputMask';
 
 const Form = ({ fields, onCancel = () => {}, onSubmit = () => {}, ...others }) => {
   const [value, setValue] = useState([]);
@@ -23,14 +24,14 @@ const Form = ({ fields, onCancel = () => {}, onSubmit = () => {}, ...others }) =
   return (
     <Card gap outlined row small style={[style.container, others.style]}>
       <View gap style={style.inputs}>
-        {fields?.map((field) => (
-          <Input
-            {...field}
-            key={field.name}
-            value={value[field.name]}
-            onChange={(fieldValue) => setValue({ ...value, [field.name]: fieldValue })}
-          />
-        ))}
+        {fields?.map(({ mask = false, ...field }) =>
+          React.createElement(mask ? InputMask : Input, {
+            ...field,
+            key: field.name,
+            value: value[field.name],
+            onChange: (fieldValue) => setValue({ ...value, [field.name]: fieldValue }),
+          }),
+        )}
       </View>
       <View gap row>
         <Button

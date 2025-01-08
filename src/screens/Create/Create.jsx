@@ -6,23 +6,20 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
 import { QR_TYPE } from '../../App.constants';
-import { Switch } from '../../components';
+import { InputMask, Switch } from '../../components';
+import { useStore } from '../../contexts';
 import { Cypher, QRParser } from '../../modules';
+import { PurchaseService } from '../../services';
 
-const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } = QR_TYPE;
 
 const Create = ({ navigation = {} }) => {
+  const { secrets, subscription, updateSubscription } = useStore();
   const [form, setForm] = useState(DEFAULT_FORM);
 
-  useFocusEffect(
-    useCallback(() => {
-      setForm({
-        ...DEFAULT_FORM,
-        name: 'Seedsigner',
-        secret: 'roast soon winter over sentence shaft shock side mango select screen neither',
-      });
-    }, []),
-  );
+  const isPremium = !!subscription?.productIdentifier;
+
+  useFocusEffect(useCallback(() => setForm({ ...DEFAULT_FORM }), []));
 
   useEffect(() => {
     setForm({ ...form, passcode: undefined });
@@ -31,6 +28,16 @@ const Create = ({ navigation = {} }) => {
 
   const handlePressContinue = () => {
     const { name, passcode, secret, split = false } = form;
+
+    const shardSecretsLength = secrets.filter((s) => [PASSWORD_SHARD, SEED_PHRASE_SHARD].includes(s.value[0])).length;
+    if (!isPremium && form.split && shardSecretsLength >= 2) {
+      return PurchaseService.getProducts()
+        .then((plans) => {
+          navigation.navigate('subscription', { plans });
+        })
+        .catch((error) => alert(error));
+    }
+
     const qr = QRParser.encode(secret, !!passcode);
     let values = split ? QRParser.split(qr) : [qr];
 
@@ -43,6 +50,12 @@ const Create = ({ navigation = {} }) => {
       else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
 
       return `${type}${Cypher.encrypt(digits.join(''), passcode)}`;
+    });
+
+    PurchaseService.checkSubscription(subscription).then((activeSubscription) => {
+      if (!activeSubscription) {
+        updateSubscription({});
+      }
     });
 
     navigation.goBack();
@@ -83,11 +96,10 @@ const Create = ({ navigation = {} }) => {
           <Text bold tiny>
             Secret
           </Text>
-          <Input
+          <InputMask
             align="right"
-            multiline={form.secret?.includes(' ')}
+            multiline
             placeholder="secret..."
-            secureTextEntry
             value={form.secret}
             onChange={(secret) => setForm({ ...form, secret })}
             style={style.input}
@@ -115,13 +127,12 @@ const Create = ({ navigation = {} }) => {
               <Text bold tiny color={form.split ? 'disabled' : undefined}>
                 6-digit passcode
               </Text>
-              <Input
+              <InputMask
                 align="right"
                 editable={!form.split}
                 keyboard="numeric"
                 maxLength={6}
                 placeholder="passcode..."
-                secureTextEntry
                 value={form.passcode}
                 onChange={(passcode) => setForm({ ...form, passcode })}
                 style={style.input}

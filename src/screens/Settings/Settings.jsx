@@ -1,39 +1,39 @@
 import { Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Linking } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Setting } from './components';
 import { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
-// import { IS_WEB } from '../../App.constants';
 import { DEFAULT_THEME } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
-import { BackupService, NotificationsService } from '../../services';
+import { BackupService, NotificationsService, PurchaseService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
 
+const IS_WEB = Platform.OS === 'web';
+
 const Settings = ({ navigation = {} }) => {
-  const { secrets, settings, importBackup = () => {}, updateSettings } = useStore();
+  const { secrets, settings, importBackup = () => {}, subscription, updateSettings, updateSubscription } = useStore();
 
   const [activity, setActivity] = useState();
 
-  const { reminders, subscription, theme } = settings;
+  const { reminders, theme } = settings;
   const isPremium = !!subscription?.productIdentifier;
 
   const handleOption = ({ callback, screen, url }) => {
     if (url) Linking.openURL(url);
     if (screen) navigation.navigate(screen);
-    // else if (callback === 'handleSubscription') handleSubscription();
+    else if (callback === 'handleSubscription') handleSubscription();
     else if (callback === 'handleExport') handleExport();
     else if (callback === 'handleImport') handleImport();
-    // else if (callback === 'handleRestorePurchases') handleRestorePurchases();
-    // else if (callback === 'handleSync') handleSync();
+    else if (callback === 'handleRestorePurchases') handleRestorePurchases();
   };
 
   const handleExport = async () => {
-    // if (!IS_WEB && !isPremium) return handleSubscription('export');
+    if (!IS_WEB && !isPremium) return handleSubscription('export');
 
     setActivity({ ...activity, handleExport: true });
     const exported = await BackupService.export({ secrets, settings });
@@ -42,7 +42,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleImport = async () => {
-    // if (!IS_WEB && !isPremium) return handleSubscription('import');
+    if (!IS_WEB && !isPremium) return handleSubscription('import');
 
     setActivity({ ...activity, handleImport: true });
     const backup = await BackupService.import().catch((error) => alert(error));
@@ -63,29 +63,29 @@ const Settings = ({ navigation = {} }) => {
     }
   };
 
-  // const handleSubscription = (activityState) => {
-  //   if (subscription?.productIdentifier) navigation.navigate('subscription');
-  //   setActivity(activityState);
-  //   PurchaseService.getProducts()
-  //     .then((plans) => {
-  //       navigation.navigate('subscription', { plans });
-  //       setActivity();
-  //     })
-  //     .catch((error) => alert(error));
-  // };
+  const handleSubscription = (activityState) => {
+    if (subscription?.productIdentifier) navigation.navigate('subscription');
+    setActivity(activityState);
+    PurchaseService.getProducts()
+      .then((plans) => {
+        navigation.navigate('subscription', { plans });
+        setActivity();
+      })
+      .catch((error) => alert(error));
+  };
 
-  // const handleRestorePurchases = () => {
-  //   setActivity('restore');
-  //   PurchaseService.restore()
-  //     .then((activeSubscription) => {
-  //       if (activeSubscription) {
-  //         updateSubscription(activeSubscription);
-  //         alert(L10N.PURCHASE_RESTORED);
-  //         setActivity();
-  //       }
-  //     })
-  //     .catch((error) => alert(error));
-  // };
+  const handleRestorePurchases = () => {
+    setActivity('restore');
+    PurchaseService.restore()
+      .then((activeSubscription) => {
+        if (activeSubscription) {
+          updateSubscription(activeSubscription);
+          alert(L10N.PURCHASE_RESTORED);
+          setActivity();
+        }
+      })
+      .catch((error) => alert(error));
+  };
 
   const handleTheme = () => {
     StyleSheet.build(StyleSheet.value('$theme') === DEFAULT_THEME ? DarkTheme : LightTheme);

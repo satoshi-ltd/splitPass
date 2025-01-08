@@ -33,18 +33,20 @@ export const QRParser = {
   },
 
   decode: (qr = '', pin) => {
-    let [type, ...digits] = qr;
+    const [type, ...rawDigits] = qr;
     const { regexp, set, join } = getConfig(type);
 
-    digits = digits.join('');
-    if (pin) digits = Cypher.decrypt(digits, pin);
+    let digits = rawDigits.join('');
+    if (pin) {
+      digits = Cypher.decrypt(digits, pin);
+      // ! TODO: Should alert when there is no digits (indicates is not valid password)
+      if (digits?.length !== rawDigits.join('').length) return undefined;
+    }
 
-    const value = digits
+    return digits
       .match(regexp || [])
       .map((index) => set[parseInt(index - 1)])
       .join(join);
-
-    return value;
   },
 
   split: (qr = '', shares = 3) => {

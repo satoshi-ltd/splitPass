@@ -5,7 +5,15 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { StorageService } from '../services';
 import { DarkTheme, LightTheme } from '../theme';
 import { consolidate } from './modules';
-import { createSecret, readSecret, updateSecret, deleteSecret, updateSettings, importBackup } from './reducers';
+import {
+  createSecret,
+  readSecret,
+  updateSecret,
+  deleteSecret,
+  updateSettings,
+  updateSubscription,
+  importBackup,
+} from './reducers';
 import { DEFAULTS, FILENAME } from './store.constants';
 import { DEFAULT_THEME } from '../App.constants';
 
@@ -25,6 +33,7 @@ const StoreProvider = ({ children }) => {
         store,
         secrets: await store.get('secrets')?.value,
         settings: await store.get('settings')?.value,
+        subscription: await store.get('subscription')?.value,
       });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,6 +50,7 @@ const StoreProvider = ({ children }) => {
         deleteSecret: (...props) => deleteSecret(...props, [state, setState]),
         //
         updateSettings: (...props) => updateSettings(...props, [state, setState]),
+        updateSubscription: (...props) => updateSubscription(...props, [state, setState]),
         importBackup: (...props) => importBackup(...props, [state, setState]),
       }}
     >

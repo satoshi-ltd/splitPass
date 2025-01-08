@@ -5,9 +5,9 @@ const DEFAULTS = {
   settings: {
     onboarded: false,
     reminders: [1],
-    subscription: {},
     theme: DEFAULT_THEME,
   },
+  subscription: {},
 };
 
 const FILENAME = 'com.satoshi-ltd.splitpass';

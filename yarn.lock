@@ -1769,6 +1769,11 @@
   dependencies:
     nanoid "^3.1.23"
 
+"@revenuecat/purchases-typescript-internal@13.14.0":
+  version "13.14.0"
+  resolved "https://registry.yarnpkg.com/@revenuecat/purchases-typescript-internal/-/purchases-typescript-internal-13.14.0.tgz#7baa3848c2b34819c0eac725c81e18c78051cbb2"
+  integrity sha512-PVB3mfqElRwewyufdd3WEbLj7fyGQ36fAGMC6nRdA86H9tZI8TwH3db1BBCX49SK5QrDaaOF7E3VHXXe0/zB5w==
+
 "@rtsao/scc@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@rtsao/scc/-/scc-1.1.0.tgz#927dd2fae9bc3361403ac2c7a00c32ddce9ad7e8"
@@ -1791,9 +1796,9 @@
     prettier "^2.2.1"
 
 "@satoshi-ltd/nano-design@^0.2":
-  version "0.2.45"
-  resolved "https://registry.yarnpkg.com/@satoshi-ltd/nano-design/-/nano-design-0.2.45.tgz#d80797b7a9cbdd347858cbfea0b3bd4afa9273f8"
-  integrity sha512-o5Oj8mgO/zOKcRaYEbZfQznDIDqzAOI1O1oqazZ83UDCrYjQzIXMGXycQ9M19AkGC4PTPizf/d/sT5Ou3QAjBQ==
+  version "0.2.48"
+  resolved "https://registry.yarnpkg.com/@satoshi-ltd/nano-design/-/nano-design-0.2.48.tgz#e6bd04c086c64f76167bfc928fb5d0322dae89f2"
+  integrity sha512-ebJu86aGQBGHN+wqUmeF2RgHVmA6jqvBw4lfbt6xWGuhXGJvErM/ya1GCMmO2Mjhy4RcsnYZyarA38dIFhbp5A==
   dependencies:
     expo "^52.0.0"
 
@@ -8490,6 +8495,13 @@ react-native-extended-stylesheet@^0.12.0:
   dependencies:
     css-mediaquery "^0.1.2"
     object-resolve-path "^1.1.0"
+
+react-native-purchases@^8.5.0:
+  version "8.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-purchases/-/react-native-purchases-8.5.0.tgz#62eca81463ea5031d756e888733e3307880d5119"
+  integrity sha512-Qu8P+ZNKH9e9mRnwD7lsdlgrN4HPy79fStSe9GDvVD89922jO0isdUz2m1d2vLAxR2Yawq+O0ggi0uUhA1NzUg==
+  dependencies:
+    "@revenuecat/purchases-typescript-internal" "13.14.0"
 
 react-native-qrcode-styled@^0.3.0:
   version "0.3.3"

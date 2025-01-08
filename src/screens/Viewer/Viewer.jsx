@@ -7,10 +7,10 @@ import { Share, useWindowDimensions } from 'react-native';
 
 import { CardOption } from './components';
 import { style } from './Viewer.style';
-import { FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
 import { Form, QR } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON, L10N } from '../../modules';
+import { eventEmitter, ICON, L10N } from '../../modules';
 
 const QR_SIZE = 256;
 
@@ -46,8 +46,15 @@ const Viewer = ({
   };
 
   const handleDelete = async () => {
-    await deleteSecret({ hash });
-    navigation.goBack();
+    navigation.navigate('confirm', {
+      caption: L10N.DELETE_SECRET_CAPTION,
+      title: L10N.DELETE_SECRET_TITLE,
+      onAccept: async () => {
+        await deleteSecret({ hash });
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret deleted correctly.' });
+        navigation.goBack();
+      },
+    });
   };
 
   const handleShareQr = async () => {
@@ -59,11 +66,31 @@ const Viewer = ({
     await Share.share({ message: `splitpass://${values[currentIndex]}` }).catch(() => {});
   };
 
+  const handleGoToScanner = () => {
+    navigation.goBack();
+    navigation.navigate('scanner', { readMode: true, values });
+  };
+
   const handleFavorite = async () => {
     const nextFavorite = !favorite;
 
     await updateSecret({ hash, favorite: nextFavorite });
     setFavorite(nextFavorite);
+  };
+
+  const handleShareNFC = () => {};
+
+  const handleShareBluetooth = () => {};
+
+  const handleShare = () => {
+    const options = [
+      { text: L10N.SHARE_QR, icon: ICON.QRCODE, onPress: handleShareQr },
+      { text: L10N.SHARE_CODE, icon: ICON.BARCODE, onPress: handleShareCode },
+      { disabled: true, text: L10N.SHARE_NFC, icon: ICON.NFC, onPress: handleShareNFC },
+      { disabled: true, text: L10N.SHARE_BLUETOOTH, icon: ICON.BLUETOOTH, onPress: handleShareBluetooth },
+    ];
+
+    navigation.navigate('menu', { options });
   };
 
   const next = () => {
@@ -157,8 +184,8 @@ const Viewer = ({
             <CardOption icon={ICON.PASSCODE} text={L10N.SET_PASSCODE} onPress={() => setFields([FIELD.PASSCODE])} />
           ) : (
             <>
-              <CardOption icon={ICON.QRCODE} text={L10N.SHARE_QR} onPress={handleShareQr} />
-              <CardOption icon={ICON.BARCODE} text={L10N.SHARE_CODE} onPress={handleShareCode} />
+              {is.shard && readMode && <CardOption icon={ICON.SCAN} text={'Scan shard'} onPress={handleGoToScanner} />}
+              <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
             </>
           )}
         </View>
