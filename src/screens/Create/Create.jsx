@@ -11,11 +11,13 @@ import { useStore } from '../../contexts';
 import { Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
-const { PASSWORD, PASSWORD_ENCRYPTED, SEED_PHRASE, SEED_PHRASE_ENCRYPTED } = QR_TYPE;
+const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } = QR_TYPE;
 
 const Create = ({ navigation = {} }) => {
-  const { subscription, updateSubscription } = useStore();
+  const { secrets, subscription, updateSubscription } = useStore();
   const [form, setForm] = useState(DEFAULT_FORM);
+
+  const isPremium = !!subscription?.productIdentifier;
 
   useFocusEffect(useCallback(() => setForm({ ...DEFAULT_FORM }), []));
 
@@ -26,6 +28,16 @@ const Create = ({ navigation = {} }) => {
 
   const handlePressContinue = () => {
     const { name, passcode, secret, split = false } = form;
+
+    const shardSecretsLength = secrets.filter((s) => [PASSWORD_SHARD, SEED_PHRASE_SHARD].includes(s.value[0])).length;
+    if (!isPremium && form.split && shardSecretsLength >= 2) {
+      return PurchaseService.getProducts()
+        .then((plans) => {
+          navigation.navigate('subscription', { plans });
+        })
+        .catch((error) => alert(error));
+    }
+
     const qr = QRParser.encode(secret, !!passcode);
     let values = split ? QRParser.split(qr) : [qr];
 
