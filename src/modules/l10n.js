@@ -5,6 +5,10 @@ export const L10N = {
 
   CHOOSE_PLAN: 'Choose your plan',
   CLOSE: 'Close',
+  CONFIRM_IMPORT: 'Confirm import',
+  CONFIRM_IMPORT_CAPTION: ({ secrets = [] }) =>
+    `Ready to import the JSON file? It'll update your vaults with ${secrets.length} secrets. Just make sure the file is good to go—this action can't be undone!"`,
+  CONFIRM_IMPORT_SUCCESS: 'Imported successfully.',
 
   DELETE_SECRET: 'Delete Secret',
   DELETE_SECRET_TITLE: 'Confirm Secret Deletion',
