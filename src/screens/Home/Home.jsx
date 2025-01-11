@@ -24,7 +24,8 @@ const Home = ({ navigation }) => {
   const vaults = groupByVault(secrets);
   const subtitleProps = { bold: true, secondary: true, subtitle: true };
 
-  const [lastViewed] = (secrets.length && secrets.sort((a, b) => b.readAt - a.readAt)) || [];
+  const [lastViewed] =
+    (secrets.length && secrets.sort((a, b) => new Date(b.readAt || null) - new Date(a.readAt || null))) || [];
 
   // !TODO: We should determine if is a shard or not
 
