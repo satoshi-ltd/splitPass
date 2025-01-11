@@ -53,6 +53,9 @@ const Settings = ({ navigation = {} }) => {
         title: L10N.CONFIRM_IMPORT,
         onAccept: async () => {
           await importBackup(backup);
+          if (backup?.settings?.theme) {
+            StyleSheet.build(backup.settings.theme === DEFAULT_THEME ? LightTheme : DarkTheme);
+          }
           navigation.navigate('home');
           alert(L10N.CONFIRM_IMPORT_SUCCESS);
           setActivity({ ...activity, handleImport: false });
