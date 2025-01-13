@@ -33,6 +33,9 @@ export const L10N = {
   LIFETIME: 'Lifetime',
   LIFETIME_DESCRIPTION: "Pay once and don't worry ever",
 
+  NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
+  NFC_WRITE_ERROR: 'Unable to write to NFC tag.',
+
   OFF: 'Off',
   ON: 'On',
 
