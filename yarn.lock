@@ -8941,6 +8941,11 @@ react-native-extended-stylesheet@^0.12.0:
     css-mediaquery "^0.1.2"
     object-resolve-path "^1.1.0"
 
+react-native-nfc-manager@^3.16.1:
+  version "3.16.1"
+  resolved "https://registry.yarnpkg.com/react-native-nfc-manager/-/react-native-nfc-manager-3.16.1.tgz#a08a192e862864d51245f0aeb59d62020a1849f4"
+  integrity sha512-rYhJSThAxAT4AVpZzZJc3X1jiTnZQlmrzk9DeeWLstUTXCoECt/75brLgn+EiXK+AfONnMnFdsSzIyruVWyIdw==
+
 react-native-purchases@^8.5.0:
   version "8.5.0"
   resolved "https://registry.yarnpkg.com/react-native-purchases/-/react-native-purchases-8.5.0.tgz#62eca81463ea5031d756e888733e3307880d5119"

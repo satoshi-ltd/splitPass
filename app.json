@@ -13,9 +13,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#111"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.satoshi-limited.splitpass",
@@ -29,10 +27,7 @@
       },
       "package": "com.satoshilimited.splitpass",
       "versionCode": 3,
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -47,6 +42,15 @@
         "expo-camera",
         {
           "cameraPermission": "$(PRODUCT_NAME) needs camera access to scan QR codes."
+        }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "Necesitamos usar NFC para leer tarjetas",
+          "selectIdentifiers": ["*"],
+          "systemCodes": ["*"],
+          "includeNdefEntitlement": false
         }
       ]
     ]
