@@ -5,13 +5,13 @@ import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
-import NfcManager from 'react-native-nfc-manager';
 
 import { style } from './Scanner.style';
 import { FIELD, SECURE_TYPES, SHARD_TYPES, QR_TYPE } from '../../App.constants';
 import { Form } from '../../components';
 import { useStore } from '../../contexts';
 import { ICON, L10N, QRParser } from '../../modules';
+// import { NFCService } from '../../services';
 // ! TODO: Refacto
 import { CardOption } from '../Viewer/components';
 
@@ -22,7 +22,6 @@ const Scanner = ({ navigation, route: { params: { readMode = false, values: prop
   const { createSecret } = useStore();
 
   const [active, setActive] = useState(false);
-  const [hasNFC, setHasNFC] = useState(false);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
   const [reveal, setReveal] = useState(false);
@@ -38,28 +37,13 @@ const Scanner = ({ navigation, route: { params: { readMode = false, values: prop
     }, []),
   );
 
-  useEffect(() => {
-    const setupNFC = async () => {
-      try {
-        const supported = await NfcManager.isSupported();
-        setHasNFC(supported);
-
-        if (supported) {
-          await NfcManager.start();
-        }
-      } catch (error) {
-        console.log('Error al inicializar NFC:', error);
-      }
-    };
-
-    setupNFC();
-
-    return () => {
-      NfcManager.cancelTechnologyRequest().catch(() => {});
-    };
-  }, []);
-
-  console.log({ hasNFC });
+  // useEffect(() => {
+  //   async function pepito() {
+  //     const data = await NFCService.readTag();
+  //     alert(data);
+  //   }
+  //   pepito();
+  // }, []);
 
   useEffect(() => {
     if (readMode && propValues.length) handleBarcodeScanned({ data: propValues[0] });
