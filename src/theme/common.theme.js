@@ -28,5 +28,6 @@ export const CommonTheme = {
   $qrSize: Dimensions.get('window').width * 0.66,
 
   // -- <screens> --------------------------------------------------------------
-  $importBackgroundColor: 'rgba(0, 0, 0, 0.85)',
+  $scannerBackground: '#000000',
+  $scannerBackgroundOpacity: 'rgba(0, 0, 0, 0.85)',
 };

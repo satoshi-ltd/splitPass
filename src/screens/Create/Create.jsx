@@ -5,13 +5,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
-import { QR_TYPE } from '../../App.constants';
+import { SECRET_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
 import { Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
-const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } = QR_TYPE;
+const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
+  SECRET_TYPE;
 
 const Create = ({ navigation = {} }) => {
   const { secrets, subscription, updateSubscription } = useStore();

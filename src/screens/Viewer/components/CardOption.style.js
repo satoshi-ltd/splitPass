@@ -5,6 +5,12 @@ export const style = StyleSheet.create({
     flex: 1,
   },
 
+  squared: {
+    flex: 0,
+    maxWidth: '$viewOffset * 4.35',
+    minWidth: '$viewOffset * 4.35',
+  },
+
   content: {
     gap: '$viewOffset / 2',
     paddingHorizontal: '$viewOffset',

@@ -24,6 +24,8 @@ export const L10N = {
   ERROR_PURCHASE: 'Purchase failed',
   ERROR_RESTORE: 'Restore failed',
 
+  ERROR_NFC_NOT_SUPPORTED: 'NFC is not supported by this device.',
+
   GENERAL: 'General',
   GET_MONEY_PREMIUM: 'Get môney Premium',
 
@@ -50,14 +52,22 @@ export const L10N = {
   REVEAL_SECRET: 'Reveal Secret',
   RESCAN: 'Rescan',
 
-  SAVE_SECRET: 'Save Secret',
+  SAVE_IN_DEVICE: 'Save in Phone',
+  SAVE_IN_CARD: 'Save in Card',
+  SPLIT_CARD: 'split|Card',
+
+  SCANNER_NFC_TITLE: 'Bring your NFC card close to your phone',
+  SCANNER_NFC_CAPTION: 'Hold the NFC card near your phone to securely read the secret',
+
+  SCANNER_QR_TITLE: 'Bring your QR code close to your phone',
+  SCANNER_QR_CAPTION: 'Hold the QR code inside the box to securely read the secret',
+
   SET_PASSCODE: 'Set passcode',
   SETTINGS: 'Settings',
   SHARE: 'Share...',
-  SHARE_QR: 'Share via QR Code',
-  SHARE_CODE: 'Share via code',
-  SHARE_NFC: 'Share via NFC',
-  SHARE_BLUETOOTH: 'Share via Bluetooth',
+  // SHARE_QR: 'Share via QR Code',
+  // SHARE_CODE: 'Share via code',
+  // SHARE_NFC: 'Share via NFC',
   START_TRIAL: 'Start free 7 day trial',
   SUBSCRIPTION: 'Subscription',
   SUBSCRIPTION_ACTUAL_PLAN: 'Actual plan',

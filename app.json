@@ -47,7 +47,7 @@
       [
         "react-native-nfc-manager",
         {
-          "nfcPermission": "Necesitamos usar NFC para leer tarjetas",
+          "nfcPermission": "$(PRODUCT_NAME) needs NFC access to scan cards.",
           "selectIdentifiers": ["*"],
           "systemCodes": ["*"],
           "includeNdefEntitlement": false

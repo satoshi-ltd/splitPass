@@ -13,7 +13,6 @@ export const style = StyleSheet.create({
   },
 
   name: {
-    gap: '$viewOffset / 2',
     marginTop: '$viewOffset',
   },
 

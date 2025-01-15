@@ -9,7 +9,7 @@ const FIELD = {
   PASSCODE: { mask: true, name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...' },
 };
 
-const QR_TYPE = {
+const SECRET_TYPE = {
   PASSWORD: '1',
   PASSWORD_SECURE: '2',
   PASSWORD_SHARD: '3',
@@ -18,9 +18,9 @@ const QR_TYPE = {
   SEED_PHRASE_SHARD: '6',
 };
 
-const SECURE_TYPES = [QR_TYPE.PASSWORD_SECURE, QR_TYPE.SEED_PHRASE_SECURE];
+const SECURE_TYPES = [SECRET_TYPE.PASSWORD_SECURE, SECRET_TYPE.SEED_PHRASE_SECURE];
 
-const SHARD_TYPES = [QR_TYPE.PASSWORD_SHARD, QR_TYPE.SEED_PHRASE_SHARD];
+const SHARD_TYPES = [SECRET_TYPE.PASSWORD_SHARD, SECRET_TYPE.SEED_PHRASE_SHARD];
 
 const STORAGE_DOMAIN = 'com.satoshi-ltd.splitpass';
 
@@ -87,11 +87,17 @@ const SATOSHI_URLS = {
   PRIVACY: 'https://www.satoshi-ltd.com/privacy-policy/',
 };
 
+const READER_TYPE = {
+  QR: 1,
+  NFC: 2,
+};
+
 export {
   DEFAULT_THEME,
   EVENT,
   FIELD,
-  QR_TYPE,
+  SECRET_TYPE,
+  READER_TYPE,
   SECURE_TYPES,
   SHARD_TYPES,
   SATOSHI_URLS,

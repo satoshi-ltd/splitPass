@@ -1,4 +1,4 @@
-import { Card, Icon, Pressable, Text, View } from '@satoshi-ltd/nano-design';
+import { Card, Icon, Pressable, Tabs, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
@@ -6,7 +6,6 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Setting.style';
 import { DEFAULT_THEME } from '../../../App.constants';
-import { Tabs } from '../../../components';
 import { useStore } from '../../../contexts';
 import { ICON } from '../../../modules';
 

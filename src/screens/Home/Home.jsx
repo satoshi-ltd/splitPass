@@ -12,13 +12,15 @@ import { ICON } from '../../modules';
 const Home = ({ navigation }) => {
   const { settings: { subscription } = {}, secrets = [] } = useStore();
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     // const [secret] = secrets;
-  //     // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
-  //     // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
-  //   }, 10);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      const [secret] = secrets;
+      // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
+      // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
+
+      // navigation.navigate('splitcard', { writeMode: secret });
+    }, 10);
+  }, []);
 
   const favorites = getFavorites(secrets);
   const vaults = groupByVault(secrets);
@@ -31,7 +33,7 @@ const Home = ({ navigation }) => {
 
   return (
     <Screen disableScroll style={style.screen}>
-      <ScrollView style={style.scrollview}>
+      <ScrollView contentContainerStyle={style.scrollviewContentContainer}>
         <View row spaceBetween style={[style.section, style.cardActions]}>
           <CardAction
             color="accent"

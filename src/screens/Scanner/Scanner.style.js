@@ -1,41 +1,44 @@
 import { Dimensions } from 'react-native';
-import { Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
     height: Dimensions.get('window').height,
     width: Dimensions.get('window').width,
+    paddingTop: '$viewOffset * 5',
   },
 
-  scanner: {
-    height: '100%',
-    width: '100%',
+  camera: {
     position: 'absolute',
     top: 0,
     left: 0,
+    height: '100%',
+    width: '100%',
   },
 
-  header: {
-    backgroundColor: '$importBackgroundColor',
-    ...Platform.select({ web: { paddingTop: '$viewOffset' } }),
+  background: {
+    backgroundColor: '$scannerBackgroundOpacity',
   },
 
-  headerLeft: {
-    marginLeft: '$viewOffset',
-    width: '$spaceXXL',
+  instructions: {
+    paddingVertical: '$viewOffset * 2',
   },
 
-  headerRight: {
-    marginRight: '$viewOffset',
-    width: '$spaceXXL',
+  instructionsContent: {
+    maxWidth: '66%',
+  },
+
+  tabs: {
+    alignSelf: 'center',
+    marginBottom: '$viewOffset * 2',
   },
 
   section: {
-    backgroundColor: '$importBackgroundColor',
+    backgroundColor: '$scannerBackgroundOpacity',
+    // backgroundColor: 'rgba(0,255,0,0.1)',
     flex: 1,
     height: '100%',
-    padding: '$viewOffset',
+    // padding: '$viewOffset',
   },
 
   frame: {
@@ -45,6 +48,10 @@ export const style = StyleSheet.create({
 
   cardOptions: {
     gap: '$viewOffset / 2',
+  },
+
+  scanningText: {
+    marginTop: '$viewOffset',
   },
 
   corner: {
@@ -96,7 +103,20 @@ export const style = StyleSheet.create({
   },
 
   footer: {
+    backgroundColor: '$scannerBackgroundOpacity',
     flex: 2,
-    paddingVertical: '$viewOffset * 2',
+    justifyContent: 'flex-end',
+    paddingBottom: '$viewOffset * 2',
+    paddingHorizontal: '$viewOffset',
+  },
+  // --
+
+  // -- Scanner.NFC (partial)
+  scannerNFC: {
+    width: '100%',
+    // paddingBottom: '$viewOffset',
+    // marginTop: '$viewOffset * 2',
+    // maxWidth: '80%',
+    // height: '80%',
   },
 });

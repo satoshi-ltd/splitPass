@@ -1,9 +1,9 @@
 import { isSeedPhrase } from './isSeedPhrase';
 import { bip39, chars } from './repositories';
-import { QR_TYPE } from '../App.constants';
+import { SECRET_TYPE } from '../App.constants';
 import { Cypher } from './cypher';
 
-const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, PASSWORD_SHARD, SEED_PHRASE_SHARD } = QR_TYPE;
+const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, PASSWORD_SHARD, SEED_PHRASE_SHARD } = SECRET_TYPE;
 
 const CONFIG = {
   password: { regexp: /.{1,2}/g, set: chars, join: '', mask: '00' },
