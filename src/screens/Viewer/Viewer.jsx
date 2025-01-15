@@ -5,10 +5,9 @@ import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 
-import { CardOption } from './components';
 import { style } from './Viewer.style';
 import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import { Form, QR } from '../../components';
+import { CardOption, Form, QR } from '../../components';
 import { useStore } from '../../contexts';
 import { eventEmitter, ICON, L10N } from '../../modules';
 

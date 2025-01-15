@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './CardOption.style';
-import { DEFAULT_THEME } from '../../../App.constants';
-import { useStore } from '../../../contexts';
+import { DEFAULT_THEME } from '../../App.constants';
+import { useStore } from '../../contexts';
 
 const CardOption = ({ color, icon, squared = false, text, ...others }) => {
   const { settings: { theme } = {} } = useStore();
