@@ -6,6 +6,7 @@ const findVault = ({ name } = {}) => {
       return vault;
     }
   }
+
   return 'others';
 };
 

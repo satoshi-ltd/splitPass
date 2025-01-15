@@ -8,7 +8,7 @@ export const style = StyleSheet.create({
   scrollviewContentContainer: {
     paddingBottom: '$viewOffset',
     paddingHorizontal: '$viewOffset',
-    paddingTop: '$viewOffset * 5',
+    paddingTop: '$viewOffset * 4',
   },
 
   section: {

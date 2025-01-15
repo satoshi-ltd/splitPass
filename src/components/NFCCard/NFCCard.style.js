@@ -7,12 +7,11 @@ export const style = StyleSheet.create({
     paddingHorizontal: '$spaceL',
     paddingVertical: '$spaceL - $spaceXS',
     width: 328,
-
+    // shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
-    // Sombra para Android
     elevation: 8,
   },
 

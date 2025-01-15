@@ -5,7 +5,7 @@ export const style = StyleSheet.create({
     height: '100%',
     paddingBottom: '$viewOffset * 2',
     paddingHorizontal: '$viewOffset',
-    paddingTop: '$viewOffset * 5',
+    paddingTop: '$viewOffset * 4',
   },
 
   header: {

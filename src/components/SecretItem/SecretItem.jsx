@@ -7,7 +7,7 @@ import { DEFAULT_THEME, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { ICON } from '../../modules';
 
-const SecretItem = ({ favorite = false, name, value, vault = 1, createdAt, onPress }) => {
+const SecretItem = ({ favorite = false, name, value = '', vault = 1, createdAt, onPress }) => {
   const { settings: { theme } = {} } = useStore();
 
   const [type] = value;
