@@ -8,9 +8,10 @@ import { getFavorites, groupByVault } from './modules';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
+import { PurchaseService } from '../../services';
 
 const Home = ({ navigation }) => {
-  const { settings: { subscription } = {}, secrets = [] } = useStore();
+  const { subscription = {}, secrets = [] } = useStore();
 
   useEffect(() => {
     setTimeout(() => {
@@ -20,7 +21,7 @@ const Home = ({ navigation }) => {
 
       // navigation.navigate('splitcard', { writeMode: secret });
       // navigation.navigate('scanner', { writeMode: secret });
-      navigation.navigate('subscription');
+      // navigation.navigate('subscription');
     }, 10);
   }, []);
 
@@ -30,6 +31,14 @@ const Home = ({ navigation }) => {
 
   const [lastViewed] =
     (secrets.length && secrets.sort((a, b) => new Date(b.readAt || null) - new Date(a.readAt || null))) || [];
+
+  const handleSubscription = () => {
+    PurchaseService.getProducts()
+      .then((plans) => {
+        navigation.navigate('subscription', { plans });
+      })
+      .catch((error) => alert(error));
+  };
 
   // !TODO: We should determine if is a shard or not
 
@@ -69,7 +78,7 @@ const Home = ({ navigation }) => {
         </View>
 
         {!subscription?.productIdentifier && (
-          <Card onPress={() => navigation.navigate('subscription')} style={[style.banner, style.section]}>
+          <Card onPress={handleSubscription} style={[style.banner, style.section]}>
             <View row>
               <Icon name={ICON.STAR} style={style.bannerIcon} />
               <Text bold caption>

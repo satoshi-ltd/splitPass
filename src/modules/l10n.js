@@ -1,5 +1,6 @@
 export const L10N = {
   ABOUT: 'About split|Pass',
+  ANNUALY: 'Annualy',
   APPERANCE_DARK: 'Switch to dark mode',
   APPERANCE_LIGHT: 'Switch to light mode',
 
@@ -7,6 +8,7 @@ export const L10N = {
   BANNER_SUBSCRIPTION_TITLE: 'Unlock Premium Features in split|Pass',
   BANNER_SUBSCRIPTION_DESCRIPTION: 'Discover advanced security options and enhanced control for your secrets.',
 
+  CANCEL_ANYTIME: 'Cancel anytime',
   CHOOSE_PLAN: 'Choose your plan',
   CLOSE: 'Close',
   CONFIRM_EXPORT_SUCCESS: 'Export successful! Your data has been saved.',
@@ -39,6 +41,8 @@ export const L10N = {
 
   LIFETIME: 'Lifetime',
   LIFETIME_DESCRIPTION: "Pay once and don't worry ever",
+
+  MONTH: 'month',
 
   NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
   NFC_ACCESS_ERROR: 'Error accessing your split|Card. Please try again.',

@@ -85,7 +85,7 @@ const SubscriptionOptions = ({ route: { params: { plans = [] } = {} } = {}, navi
 
       <View align="center">
         {isLifetime ? (
-          <Text align="center" bold caption>
+          <Text align="center" bold caption style={style.lifetime}>
             {`${planData?.price || 'THB 3,990thb'} ${L10N.LIFETIME}`}
           </Text>
         ) : (

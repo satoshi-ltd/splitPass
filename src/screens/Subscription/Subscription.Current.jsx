@@ -11,6 +11,10 @@ import { verboseDate } from '../Settings/helpers';
 const SubscriptionCurrent = ({ navigation = {} }) => {
   const { subscription } = useStore();
 
+  const expirationDate =
+    subscription?.customerInfo?.entitlements?.active?.['pro']?.expirationDate ||
+    subscription?.customerInfo?.latestExpirationDate;
+
   return (
     <>
       <View align="center">
@@ -29,13 +33,11 @@ const SubscriptionCurrent = ({ navigation = {} }) => {
             {`${L10N.SUBSCRIPTION_NEXT_BILLING_DATE}: `}
           </Text>
           <Text subtitle>
-            {subscription?.customerInfo?.entitlements?.active?.['pro']?.expirationDate
-              ? verboseDate(new Date(subscription?.customerInfo?.entitlements?.active?.['pro']?.expirationDate), {
+            {expirationDate
+              ? verboseDate(new Date(expirationDate), {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
                 })
               : L10N.LIFETIME}
           </Text>

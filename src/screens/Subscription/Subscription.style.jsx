@@ -1,25 +1,29 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  modal: {
-    paddingTop: '$viewOffset',
-  },
-
-  title: {
-    gap: '$viewOffset / 2',
-    marginTop: '$viewOffset',
+  item: {
+    paddingVertical: '$viewOffset / 4',
   },
 
   items: {
     marginBottom: '$viewOffset',
   },
 
-  item: {
-    paddingVertical: '$viewOffset / 4',
+  lifetime: {
+    marginBottom: '$spaceM + 2',
+  },
+
+  modal: {
+    paddingTop: '$viewOffset',
   },
 
   pressableTerms: {
     height: '$fontSizeTiny',
     lineHeight: '$fontSizeTiny * $lineHeightDefaultRatio',
+  },
+
+  title: {
+    gap: '$viewOffset / 2',
+    marginTop: '$viewOffset',
   },
 });
