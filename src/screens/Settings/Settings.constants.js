@@ -10,6 +10,14 @@ const OPTIONS = [
     text: L10N.SUBSCRIPTION,
   },
   {
+    disabled: true,
+    // callback: 'handleSubscription',
+    // caption: '$$No active subscription',
+    icon: ICON.SHOPPING,
+    id: 2,
+    text: L10N.GET_SPLITCARD,
+  },
+  {
     callback: 'handleExport',
     caption: L10N.EXPORT_DATA_CAPTION,
     icon: ICON.DOWNLOAD,
@@ -31,34 +39,10 @@ const REMINDER_BACKUP_OPTIONS = [
 ];
 
 const ABOUT = (isPremium) => [
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleSubscription',
-          icon: ICON.STAR,
-          text: L10N.GET_MONEY_PREMIUM,
-        },
-      ]
-    : []),
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleRestorePurchases',
-          icon: ICON.CART,
-          text: L10N.RESTORE_PURCHASES,
-        },
-      ]
-    : []),
-  {
-    icon: ICON.FILE,
-    url: SATOSHI_URLS.TERMS,
-    text: L10N.TERMS,
-  },
-  {
-    icon: ICON.FILE,
-    url: SATOSHI_URLS.PRIVACY,
-    text: L10N.PRIVACY,
-  },
+  ...(!isPremium ? [{ callback: 'handleSubscription', icon: ICON.STAR, text: L10N.GET_PREMIUM }] : []),
+  ...(!isPremium ? [{ callback: 'handleRestorePurchases', icon: ICON.CART, text: L10N.RESTORE_PURCHASES }] : []),
+  { icon: ICON.FILE, url: SATOSHI_URLS.TERMS, text: L10N.TERMS },
+  { icon: ICON.FILE, url: SATOSHI_URLS.PRIVACY, text: L10N.PRIVACY },
 ];
 
 export { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS };

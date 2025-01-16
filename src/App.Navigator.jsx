@@ -16,34 +16,35 @@ const Stack = createNativeStackNavigator();
 
 const commonScreenOptions = (theme = 'light') => ({
   headerBackground: () => <BlurView intensity={60} tint={theme} style={{ flex: 1 }} />,
-  headerLeft: ({ canGoBack = false }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const navigation = useNavigation();
-
-    return canGoBack ? <Button icon={ICON.BACK} small onPress={navigation.goBack} /> : null;
-  },
   headerShown: true,
-  // headerStyle: {},
   headerTintColor: StyleSheet.value('$colorContent'),
   headerTitle: () => <Logo />,
   headerTitleAlign: 'center',
-  // headerTitleStyle: {},
   headerTransparent: true,
 });
 
 export const Navigator = () => {
   const { settings: { onboarded, theme } = {} } = useStore();
 
-  const screenOptions = { headerBackTitleVisible: false, headerShadowVisible: false, headerShown: false };
+  const screenOptions = {
+    headerBackTitleVisible: false,
+    headerShadowVisible: false,
+    headerShown: false,
+  };
   const screen = {
     ...commonScreenOptions(theme),
-    // headerLeft: () => <Button>sss</Button>,
+    headerLeft: ({ canGoBack = false }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const navigation = useNavigation();
+
+      return canGoBack ? <Button icon={ICON.BACK} small onPress={navigation.goBack} style={style.buttonBack} /> : null;
+    },
     headerRight: () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigation = useNavigation();
 
       return (
-        <View row style={style.header}>
+        <View row style={style.headerRight}>
           <Button icon={ICON.ADD} rounded small squared onPress={() => navigation.navigate('create')} />
           <Pressable onPress={() => navigation.navigate('settings')}>
             <Icon name={ICON.SETTINGS} title />
@@ -52,7 +53,11 @@ export const Navigator = () => {
       );
     },
   };
-  const modal = { cardOverlayEnabled: true, gestureEnabled: true, presentation: 'transparentModal' };
+  const modal = {
+    cardOverlayEnabled: true,
+    gestureEnabled: true,
+    presentation: 'transparentModal',
+  };
 
   return (
     <NavigationContainer theme={getNavigationTheme()}>

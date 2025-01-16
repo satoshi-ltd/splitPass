@@ -1,63 +1,44 @@
-import { Screen, View, Text } from '@satoshi-ltd/nano-design';
+import { Screen, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
 import { style } from './SplitCard.style';
-import { NFCCard } from '../../components';
-import { useStore } from '../../contexts';
+import { CardOption, NFCCard } from '../../components';
 import { ICON, L10N } from '../../modules';
 
-// ! TODO: Refacto
-import { CardOption } from '../Viewer/components';
-
 const SplitCard = ({ navigation, route: { params: { writeMode } = {} } }) => {
-  const { secrets = [] } = useStore();
-
   const [active, setActive] = useState(false);
+  const [tag, setTag] = useState(false);
 
-  const handleSuccess = () => {
+  const handleError = () => {
     setActive(false);
+  };
+
+  const handleRead = (tag) => {
+    setTag(tag);
+  };
+
+  const handleRecord = (record) => {
+    console.log('::handleRecord::', record);
   };
 
   const handleScan = () => {
     setActive(false);
-    setTimeout(() => {
-      setActive(true);
-    }, 400);
+    setTag();
+    setTimeout(() => setActive(true), 400);
   };
-
-  console.log({ writeMode });
 
   return (
     <Screen disableScroll gap style={style.screen}>
-      <View align="center" style={style.header}>
-        <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
-          {L10N.SCANNER_NFC_TITLE}
-        </Text>
-        <Text align="center" caption color="contentLight" style={style.instructionsContent}>
-          {L10N.SCANNER_NFC_CAPTION}
-        </Text>
-      </View>
-
-      <View align="center">
-        <NFCCard
-          {...{ active, writeMode }}
-          //
-          onError={() => setActive(false)}
-          // onRead={() => setActive(false)}
-          // onSuccess={handleSuccess}
-        />
-      </View>
+      <NFCCard {...{ active, writeMode }} onError={handleError} onRead={handleRead} onRecord={handleRecord} />
 
       <View style={style.footer}>
         <View row gap>
-          {/* <CardOption text="Close" onPress={navigation.goBack} /> */}
-          <CardOption icon={ICON.SHOPPING} text="Get your own Split|Card" onPress={navigation.goBack} />
+          <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} onPress={navigation.goBack} />
           <CardOption
             color="accent"
-            // disabled={active}
             icon={ICON.NFC}
-            text="Ready to Scan"
+            text={active && !tag ? L10N.SCANNING : tag ? L10N.RESCAN : L10N.START_SCAN}
             onPress={handleScan}
           />
         </View>

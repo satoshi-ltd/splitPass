@@ -3,6 +3,10 @@ export const L10N = {
   APPERANCE_DARK: 'Switch to dark mode',
   APPERANCE_LIGHT: 'Switch to light mode',
 
+  BANNER_SUBSCRIPTION_CAPTION: 'Upgrade Now',
+  BANNER_SUBSCRIPTION_TITLE: 'Unlock Premium Features in split|Pass',
+  BANNER_SUBSCRIPTION_DESCRIPTION: 'Discover advanced security options and enhanced control for your secrets.',
+
   CHOOSE_PLAN: 'Choose your plan',
   CLOSE: 'Close',
   CONFIRM_EXPORT_SUCCESS: 'Export successful! Your data has been saved.',
@@ -27,7 +31,8 @@ export const L10N = {
   ERROR_NFC_NOT_SUPPORTED: 'NFC is not supported by this device.',
 
   GENERAL: 'General',
-  GET_MONEY_PREMIUM: 'Get môney Premium',
+  GET_PREMIUM: 'Get split|Pass Premium',
+  GET_SPLITCARD: 'Get your own split|Card',
 
   IMPORT_DATA: 'Import Data',
   IMPORT_DATA_CAPTION: 'JSON archive',
@@ -36,7 +41,8 @@ export const L10N = {
   LIFETIME_DESCRIPTION: "Pay once and don't worry ever",
 
   NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
-  NFC_WRITE_ERROR: 'Unable to write to NFC tag.',
+  NFC_ACCESS_ERROR: 'Error accessing your split|Card. Please try again.',
+  NFC_CARD_IS_FULL: 'Your split|Card is full. No more secrets can be saved.',
 
   OFF: 'Off',
   ON: 'On',
@@ -54,17 +60,17 @@ export const L10N = {
 
   SAVE_IN_DEVICE: 'Save in Phone',
   SAVE_IN_CARD: 'Save in Card',
+  SCANNING: 'Scanning...',
   SPLIT_CARD: 'split|Card',
 
-  SCANNER_NFC_TITLE: 'Bring your NFC card close to your phone',
-  SCANNER_NFC_CAPTION: 'Hold the NFC card near your phone to securely read the secret',
-
-  SCANNER_QR_TITLE: 'Bring your QR code close to your phone',
-  SCANNER_QR_CAPTION: 'Hold the QR code inside the box to securely read the secret',
-
+  SCANNER_NFC_TITLE: 'Bring Your Card Close',
+  SCANNER_NFC_CAPTION: 'Hold your split|Card near your phone to securely read the secret.',
+  SCANNER_QR_TITLE: 'Scan Your QR Code',
+  SCANNER_QR_CAPTION: 'Align the QR code within the frame to securely read the secret.',
   SET_PASSCODE: 'Set passcode',
   SETTINGS: 'Settings',
   SHARE: 'Share...',
+  START_SCAN: 'Start Scan',
   // SHARE_QR: 'Share via QR Code',
   // SHARE_CODE: 'Share via code',
   // SHARE_NFC: 'Share via NFC',

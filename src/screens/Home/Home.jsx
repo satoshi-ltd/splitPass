@@ -7,7 +7,7 @@ import { style } from './Home.style';
 import { getFavorites, groupByVault } from './modules';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON } from '../../modules';
+import { ICON, L10N } from '../../modules';
 
 const Home = ({ navigation }) => {
   const { settings: { subscription } = {}, secrets = [] } = useStore();
@@ -19,6 +19,8 @@ const Home = ({ navigation }) => {
       // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
 
       // navigation.navigate('splitcard', { writeMode: secret });
+      // navigation.navigate('scanner', { writeMode: secret });
+      navigation.navigate('subscription');
     }, 10);
   }, []);
 
@@ -65,19 +67,22 @@ const Home = ({ navigation }) => {
             />
           )}
         </View>
+
         {!subscription?.productIdentifier && (
-          <Card gap style={style.section}>
+          <Card onPress={() => navigation.navigate('subscription')} style={[style.banner, style.section]}>
             <View row>
-              <Text caption>What's new</Text>
-              <Icon name={ICON.ADD} />
+              <Icon name={ICON.STAR} style={style.bannerIcon} />
+              <Text bold caption>
+                {L10N.BANNER_SUBSCRIPTION_CAPTION}
+              </Text>
             </View>
 
-            <Text bold secondary title style={{ maxWidth: '55%' }}>
-              New features in split|Pass
+            <Text bold title style={style.bannerText}>
+              {L10N.BANNER_SUBSCRIPTION_TITLE}
             </Text>
 
-            <Text caption color="contentLight">
-              Explore the new features that make split|Pass much better.
+            <Text caption color="contentLight" secondary style={style.bannerText}>
+              {L10N.BANNER_SUBSCRIPTION_DESCRIPTION}
             </Text>
           </Card>
         )}

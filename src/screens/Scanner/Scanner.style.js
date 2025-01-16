@@ -3,9 +3,11 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width,
-    paddingTop: '$viewOffset * 5',
+    height: '100%',
+  },
+
+  container: {
+    height: '100%',
   },
 
   camera: {
@@ -13,7 +15,7 @@ export const style = StyleSheet.create({
     top: 0,
     left: 0,
     height: '100%',
-    width: '100%',
+    width: Dimensions.get('window').width,
   },
 
   background: {
@@ -21,33 +23,27 @@ export const style = StyleSheet.create({
   },
 
   instructions: {
-    paddingVertical: '$viewOffset * 2',
+    paddingBottom: '$viewOffset',
   },
 
   instructionsContent: {
-    maxWidth: '66%',
+    maxWidth: '75%',
   },
 
   tabs: {
     alignSelf: 'center',
     marginBottom: '$viewOffset * 2',
+    marginTop: '$viewOffset * 3',
   },
 
   section: {
-    backgroundColor: '$scannerBackgroundOpacity',
-    // backgroundColor: 'rgba(0,255,0,0.1)',
     flex: 1,
     height: '100%',
-    // padding: '$viewOffset',
   },
 
   frame: {
     height: '$qrSize',
     width: '$qrSize',
-  },
-
-  cardOptions: {
-    gap: '$viewOffset / 2',
   },
 
   scanningText: {
@@ -103,11 +99,9 @@ export const style = StyleSheet.create({
   },
 
   footer: {
-    backgroundColor: '$scannerBackgroundOpacity',
-    flex: 2,
+    flex: 1,
     justifyContent: 'flex-end',
-    paddingBottom: '$viewOffset * 2',
-    paddingHorizontal: '$viewOffset',
+    padding: '$viewOffset',
   },
   // --
 

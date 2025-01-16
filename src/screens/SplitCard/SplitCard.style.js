@@ -8,11 +8,6 @@ export const style = StyleSheet.create({
     paddingTop: '$viewOffset * 4',
   },
 
-  header: {
-    width: '80%',
-    marginBottom: '$viewOffset',
-  },
-
   footer: {
     flex: 1,
     justifyContent: 'flex-end',

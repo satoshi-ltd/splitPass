@@ -9,6 +9,7 @@ export const style = StyleSheet.create({
     paddingBottom: '$viewOffset',
     paddingHorizontal: '$viewOffset',
     paddingTop: '$viewOffset * 4',
+    // gap: '$viewOffset',
   },
 
   section: {
@@ -22,6 +23,20 @@ export const style = StyleSheet.create({
   cardAction: {
     flex: 1,
   },
+
+  banner: {
+    gap: '$viewOffset/2',
+  },
+
+  bannerIcon: {
+    marginRight: '$viewOffset / 4',
+  },
+
+  bannerText: {
+    maxWidth: '85%',
+  },
+
+  bannerTitle: {},
 
   vaults: {
     flexWrap: 'wrap',

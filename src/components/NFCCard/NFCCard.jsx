@@ -1,20 +1,21 @@
-import { Card, Icon, Text, View } from '@satoshi-ltd/nano-design';
+import { Card, Icon, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 
 import { ANIMATION } from './NFCCard.constants';
 import { style } from './NFCCard.style';
-import { ICON } from '../../modules';
+import { eventEmitter, findVault, ICON, L10N } from '../../modules';
 import { NFCService } from '../../services';
+import { EVENT } from '../../App.constants';
 
 const NFCCard = ({
-  //
   active = false,
   readMode = false,
   writeMode,
   onError = () => {},
-  onSecret = () => {},
+  onRead = () => {},
+  onRecord = () => {},
 }) => {
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
@@ -34,58 +35,92 @@ const NFCCard = ({
 
     setTimeout(async () => {
       if (readMode) setTag(await NFCService.read().catch(handleError));
-      else if (writeMode) setTag(await NFCService.append(writeMode.value, writeMode.name).catch(handleError));
-      // await NFCService.append(new Date().getTime().toString());
+      else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
     }, ANIMATION.duration);
-  }, [active]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, readMode, writeMode]);
 
   useEffect(() => {
-    const { records = [] } = tag || {};
+    if (!tag) return;
 
-    if (records.length === 1) return onSecret(records[0]);
-    // ! Should ask secrets
-    // console.log('::records::', records);
-    // onSecret(secrets[0]);
-  }, [onSecret, tag]);
+    const { records = [] } = tag || {};
+    onRead(tag);
+    if (readMode && records.length === 1) handleRecord(records[0].value);
+    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret save correctlu' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tag]);
 
   const handleError = (error) => {
-    console.error('<NFCCard>:handleError', JSON.stringify(error));
+    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: error });
     onError(error);
+  };
+
+  const handleRecord = (record) => {
+    onRecord(record);
+    // !TODO
+    setTag();
   };
 
   const { info: { id, name, totalMemory, usedMemory } = {}, records = [] } = tag || {};
   const textProps = { color: id ? '#000' : 'contentLight' };
 
   return (
-    <>
+    <View align="center">
+      <View align="center" style={style.header}>
+        <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
+          {L10N.SCANNER_NFC_TITLE}
+        </Text>
+        <Text align="center" caption color="contentLight" style={style.instructionsContent}>
+          {L10N.SCANNER_NFC_CAPTION}
+        </Text>
+      </View>
+
       <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }]}>
         <Card spaceBetween color={id ? 'accent' : undefined} gap style={[style.card]}>
-          <View row spaceBetween style={style.row}>
-            <Text {...textProps} bold subtitle style={style.logo}>
+          <View row spaceBetween style={style.cardRow}>
+            <Text {...textProps} bold subtitle>
               split|Card
             </Text>
-            {usedMemory && (
-              <Text {...textProps} tiny style={style.embossedText}>
-                {`${parseInt((usedMemory * 100) / totalMemory)}% Free Memory`}
-              </Text>
-            )}
+            <Text {...textProps} tiny style={style.embossedText}>
+              {usedMemory > 0 ? `${parseInt((usedMemory * 100) / totalMemory)}% Free Memory` : 'EMPTY CARD'}
+            </Text>
           </View>
 
-          <Icon {...textProps} name={ICON.NFC} style={style.icon} />
+          <Icon {...textProps} name={ICON.NFC} style={style.cardIcon} />
 
-          <View row spaceBetween style={style.row}>
-            <Text {...textProps} tiny style={style.embossedText}>
-              {(id || '0'.repeat(16)).match(/.{1,4}/g).join(' ')}
+          <View row spaceBetween style={style.cardRow}>
+            <Text {...textProps} tiny style={style.cardEmbossedText}>
+              {(id || '0'.repeat(14)).match(/.{1,4}/g).join(' ')}
             </Text>
-            <Text {...textProps} tiny style={style.embossedText}>
+            <Text {...textProps} tiny style={style.cardEmbossedText}>
               {name || 'SATOSHI LTD.'}
             </Text>
           </View>
         </Card>
       </Animated.View>
 
-      {readMode && records.length > 1 && <Text>{JSON.stringify(records)}</Text>}
-    </>
+      {readMode && records.length ? (
+        <View style={style.records}>
+          <View style={[style.gradient, style.gradientTop]} />
+          <ScrollView>
+            {records.map(({ name, value }, index) => (
+              <Card key={index} row onPress={() => handleRecord(value)} style={style.record}>
+                <View row>
+                  <Icon name={ICON.NFC} />
+                  <Text bold caption ellipsizeMode style={style.recordName}>
+                    {name}
+                  </Text>
+                  <Text color="contentLight" tiny>
+                    {findVault({ name })}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </ScrollView>
+          <View style={[style.gradient, style.gradientBottom]} />
+        </View>
+      ) : null}
+    </View>
   );
 };
 
@@ -97,7 +132,8 @@ NFCCard.propTypes = {
     value: PropTypes.string,
   }),
   onError: PropTypes.func,
-  onSecret: PropTypes.func,
+  onRead: PropTypes.func,
+  onRecord: PropTypes.func,
 };
 
 export { NFCCard };

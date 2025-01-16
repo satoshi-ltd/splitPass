@@ -2,7 +2,7 @@ import { Notification as NotificationBase } from '@satoshi-ltd/nano-design';
 import React, { useEffect, useState } from 'react';
 
 import { EVENT } from '../../App.constants';
-import { C, eventEmitter, L10N } from '../../modules';
+import { eventEmitter, L10N } from '../../modules';
 
 export const Notification = () => {
   const [value, setValue] = useState();

@@ -9,7 +9,7 @@ import { NFCCard } from '../../components';
 const ScannerNFC = ({ onRead = () => {}, reveal }) => {
   return (
     <View align="center" style={[style.background, style.scannerNFC]}>
-      <NFCCard active readMode onSecret={onRead} onError={() => {}} />
+      <NFCCard active readMode onRecord={onRead} onError={() => {}} />
 
       {reveal && (
         <View align="center" style={style.reveal}>
