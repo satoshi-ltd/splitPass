@@ -86,6 +86,35 @@ export const L10N = {
   SUBSCRIPTION_TERMS_CAPTION:
     'By tapping "Start free 7 day trial", you will not be charged for the next 7 days, your subscription will auto-renew for the same price and package length until you cancel via App Store Settings. and you agree to our',
 
+  SUBSCRIPTION_TITLE: 'Maximize Your secrets',
+  SUBSCRIPTION_DESCRIPTION:
+    'Unlock premium features to take full control of your finances with an annual subscription.',
+  SUBSCRIPTION_LIFETIME_DESCRIPTION:
+    'Lifetime access to advanced financial tools and personalized insights with a one-time payment.',
+
+  SUBSCRIPTION_ITEMS: [
+    {
+      icon: 'currency-usd',
+      title: 'Unlimited Multicurrency Accounts',
+      description: 'Manage as many accounts in different currencies as you need, without any limits.',
+    },
+    {
+      icon: 'swap-horizontal',
+      title: 'Unlimited Transactions',
+      description: 'Track and record all your financial activities without restrictions.',
+    },
+    {
+      icon: 'palette',
+      title: 'Enhanced Themes Customization',
+      description: 'Create a unique visual experience by customizing themes for each currency.',
+    },
+    {
+      icon: 'backup-restore',
+      title: 'Import & Export Feature',
+      description: 'Easily back up and transfer your financial data with the import and export functionality.',
+    },
+  ],
+
   TERMS: 'Terms',
 
   VIEWER_CAPTION_ENTER_PASSCODE: 'To reveal the secret, please enter your passcode.',

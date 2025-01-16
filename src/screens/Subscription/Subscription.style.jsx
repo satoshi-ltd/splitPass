@@ -2,26 +2,24 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   modal: {
-    gap: '$spaceXL',
-    paddingHorizontal: '$spaceL',
-    paddingTop: '$spaceL',
+    paddingTop: '$viewOffset',
   },
 
-  buttons: {
-    gap: '$spaceS',
+  title: {
+    gap: '$viewOffset / 2',
+    marginTop: '$viewOffset',
   },
 
-  options: {
-    gap: '$spaceM',
+  items: {
+    marginBottom: '$viewOffset',
   },
 
-  optionHighlight: {
-    backgroundColor: '$colorContent',
+  item: {
+    paddingVertical: '$viewOffset / 4',
   },
 
   pressableTerms: {
-    height: '$fontSizeTiny * 1',
-    lineHeight: '$fontSizeTiny * 1',
-    paddingTop: '$spaceXS / 2',
+    height: '$fontSizeTiny',
+    lineHeight: '$fontSizeTiny * $lineHeightDefaultRatio',
   },
 });
