@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Icon, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Icon, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
@@ -157,15 +157,22 @@ const Viewer = ({
       )}
 
       {readMode && (
-        <View align="center" row style={style.caption}>
-          <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
-          <Text align="center" color="contentLight" tiny>
-            {is.secure
-              ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
-              : is.shard
-              ? L10N.VIEWER_CAPTION_SHARD_SCANNER
-              : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
-          </Text>
+        <View>
+          {is.shard && (
+            <Button outlined onPress={handleGoToScanner} style={style.buttonScanner}>
+              Go to scanner
+            </Button>
+          )}
+          <View align="center" row style={style.caption}>
+            <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
+            <Text align="center" color="contentLight" tiny>
+              {is.secure
+                ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
+                : is.shard
+                ? L10N.VIEWER_CAPTION_SHARD_SCANNER
+                : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
+            </Text>
+          </View>
         </View>
       )}
 
@@ -178,10 +185,7 @@ const Viewer = ({
           {readMode && is.secure && !form.passcode ? (
             <CardOption icon={ICON.PASSCODE} text={L10N.SET_PASSCODE} onPress={() => setFields([FIELD.PASSCODE])} />
           ) : (
-            <>
-              {is.shard && readMode && <CardOption icon={ICON.SCAN} text={'Scan shard'} onPress={handleGoToScanner} />}
-              <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
-            </>
+            <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
           )}
 
           {!readMode && currentIndex === 0 && (

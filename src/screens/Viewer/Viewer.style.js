@@ -35,6 +35,12 @@ export const style = StyleSheet.create({
     width: '$viewOffset * 4.5',
   },
 
+  buttonScanner: {
+    alignSelf: 'center',
+    marginBottom: '$viewOffset / 2',
+    width: '$qrSize',
+  },
+
   index: {},
 
   cardOptions: {
