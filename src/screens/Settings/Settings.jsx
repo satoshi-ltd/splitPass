@@ -132,6 +132,7 @@ const Settings = ({ navigation = {} }) => {
         <Setting
           caption={L10N.REMINDER_BACKUP_CAPTION}
           icon={ICON.BELL}
+          onPress={() => {}}
           onChange={(value = 0) => handleChangeReminder(value)}
           options={REMINDER_BACKUP_OPTIONS}
           selected={reminders[0]}
