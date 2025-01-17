@@ -1,10 +1,12 @@
 import { SATOSHI_URLS } from '../../App.constants';
 import { ICON, L10N } from '../../modules';
 
-const OPTIONS = [
+const OPTIONS = (isPremium, subscription) => [
   {
-    callback: 'handleSubscription',
-    // caption: '$$No active subscription',
+    callback: !isPremium ? 'handleSubscription' : undefined,
+    caption: isPremium
+      ? `${L10N.SUBSCRIPTION_ACTUAL_PLAN} ${subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier}`
+      : undefined,
     icon: ICON.FAVORITE,
     id: 1,
     text: L10N.SUBSCRIPTION,

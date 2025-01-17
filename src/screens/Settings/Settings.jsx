@@ -95,7 +95,7 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ theme: StyleSheet.value('$theme') });
   };
 
-  const handleChangeReminder = (item) => {
+  const handleChangeReminder = (item = {}) => {
     NotificationsService.reminders([item.value]);
     updateSettings({ reminders: [item.value] });
   };
@@ -110,17 +110,12 @@ const Settings = ({ navigation = {} }) => {
         <Text bold caption>
           {L10N.GENERAL}
         </Text>
-        {OPTIONS.map(({ caption, disabled, icon, id, text, ...rest }) => (
+        {OPTIONS(isPremium, subscription).map(({ caption, disabled, icon, id, text, ...rest }) => (
           <Setting
             activity={activity?.[rest.callback]}
             key={`option-${id}`}
-            {...{
-              caption,
-              disabled,
-              icon,
-              text,
-            }}
-            onPress={() => handleOption(rest)}
+            {...{ caption, disabled, icon, text }}
+            onPress={rest.callback ? () => handleOption(rest) : undefined}
           />
         ))}
       </View>
