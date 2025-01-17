@@ -1,11 +1,9 @@
 import { DefaultTheme } from '@satoshi-ltd/nano-design/build/module/theme';
-import { Dimensions } from 'react-native';
 
 export const CommonTheme = {
   ...DefaultTheme,
 
   // -- palette ----------------------------------------------------------------
-  // $colorAccent: '#E1D558',
   $colorAccent: '#FEF984',
   // $colorAccent: '#FDE835',
 
@@ -25,7 +23,7 @@ export const CommonTheme = {
   // -- <components> -----------------------------------------------------------
   $qrBackgroundColor: '#ffffff',
   $qrColor: '#000000',
-  $qrSize: Dimensions.get('window').width * 0.66,
+  $qrSize: 232,
 
   // -- <screens> --------------------------------------------------------------
   $scannerBackground: '#000000',

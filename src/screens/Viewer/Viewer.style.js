@@ -21,18 +21,18 @@ export const style = StyleSheet.create({
   },
 
   shard: {
-    position: 'absolute',
     backgroundColor: '$qrBackgroundColor',
     borderColor: '$qrColor',
     borderRadius: '$borderRadius',
     borderStyle: '$borderStyle',
+
+    position: 'absolute',
     borderWidth: '$viewOffset / 2',
     color: '$qrColor',
-    fontSize: '$viewOffset * 2.25',
-    height: '$viewOffset * 4.5',
-    lineHeight: '$viewOffset * 3.5',
-    top: '$spaceXXL * 1.8',
-    width: '$viewOffset * 4.5',
+    height: '$qrSize / 3',
+    width: '$qrSize / 3',
+    top: '$qrSize / 2',
+    marginTop: '$viewOffset * -1.75',
   },
 
   buttonScanner: {

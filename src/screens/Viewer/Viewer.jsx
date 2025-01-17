@@ -50,7 +50,7 @@ const Viewer = ({
       title: L10N.DELETE_SECRET_TITLE,
       onAccept: async () => {
         await deleteSecret({ hash });
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret deleted correctly.' });
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_DELETED });
         navigation.goBack();
       },
     });
@@ -60,10 +60,6 @@ const Viewer = ({
     const uri = await qrRef.current.capture();
     await Sharing.shareAsync(uri);
   };
-
-  // const handleShareCode = async () => {
-  //   await Share.share({ message: `splitpass://${values[currentIndex]}` }).catch(() => {});
-  // };
 
   const handleGoToScanner = () => {
     navigation.goBack();
@@ -86,7 +82,7 @@ const Viewer = ({
     const options = [
       {
         accent: favorite,
-        text: 'Favorite',
+        text: L10N.FAVORITE,
         icon: favorite ? ICON.FAVORITE : ICON.UNFAVORITE,
         onPress: handleFavorite,
       },
@@ -96,9 +92,6 @@ const Viewer = ({
         icon: ICON.DATABASE_REMOVE,
         onPress: handleDelete,
       },
-
-      // { text: L10N.SHARE_CODE, icon: ICON.BARCODE, onPress: handleShareCode },
-      // { disabled: true, text: L10N.SHARE_NFC, icon: ICON.NFC, onPress: handleShareNFC },
     ];
 
     navigation.navigate('menu', { options });
@@ -139,12 +132,14 @@ const Viewer = ({
               ref={readMode || currentIndex === index ? qrRef : undefined}
               size={QR_SIZE}
               value={value}
-              onPress={() => {}}
+              onPress={!is.shard ? () => {} : undefined}
             />
-            {values.length > 1 && (
-              <Text align="center" bold style={style.shard}>
-                {index + 1}
-              </Text>
+            {(is.shard || values.length > 1) && (
+              <View align="center" bold style={style.shard}>
+                <Text bold tiny>
+                  shard:{index + 1}
+                </Text>
+              </View>
             )}
           </View>
         ))}
@@ -160,7 +155,7 @@ const Viewer = ({
         <View>
           {is.shard && (
             <Button outlined onPress={handleGoToScanner} style={style.buttonScanner}>
-              Go to scanner
+              {L10N.SCAN_SHARD}
             </Button>
           )}
           <View align="center" row style={style.caption}>
@@ -189,7 +184,7 @@ const Viewer = ({
           )}
 
           {!readMode && currentIndex === 0 && (
-            <CardOption _color="accent" icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
+            <CardOption icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
           )}
 
           <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleNFCCard} />
