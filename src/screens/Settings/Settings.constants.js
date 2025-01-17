@@ -5,7 +5,7 @@ const OPTIONS = (isPremium, subscription) => [
   {
     callback: !isPremium ? 'handleSubscription' : undefined,
     caption: isPremium
-      ? `${L10N.SUBSCRIPTION_ACTUAL_PLAN} ${subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier}`
+      ? `${L10N.SUBSCRIPTION_ACTUAL_PLAN}: ${subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier}`
       : undefined,
     icon: ICON.FAVORITE,
     id: 1,

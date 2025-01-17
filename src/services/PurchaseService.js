@@ -9,6 +9,19 @@ const APIKEY = {
   android: 'goog_bzzicUKLHqrXEdrltqKGmdXgyyI',
 };
 
+const PREMIUM_MOCK = {
+  customerInfo: {
+    entitlements: {
+      active: {
+        pro: {
+          identifier: 'pro',
+        },
+      },
+    },
+  },
+  productIdentifier: 'lifetime',
+};
+
 const initializePurchases = async () => {
   const Purchases = require('react-native-purchases').default;
 
@@ -53,7 +66,7 @@ export const PurchaseService = {
   buy: async (plan) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve({ productIdentifier: 'lifetime' });
+      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve(PREMIUM_MOCK);
 
       try {
         const Purchases = await initializePurchases();
@@ -74,7 +87,7 @@ export const PurchaseService = {
   restore: async () =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve({ productIdentifier: 'lifetime' });
+      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve(PREMIUM_MOCK);
 
       try {
         const Purchases = await initializePurchases();

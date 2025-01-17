@@ -1,7 +1,7 @@
 import { Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Linking } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Setting } from './components';
@@ -12,8 +12,6 @@ import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
 import { BackupService, NotificationsService, PurchaseService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
-
-const IS_WEB = Platform.OS === 'web';
 
 const Settings = ({ navigation = {} }) => {
   const { secrets, settings, importBackup = () => {}, subscription, updateSettings, updateSubscription } = useStore();
@@ -33,7 +31,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleExport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('export');
+    if (!isPremium) return handleSubscription('export');
 
     setActivity({ ...activity, handleExport: true });
     const exported = await BackupService.export({ secrets, settings });
@@ -42,7 +40,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleImport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('import');
+    if (!isPremium) return handleSubscription('import');
 
     setActivity({ ...activity, handleImport: true });
     const backup = await BackupService.import().catch((error) => alert(error));
