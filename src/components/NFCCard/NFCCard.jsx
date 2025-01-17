@@ -5,9 +5,9 @@ import { Animated } from 'react-native';
 
 import { ANIMATION } from './NFCCard.constants';
 import { style } from './NFCCard.style';
+import { EVENT } from '../../App.constants';
 import { eventEmitter, findVault, ICON, L10N } from '../../modules';
 import { NFCService } from '../../services';
-import { EVENT } from '../../App.constants';
 
 const NFCCard = ({
   active = false,
@@ -46,7 +46,7 @@ const NFCCard = ({
     const { records = [] } = tag || {};
     onRead(tag);
     if (readMode && records.length === 1) handleRecord(records[0].value);
-    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret save correctlu' });
+    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_NFC });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tag]);
 
@@ -62,13 +62,13 @@ const NFCCard = ({
   };
 
   const { info: { id, name, totalMemory, usedMemory } = {}, records = [] } = tag || {};
-  const textProps = { color: id ? '#000' : 'contentLight' };
+  const color = id ? '#000' : 'contentLight';
 
   return (
     <View align="center">
       <View align="center" style={style.header}>
         <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
-          {L10N.SCANNER_NFC_TITLE}
+          {L10N.SCANNER_NFC}
         </Text>
         <Text align="center" caption color="contentLight" style={style.instructionsContent}>
           {L10N.SCANNER_NFC_CAPTION}
@@ -78,21 +78,26 @@ const NFCCard = ({
       <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }]}>
         <Card spaceBetween color={id ? 'accent' : undefined} gap style={[style.card]}>
           <View row spaceBetween style={style.cardRow}>
-            <Text {...textProps} bold subtitle>
+            <Text color={color} bold subtitle>
               split|Card
             </Text>
-            <Text {...textProps} tiny style={style.embossedText}>
-              {usedMemory > 0 ? `${parseInt((usedMemory * 100) / totalMemory)}% Free Memory` : 'EMPTY CARD'}
-            </Text>
+            {id && (
+              <View row style={style.cardMemory}>
+                <Icon color={color} caption name={ICON.MEMORY} />
+                <Text bold color={color} tiny>
+                  {usedMemory > 0 ? `${parseInt((usedMemory * 100) / totalMemory)}%` : ''}
+                </Text>
+              </View>
+            )}
           </View>
 
-          <Icon {...textProps} name={ICON.NFC} style={style.cardIcon} />
+          <Icon color={color} name={ICON.NFC} style={style.cardIcon} />
 
           <View row spaceBetween style={style.cardRow}>
-            <Text {...textProps} tiny style={style.cardEmbossedText}>
+            <Text color={color} tiny style={style.cardEmbossedText}>
               {(id || '0'.repeat(14)).match(/.{1,4}/g).join(' ')}
             </Text>
-            <Text {...textProps} tiny style={style.cardEmbossedText}>
+            <Text color={color} tiny style={style.cardEmbossedText}>
               {name || 'SATOSHI LTD.'}
             </Text>
           </View>

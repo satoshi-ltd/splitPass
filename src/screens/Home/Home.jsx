@@ -15,13 +15,11 @@ const Home = ({ navigation }) => {
 
   useEffect(() => {
     setTimeout(() => {
-      const [secret] = secrets;
+      // ? SHORTCUTS
+      // const [secret] = secrets;
       // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
       // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
-
       // navigation.navigate('splitcard', { writeMode: secret });
-      // navigation.navigate('scanner', { writeMode: secret });
-      // navigation.navigate('subscription');
     }, 10);
   }, []);
 
@@ -49,8 +47,8 @@ const Home = ({ navigation }) => {
           <CardAction
             color="accent"
             icon={ICON.SCAN}
-            text="Scan Secret"
-            tiny="Add an external QR to become a guardian."
+            text={L10N.SCAN_SECRET}
+            tiny={L10N.SCAN_SECRET_CAPTION}
             onPress={() => navigation.navigate('scanner')}
           />
           {lastViewed ? (

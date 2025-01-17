@@ -62,6 +62,7 @@ export const L10N = {
   REMINDER_BACKUP: 'Backup Reminder',
   REMINDER_BACKUP_CAPTION: 'Remember to save your secrets.',
   RESCAN: 'Rescan',
+  RESTART: 'Restart',
   RESTORE_PURCHASES: 'Restore purchases',
   REVEAL_SECRET: 'Reveal Secret',
 
@@ -76,6 +77,7 @@ export const L10N = {
   SCANNER_QR_CAPTION: 'Align the QR code within the frame to securely read the secret.',
   SCANNING: 'Scanning...',
   SECRET_DELETED: 'Secret deleted successfully.',
+  SECRET_SAVED_IN_NFC: 'Secret saved successfully to your split|Card.',
   SET_PASSCODE: 'Set passcode',
   SETTINGS: 'Settings',
   SHARE: 'Share...',
@@ -84,8 +86,6 @@ export const L10N = {
   SUBSCRIPTION: 'Subscription',
   SUBSCRIPTION_ACTUAL_PLAN: 'Actual plan',
   SUBSCRIPTION_AND: 'and',
-  SUBSCRIPTION_CAPTION: 'No restrictions on shard pass, plus a robust import/export feature.',
-  SUBSCRIPTION_CLOSE: 'No thanks',
   SUBSCRIPTION_DESCRIPTION:
     'Unlock premium features to take full control of your finances with an annual subscription.',
   SUBSCRIPTION_ITEMS: [

@@ -5,7 +5,7 @@ const DEFAULTS = {
   settings: {
     onboarded: false,
     reminders: [1],
-    theme: DEFAULT_THEME,
+    theme: 'dark',
   },
   subscription: {},
 };

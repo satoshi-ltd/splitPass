@@ -18,7 +18,7 @@ const commonScreenOptions = (theme = 'light') => ({
   headerBackground: () => <BlurView intensity={60} tint={theme} style={{ flex: 1 }} />,
   headerShown: true,
   headerTintColor: StyleSheet.value('$colorContent'),
-  headerTitle: () => <Logo />,
+  headerTitle: () => <Logo forceTheme={theme} />,
   headerTitleAlign: 'center',
   headerTransparent: true,
 });
@@ -66,7 +66,15 @@ export const Navigator = () => {
       <Stack.Navigator initialRouteName={onboarded ? 'home' : 'onboarding'} screenOptions={screenOptions}>
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="home" component={Home} options={screen} />
-        <Stack.Screen name="scanner" component={Scanner} options={{ ...screen, headerRight: undefined }} />
+        <Stack.Screen
+          name="scanner"
+          component={Scanner}
+          options={{
+            ...screen,
+            headerRight: undefined,
+            ...(theme === 'light' ? commonScreenOptions('dark') : undefined),
+          }}
+        />
         <Stack.Screen name="settings" component={Settings} options={{ ...screen, headerRight: undefined }} />
         <Stack.Screen name="splitcard" component={SplitCard} options={{ ...screen, headerRight: undefined }} />
         <Stack.Screen name="vault" component={Vault} options={screen} />

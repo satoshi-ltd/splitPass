@@ -26,6 +26,8 @@ export const ICON = {
   REFRESH: 'refresh',
   RIGHT: 'chevron-right',
 
+  MEMORY: 'memory',
+
   SCAN: 'qrcode-scan',
   SEARCH: 'magnify',
   SECURE: 'lock-outline', // SECURE: 'database-lock-outline',

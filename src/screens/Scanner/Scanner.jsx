@@ -8,7 +8,7 @@ import { KeyboardAvoidingView } from 'react-native';
 import { ScannerNFC } from './Scanner.nfc';
 import { ScannerQR } from './Scanner.qr';
 import { style } from './Scanner.style';
-import { FIELD, READER_TYPE, SECURE_TYPES, SHARD_TYPES, SECRET_TYPE } from '../../App.constants';
+import { FIELD, IS_WEB, READER_TYPE, SECURE_TYPES, SHARD_TYPES, SECRET_TYPE } from '../../App.constants';
 import { EVENT } from '../../App.constants';
 import { CardOption, Form } from '../../components';
 import { useStore } from '../../contexts';
@@ -16,7 +16,7 @@ import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 
 const Scanner = ({
   navigation,
-  route: { params: { readMode = true, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
+  route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.NFC, values: propValues = [] } = {} },
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
@@ -24,16 +24,15 @@ const Scanner = ({
   const [active, setActive] = useState(false);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
-  const [reveal, setReveal] = useState(false);
-  const [scanning, setScanning] = useState(true);
   const [readerType, setReaderType] = useState(propReaderType);
+  const [reveal, setReveal] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [tag, setTag] = useState();
   const [values, setValues] = useState([]);
 
   useFocusEffect(
     useCallback(async () => {
       setActive(true);
-      setScanning(true);
-
       if (!permission?.granted) return requestPermission();
     }, []),
   );
@@ -43,14 +42,20 @@ const Scanner = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propValues, readMode]);
 
+  const handleReaderType = (next) => {
+    setScanning(next === READER_TYPE.QR);
+    setReaderType(next);
+  };
+
   const handleScanned = (data = '') => {
     const [type] = data;
 
     if (!Object.values(SECRET_TYPE).includes(type)) return;
 
     setScanning(false);
+    setTag();
     if (SHARD_TYPES.includes(type)) {
-      if (values.length < 2) setTimeout(() => setScanning(true), 1000);
+      if (values.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
       if (values.includes(data)) {
         // ! TODO: Make it a notification
         return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: '$$ Same shard' });
@@ -62,7 +67,7 @@ const Scanner = ({
   };
 
   const handleReset = () => {
-    setScanning(true);
+    handleReaderType(readerType);
     setValues([]);
   };
 
@@ -77,6 +82,13 @@ const Scanner = ({
     }
   };
 
+  const handleScanNFC = () => {
+    if (!tag) return setScanning(true);
+    setScanning(false);
+    setTag();
+    setTimeout(() => setScanning(true), 400);
+  };
+
   const [type] = values[0] || [];
 
   const is = {
@@ -88,6 +100,8 @@ const Scanner = ({
     shard: SHARD_TYPES.includes(type),
   };
 
+  const Wrapper = IS_WEB ? React.Fragment : KeyboardAvoidingView;
+
   return (
     <Screen disableScroll style={style.screen}>
       {permission?.granted && !is.modeNFC && (
@@ -97,11 +111,11 @@ const Scanner = ({
           barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
           facing="back"
           onBarcodeScanned={scanning ? ({ data = '' }) => handleScanned(data) : undefined}
-          style={style.camera}
+          style={[style.camera, StyleSheet.absoluteFill]}
         />
       )}
 
-      <KeyboardAvoidingView behavior="padding">
+      <Wrapper behavior="padding">
         <View style={style.container}>
           <View style={style.background}>
             <Tabs
@@ -111,14 +125,16 @@ const Scanner = ({
                 { icon: ICON.QRCODE, text: 'QR Code', type: READER_TYPE.QR },
                 { icon: ICON.NFC, text: 'NFC Card', type: READER_TYPE.NFC },
               ]}
-              onChange={({ type: next }) => setReaderType(next)}
+              onChange={({ type: next }) => handleReaderType(next)}
               style={style.tabs}
             />
           </View>
 
           {React.createElement(is.modeNFC ? ScannerNFC : ScannerQR, {
             reveal: reveal ? QRParser.decode(QRParser.combine(...values), form.passcode) : undefined,
+            scanning,
             onRead: handleScanned,
+            onTag: setTag,
           })}
 
           <View style={[style.footer, style.background]}>
@@ -126,6 +142,8 @@ const Scanner = ({
               <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} />
             ) : !is.empty || is.modeNFC ? (
               <View row gap>
+                {!is.empty && <CardOption icon={ICON.REFRESH} text={L10N.RESTART} onPress={handleReset} />}
+
                 {values.length === 1 && !readMode && (
                   <CardOption
                     icon={ICON.DATABASE_ADD}
@@ -150,12 +168,24 @@ const Scanner = ({
                   />
                 )}
 
-                <CardOption color="accent" icon={ICON.REFRESH} text={L10N.RESCAN} onPress={handleReset} />
+                {is.modeNFC && (
+                  <>
+                    {!values.length && <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} />}
+                    {(is.empty || (is.shard && values.length < 2)) && (
+                      <CardOption
+                        color="accent"
+                        icon={ICON.NFC}
+                        text={scanning && !tag ? L10N.SCANNING : tag ? L10N.RESCAN : L10N.START_SCAN}
+                        onPress={handleScanNFC}
+                      />
+                    )}
+                  </>
+                )}
               </View>
             ) : null}
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </Wrapper>
     </Screen>
   );
 };

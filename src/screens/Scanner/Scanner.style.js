@@ -1,8 +1,10 @@
 import { Dimensions } from 'react-native';
+import { Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
+    backgroundColor: '$scannerBackground',
     height: '100%',
   },
 
@@ -34,6 +36,7 @@ export const style = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: '$viewOffset * 2',
     marginTop: '$viewOffset * 3',
+    ...Platform.select({ web: { marginTop: '$viewOffset * 5' } }),
   },
 
   section: {
@@ -44,10 +47,6 @@ export const style = StyleSheet.create({
   frame: {
     height: '$qrSize',
     width: '$qrSize',
-  },
-
-  scanningText: {
-    marginTop: '$viewOffset',
   },
 
   corner: {
@@ -91,7 +90,7 @@ export const style = StyleSheet.create({
   },
 
   text: {
-    color: '$qrBackgroundColor',
+    color: '$scannerTextColor',
   },
 
   reveal: {
@@ -102,6 +101,8 @@ export const style = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: '$viewOffset',
+
+    backgroundColor: 'orange',
   },
   // --
 

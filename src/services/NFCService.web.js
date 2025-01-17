@@ -1,16 +1,11 @@
-// import Constants from 'expo-constants';
-// import { Platform } from 'react-native';
-
 import { StorageService } from './StorageService';
 
 const store = await new StorageService({ defaults: { records: [] }, filename: 'com.satoshi-ltd.splitpass:nfc' });
 const INFO = { id: '19801992202022', totalMemory: 492 };
 const DELAY_RESPONSE = 500;
 
-// const IS_EXPO = Constants.appOwnership === 'expo';
-
 const parseResponse = (records = []) => ({
-  info: { ...INFO, usedMemory: records.length * 32 },
+  info: { ...INFO, usedMemory: records.length * 64 },
   records: records.map((record) => {
     const [name, value] = record.split('|');
     return { name, value };

@@ -13,7 +13,7 @@ const ScannerQR = ({ reveal }) => {
     <>
       <View style={[style.instructions, style.background]}>
         <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
-          {L10N.SCANNER_QR_TITLE}
+          {L10N.SCANNER_QR}
         </Text>
         <Text align="center" caption color="contentLight" style={style.instructionsContent}>
           {L10N.SCANNER_QR_CAPTION}

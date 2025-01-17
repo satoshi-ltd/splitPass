@@ -6,6 +6,8 @@ export const CommonTheme = {
   // -- palette ----------------------------------------------------------------
   $colorAccent: '#FEF984',
   // $colorAccent: '#FDE835',
+  $colorDark: '#000',
+  $colorLight: '#fff',
 
   // -- border -----------------------------------------------------------------
   $borderRadius: '$spaceS',
@@ -16,16 +18,16 @@ export const CommonTheme = {
   $buttonSmallHeight: '$spaceXL',
 
   // -- <Ipput> -----------------------------------------------------------------
-  // $inputBackgroundColor: 'transparent',
   $inputBorderWidth: 0,
   $inputBackgroundColorFocus: 'transparent',
 
   // -- <components> -----------------------------------------------------------
-  $qrBackgroundColor: '#ffffff',
-  $qrColor: '#000000',
+  $qrBackgroundColor: '$colorLight',
+  $qrColor: '$colorDark',
   $qrSize: 232,
 
   // -- <screens> --------------------------------------------------------------
-  $scannerBackground: '#000000',
+  $scannerBackground: '$colorDark',
   $scannerBackgroundOpacity: 'rgba(0, 0, 0, 0.85)',
+  $scannerTextColor: '$colorLight',
 };

@@ -1,3 +1,6 @@
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+
 const DEFAULT_THEME = 'light';
 
 const EVENT = {
@@ -8,6 +11,10 @@ const FIELD = {
   NAME: { name: 'secret', placeholder: 'name...' },
   PASSCODE: { mask: true, name: 'passcode', keyboard: 'numeric', maxLength: 6, placeholder: 'passcode...' },
 };
+
+const IS_EXPO = Constants.appOwnership === 'expo';
+
+const IS_WEB = Platform.OS === 'web';
 
 const SECRET_TYPE = {
   PASSWORD: '1',
@@ -96,6 +103,8 @@ export {
   DEFAULT_THEME,
   EVENT,
   FIELD,
+  IS_EXPO,
+  IS_WEB,
   SECRET_TYPE,
   READER_TYPE,
   SECURE_TYPES,

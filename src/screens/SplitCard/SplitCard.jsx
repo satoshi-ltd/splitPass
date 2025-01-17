@@ -34,7 +34,7 @@ const SplitCard = ({ navigation, route: { params: { writeMode } = {} } }) => {
 
       <View style={style.footer}>
         <View row gap>
-          <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} onPress={navigation.goBack} />
+          <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} />
           <CardOption
             color="accent"
             icon={ICON.NFC}

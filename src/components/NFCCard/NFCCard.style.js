@@ -18,8 +18,8 @@ export const style = StyleSheet.create({
     paddingVertical: '$spaceL - $spaceXS',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowOpacity: 0.33,
+    shadowRadius: 12,
   },
 
   cardRow: {
@@ -37,6 +37,16 @@ export const style = StyleSheet.create({
 
   cardEmbossedText: {
     letterSpacing: 1,
+    opacity: 0.66,
+  },
+
+  cardMemory: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: '$borderRadius',
+    gap: '$spaceXXS',
+    paddingLeft: '$spaceXS',
+    paddingRight: '$spaceS',
+    paddingVertical: '$spaceXXS',
   },
 
   records: {
