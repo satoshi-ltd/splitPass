@@ -46,6 +46,10 @@ const VAULTS_KEYWORDS = {
     'yahoo',
     'icloud',
     'gmail',
+    'access',
+    'credentials',
+    'user',
+    'auth',
   ],
 
   [VAULT_TYPE[1]]: [
@@ -67,6 +71,17 @@ const VAULTS_KEYWORDS = {
     'trezor',
     'ledger',
     'coldcard',
+    'account-number',
+    'chase',
+    'citibank',
+    'wells',
+    'goldman',
+    'visa',
+    'mastercard',
+    'amex',
+    'bitcoin',
+    'ethereum',
+    'binance',
   ],
 
   [VAULT_TYPE[2]]: [
@@ -86,6 +101,9 @@ const VAULTS_KEYWORDS = {
     'whatsapp',
     'google',
     'line',
+    'youtube',
+    'pinterest',
+    'weibo',
   ],
 };
 
