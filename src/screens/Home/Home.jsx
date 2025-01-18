@@ -68,8 +68,8 @@ const Home = ({ navigation }) => {
           ) : (
             <CardAction
               icon={ICON.ADD}
-              text="First secret"
-              tiny="Create your first secret"
+              text={L10N.FIRST_SECRET}
+              tiny={L10N.FIRST_SECRET_CAPTION}
               onPress={() => navigation.navigate('create')}
             />
           )}

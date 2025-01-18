@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { style } from './Vault.style';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
+import { L10N } from '../../modules';
 
 const Vault = ({ navigation, route: { params: { type } = {} } }) => {
   const { secrets = [] } = useStore();
@@ -13,7 +14,7 @@ const Vault = ({ navigation, route: { params: { type } = {} } }) => {
 
   return (
     <Screen gap style={style.screen}>
-      <Input placeholder="Search..." type="search" value={search} onChange={setSearch} style={style.input} />
+      <Input placeholder={L10N.SEARCH} type="search" value={search} onChange={setSearch} style={style.input} />
 
       <View>
         <Text bold secondary subtitle>

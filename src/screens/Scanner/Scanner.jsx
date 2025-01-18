@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 import { ScannerNFC } from './Scanner.nfc';
 import { ScannerQR } from './Scanner.qr';
@@ -16,7 +17,7 @@ import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 
 const Scanner = ({
   navigation,
-  route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.NFC, values: propValues = [] } = {} },
+  route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
@@ -57,10 +58,9 @@ const Scanner = ({
     if (SHARD_TYPES.includes(type)) {
       if (values.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
       if (values.includes(data)) {
-        // ! TODO: Make it a notification
-        return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: '$$ Same shard' });
+        return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.FIRST_SHARD_SAME });
       } else if (!values.length) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: 'First shard scanned! scan the second shard to continue.' });
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.FIRST_SHARD_SCANNED });
       }
     }
     setValues([...values, data]);
@@ -122,8 +122,8 @@ const Scanner = ({
               caption
               selected={readerType === READER_TYPE.QR ? 0 : 1}
               options={[
-                { icon: ICON.QRCODE, text: 'QR Code', type: READER_TYPE.QR },
-                { icon: ICON.NFC, text: 'NFC Card', type: READER_TYPE.NFC },
+                { icon: ICON.QRCODE, text: L10N.QR_CODE, type: READER_TYPE.QR },
+                { icon: ICON.NFC, text: L10N.NFC_CARD, type: READER_TYPE.NFC },
               ]}
               onChange={({ type: next }) => handleReaderType(next)}
               style={style.tabs}
