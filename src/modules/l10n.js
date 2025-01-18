@@ -86,33 +86,25 @@ export const L10N = {
   SUBSCRIPTION: 'Subscription',
   SUBSCRIPTION_ACTUAL_PLAN: 'Actual plan',
   SUBSCRIPTION_AND: 'and',
-  SUBSCRIPTION_DESCRIPTION:
-    'Unlock premium features to take full control of your finances with an annual subscription.',
+  SUBSCRIPTION_DESCRIPTION: 'Unlock premium features to take full control of your secrets with an annual subscription.',
   SUBSCRIPTION_ITEMS: [
     {
-      icon: 'currency-usd',
-      title: 'Unlimited Multicurrency Accounts',
-      description: 'Manage as many accounts in different currencies as you need, without any limits.',
+      icon: 'infinity',
+      title: 'Unlimited Shards',
+      description: 'Create as many shared secrets as you need, with no restrictions or limits.',
     },
     {
-      icon: 'swap-horizontal',
-      title: 'Unlimited Transactions',
-      description: 'Track and record all your financial activities without restrictions.',
-    },
-    {
-      icon: 'palette',
-      title: 'Enhanced Themes Customization',
-      description: 'Create a unique visual experience by customizing themes for each currency.',
+      icon: 'nfc',
+      title: 'Use Your Own NFC Cards',
+      description: 'Unlock the ability to use your personal NFC cards instead of split|Card.',
     },
     {
       icon: 'backup-restore',
-      title: 'Import & Export Feature',
-      description: 'Easily back up and transfer your financial data with the import and export functionality.',
+      title: 'Import & Export Capabilities',
+      description: 'Easily back up and transfer your secrets using the import and export functionality.',
     },
   ],
-  SUBSCRIPTION_LIFETIME_DESCRIPTION:
-    'Lifetime access to advanced financial tools and personalized insights with a one-time payment.',
-  SUBSCRIPTION_NEXT_BILLING_DATE: 'Next billing date',
+  SUBSCRIPTION_LIFETIME_DESCRIPTION: 'Lifetime access to advanced secret management features with a one-time payment.',
   SUBSCRIPTION_PRIVACY: 'Privacy Policy',
   SUBSCRIPTION_TERMS: 'Terms',
   SUBSCRIPTION_TERMS_CAPTION:
