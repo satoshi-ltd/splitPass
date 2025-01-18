@@ -1,10 +1,9 @@
-import { Screen, Text, View } from '@satoshi-ltd/nano-design';
+import { Screen, Setting, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Linking } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
-import { Setting } from './components';
 import { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
 import { DEFAULT_THEME } from '../../App.constants';
@@ -12,8 +11,6 @@ import { useStore } from '../../contexts';
 import { ICON, L10N } from '../../modules';
 import { BackupService, NotificationsService, PurchaseService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
-
-const IS_WEB = Platform.OS === 'web';
 
 const Settings = ({ navigation = {} }) => {
   const { secrets, settings, importBackup = () => {}, subscription, updateSettings, updateSubscription } = useStore();
@@ -33,7 +30,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleExport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('export');
+    if (!isPremium) return handleSubscription('export');
 
     setActivity({ ...activity, handleExport: true });
     const exported = await BackupService.export({ secrets, settings });
@@ -42,7 +39,7 @@ const Settings = ({ navigation = {} }) => {
   };
 
   const handleImport = async () => {
-    if (!IS_WEB && !isPremium) return handleSubscription('import');
+    if (!isPremium) return handleSubscription('import');
 
     setActivity({ ...activity, handleImport: true });
     const backup = await BackupService.import().catch((error) => alert(error));
@@ -95,10 +92,12 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ theme: StyleSheet.value('$theme') });
   };
 
-  const handleChangeReminder = (item) => {
+  const handleChangeReminder = (item = {}) => {
     NotificationsService.reminders([item.value]);
     updateSettings({ reminders: [item.value] });
   };
+
+  const settingProps = { iconColor: theme === 'dark' ? StyleSheet.value('$colorBase') : undefined };
 
   return (
     <Screen gap offset style={style.screen}>
@@ -110,17 +109,13 @@ const Settings = ({ navigation = {} }) => {
         <Text bold caption>
           {L10N.GENERAL}
         </Text>
-        {OPTIONS.map(({ caption, disabled, icon, id, text, ...rest }) => (
+        {OPTIONS(isPremium, subscription).map(({ caption, disabled, icon, id, text, ...rest }) => (
           <Setting
+            {...settingProps}
             activity={activity?.[rest.callback]}
             key={`option-${id}`}
-            {...{
-              caption,
-              disabled,
-              icon,
-              text,
-            }}
-            onPress={() => handleOption(rest)}
+            {...{ caption, disabled, icon, text }}
+            onPress={rest.callback ? () => handleOption(rest) : undefined}
           />
         ))}
       </View>
@@ -130,13 +125,16 @@ const Settings = ({ navigation = {} }) => {
           {L10N.PREFERENCES}
         </Text>
         <Setting
+          {...settingProps}
           icon={ICON.INVERT_COLORS}
           text={theme === 'dark' ? L10N.APPERANCE_LIGHT : L10N.APPERANCE_DARK}
           onPress={handleTheme}
         />
         <Setting
+          {...settingProps}
           caption={L10N.REMINDER_BACKUP_CAPTION}
           icon={ICON.BELL}
+          onPress={() => {}}
           onChange={(value = 0) => handleChangeReminder(value)}
           options={REMINDER_BACKUP_OPTIONS}
           selected={reminders[0]}
@@ -150,6 +148,7 @@ const Settings = ({ navigation = {} }) => {
         </Text>
         {ABOUT(isPremium).map(({ disabled, icon, text, ...rest }, index) => (
           <Setting
+            {...settingProps}
             activity={activity && activity[rest.callback]}
             key={`about-${index}`}
             {...{ disabled, icon, text }}

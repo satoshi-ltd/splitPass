@@ -1,13 +1,20 @@
 import { SATOSHI_URLS } from '../../App.constants';
 import { ICON, L10N } from '../../modules';
 
-const OPTIONS = [
+const OPTIONS = (isPremium, subscription) => [
   {
-    callback: 'handleSubscription',
-    // caption: '$$No active subscription',
+    callback: !isPremium ? 'handleSubscription' : undefined,
+    caption: isPremium ? 'Premium' || subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier : undefined,
     icon: ICON.FAVORITE,
     id: 1,
     text: L10N.SUBSCRIPTION,
+  },
+  {
+    disabled: true,
+    // callback: 'handleShop',
+    icon: ICON.SHOPPING,
+    id: 2,
+    text: L10N.GET_SPLITCARD,
   },
   {
     callback: 'handleExport',
@@ -31,34 +38,10 @@ const REMINDER_BACKUP_OPTIONS = [
 ];
 
 const ABOUT = (isPremium) => [
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleSubscription',
-          icon: ICON.STAR,
-          text: L10N.GET_MONEY_PREMIUM,
-        },
-      ]
-    : []),
-  ...(!isPremium
-    ? [
-        {
-          callback: 'handleRestorePurchases',
-          icon: ICON.CART,
-          text: L10N.RESTORE_PURCHASES,
-        },
-      ]
-    : []),
-  {
-    icon: ICON.FILE,
-    url: SATOSHI_URLS.TERMS,
-    text: L10N.TERMS,
-  },
-  {
-    icon: ICON.FILE,
-    url: SATOSHI_URLS.PRIVACY,
-    text: L10N.PRIVACY,
-  },
+  ...(!isPremium ? [{ callback: 'handleSubscription', icon: ICON.STAR, text: L10N.GET_PREMIUM }] : []),
+  ...(!isPremium ? [{ callback: 'handleRestorePurchases', icon: ICON.CART, text: L10N.RESTORE_PURCHASES }] : []),
+  { icon: ICON.FILE, url: SATOSHI_URLS.TERMS, text: L10N.TERMS },
+  { icon: ICON.FILE, url: SATOSHI_URLS.PRIVACY, text: L10N.PRIVACY },
 ];
 
 export { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS };

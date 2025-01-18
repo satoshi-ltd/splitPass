@@ -5,6 +5,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import ViewShot from 'react-native-view-shot';
 
+import { calculatePieceSize } from './helpers';
 import { style } from './Qr.style';
 import { QRParser } from '../../modules';
 
@@ -16,7 +17,7 @@ const QR = React.forwardRef(({ passcode = '', readMode = false, value = '', ...o
   const handlePressEnd = () => setReveal(false);
 
   return (
-    <ViewShot ref={ref} options={{ format: 'png', quality: 0.8 }}>
+    <ViewShot ref={ref} options={{ format: 'png', quality: 1 }}>
       <Pressable
         {...others}
         feedback={false}
@@ -30,7 +31,7 @@ const QR = React.forwardRef(({ passcode = '', readMode = false, value = '', ...o
           color={StyleSheet.value('$qrColor')}
           data={value}
           isPiecesGlued
-          pieceSize={8}
+          pieceSize={calculatePieceSize(value)}
           pieceBorderRadius={4}
         />
         {reveal && (

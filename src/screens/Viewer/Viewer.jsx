@@ -3,12 +3,11 @@ import { Button, Icon, Modal, Pagination, ScrollView, Text, View } from '@satosh
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
-import { Share, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 
-import { CardOption } from './components';
 import { style } from './Viewer.style';
 import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import { Form, QR } from '../../components';
+import { CardOption, Form, QR } from '../../components';
 import { useStore } from '../../contexts';
 import { eventEmitter, ICON, L10N } from '../../modules';
 
@@ -51,19 +50,15 @@ const Viewer = ({
       title: L10N.DELETE_SECRET_TITLE,
       onAccept: async () => {
         await deleteSecret({ hash });
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: 'Secret deleted correctly.' });
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_DELETED });
         navigation.goBack();
       },
     });
   };
 
-  const handleShareQr = async () => {
+  const handleShare = async () => {
     const uri = await qrRef.current.capture();
     await Sharing.shareAsync(uri);
-  };
-
-  const handleShareCode = async () => {
-    await Share.share({ message: `splitpass://${values[currentIndex]}` }).catch(() => {});
   };
 
   const handleGoToScanner = () => {
@@ -78,16 +73,25 @@ const Viewer = ({
     setFavorite(nextFavorite);
   };
 
-  const handleShareNFC = () => {};
+  const handleNFCCard = () => {
+    navigation.goBack();
+    navigation.navigate('splitcard', { writeMode: { name, value: values[currentIndex] } });
+  };
 
-  const handleShareBluetooth = () => {};
-
-  const handleShare = () => {
+  const handleOptions = () => {
     const options = [
-      { text: L10N.SHARE_QR, icon: ICON.QRCODE, onPress: handleShareQr },
-      { text: L10N.SHARE_CODE, icon: ICON.BARCODE, onPress: handleShareCode },
-      { disabled: true, text: L10N.SHARE_NFC, icon: ICON.NFC, onPress: handleShareNFC },
-      { disabled: true, text: L10N.SHARE_BLUETOOTH, icon: ICON.BLUETOOTH, onPress: handleShareBluetooth },
+      {
+        accent: favorite,
+        text: L10N.FAVORITE,
+        icon: favorite ? ICON.FAVORITE : ICON.UNFAVORITE,
+        onPress: handleFavorite,
+      },
+      {
+        critical: true,
+        text: L10N.DELETE_SECRET,
+        icon: ICON.DATABASE_REMOVE,
+        onPress: handleDelete,
+      },
     ];
 
     navigation.navigate('menu', { options });
@@ -108,21 +112,9 @@ const Viewer = ({
 
   return (
     <Modal gap onClose={navigation.goBack}>
-      <View align="center" row style={style.name}>
-        <Text bold secondary title>
-          {name}
-        </Text>
-
-        {readMode && (
-          <Button
-            outlined={!favorite}
-            secondary={favorite}
-            small
-            icon={favorite ? ICON.FAVORITE : ICON.UNFAVORITE}
-            onPress={handleFavorite}
-          />
-        )}
-      </View>
+      <Text align="center" bold secondary title style={style.name}>
+        {name}
+      </Text>
 
       <ScrollView
         horizontal
@@ -140,12 +132,14 @@ const Viewer = ({
               ref={readMode || currentIndex === index ? qrRef : undefined}
               size={QR_SIZE}
               value={value}
-              onPress={() => {}}
+              onPress={!is.shard ? () => {} : undefined}
             />
-            {values.length > 1 && (
-              <Text align="center" bold style={style.shard}>
-                {index + 1}
-              </Text>
+            {(is.shard || values.length > 1) && (
+              <View align="center" bold style={style.shard}>
+                <Text bold tiny>
+                  shard:{index + 1}
+                </Text>
+              </View>
             )}
           </View>
         ))}
@@ -158,15 +152,22 @@ const Viewer = ({
       )}
 
       {readMode && (
-        <View align="center" row style={style.caption}>
-          <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
-          <Text align="center" color="contentLight" tiny>
-            {is.secure
-              ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
-              : is.shard
-              ? L10N.VIEWER_CAPTION_SHARD_SCANNER
-              : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
-          </Text>
+        <View>
+          {is.shard && (
+            <Button outlined onPress={handleGoToScanner} style={style.buttonScanner}>
+              {L10N.SCAN_SHARD}
+            </Button>
+          )}
+          <View align="center" row style={style.caption}>
+            <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
+            <Text align="center" color="contentLight" tiny>
+              {is.secure
+                ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
+                : is.shard
+                ? L10N.VIEWER_CAPTION_SHARD_SCANNER
+                : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
+            </Text>
+          </View>
         </View>
       )}
 
@@ -174,20 +175,19 @@ const Viewer = ({
         <Form fields={fields} onCancel={setFields} onSubmit={setForm} style={style.cardOptions} />
       ) : (
         <View row style={style.cardOptions}>
-          {!readMode && currentIndex === 0 ? (
-            <CardOption color="accent" icon={ICON.DATABASE_ADD} text={L10N.SAVE_SECRET} onPress={handleSave} />
-          ) : readMode ? (
-            <CardOption color="accent" icon={ICON.DATABASE_REMOVE} text={L10N.DELETE_SECRET} onPress={handleDelete} />
-          ) : null}
+          {readMode && <CardOption icon={ICON.SETTINGS} squared onPress={handleOptions} />}
 
           {readMode && is.secure && !form.passcode ? (
             <CardOption icon={ICON.PASSCODE} text={L10N.SET_PASSCODE} onPress={() => setFields([FIELD.PASSCODE])} />
           ) : (
-            <>
-              {is.shard && readMode && <CardOption icon={ICON.SCAN} text={'Scan shard'} onPress={handleGoToScanner} />}
-              <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
-            </>
+            <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
           )}
+
+          {!readMode && currentIndex === 0 && (
+            <CardOption icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
+          )}
+
+          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleNFCCard} />
         </View>
       )}
     </Modal>

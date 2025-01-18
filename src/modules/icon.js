@@ -5,13 +5,12 @@ export const ICON = {
 
   BACK: 'chevron-left',
   BARCODE: 'barcode',
-  BLUETOOTH: 'bluetooth',
 
   CHECK: 'check-bold',
   CLOSE: 'close',
 
-  DATABASE_ADD: 'database-plus-outline',
-  DATABASE_REMOVE: 'database-remove-outline',
+  DATABASE_ADD: 'cellphone-arrow-down',
+  DATABASE_REMOVE: 'delete-forever-outline',
 
   EYE: 'eye-outline',
 
@@ -27,12 +26,15 @@ export const ICON = {
   REFRESH: 'refresh',
   RIGHT: 'chevron-right',
 
+  MEMORY: 'memory',
+
   SCAN: 'qrcode-scan',
   SEARCH: 'magnify',
   SECURE: 'lock-outline', // SECURE: 'database-lock-outline',
   SETTINGS: 'cog-outline',
   SHARD: 'call-split',
   SHARE: 'share-outline',
+  SHOPPING: 'shopping-outline',
 
   UNFAVORITE: 'star-outline',
 

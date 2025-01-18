@@ -7,18 +7,21 @@ import { style } from './Home.style';
 import { getFavorites, groupByVault } from './modules';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON } from '../../modules';
+import { ICON, L10N } from '../../modules';
+import { PurchaseService } from '../../services';
 
 const Home = ({ navigation }) => {
-  const { settings: { subscription } = {}, secrets = [] } = useStore();
+  const { subscription = {}, secrets = [] } = useStore();
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     // const [secret] = secrets;
-  //     // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
-  //     // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
-  //   }, 10);
-  // }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      // ? SHORTCUTS
+      // const [secret] = secrets;
+      // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
+      // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
+      // navigation.navigate('splitcard', { writeMode: secret });
+    }, 10);
+  }, []);
 
   const favorites = getFavorites(secrets);
   const vaults = groupByVault(secrets);
@@ -27,17 +30,25 @@ const Home = ({ navigation }) => {
   const [lastViewed] =
     (secrets.length && secrets.sort((a, b) => new Date(b.readAt || null) - new Date(a.readAt || null))) || [];
 
+  const handleSubscription = () => {
+    PurchaseService.getProducts()
+      .then((plans) => {
+        navigation.navigate('subscription', { plans });
+      })
+      .catch((error) => alert(error));
+  };
+
   // !TODO: We should determine if is a shard or not
 
   return (
     <Screen disableScroll style={style.screen}>
-      <ScrollView style={style.scrollview}>
+      <ScrollView contentContainerStyle={style.scrollviewContentContainer}>
         <View row spaceBetween style={[style.section, style.cardActions]}>
           <CardAction
             color="accent"
             icon={ICON.SCAN}
-            text="Scan Secret"
-            tiny="Add an external QR to become a guardian."
+            text={L10N.SCAN_SECRET}
+            tiny={L10N.SCAN_SECRET_CAPTION}
             onPress={() => navigation.navigate('scanner')}
           />
           {lastViewed ? (
@@ -57,25 +68,28 @@ const Home = ({ navigation }) => {
           ) : (
             <CardAction
               icon={ICON.ADD}
-              text="First secret"
-              tiny="Create your first secret"
+              text={L10N.FIRST_SECRET}
+              tiny={L10N.FIRST_SECRET_CAPTION}
               onPress={() => navigation.navigate('create')}
             />
           )}
         </View>
+
         {!subscription?.productIdentifier && (
-          <Card gap style={style.section}>
+          <Card onPress={handleSubscription} style={[style.banner, style.section]}>
             <View row>
-              <Text caption>What's new</Text>
-              <Icon name={ICON.ADD} />
+              <Icon name={ICON.STAR} style={style.bannerIcon} />
+              <Text bold caption>
+                {L10N.BANNER_SUBSCRIPTION_CAPTION}
+              </Text>
             </View>
 
-            <Text bold secondary title style={{ maxWidth: '55%' }}>
-              New features in split|Pass
+            <Text bold title style={style.bannerText}>
+              {L10N.BANNER_SUBSCRIPTION_TITLE}
             </Text>
 
-            <Text caption color="contentLight">
-              Explore the new features that make split|Pass much better.
+            <Text caption color="contentLight" secondary style={style.bannerText}>
+              {L10N.BANNER_SUBSCRIPTION_DESCRIPTION}
             </Text>
           </Card>
         )}

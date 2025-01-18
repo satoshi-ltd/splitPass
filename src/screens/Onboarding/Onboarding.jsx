@@ -8,6 +8,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { SLIDES } from './Onboarding.constants';
 import { style } from './Onboarding.style';
 import { useStore } from '../../contexts';
+import { L10N } from '../../modules';
 import { NotificationsService } from '../../services';
 
 const Onboarding = ({ navigation }) => {
@@ -68,7 +69,7 @@ const Onboarding = ({ navigation }) => {
         <Pagination currentIndex={currentIndex} length={SLIDES.length} />
 
         <Button secondary={lastSlide} onPress={lastSlide ? handleSubmit : handleNext} style={style.button}>
-          {lastSlide ? 'Start' : 'Next'}
+          {lastSlide ? L10N.START : L10N.NEXT}
         </Button>
       </View>
     </SafeAreaView>

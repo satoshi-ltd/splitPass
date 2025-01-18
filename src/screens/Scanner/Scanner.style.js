@@ -4,47 +4,49 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   screen: {
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width,
+    backgroundColor: '$scannerBackground',
+    height: '100%',
   },
 
-  scanner: {
+  container: {
     height: '100%',
-    width: '100%',
+  },
+
+  camera: {
     position: 'absolute',
     top: 0,
     left: 0,
+    height: '100%',
+    width: Dimensions.get('window').width,
   },
 
-  header: {
-    backgroundColor: '$importBackgroundColor',
-    ...Platform.select({ web: { paddingTop: '$viewOffset' } }),
+  background: {
+    backgroundColor: '$scannerBackgroundOpacity',
   },
 
-  headerLeft: {
-    marginLeft: '$viewOffset',
-    width: '$spaceXXL',
+  instructions: {
+    paddingBottom: '$viewOffset',
   },
 
-  headerRight: {
-    marginRight: '$viewOffset',
-    width: '$spaceXXL',
+  instructionsContent: {
+    maxWidth: '75%',
+  },
+
+  tabs: {
+    alignSelf: 'center',
+    marginBottom: '$viewOffset * 2',
+    marginTop: '$viewOffset * 3',
+    ...Platform.select({ web: { marginTop: '$viewOffset * 5' } }),
   },
 
   section: {
-    backgroundColor: '$importBackgroundColor',
     flex: 1,
     height: '100%',
-    padding: '$viewOffset',
   },
 
   frame: {
     height: '$qrSize',
     width: '$qrSize',
-  },
-
-  cardOptions: {
-    gap: '$viewOffset / 2',
   },
 
   corner: {
@@ -88,7 +90,7 @@ export const style = StyleSheet.create({
   },
 
   text: {
-    color: '$qrBackgroundColor',
+    color: '$scannerTextColor',
   },
 
   reveal: {
@@ -96,7 +98,20 @@ export const style = StyleSheet.create({
   },
 
   footer: {
-    flex: 2,
-    paddingVertical: '$viewOffset * 2',
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: '$viewOffset',
+
+    backgroundColor: 'orange',
+  },
+  // --
+
+  // -- Scanner.NFC (partial)
+  scannerNFC: {
+    width: '100%',
+    // paddingBottom: '$viewOffset',
+    // marginTop: '$viewOffset * 2',
+    // maxWidth: '80%',
+    // height: '80%',
   },
 });

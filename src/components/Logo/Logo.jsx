@@ -11,23 +11,14 @@ const IMAGE = {
   dark: require('../../../assets/images/logo-dark.png'),
 };
 
-const Logo = ({ showText = false, ...others }) => {
+const Logo = ({ forceTheme }) => {
   const { settings: { theme } = {} } = useStore();
 
-  return (
-    <View row style={[style.container, others.style]}>
-      <Image source={IMAGE[theme]} style={style.image} />
-      {showText && (
-        <Text bold title>
-          clonara
-        </Text>
-      )}
-    </View>
-  );
+  return <Image source={IMAGE[forceTheme || theme]} style={style.image} />;
 };
 
 Logo.propTypes = {
-  showText: PropTypes.bool,
+  forceTheme: PropTypes.string,
 };
 
 export { Logo };

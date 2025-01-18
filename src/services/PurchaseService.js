@@ -4,35 +4,29 @@ import { Platform } from 'react-native';
 import { L10N } from '../modules';
 
 const IS_WEB = Platform.OS === 'web';
-const MOCKED_PRODUCTS = [
-  {
-    productId: 'monthly',
-    price: '$2.99',
-    title: '1 month',
+const APIKEY = {
+  ios: 'appl_UpcVUSYlXYWPnJiAoroqRrpKuhT',
+  android: 'goog_bzzicUKLHqrXEdrltqKGmdXgyyI',
+};
+
+const PREMIUM_MOCK = {
+  customerInfo: {
+    entitlements: {
+      active: {
+        pro: {
+          identifier: 'pro',
+        },
+      },
+    },
   },
-  {
-    productId: 'yearly',
-    price: '$24.99',
-    title: '1 year',
-  },
-  {
-    description: 'Lifetime access to all features',
-    productId: 'lifetime',
-    price: '$49.99',
-    title: 'Lifetime',
-  },
-];
+  productIdentifier: 'lifetime',
+};
 
 const initializePurchases = async () => {
   const Purchases = require('react-native-purchases').default;
 
   Purchases.setLogLevel(Purchases.LOG_LEVEL.VERBOSE);
-
-  if (Platform.OS === 'ios') {
-    Purchases.configure({ apiKey: 'appl_UpcVUSYlXYWPnJiAoroqRrpKuhT' });
-  } else if (Platform.OS === 'android') {
-    Purchases.configure({ apiKey: 'goog_bzzicUKLHqrXEdrltqKGmdXgyyI' });
-  }
+  Purchases.configure({ apiKey: APIKEY[Platform.OS] });
 
   return Purchases;
 };
@@ -41,7 +35,7 @@ export const PurchaseService = {
   getProducts: async () =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve(MOCKED_PRODUCTS);
+      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve([]);
 
       try {
         const Purchases = await initializePurchases();
@@ -49,16 +43,22 @@ export const PurchaseService = {
         const offerings = await Purchases.getOfferings();
 
         if (offerings.current !== null && offerings.current.availablePackages.length !== 0) {
-          const plans = offerings.current.availablePackages.map((item) => ({
-            data: item,
-            productId: item.identifier,
-            price: item.product.priceString,
-            title: item.product.title,
-            description: item.product.identifier === 'lifetime.splitpass' ? L10N.LIFETIME_DESCRIPTION : null,
-          }));
+          const plans = Object.fromEntries(
+            offerings.current.availablePackages.map((item) => [
+              item.identifier,
+              {
+                data: item,
+                productId: item.identifier,
+                price: item.product.priceString,
+                pricePerMonth: item.product.pricePerMonthString,
+                title: item.product.title,
+              },
+            ]),
+          );
           resolve(plans);
+        } else {
+          resolve([]);
         }
-        resolve([]);
       } catch (error) {
         reject(`${L10N.ERROR}: ${JSON.stringify(error)}`);
       }
@@ -66,7 +66,7 @@ export const PurchaseService = {
   buy: async (plan) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve({ productIdentifier: 'lifetime' });
+      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve(PREMIUM_MOCK);
 
       try {
         const Purchases = await initializePurchases();
@@ -87,12 +87,13 @@ export const PurchaseService = {
   restore: async () =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve({ productIdentifier: 'lifetime' });
+      if (Constants.appOwnership === 'expo' || IS_WEB) return resolve(PREMIUM_MOCK);
 
       try {
         const Purchases = await initializePurchases();
 
         const customerInfo = await Purchases.restorePurchases();
+
         if (typeof customerInfo.entitlements.active['pro'] !== 'undefined') {
           resolve({ customerInfo, productIdentifier: customerInfo.entitlements.active['pro'].productIdentifier });
         } else {
@@ -105,7 +106,7 @@ export const PurchaseService = {
   checkSubscription: async (subscription) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      if (Constants.appOwnership === 'expo' || IS_WEB || subscription?.productIdentifier === 'lifetime')
+      if (Constants.appOwnership === 'expo' || IS_WEB || subscription.productIdentifier === 'lifetime')
         return resolve(true);
 
       try {

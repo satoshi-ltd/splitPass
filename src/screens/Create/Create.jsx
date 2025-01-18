@@ -5,13 +5,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
-import { QR_TYPE } from '../../App.constants';
+import { SECRET_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { Cypher, QRParser } from '../../modules';
+import { L10N, Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
-const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } = QR_TYPE;
+const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
+  SECRET_TYPE;
 
 const Create = ({ navigation = {} }) => {
   const { secrets, subscription, updateSubscription } = useStore();
@@ -72,18 +73,18 @@ const Create = ({ navigation = {} }) => {
   return (
     <Modal gap onClose={navigation.goBack}>
       <Text align="center" secondary bold title>
-        New Secret
+        {L10N.NEW_SECRET}
       </Text>
 
       <Card outlined style={style.cardForm}>
         <View {...fieldProps}>
           <Text bold tiny>
-            Name
+            {L10N.NAME}
           </Text>
           <Input
             align="right"
             autoFocus
-            placeholder="name..."
+            placeholder={L10N.NAME_PLACEHOLDER}
             value={form.name}
             onChange={(name) => setForm({ ...form, name })}
             style={style.input}
@@ -94,12 +95,12 @@ const Create = ({ navigation = {} }) => {
 
         <View {...fieldProps}>
           <Text bold tiny>
-            Secret
+            {L10N.SECRET}
           </Text>
           <InputMask
             align="right"
             multiline
-            placeholder="secret..."
+            placeholder={L10N.SECRET_PLACEHOLDER}
             value={form.secret}
             onChange={(secret) => setForm({ ...form, secret })}
             style={style.input}
@@ -110,11 +111,11 @@ const Create = ({ navigation = {} }) => {
 
         <View {...fieldProps}>
           <Text tiny style={{ maxWidth: '85%' }}>
-            {`Recover this secret will require the approval of at least `}
+            {L10N.SHARD_EXPLANATION}
             <Text bold tiny>
-              2 out of 3
+              {L10N.SHARD_EXPLANATION_NUMBER}
             </Text>
-            {` guardians.`}
+            {L10N.SHARD_EXPLANATION_GUARDIANS}
           </Text>
           <Switch checked={form.split} onChange={(split) => setForm({ ...form, split })} />
         </View>
@@ -125,14 +126,14 @@ const Create = ({ navigation = {} }) => {
 
             <View {...fieldProps}>
               <Text bold tiny color={form.split ? 'disabled' : undefined}>
-                6-digit passcode
+                {L10N.PASSCODE}
               </Text>
               <InputMask
                 align="right"
                 editable={!form.split}
                 keyboard="numeric"
                 maxLength={6}
-                placeholder="passcode..."
+                placeholder={L10N.PASSCODE_PLACEHOLDER}
                 value={form.passcode}
                 onChange={(passcode) => setForm({ ...form, passcode })}
                 style={style.input}
@@ -143,7 +144,7 @@ const Create = ({ navigation = {} }) => {
       </Card>
 
       <Button disabled={!isValid} secondary onPress={handlePressContinue} style={style.button}>
-        Continue
+        {L10N.CONTINUE}
       </Button>
     </Modal>
   );

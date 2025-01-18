@@ -1,55 +1,36 @@
-import { Action, Button, Card, Pressable, Modal, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Icon, Modal, Pressable, Tabs, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { Linking } from 'react-native';
 
+import { PLAN } from './Subscription.constants';
 import { style } from './Subscription.style';
-import { SATOSHI_URLS } from '../../App.constants';
-import { Logo } from '../../components';
+import { EVENT, SATOSHI_URLS } from '../../App.constants';
 import { useStore } from '../../contexts';
-import { L10N } from '../../modules';
+import { eventEmitter, L10N } from '../../modules';
 import { PurchaseService } from '../../services';
-import { verboseDate } from '../Settings/helpers';
 
-const Subscription = ({ route: { params: { plans = [] } = {} } = {}, navigation: { goBack } = {} }) => {
-  const { subscription, updateSubscription } = useStore();
+const Subscription = ({ route: { params: { plans = [] } = {} } = {}, navigation = {} }) => {
+  const { updateSubscription } = useStore();
 
   const [busy, setBusy] = useState(null);
-  const [plan, setPlan] = useState(null);
-
-  const isPremium = !!subscription?.productIdentifier;
-
-  const handleChange = (id) => {
-    setPlan(id);
-  };
-
-  const handleRestore = () => {
-    setBusy('restore');
-    PurchaseService.restore()
-      .then((activeSubscription) => {
-        if (activeSubscription) {
-          updateSubscription(activeSubscription);
-          alert(L10N.PURCHASE_RESTORED);
-          goBack();
-          setBusy(null);
-        }
-      })
-      .catch((error) => alert(error));
-  };
+  const [plan, setPlan] = useState(PLAN.SUBSCRIPTION);
 
   const handleStart = () => {
     setBusy('purchase');
-    const { data } = plans.find((p) => p.productId === plan) || {};
+    const { data } = plans[plan] || {};
     PurchaseService.buy(data)
       .then((newSubscription) => {
         if (newSubscription) {
           updateSubscription(newSubscription);
-          goBack();
+          navigation.goBack();
           setBusy(null);
         }
       })
-      .catch((error) => alert(error));
+      .catch(handleError);
   };
+
+  const handleError = (error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: JSON.stringify(error) });
 
   const handleTermsAndConditions = () => {
     Linking.openURL(SATOSHI_URLS.TERMS);
@@ -59,102 +40,88 @@ const Subscription = ({ route: { params: { plans = [] } = {} } = {}, navigation:
     Linking.openURL(SATOSHI_URLS.PRIVACY);
   };
 
+  const isLifetime = plan === PLAN.LIFETIME;
+  const planData = plans[plan];
+
   return (
-    <Modal onClose={goBack} style={style.modal}>
-      {isPremium ? (
-        <>
-          <View align="center">
-            <Logo />
-          </View>
+    <Modal gap onClose={navigation.goBack} style={style.modal}>
+      <View align="center">
+        <Tabs
+          accent={isLifetime}
+          caption
+          selected={isLifetime ? 1 : 0}
+          options={[
+            { id: PLAN.SUBSCRIPTION, text: L10N.SUBSCRIPTION },
+            { id: PLAN.LIFETIME, text: L10N.LIFETIME },
+          ]}
+          onChange={(option) => setPlan(option.id)}
+        />
+      </View>
 
-          <View>
-            <View gap row>
-              <Text bold subtitle>
-                {`${L10N.SUBSCRIPTION_ACTUAL_PLAN}: `}
+      <View style={style.title}>
+        <Text bold title>
+          {L10N.SUBSCRIPTION_TITLE}
+        </Text>
+        <Text bold caption color="contentLight">
+          {isLifetime ? L10N.SUBSCRIPTION_LIFETIME_DESCRIPTION : L10N.SUBSCRIPTION_DESCRIPTION}
+        </Text>
+      </View>
+
+      <Card gap style={style.items}>
+        {L10N.SUBSCRIPTION_ITEMS.map(({ icon, description, title }, index) => (
+          <View gap row key={`item-${index}`} style={style.item}>
+            <Icon name={icon} title />
+            <View flex>
+              <Text caption bold>
+                {title}
               </Text>
-              <Text subtitle>{subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier}</Text>
+              <Text tiny color="contentLight">
+                {description}
+              </Text>
             </View>
-            <View gap row>
-              <Text bold subtitle>
-                {`${L10N.SUBSCRIPTION_NEXT_BILLING_DATE}: `}
-              </Text>
-              <Text subtitle>
-                {subscription?.customerInfo?.entitlements?.active?.['pro']?.expirationDate
-                  ? verboseDate(new Date(subscription?.customerInfo?.entitlements?.active?.['pro']?.expirationDate), {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                  : L10N.LIFETIME}
-              </Text>
-            </View>
           </View>
+        ))}
+      </Card>
 
-          <View style={style.buttons}>
-            <Button outlined onPress={goBack}>
-              {L10N.CLOSE}
-            </Button>
-          </View>
-        </>
-      ) : (
-        <>
-          <View align="center">
-            <Logo />
-            <Text align="center">{L10N.SUBSCRIPTION_CAPTION}</Text>
-          </View>
-
-          <View style={style.options}>
-            <Text align="center" bold subtitle>
-              {L10N.CHOOSE_PLAN}
-            </Text>
-
-            {plans.map(({ productId, price, title, description }) => (
-              <Pressable key={productId} onPress={() => handleChange(productId)}>
-                <Card outlined style={productId === plan ? style.optionHighlight : undefined}>
-                  <View />
-                  <Text bold color={productId === plan ? 'base' : undefined}>{`${price} / ${title}`}</Text>
-                  {!!description && (
-                    <Text color={productId === plan ? 'base' : undefined} tiny>
-                      {description}
-                    </Text>
-                  )}
-                </Card>
-              </Pressable>
-            ))}
-          </View>
-
-          <View style={style.buttons}>
-            <Action activity={busy === 'restore'} color="content" onPress={handleRestore}>
-              {L10N.RESTORE_PURCHASES}
-            </Action>
-            <Button activity={busy === 'purchase'} onPress={handleStart}>
-              {plan === 'lifetime' ? L10N.PURCHASE : L10N.START_TRIAL}
-            </Button>
-            <Button outlined onPress={goBack}>
-              {L10N.SUBSCRIPTION_CLOSE}
-            </Button>
-          </View>
-
-          <Text tiny>
-            {L10N.SUBSCRIPTION_TERMS_CAPTION}
-            {` `}
-            <Pressable onPress={handleTermsAndConditions}>
-              <Text bold tiny style={style.pressableTerms}>
-                {L10N.SUBSCRIPTION_TERMS}
-              </Text>
-            </Pressable>
-            {` ${L10N.SUBSCRIPTION_AND} `}
-            <Pressable onPress={handlePrivacy}>
-              <Text bold tiny style={style.pressableTerms}>
-                {L10N.SUBSCRIPTION_PRIVACY}
-              </Text>
-            </Pressable>
-            .
+      <View align="center">
+        {isLifetime ? (
+          <Text align="center" bold caption style={style.lifetime}>
+            {`${planData?.price || 'THB 3,990thb'} ${L10N.LIFETIME}`}
           </Text>
-        </>
-      )}
+        ) : (
+          <>
+            <Text align="center" bold caption>
+              {`${planData?.price || 'THB 3,990thb'} ${L10N.ANNUALY} (${planData?.pricePerMonth || 'THB 332.50'}/${
+                L10N.MONTH
+              })`}
+            </Text>
+            <Text align="center" bold caption>
+              {L10N.CANCEL_ANYTIME}
+            </Text>
+          </>
+        )}
+      </View>
+
+      <Button activity={busy === 'purchase'} secondary={isLifetime} onPress={handleStart}>
+        {plan === PLAN.LIFETIME ? L10N.PURCHASE : L10N.START_TRIAL}
+      </Button>
+
+      <Text align="center" tiny>
+        {L10N.SUBSCRIPTION_TERMS_CAPTION}
+        {` `}
+        <Pressable onPress={handleTermsAndConditions}>
+          <Text bold tiny style={style.pressableTerms}>
+            {L10N.SUBSCRIPTION_TERMS}
+          </Text>
+        </Pressable>
+        {` ${L10N.SUBSCRIPTION_AND} `}
+        <Pressable onPress={handlePrivacy}>
+          <Text bold tiny style={style.pressableTerms}>
+            {L10N.SUBSCRIPTION_PRIVACY}
+          </Text>
+        </Pressable>
+        .
+      </Text>
     </Modal>
   );
 };
