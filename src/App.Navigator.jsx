@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Button, Icon, Pressable, View } from '@satoshi-ltd/nano-design';
 import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useState } from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './App.style';
@@ -25,6 +25,7 @@ const commonScreenOptions = (theme = 'light') => ({
 
 export const Navigator = () => {
   const { settings: { onboarded, theme } = {} } = useStore();
+  const [routeName, setRouteName] = useState('');
 
   const screenOptions = {
     headerBackTitleVisible: false,
@@ -37,7 +38,15 @@ export const Navigator = () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigation = useNavigation();
 
-      return canGoBack ? <Button icon={ICON.BACK} small onPress={navigation.goBack} style={style.buttonBack} /> : null;
+      return canGoBack ? (
+        <Button
+          secondary={routeName === 'scanner'}
+          icon={ICON.BACK}
+          small
+          onPress={navigation.goBack}
+          style={style.buttonBack}
+        />
+      ) : null;
     },
     headerRight: () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -60,7 +69,10 @@ export const Navigator = () => {
   };
 
   return (
-    <NavigationContainer theme={getNavigationTheme()}>
+    <NavigationContainer
+      onStateChange={(state) => setRouteName(state.routes[state.index].name)}
+      theme={getNavigationTheme(routeName)}
+    >
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} translucent />
 
       <Stack.Navigator initialRouteName={onboarded ? 'home' : 'onboarding'} screenOptions={screenOptions}>

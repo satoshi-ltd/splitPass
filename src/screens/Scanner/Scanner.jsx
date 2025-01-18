@@ -111,7 +111,7 @@ const Scanner = ({
           barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
           facing="back"
           onBarcodeScanned={scanning ? ({ data = '' }) => handleScanned(data) : undefined}
-          style={[style.camera, StyleSheet.absoluteFill]}
+          style={style.camera}
         />
       )}
 
