@@ -4,17 +4,14 @@ import { ICON, L10N } from '../../modules';
 const OPTIONS = (isPremium, subscription) => [
   {
     callback: !isPremium ? 'handleSubscription' : undefined,
-    caption: isPremium
-      ? `${L10N.SUBSCRIPTION_ACTUAL_PLAN}: ${subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier}`
-      : undefined,
+    caption: isPremium ? 'Premium' || subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier : undefined,
     icon: ICON.FAVORITE,
     id: 1,
     text: L10N.SUBSCRIPTION,
   },
   {
     disabled: true,
-    // callback: 'handleSubscription',
-    // caption: '$$No active subscription',
+    // callback: 'handleShop',
     icon: ICON.SHOPPING,
     id: 2,
     text: L10N.GET_SPLITCARD,
