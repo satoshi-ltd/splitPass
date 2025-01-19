@@ -160,7 +160,11 @@ const Viewer = ({
             </Button>
           )}
           <View align="center" row style={style.caption}>
-            <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
+            <Icon
+              caption
+              color="contentLight"
+              name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO}
+            />
             <Text align="center" color="contentLight" tiny>
               {is.secure
                 ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
