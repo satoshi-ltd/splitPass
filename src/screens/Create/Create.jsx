@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Card, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Icon, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -8,7 +8,7 @@ import { style } from './Create.style';
 import { SECRET_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { L10N, Cypher, QRParser } from '../../modules';
+import { ICON, isSeedPhrase, L10N, Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
@@ -106,6 +106,13 @@ const Create = ({ navigation = {} }) => {
             style={style.input}
           />
         </View>
+
+        {isSeedPhrase(form.secret) && (
+          <View row style={style.hint}>
+            <Icon name={ICON.INFO} />
+            <Text tiny>{L10N.SEED_PHRASE_DETECTED}</Text>
+          </View>
+        )}
 
         <View style={style.separator} />
 

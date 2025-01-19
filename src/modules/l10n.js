@@ -100,6 +100,7 @@ export const L10N = {
   SECRET_PLACEHOLDER: 'Secret...',
   SECRET_DELETED: 'Secret deleted successfully.',
   SECRET_SAVED_IN_NFC: 'The secret has been successfully saved to your split|Card.',
+  SEED_PHRASE_DETECTED: 'Seed phrase detected. Secret will be securely stored.',
   SET_PASSCODE: 'Set passcode',
   SETTINGS: 'Settings',
   SHARE: 'Share...',

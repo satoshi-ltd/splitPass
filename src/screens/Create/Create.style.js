@@ -34,6 +34,11 @@ export const style = StyleSheet.create({
     paddingRight: 0,
   },
 
+  hint: {
+    gap: '$viewOffset / 4',
+    marginVertical: '$viewOffset / 2',
+  },
+
   button: {
     marginTop: '$viewOffset',
   },
