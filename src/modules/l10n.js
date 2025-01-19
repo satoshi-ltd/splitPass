@@ -66,6 +66,8 @@ export const L10N = {
   PASSCODE: '6-digit passcode',
   PASSCODE_PLACEHOLDER: 'passcode...',
   PREFERENCES: 'Preferences',
+  PREMIUM_LIFETIME: 'Lifetime Premium',
+  PREMIUM_YEARLY: 'Yearly Premium',
   PRIVACY: 'Privacy Policy',
   PURCHASE: 'Purchase',
   PURCHASE_RESTORED: 'Purchase restored.',
