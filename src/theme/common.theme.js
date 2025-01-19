@@ -30,4 +30,7 @@ export const CommonTheme = {
   $scannerBackground: '$colorDark',
   $scannerBackgroundOpacity: 'rgba(0, 0, 0, 0.85)',
   $scannerTextColor: '$colorLight',
+
+  $splitCardHeight: 208,
+  $splitCardWidth: 328,
 };

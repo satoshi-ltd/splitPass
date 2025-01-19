@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
+import { Frame } from './components';
 import { style } from './Scanner.style';
 import { NFCCard } from '../../components';
 
@@ -11,11 +12,11 @@ const ScannerNFC = ({ onRead = () => {}, onTag, reveal }) => (
     <NFCCard readMode onRecord={onRead} onRead={onTag} />
 
     {reveal && (
-      <View align="center" style={style.reveal}>
-        <Text align="center" bold caption color={StyleSheet.value('$qrBackgroundColor')}>
+      <Frame align="center" card style={style.revealNFC}>
+        <Text align="center" bold color={StyleSheet.value('$colorLight')} secondary>
           {reveal}
         </Text>
-      </View>
+      </Frame>
     )}
   </View>
 );
