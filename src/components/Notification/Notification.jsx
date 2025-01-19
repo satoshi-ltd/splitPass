@@ -1,6 +1,7 @@
 import { Notification as NotificationBase } from '@satoshi-ltd/nano-design';
 import React, { useEffect, useState } from 'react';
 
+import { style } from './Notification.style';
 import { EVENT } from '../../App.constants';
 import { eventEmitter, L10N } from '../../modules';
 
@@ -31,5 +32,14 @@ export const Notification = () => {
 
   const { error, message = L10N.ERROR } = value || {};
 
-  return <NotificationBase error={error} text={message} visible={visible} onClose={handleClose} />;
+  return (
+    <NotificationBase
+      caption
+      error={error}
+      text={message}
+      visible={visible}
+      onClose={handleClose}
+      style={style.notification}
+    />
+  );
 };
