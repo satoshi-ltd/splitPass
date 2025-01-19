@@ -14,7 +14,9 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
   const translateY = useRef(new Animated.Value(8)).current;
-  const { settings: { theme } = {} } = useStore();
+  const { settings: { theme } = {}, subscription } = useStore();
+
+  const isPremium = !!subscription?.productIdentifier;
 
   const [active, setActive] = useState();
   const [busy, setBusy] = useState(false);
@@ -36,6 +38,20 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       setError();
       if (readMode) {
         const nextTag = await NFCService.read().catch(handleError);
+
+        if (!isPremium) {
+          const response = await fetch('https://splitpass.clonara.com/cards/valid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tagId: nextTag?.info?.id }),
+          });
+          const data = await response.json();
+
+          if (!data.isValid) {
+            return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
+          }
+        }
+
         if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
         setTag(nextTag);
       } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
@@ -63,7 +79,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
     setTag();
   };
 
-  const handleactive = () => {
+  const handleActive = () => {
     setActive(false);
     setBusy(true);
     setTimeout(() => setActive(true), 300);
@@ -84,13 +100,12 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       </View>
 
       <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }]}>
-        <Card spaceBetween color={id ? 'accent' : undefined} gap style={style.card} onPress={handleactive}>
+        <Card spaceBetween color={id ? 'accent' : undefined} gap style={style.card} onPress={handleActive}>
           <View row spaceBetween style={style.cardRow}>
             <Text color={color} bold subtitle>
               split|Card
             </Text>
-            {id && usedMemory > 0 &&
-              (
+            {id && usedMemory > 0 && (
               <View row style={style.cardMemory}>
                 <Icon color={color} caption name={ICON.MEMORY} />
                 <Text bold color={color} tiny>
@@ -116,7 +131,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       <Action
         caption
         color={tag || busy ? 'contentLight' : theme === 'light' ? 'content' : undefined}
-        onPress={handleactive}
+        onPress={handleActive}
         style={style.action}
       >
         {error
