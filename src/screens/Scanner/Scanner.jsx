@@ -60,6 +60,8 @@ const Scanner = ({
         return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.FIRST_SHARD_SAME });
       } else if (!values.length) {
         eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.FIRST_SHARD_SCANNED });
+      } else {
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SHARDS_COMBINED });
       }
     }
     setValues([...values, data]);
@@ -85,11 +87,11 @@ const Scanner = ({
 
   const is = {
     empty: !values.length,
-    fields: fields?.length > 0,
     form: !!Object.values(form).length,
     modeNFC: readerType === READER_TYPE.NFC,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
+    complete: values.length > 0 && (!SHARD_TYPES.includes(type) || values.length > 1),
   };
 
   const Wrapper = IS_WEB ? React.Fragment : KeyboardAvoidingView;
@@ -143,7 +145,7 @@ const Scanner = ({
                   />
                 )}
 
-                {!is.empty && (!is.shard || values.length > 1) && (
+                {is.complete && (
                   <CardOption
                     color="accent"
                     icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}

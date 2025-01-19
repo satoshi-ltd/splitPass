@@ -106,6 +106,7 @@ export const L10N = {
   SHARD_EXPLANATION: 'Recover this secret will require the approval of at least ',
   SHARD_EXPLANATION_NUMBER: '2 out of 3',
   SHARD_EXPLANATION_GUARDIANS: ' guardians',
+  SHARDS_COMBINED: 'Shards combined! Secret ready to view.',
   START: 'Start',
   START_TRIAL: 'Start free 7 day trial',
   SUBSCRIPTION: 'Subscription',
