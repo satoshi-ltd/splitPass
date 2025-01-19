@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Viewer.style';
 import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
@@ -134,9 +135,9 @@ const Viewer = ({
               value={value}
               onPress={!is.shard ? () => {} : undefined}
             />
-            {(is.shard || values.length > 1) && (
+            {is.shard && (
               <View align="center" bold style={style.shard}>
-                <Text bold tiny>
+                <Text bold color={StyleSheet.value('$qrColor')} tiny>
                   shard:{index + 1}
                 </Text>
               </View>
