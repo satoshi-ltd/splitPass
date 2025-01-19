@@ -40,7 +40,10 @@ const Viewer = ({
   };
 
   const handleSave = async () => {
-    await createSecret({ name, value: values[currentIndex] });
+    const secret = await createSecret({ name, value: values[currentIndex] });
+    if (!secret) return;
+
+    eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
     if (values.length > 1) next();
     else navigation.goBack();
   };

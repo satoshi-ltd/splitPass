@@ -76,10 +76,8 @@ const Scanner = ({
     setForm(nextForm);
 
     if (nextForm.secret) {
-      await createSecret({ name: nextForm.secret, value: values[0] });
-      navigation.goBack();
-      // !TODO
-      // navigation.navigate('vault');
+      const secret = await createSecret({ name: nextForm.secret, value: values[0] });
+      if (secret) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
     }
   };
 
