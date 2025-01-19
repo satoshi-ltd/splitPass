@@ -104,7 +104,12 @@ export const style = StyleSheet.create({
 
     backgroundColor: 'orange',
   },
-  // --
+
+  cardOptions: {
+    gap: '$viewOffset / 2',
+  },
+
+  // -- Scanner.QR (partial)
 
   // -- Scanner.NFC (partial)
   scannerNFC: {

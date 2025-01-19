@@ -6,9 +6,9 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { style } from './Scanner.style';
 import { NFCCard } from '../../components';
 
-const ScannerNFC = ({ scanning = false, onRead = () => {}, onTag, reveal }) => (
+const ScannerNFC = ({ onRead = () => {}, onTag, reveal }) => (
   <View align="center" style={[style.background, style.scannerNFC]}>
-    <NFCCard active={scanning} readMode onRecord={onRead} onRead={onTag} />
+    <NFCCard readMode onRecord={onRead} onRead={onTag} />
 
     {reveal && (
       <View align="center" style={style.reveal}>
@@ -22,7 +22,6 @@ const ScannerNFC = ({ scanning = false, onRead = () => {}, onTag, reveal }) => (
 
 ScannerNFC.propTypes = {
   reveal: PropTypes.string,
-  scanning: PropTypes.bool,
   onRead: PropTypes.func,
   onTag: PropTypes.func,
 };

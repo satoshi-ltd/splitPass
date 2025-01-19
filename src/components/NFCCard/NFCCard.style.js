@@ -14,6 +14,7 @@ export const style = StyleSheet.create({
   card: {
     ...CARD_DIMENSION,
     borderRadius: 12,
+    justifyContent: 'space-between',
     paddingHorizontal: '$spaceL',
     paddingVertical: '$spaceL - $spaceXS',
     shadowColor: '#000',
@@ -47,6 +48,10 @@ export const style = StyleSheet.create({
     paddingLeft: '$spaceXS',
     paddingRight: '$spaceS',
     paddingVertical: '$spaceXXS',
+  },
+
+  action: {
+    marginTop: '$viewOffset / 2',
   },
 
   records: {
