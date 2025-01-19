@@ -132,7 +132,7 @@ const Scanner = ({
 
           <View style={[style.footer, style.background]}>
             {fields && !is.form ? (
-              <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} />
+              <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} style={style.input} />
             ) : !is.empty || is.modeNFC ? (
               <View row style={style.cardOptions}>
                 {!is.empty && <CardOption icon={ICON.REFRESH} text={L10N.RESTART} onPress={handleReset} />}

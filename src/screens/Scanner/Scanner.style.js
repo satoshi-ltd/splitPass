@@ -45,8 +45,7 @@ export const style = StyleSheet.create({
   },
 
   input: {
-    backgroundColor: 'transparent',
-    flex: 1,
+    height: '$viewOffset * 4.5',
   },
 
   text: {
