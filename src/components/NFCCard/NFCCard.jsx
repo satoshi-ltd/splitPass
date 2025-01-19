@@ -34,8 +34,11 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
     setBusy(true);
     setTimeout(async () => {
       setError();
-      if (readMode) setTag(await NFCService.read().catch(handleError));
-      else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
+      if (readMode) {
+        const nextTag = await NFCService.read().catch(handleError);
+        if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
+        setTag(nextTag);
+      } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
       setBusy(false);
     }, ANIMATION.duration);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,7 +89,8 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
             <Text color={color} bold subtitle>
               split|Card
             </Text>
-            {id && (
+            {id && usedMemory > 0 &&
+              (
               <View row style={style.cardMemory}>
                 <Icon color={color} caption name={ICON.MEMORY} />
                 <Text bold color={color} tiny>

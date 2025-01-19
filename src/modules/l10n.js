@@ -58,6 +58,7 @@ export const L10N = {
   NEXT: 'Next',
   NFC_ACCESS_ERROR: 'Error accessing your split|Card. Please try again.',
   NFC_CARD_IS_FULL: 'Your split|Card is full. No more secrets can be saved.',
+  NFC_CARD_IS_EMPTY: 'No secrets on this card. Try another.',
   NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
 
   OFF: 'Off',
