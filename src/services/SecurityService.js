@@ -6,7 +6,7 @@ export const SecurityService = {
       if (isPremium) resolve(true);
 
       if (!isPremium) {
-        const response = await fetch('https://splitpass.clonara.com/cards/valid', {
+        const response = await fetch('https://splitpass.satoshi-ltd.com/cards/valid', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ tagId: tag.info?.id }),

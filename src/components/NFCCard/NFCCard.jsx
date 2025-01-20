@@ -36,7 +36,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       setError();
       if (readMode) {
         const nextTag = await NFCService.read().catch(handleError);
-        const valid = await SecurityService.checkCard({ subscription }).catch();
+        const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
 
         if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
         if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
