@@ -60,7 +60,7 @@ export const L10N = {
   NFC_CARD_IS_FULL: 'Your split|Card is full. No more secrets can be saved.',
   NFC_CARD_IS_EMPTY: 'No secrets on this card. Try another.',
   NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
-  NFC_SPLITCARD_ERROR: 'The scanned card is not a valid SplitCard.',
+  NFC_SPLITCARD_ERROR: 'Invalid card. Use a valid split|Card.',
 
   OFF: 'Off',
   ON: 'On',

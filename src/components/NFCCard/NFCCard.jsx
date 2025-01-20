@@ -8,15 +8,13 @@ import { style } from './NFCCard.style';
 import { EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { eventEmitter, findVault, ICON, L10N } from '../../modules';
-import { NFCService } from '../../services';
+import { NFCService, SecurityService } from '../../services';
 
 const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) => {
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
   const translateY = useRef(new Animated.Value(8)).current;
   const { settings: { theme } = {}, subscription } = useStore();
-
-  const isPremium = !!subscription?.productIdentifier;
 
   const [active, setActive] = useState();
   const [busy, setBusy] = useState(false);
@@ -38,21 +36,11 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       setError();
       if (readMode) {
         const nextTag = await NFCService.read().catch(handleError);
+        const valid = await SecurityService.checkCard({ subscription }).catch();
 
-        if (!isPremium) {
-          const response = await fetch('https://splitpass.clonara.com/cards/valid', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tagId: nextTag?.info?.id }),
-          });
-          const data = await response.json();
-
-          if (!data.isValid) {
-            return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
-          }
-        }
-
+        if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
         if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
+
         setTag(nextTag);
       } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
       setBusy(false);
