@@ -15,7 +15,6 @@ import { useStore } from '../../contexts';
 import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 
 const Scanner = ({
-  navigation,
   route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -70,6 +69,7 @@ const Scanner = ({
   const handleReset = () => {
     handleReaderType(readerType);
     setForm({});
+    setFields();
     setValues([]);
   };
 
@@ -173,7 +173,6 @@ const Scanner = ({
 
 Scanner.propTypes = {
   route: PropTypes.any,
-  navigation: PropTypes.any,
 };
 
 export { Scanner };
