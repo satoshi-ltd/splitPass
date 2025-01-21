@@ -68,7 +68,7 @@ const Create = ({ navigation = {} }) => {
 
   const fieldProps = { row: true, spaceBetween: true, style: style.field };
 
-  const isValid = !!form.name && !!form.secret;
+  const isValid = !!form.name && !!form.secret && (form.passcode?.length === 0 || form.passcode?.length === 6);
 
   return (
     <Modal gap onClose={navigation.goBack}>

@@ -69,6 +69,7 @@ const Scanner = ({
 
   const handleReset = () => {
     handleReaderType(readerType);
+    setForm({});
     setValues([]);
   };
 
