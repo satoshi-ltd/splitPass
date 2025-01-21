@@ -1,4 +1,4 @@
-import { Card, Icon, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import { Action, Card, Icon, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
@@ -6,21 +6,19 @@ import { Animated } from 'react-native';
 import { ANIMATION } from './NFCCard.constants';
 import { style } from './NFCCard.style';
 import { EVENT } from '../../App.constants';
+import { useStore } from '../../contexts';
 import { eventEmitter, findVault, ICON, L10N } from '../../modules';
-import { NFCService } from '../../services';
+import { NFCService, SecurityService } from '../../services';
 
-const NFCCard = ({
-  active = false,
-  readMode = false,
-  writeMode,
-  onError = () => {},
-  onRead = () => {},
-  onRecord = () => {},
-}) => {
+const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) => {
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
-  const translateY = useRef(new Animated.Value(16)).current;
+  const translateY = useRef(new Animated.Value(8)).current;
+  const { settings: { theme } = {}, subscription } = useStore();
 
+  const [active, setActive] = useState();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
   const [tag, setTag] = useState();
 
   useEffect(() => {
@@ -28,14 +26,24 @@ const NFCCard = ({
     Animated.parallel([
       Animated.timing(opacity, { ...ANIMATION, toValue: active ? 1 : 0.8 }),
       Animated.timing(scale, { ...ANIMATION, toValue: active ? 1 : 0.9 }),
-      Animated.timing(translateY, { ...ANIMATION, toValue: active ? 0 : 16 }),
+      Animated.timing(translateY, { ...ANIMATION, toValue: active ? 0 : 8 }),
     ]).start();
 
     if (!active) return;
 
+    setBusy(true);
     setTimeout(async () => {
-      if (readMode) setTag(await NFCService.read().catch(handleError));
-      else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
+      setError();
+      if (readMode) {
+        const nextTag = await NFCService.read().catch(handleError);
+        const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
+
+        if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
+        if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
+
+        setTag(nextTag);
+      } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
+      setBusy(false);
     }, ANIMATION.duration);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, readMode, writeMode]);
@@ -44,21 +52,25 @@ const NFCCard = ({
     if (!tag) return;
 
     const { records = [] } = tag || {};
-    onRead(tag);
     if (readMode && records.length === 1) handleRecord(records[0].value);
     if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_NFC });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tag]);
 
   const handleError = (error) => {
+    setError(error);
     eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: error });
-    onError(error);
   };
 
   const handleRecord = (record) => {
     onRecord(record);
-    // !TODO
     setTag();
+  };
+
+  const handleActive = () => {
+    setActive(false);
+    setBusy(true);
+    setTimeout(() => setActive(true), 300);
   };
 
   const { info: { id, name, totalMemory, usedMemory } = {}, records = [] } = tag || {};
@@ -76,12 +88,12 @@ const NFCCard = ({
       </View>
 
       <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }]}>
-        <Card spaceBetween color={id ? 'accent' : undefined} gap style={[style.card]}>
+        <Card spaceBetween color={id ? 'accent' : undefined} gap style={style.card} onPress={handleActive}>
           <View row spaceBetween style={style.cardRow}>
             <Text color={color} bold subtitle>
               split|Card
             </Text>
-            {id && (
+            {id && usedMemory > 0 && (
               <View row style={style.cardMemory}>
                 <Icon color={color} caption name={ICON.MEMORY} />
                 <Text bold color={color} tiny>
@@ -103,6 +115,23 @@ const NFCCard = ({
           </View>
         </Card>
       </Animated.View>
+
+      <Action
+        caption
+        color={tag || busy ? 'contentLight' : theme === 'light' ? 'content' : undefined}
+        onPress={handleActive}
+        style={style.action}
+      >
+        {error
+          ? L10N.SCANNER_NFC_ERROR
+          : busy
+          ? L10N.SCANNER_NFC_BUSY
+          : tag
+          ? writeMode
+            ? L10N.SCANNER_NFC_WRITE
+            : L10N.SCANNER_NFC_RESCAN
+          : L10N.SCANNER_NFC_SCAN}
+      </Action>
 
       {readMode && records.length ? (
         <View style={style.records}>
@@ -130,14 +159,11 @@ const NFCCard = ({
 };
 
 NFCCard.propTypes = {
-  active: PropTypes.bool,
   readMode: PropTypes.bool,
   writeMode: PropTypes.shape({
     name: PropTypes.string,
     value: PropTypes.string,
   }),
-  onError: PropTypes.func,
-  onRead: PropTypes.func,
   onRecord: PropTypes.func,
 };
 

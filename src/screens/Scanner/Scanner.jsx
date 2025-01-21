@@ -4,19 +4,17 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
-import StyleSheet from 'react-native-extended-stylesheet';
 
 import { ScannerNFC } from './Scanner.nfc';
 import { ScannerQR } from './Scanner.qr';
 import { style } from './Scanner.style';
 import { FIELD, IS_WEB, READER_TYPE, SECURE_TYPES, SHARD_TYPES, SECRET_TYPE } from '../../App.constants';
 import { EVENT } from '../../App.constants';
-import { CardOption, Form } from '../../components';
+import { CardMarketplace, CardOption, Form } from '../../components';
 import { useStore } from '../../contexts';
 import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 
 const Scanner = ({
-  navigation,
   route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -28,12 +26,13 @@ const Scanner = ({
   const [readerType, setReaderType] = useState(propReaderType);
   const [reveal, setReveal] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [tag, setTag] = useState();
   const [values, setValues] = useState([]);
 
+  // ! TODO: We need this effect?
   useFocusEffect(
     useCallback(async () => {
       setActive(true);
+      handleReaderType(propReaderType);
       if (!permission?.granted) return requestPermission();
     }, []),
   );
@@ -54,13 +53,14 @@ const Scanner = ({
     if (!Object.values(SECRET_TYPE).includes(type)) return;
 
     setScanning(false);
-    setTag();
     if (SHARD_TYPES.includes(type)) {
       if (values.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
       if (values.includes(data)) {
         return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.FIRST_SHARD_SAME });
       } else if (!values.length) {
         eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.FIRST_SHARD_SCANNED });
+      } else {
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SHARDS_COMBINED });
       }
     }
     setValues([...values, data]);
@@ -68,6 +68,8 @@ const Scanner = ({
 
   const handleReset = () => {
     handleReaderType(readerType);
+    setForm({});
+    setFields();
     setValues([]);
   };
 
@@ -75,29 +77,20 @@ const Scanner = ({
     setForm(nextForm);
 
     if (nextForm.secret) {
-      await createSecret({ name: nextForm.secret, value: values[0] });
-      navigation.goBack();
-      // !TODO
-      // navigation.navigate('vault');
+      const secret = await createSecret({ name: nextForm.secret, value: values[0] });
+      if (secret) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
     }
-  };
-
-  const handleScanNFC = () => {
-    if (!tag) return setScanning(true);
-    setScanning(false);
-    setTag();
-    setTimeout(() => setScanning(true), 400);
   };
 
   const [type] = values[0] || [];
 
   const is = {
     empty: !values.length,
-    fields: fields?.length > 0,
     form: !!Object.values(form).length,
     modeNFC: readerType === READER_TYPE.NFC,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
+    complete: values.length > 0 && (!SHARD_TYPES.includes(type) || values.length > 1),
   };
 
   const Wrapper = IS_WEB ? React.Fragment : KeyboardAvoidingView;
@@ -134,14 +127,13 @@ const Scanner = ({
             reveal: reveal ? QRParser.decode(QRParser.combine(...values), form.passcode) : undefined,
             scanning,
             onRead: handleScanned,
-            onTag: setTag,
           })}
 
           <View style={[style.footer, style.background]}>
             {fields && !is.form ? (
-              <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} />
+              <Form fields={fields} onCancel={setFields} onSubmit={handleSubmitForm} style={style.input} />
             ) : !is.empty || is.modeNFC ? (
-              <View row gap>
+              <View row style={style.cardOptions}>
                 {!is.empty && <CardOption icon={ICON.REFRESH} text={L10N.RESTART} onPress={handleReset} />}
 
                 {values.length === 1 && !readMode && (
@@ -152,8 +144,9 @@ const Scanner = ({
                   />
                 )}
 
-                {!is.empty && (!is.shard || values.length > 1) && (
+                {is.complete && (
                   <CardOption
+                    color="accent"
                     icon={is.secure && !form.passcode ? ICON.PASSCODE : ICON.EYE}
                     text={is.secure && !form.passcode ? L10N.SET_PASSCODE : L10N.REVEAL_SECRET}
                     {...(is.secure && !form.passcode
@@ -168,19 +161,7 @@ const Scanner = ({
                   />
                 )}
 
-                {is.modeNFC && (
-                  <>
-                    {!values.length && <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} />}
-                    {(is.empty || (is.shard && values.length < 2)) && (
-                      <CardOption
-                        color="accent"
-                        icon={ICON.NFC}
-                        text={scanning && !tag ? L10N.SCANNING : tag ? L10N.RESCAN : L10N.START_SCAN}
-                        onPress={handleScanNFC}
-                      />
-                    )}
-                  </>
-                )}
+                {is.modeNFC && is.empty && <CardMarketplace />}
               </View>
             ) : null}
           </View>
@@ -192,7 +173,6 @@ const Scanner = ({
 
 Scanner.propTypes = {
   route: PropTypes.any,
-  navigation: PropTypes.any,
 };
 
 export { Scanner };

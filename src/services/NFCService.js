@@ -60,8 +60,11 @@ export const NFCService = {
         await NfcManager.requestTechnology(NfcTech.Ndef);
         const tag = await NfcManager.getTag();
 
-        // ! TODO: Test this one
-        backupBytes = await NfcManager.ndefHandler.getNdefMessage();
+        try {
+          backupBytes = await NfcManager.ndefHandler.getNdefMessage();
+        } catch {
+          // ! TODO: Seems card is empty
+        }
 
         const newRecord = `${name ? `${name}|` : ''}${value}`;
         const records = NFCService.filterRecords(tag, Ndef);
@@ -72,7 +75,7 @@ export const NFCService = {
         await NfcManager.ndefHandler.writeNdefMessage(bytes);
         resolve(NFCService.response(records, tag, bytes));
       } catch (error) {
-        await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+        if (backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
         reject(L10N.NFC_ACCESS_ERROR);
       } finally {
         NfcManager.cancelTechnologyRequest();

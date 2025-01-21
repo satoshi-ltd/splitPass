@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './Viewer.style';
 import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
@@ -39,7 +40,10 @@ const Viewer = ({
   };
 
   const handleSave = async () => {
-    await createSecret({ name, value: values[currentIndex] });
+    const secret = await createSecret({ name, value: values[currentIndex] });
+    if (!secret) return;
+
+    eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
     if (values.length > 1) next();
     else navigation.goBack();
   };
@@ -73,9 +77,12 @@ const Viewer = ({
     setFavorite(nextFavorite);
   };
 
-  const handleNFCCard = () => {
+  const handleGoToNFCCard = () => {
     navigation.goBack();
-    navigation.navigate('splitcard', { writeMode: { name, value: values[currentIndex] } });
+    navigation.navigate('splitcard', {
+      viewer: { name, readMode, values },
+      writeMode: { name, value: values[currentIndex] },
+    });
   };
 
   const handleOptions = () => {
@@ -134,9 +141,9 @@ const Viewer = ({
               value={value}
               onPress={!is.shard ? () => {} : undefined}
             />
-            {(is.shard || values.length > 1) && (
+            {is.shard && (
               <View align="center" bold style={style.shard}>
-                <Text bold tiny>
+                <Text bold color={StyleSheet.value('$qrColor')} tiny>
                   shard:{index + 1}
                 </Text>
               </View>
@@ -159,7 +166,11 @@ const Viewer = ({
             </Button>
           )}
           <View align="center" row style={style.caption}>
-            <Icon caption name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO} />
+            <Icon
+              caption
+              color="contentLight"
+              name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO}
+            />
             <Text align="center" color="contentLight" tiny>
               {is.secure
                 ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
@@ -187,7 +198,7 @@ const Viewer = ({
             <CardOption icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
           )}
 
-          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleNFCCard} />
+          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleGoToNFCCard} />
         </View>
       )}
     </Modal>

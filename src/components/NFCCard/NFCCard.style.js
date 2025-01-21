@@ -1,10 +1,5 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
-const CARD_DIMENSION = {
-  height: 208,
-  width: 328,
-};
-
 export const style = StyleSheet.create({
   header: {
     width: '80%',
@@ -12,14 +7,16 @@ export const style = StyleSheet.create({
   },
 
   card: {
-    ...CARD_DIMENSION,
     borderRadius: 12,
+    height: '$splitCardHeight',
+    justifyContent: 'space-between',
     paddingHorizontal: '$spaceL',
     paddingVertical: '$spaceL - $spaceXS',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.33,
     shadowRadius: 12,
+    width: '$splitCardWidth',
   },
 
   cardRow: {
@@ -49,11 +46,15 @@ export const style = StyleSheet.create({
     paddingVertical: '$spaceXXS',
   },
 
+  action: {
+    marginTop: '$viewOffset / 2',
+  },
+
   records: {
-    height: CARD_DIMENSION.height,
-    width: CARD_DIMENSION.width,
+    height: '$splitCardHeight',
     overflow: 'hidden',
     paddingVertical: '$viewOffset / 4',
+    width: '$splitCardWidth',
   },
 
   record: {

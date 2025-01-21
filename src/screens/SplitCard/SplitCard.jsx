@@ -1,46 +1,29 @@
 import { Screen, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { style } from './SplitCard.style';
-import { CardOption, NFCCard } from '../../components';
-import { ICON, L10N } from '../../modules';
+import { CardMarketplace, NFCCard } from '../../components';
 
-const SplitCard = ({ navigation, route: { params: { writeMode } = {} } }) => {
-  const [active, setActive] = useState(false);
-  const [tag, setTag] = useState(false);
+const SplitCard = ({ navigation = {}, route: { params: { writeMode, viewer } = {} } }) => {
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+      event.preventDefault();
+      navigation.dispatch(event.data.action);
 
-  const handleError = () => {
-    setActive(false);
-  };
+      if (viewer) navigation.navigate('viewer', viewer);
+    });
 
-  const handleRead = (tag) => {
-    setTag(tag);
-  };
-
-  const handleRecord = (record) => {
-    console.log('::handleRecord::', record);
-  };
-
-  const handleScan = () => {
-    setActive(false);
-    setTag();
-    setTimeout(() => setActive(true), 400);
-  };
+    return unsubscribe;
+  }, [navigation, viewer]);
 
   return (
     <Screen disableScroll gap style={style.screen}>
-      <NFCCard {...{ active, writeMode }} onError={handleError} onRead={handleRead} onRecord={handleRecord} />
+      <NFCCard {...{ writeMode }} />
 
       <View style={style.footer}>
-        <View row gap>
-          <CardOption icon={ICON.SHOPPING} text={L10N.GET_SPLITCARD} />
-          <CardOption
-            color="accent"
-            icon={ICON.NFC}
-            text={active && !tag ? L10N.SCANNING : tag ? L10N.RESCAN : L10N.START_SCAN}
-            onPress={handleScan}
-          />
+        <View>
+          <CardMarketplace />
         </View>
       </View>
     </Screen>

@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Card, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
+import { Button, Card, Icon, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -8,7 +8,7 @@ import { style } from './Create.style';
 import { SECRET_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { L10N, Cypher, QRParser } from '../../modules';
+import { ICON, isSeedPhrase, L10N, Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
@@ -68,7 +68,8 @@ const Create = ({ navigation = {} }) => {
 
   const fieldProps = { row: true, spaceBetween: true, style: style.field };
 
-  const isValid = !!form.name && !!form.secret;
+  const { passcode = '' } = form;
+  const isValid = !!form.name && !!form.secret && (form.split || passcode.length === 0 || form.passcode?.length === 6);
 
   return (
     <Modal gap onClose={navigation.goBack}>
@@ -107,10 +108,17 @@ const Create = ({ navigation = {} }) => {
           />
         </View>
 
+        {isSeedPhrase(form.secret) && (
+          <View row style={style.hint}>
+            <Icon name={ICON.INFO} />
+            <Text tiny>{L10N.SEED_PHRASE_DETECTED}</Text>
+          </View>
+        )}
+
         <View style={style.separator} />
 
         <View {...fieldProps}>
-          <Text tiny style={{ maxWidth: '85%' }}>
+          <Text tiny style={style.caption}>
             {L10N.SHARD_EXPLANATION}
             <Text bold tiny>
               {L10N.SHARD_EXPLANATION_NUMBER}
@@ -125,9 +133,14 @@ const Create = ({ navigation = {} }) => {
             <View style={style.separator} />
 
             <View {...fieldProps}>
-              <Text bold tiny color={form.split ? 'disabled' : undefined}>
-                {L10N.PASSCODE}
-              </Text>
+              <View style={style.caption}>
+                <Text bold tiny>
+                  {L10N.PASSCODE}
+                </Text>
+                <Text color="contentLight" tiny>
+                  {L10N.PASSCODE_HINT}
+                </Text>
+              </View>
               <InputMask
                 align="right"
                 editable={!form.split}
@@ -136,7 +149,7 @@ const Create = ({ navigation = {} }) => {
                 placeholder={L10N.PASSCODE_PLACEHOLDER}
                 value={form.passcode}
                 onChange={(passcode) => setForm({ ...form, passcode })}
-                style={style.input}
+                style={[style.input, style.inputPasscode]}
               />
             </View>
           </>

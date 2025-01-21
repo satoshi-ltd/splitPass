@@ -1,3 +1,4 @@
+export * from './CardMarketplace';
 export * from './CardOption';
 export * from './Confirm';
 export * from './Form';

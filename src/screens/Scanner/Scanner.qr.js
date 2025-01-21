@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
+import { Frame } from './components';
 import { style } from './Scanner.style';
 import { L10N } from '../../modules';
 
@@ -23,20 +24,13 @@ const ScannerQR = ({ reveal }) => {
       <View row wide>
         <View style={[style.section, style.background]} wide />
 
-        <View style={style.frame}>
-          <View style={[style.corner, style.topLeft]} />
-          <View style={[style.corner, style.topRight]} />
-          <View style={[style.corner, style.bottomLeft]} />
-          <View style={[style.corner, style.bottomRight]} />
-
+        <Frame align="center">
           {reveal && (
-            <View align="center" style={style.reveal}>
-              <Text align="center" bold caption color={StyleSheet.value('$qrBackgroundColor')}>
-                {reveal}
-              </Text>
-            </View>
+            <Text align="center" bold color={StyleSheet.value('$qrBackgroundColor')} secondary>
+              {reveal}
+            </Text>
           )}
-        </View>
+        </Frame>
 
         <View style={[style.section, style.background]} wide />
       </View>

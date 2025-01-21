@@ -4,7 +4,11 @@ import { ICON, L10N } from '../../modules';
 const OPTIONS = (isPremium, subscription) => [
   {
     callback: !isPremium ? 'handleSubscription' : undefined,
-    caption: isPremium ? 'Premium' || subscription?.customerInfo?.entitlements?.active?.['pro']?.identifier : undefined,
+    caption: isPremium
+      ? subscription?.productIdentifier?.split('.')?.[0] === 'lifetime'
+        ? L10N.PREMIUM_LIFETIME
+        : L10N.PREMIUM_YEARLY
+      : undefined,
     icon: ICON.FAVORITE,
     id: 1,
     text: L10N.SUBSCRIPTION,
