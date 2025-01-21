@@ -34,9 +34,17 @@ export const style = StyleSheet.create({
     paddingRight: 0,
   },
 
+  inputPasscode: {
+    width: '30%',
+  },
+
   hint: {
     gap: '$viewOffset / 4',
     marginVertical: '$viewOffset / 2',
+  },
+
+  caption: {
+    maxWidth: '70%',
   },
 
   button: {

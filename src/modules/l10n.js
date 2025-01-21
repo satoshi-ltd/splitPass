@@ -67,6 +67,7 @@ export const L10N = {
 
   PASSCODE: '6-digit passcode',
   PASSCODE_PLACEHOLDER: 'passcode...',
+  PASSCODE_HINT: 'Optional, adds extra security and privacy.',
   PREFERENCES: 'Preferences',
   PREMIUM_LIFETIME: 'Lifetime Premium',
   PREMIUM_YEARLY: 'Yearly Premium',

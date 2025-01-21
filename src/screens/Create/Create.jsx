@@ -118,7 +118,7 @@ const Create = ({ navigation = {} }) => {
         <View style={style.separator} />
 
         <View {...fieldProps}>
-          <Text tiny style={{ maxWidth: '85%' }}>
+          <Text tiny style={style.caption}>
             {L10N.SHARD_EXPLANATION}
             <Text bold tiny>
               {L10N.SHARD_EXPLANATION_NUMBER}
@@ -133,9 +133,14 @@ const Create = ({ navigation = {} }) => {
             <View style={style.separator} />
 
             <View {...fieldProps}>
-              <Text bold tiny color={form.split ? 'disabled' : undefined}>
-                {L10N.PASSCODE}
-              </Text>
+              <View style={style.caption}>
+                <Text bold tiny>
+                  {L10N.PASSCODE}
+                </Text>
+                <Text color="contentLight" tiny>
+                  {L10N.PASSCODE_HINT}
+                </Text>
+              </View>
               <InputMask
                 align="right"
                 editable={!form.split}
@@ -144,7 +149,7 @@ const Create = ({ navigation = {} }) => {
                 placeholder={L10N.PASSCODE_PLACEHOLDER}
                 value={form.passcode}
                 onChange={(passcode) => setForm({ ...form, passcode })}
-                style={style.input}
+                style={[style.input, style.inputPasscode]}
               />
             </View>
           </>
