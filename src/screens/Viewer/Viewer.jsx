@@ -77,9 +77,12 @@ const Viewer = ({
     setFavorite(nextFavorite);
   };
 
-  const handleNFCCard = () => {
+  const handleGoToNFCCard = () => {
     navigation.goBack();
-    navigation.navigate('splitcard', { writeMode: { name, value: values[currentIndex] } });
+    navigation.navigate('splitcard', {
+      viewer: { name, readMode, values },
+      writeMode: { name, value: values[currentIndex] },
+    });
   };
 
   const handleOptions = () => {
@@ -195,7 +198,7 @@ const Viewer = ({
             <CardOption icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
           )}
 
-          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleNFCCard} />
+          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleGoToNFCCard} />
         </View>
       )}
     </Modal>
