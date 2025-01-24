@@ -104,6 +104,7 @@ const Create = ({ navigation = {} }) => {
             placeholder={L10N.SECRET_PLACEHOLDER}
             value={form.secret}
             onChange={(secret) => setForm({ ...form, secret })}
+            contextMenuHidden
             style={style.input}
           />
         </View>
