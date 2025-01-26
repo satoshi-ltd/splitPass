@@ -1,6 +1,10 @@
 import { L10N } from '../modules';
 
-const TOTAL_MEMORY = 492;
+const NTAG_TYPES = {
+  15: { type: 'NTAG213', totalMemory: 144 },
+  17: { type: 'NTAG215', totalMemory: 504 },
+  18: { type: 'NTAG216', totalMemory: 888 },
+};
 
 export const NFCService = {
   // -- private
@@ -21,13 +25,26 @@ export const NFCService = {
       .map((record) => Ndef.text.decodePayload(record.payload))
       .filter((record) => /\|\d+$/.test(record)),
 
-  response: (records = [], tag, bytes) => ({
+  response: (records = [], tag, bytes, { totalMemory } = {}) => ({
     records: records.map((record) => {
       const [name, value] = record.split('|');
       return { name, value };
     }),
-    info: { id: tag.id, totalMemory: TOTAL_MEMORY, usedMemory: bytes.length },
+    info: { id: tag.id, totalMemory, usedMemory: bytes.length },
   }),
+
+  getNtag: async (NfcManager) => {
+    let ntagType;
+    try {
+      const version = await NfcManager.nfcAHandler.transceive([0x60]);
+      const storageSize = version[6];
+      ntagType = NTAG_TYPES[storageSize];
+    } catch {
+      ntagType = undefined;
+    }
+
+    return ntagType;
+  },
 
   // -- public
   read: async () =>
@@ -37,12 +54,15 @@ export const NFCService = {
 
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);
-
         const tag = await NfcManager.getTag();
+
+        const nTag = await NFCService.getNtag(NfcManager);
+        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
+
         const records = NFCService.filterRecords(tag, Ndef);
         const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
 
-        resolve(NFCService.response(records, tag, bytes));
+        resolve(NFCService.response(records, tag, bytes, nTag));
       } catch (error) {
         reject(L10N.NFC_ACCESS_ERROR);
       } finally {
@@ -60,6 +80,9 @@ export const NFCService = {
         await NfcManager.requestTechnology(NfcTech.Ndef);
         const tag = await NfcManager.getTag();
 
+        const nTag = await NFCService.getNtag(NfcManager);
+        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
+
         try {
           backupBytes = await NfcManager.ndefHandler.getNdefMessage();
         } catch {
@@ -68,12 +91,14 @@ export const NFCService = {
 
         const newRecord = `${name ? `${name}|` : ''}${value}`;
         const records = NFCService.filterRecords(tag, Ndef);
+
         if (!records.includes(newRecord)) records.push(newRecord);
         const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
-        if (bytes.length > TOTAL_MEMORY) return reject({ error: L10N.NFC_CARD_IS_FULL });
 
+        if (bytes.length > nTag.totalMemory) return reject({ error: L10N.NFC_CARD_IS_FULL });
         await NfcManager.ndefHandler.writeNdefMessage(bytes);
-        resolve(NFCService.response(records, tag, bytes));
+
+        resolve(NFCService.response(records, tag, bytes, nTag));
       } catch (error) {
         if (backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
         reject(L10N.NFC_ACCESS_ERROR);
