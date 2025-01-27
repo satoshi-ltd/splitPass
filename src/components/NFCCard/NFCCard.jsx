@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import { Action, Card, Icon, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import { eventEmitter, findVault, ICON, L10N } from '../../modules';
 import { NFCService, SecurityService } from '../../services';
 
 const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) => {
+  const navigation = useNavigation();
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
   const translateY = useRef(new Animated.Value(8)).current;
@@ -36,12 +38,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       setError();
       if (readMode) {
         const nextTag = await NFCService.read().catch(handleError);
-        const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
-
-        if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
-        if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
-
-        setTag(nextTag);
+        read(nextTag);
       } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
       setBusy(false);
     }, ANIMATION.duration);
@@ -73,8 +70,30 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
     setTimeout(() => setActive(true), 300);
   };
 
+  const handleDelete = ({ name, value }) => {
+    navigation.navigate('confirm', {
+      caption: L10N.DELETE_SECRET_CAPTION,
+      title: L10N.DELETE_SECRET_TITLE,
+      onAccept: async () => {
+        const nextTag = await NFCService.remove(value, name, tag.info.id).catch(handleError);
+        read(nextTag);
+        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_DELETED });
+      },
+    });
+  };
+
+  const read = async (nextTag) => {
+    const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
+
+    if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
+    if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
+
+    setTag(nextTag);
+  };
+
   const { info: { id, name, totalMemory, usedMemory } = {}, records = [] } = tag || {};
   const color = id ? '#000' : 'contentLight';
+  const isPremium = !!subscription?.productIdentifier;
 
   return (
     <View align="center">
@@ -144,9 +163,21 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
                   <Text bold caption ellipsizeMode style={style.recordName}>
                     {name}
                   </Text>
-                  <Text color="contentLight" tiny>
-                    {findVault({ name })}
-                  </Text>
+
+                  {!isPremium ? (
+                    <Text color="contentLight" tiny>
+                      {findVault({ name })}
+                    </Text>
+                  ) : (
+                    <Action
+                      tiny
+                      onPress={() => {
+                        handleDelete({ name, value });
+                      }}
+                    >
+                      Delete
+                    </Action>
+                  )}
                 </View>
               </Card>
             ))}

@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 import { style } from './SplitCard.style';
 import { CardMarketplace, NFCCard } from '../../components';
 
-const SplitCard = ({ navigation = {}, route: { params: { writeMode, viewer } = {} } }) => {
+const SplitCard = ({ navigation = {}, route: { params: { readMode, writeMode, viewer } = {} } }) => {
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (event) => {
       event.preventDefault();
@@ -19,7 +19,7 @@ const SplitCard = ({ navigation = {}, route: { params: { writeMode, viewer } = {
 
   return (
     <Screen disableScroll gap style={style.screen}>
-      <NFCCard {...{ writeMode }} />
+      <NFCCard {...{ readMode, writeMode }} />
 
       <View style={style.footer}>
         <View>

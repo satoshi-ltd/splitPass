@@ -61,6 +61,7 @@ export const L10N = {
   NFC_CARD_IS_EMPTY: 'No secrets on this card. Try another.',
   NFC_NOT_SUPPORTED: 'NFC is not supported on this device.',
   NFC_SPLITCARD_ERROR: 'Invalid card. Use a valid split|Card.',
+  NFC_INVALID_ORIGIN_CARD: 'The scanned card doesn’t match the one holding the secret.',
 
   OFF: 'Off',
   ON: 'On',

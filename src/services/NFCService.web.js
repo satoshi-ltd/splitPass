@@ -33,15 +33,15 @@ export const NFCService = {
       setTimeout(() => resolve(parseResponse(records)), DELAY_RESPONSE);
     }),
 
-  clone: (records = []) =>
+  remove: (name, value) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async () => {
-      // ! TODO
-    }),
+    new Promise(async (resolve) => {
+      let records = await store.get('records').value;
 
-  remove: (record) =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async () => {
-      // ! TODO
+      const targetRecord = `${name}|${value}`;
+      records = records.filter((record) => record !== targetRecord);
+      await store.save();
+
+      setTimeout(() => resolve(parseResponse(records)), DELAY_RESPONSE);
     }),
 };

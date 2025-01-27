@@ -107,27 +107,39 @@ export const NFCService = {
       }
     }),
 
-  // clone: (records = []) =>
-  //   // eslint-disable-next-line no-undef, no-async-promise-executor
-  //   new Promise(async (resolve, reject) => {
-  //     const { Ndef, NfcManager, NfcTech } = await NFCService.instance();
+  remove: (value, name, targetTagId) =>
+    // eslint-disable-next-line no-undef, no-async-promise-executor
+    new Promise(async (resolve, reject) => {
+      const { Ndef, NfcManager, NfcTech } = await NFCService.instance();
+      let backupBytes;
 
-  //     try {
-  //       await NfcManager.requestTechnology(NfcTech.Ndef);
-  //       const tag = await NfcManager.getTag();
+      try {
+        await NfcManager.requestTechnology(NfcTech.Ndef);
 
-  //       const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
-  //       if (bytes.length > TOTAL_MEMORY) return reject({ error: L10N.NFC_CARD_IS_FULL });
+        const tag = await NfcManager.getTag();
+        if (tag.id !== targetTagId) return reject(L10N.NFC_INVALID_ORIGIN_CARD);
 
-  //       await NfcManager.ndefHandler.writeNdefMessage(bytes);
-  //       resolve(NFCService.response(records, tag, bytes));
-  //     } catch (error) {
-  //       reject(L10N.NFC_ACCESS_ERROR);
-  //     } finally {
-  //       NfcManager.cancelTechnologyRequest();
-  //     }
-  //   }),
+        const nTag = await NFCService.getNtag(NfcManager);
+        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
 
-  // //
-  // remove: (record) => {},
+        try {
+          backupBytes = await NfcManager.ndefHandler.getNdefMessage();
+        } catch {
+          // ! TODO: Seems card is empty
+        }
+
+        const targetRecord = `${name ? `${name}|` : ''}${value}`;
+        const records = NFCService.filterRecords(tag, Ndef).filter((record) => record !== targetRecord);
+        const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
+
+        await NfcManager.ndefHandler.writeNdefMessage(bytes);
+
+        resolve(NFCService.response(records, tag, bytes, nTag));
+      } catch {
+        if (backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+        reject(L10N.NFC_ACCESS_ERROR);
+      } finally {
+        NfcManager.cancelTechnologyRequest();
+      }
+    }),
 };
