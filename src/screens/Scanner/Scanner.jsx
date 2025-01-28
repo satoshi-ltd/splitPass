@@ -1,6 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { Screen, Tabs, View } from '@satoshi-ltd/nano-design';
-import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
@@ -17,10 +16,8 @@ import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 const Scanner = ({
   route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
 }) => {
-  const [permission, requestPermission] = useCameraPermissions();
   const { createSecret } = useStore();
 
-  const [active, setActive] = useState(false);
   const [fields, setFields] = useState();
   const [form, setForm] = useState({});
   const [readerType, setReaderType] = useState(propReaderType);
@@ -31,9 +28,7 @@ const Scanner = ({
   // ! TODO: We need this effect?
   useFocusEffect(
     useCallback(async () => {
-      setActive(true);
       handleReaderType(propReaderType);
-      if (!permission?.granted) return requestPermission();
     }, []),
   );
 
@@ -97,17 +92,6 @@ const Scanner = ({
 
   return (
     <Screen disableScroll style={style.screen}>
-      {permission?.granted && !is.modeNFC && (
-        <CameraView
-          active={active}
-          autofocus="on"
-          barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
-          facing="back"
-          onBarcodeScanned={scanning ? ({ data = '' }) => handleScanned(data) : undefined}
-          style={style.camera}
-        />
-      )}
-
       <Wrapper behavior="padding">
         <View style={style.container}>
           <View style={style.background}>
@@ -124,6 +108,7 @@ const Scanner = ({
           </View>
 
           {React.createElement(is.modeNFC ? ScannerNFC : ScannerQR, {
+            is,
             reveal: reveal ? QRParser.decode(QRParser.combine(...values), form.passcode) : undefined,
             scanning,
             onRead: handleScanned,

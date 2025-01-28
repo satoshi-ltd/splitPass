@@ -1,17 +1,38 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { Text, View } from '@satoshi-ltd/nano-design';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Frame } from './components';
 import { style } from './Scanner.style';
 import { L10N } from '../../modules';
 
-// !TODO: We should bring the camera here
+const ScannerQR = ({ is, onRead, reveal, scanning }) => {
+  const [permission, requestPermission] = useCameraPermissions();
 
-const ScannerQR = ({ reveal }) => {
+  const [active, setActive] = useState(false);
+
+  useFocusEffect(
+    useCallback(async () => {
+      setActive(true);
+      if (!permission?.granted) return requestPermission();
+    }, []),
+  );
+
   return (
     <>
+      {permission?.granted && !is.modeNFC && (
+        <CameraView
+          active={active}
+          autofocus="on"
+          barcodeScannerSettings={{ barcodeTypes: ['qr'], isSupported: true }}
+          facing="back"
+          onBarcodeScanned={scanning ? ({ data = '' }) => onRead(data) : undefined}
+          style={style.camera}
+        />
+      )}
       <View style={[style.instructions, style.background]}>
         <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
           {L10N.SCANNER_QR}
@@ -39,7 +60,12 @@ const ScannerQR = ({ reveal }) => {
 };
 
 ScannerQR.propTypes = {
+  is: PropTypes.shape({
+    modeNFC: PropTypes.bool,
+  }),
+  onRead: PropTypes.func,
   reveal: PropTypes.string,
+  scanning: PropTypes.bool,
 };
 
 export { ScannerQR };
