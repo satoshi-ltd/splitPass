@@ -115,7 +115,7 @@ const Settings = ({ navigation = {} }) => {
             activity={activity?.[rest.callback]}
             key={`option-${id}`}
             {...{ caption, disabled, icon, text }}
-            onPress={rest.callback ? () => handleOption(rest) : undefined}
+            onPress={rest.callback || rest.screen ? () => handleOption(rest) : undefined}
           />
         ))}
       </View>

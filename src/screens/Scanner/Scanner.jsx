@@ -14,6 +14,7 @@ import { useStore } from '../../contexts';
 import { eventEmitter, ICON, L10N, QRParser } from '../../modules';
 
 const Scanner = ({
+  navigation,
   route: { params: { readMode = false, readerType: propReaderType = READER_TYPE.QR, values: propValues = [] } = {} },
 }) => {
   const { createSecret } = useStore();
@@ -146,7 +147,7 @@ const Scanner = ({
                   />
                 )}
 
-                {is.modeNFC && is.empty && <CardMarketplace />}
+                {is.modeNFC && is.empty && <CardMarketplace onPress={() => navigation.navigate('marketplace')} />}
               </View>
             ) : null}
           </View>
@@ -157,6 +158,7 @@ const Scanner = ({
 };
 
 Scanner.propTypes = {
+  navigation: PropTypes.any,
   route: PropTypes.any,
 };
 

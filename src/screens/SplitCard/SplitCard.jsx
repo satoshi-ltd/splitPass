@@ -19,13 +19,10 @@ const SplitCard = ({ navigation = {}, route: { params: { readMode, writeMode, vi
 
   return (
     <Screen disableScroll gap style={style.screen}>
-      <NFCCard {...{ readMode, writeMode }} />
-
-      <View style={style.footer}>
-        <View>
-          <CardMarketplace />
-        </View>
+      <View style={style.container}>
+        <NFCCard {...{ readMode, writeMode }} />
       </View>
+      <CardMarketplace onPress={() => navigation.navigate('marketplace')} />
     </Screen>
   );
 };

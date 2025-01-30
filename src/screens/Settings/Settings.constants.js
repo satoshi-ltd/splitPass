@@ -14,11 +14,10 @@ const OPTIONS = (isPremium, subscription) => [
     text: L10N.SUBSCRIPTION,
   },
   {
-    disabled: true,
-    // callback: 'handleShop',
     icon: ICON.SHOPPING,
     id: 2,
     text: L10N.GET_SPLITCARD,
+    screen: 'marketplace',
   },
   {
     callback: 'handleExport',

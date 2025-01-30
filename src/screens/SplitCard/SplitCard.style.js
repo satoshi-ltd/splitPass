@@ -8,8 +8,7 @@ export const style = StyleSheet.create({
     paddingTop: '$viewOffset * 5',
   },
 
-  footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
+  container: {
+    flex: 8,
   },
 });
