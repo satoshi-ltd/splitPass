@@ -1,6 +1,11 @@
+import { Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
+  container: {
+    justifyContent: 'flex-start',
+  },
+
   header: {
     width: '80%',
     marginBottom: '$viewOffset',
@@ -51,7 +56,8 @@ export const style = StyleSheet.create({
   },
 
   records: {
-    height: '$splitCardHeight',
+    ...Platform.select({ web: { maxHeight: '$splitCardHeight' } }),
+    flex: 1,
     overflow: 'hidden',
     paddingVertical: '$viewOffset / 4',
     width: '$splitCardWidth',
@@ -73,7 +79,7 @@ export const style = StyleSheet.create({
     position: 'absolute',
     right: 0,
     shadowColor: '$colorBase',
-    shadowOpacity: 0.66,
+    shadowOpacity: 0.8,
     shadowRadius: 4,
     zIndex: 1,
   },

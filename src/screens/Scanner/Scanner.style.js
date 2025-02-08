@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { Dimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
@@ -73,6 +74,7 @@ export const style = StyleSheet.create({
 
   // -- Scanner.NFC (partial)
   scannerNFC: {
+    maxHeight: `${Dimensions.get('window').height} * 0.65`,
     width: '100%',
   },
 });
