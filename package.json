@@ -16,7 +16,7 @@
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",
-    "@satoshi-ltd/nano-design": "0.2.67",
+    "@satoshi-ltd/nano-design": "0.2.69",
     "expo": "~52.0.25",
     "expo-blur": "~14.0.2",
     "expo-camera": "~16.0.11",

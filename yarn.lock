@@ -1839,12 +1839,12 @@
     eslint-plugin-react-hooks "^4.3"
     prettier "^2.2.1"
 
-"@satoshi-ltd/nano-design@0.2.67":
-  version "0.2.67"
-  resolved "https://registry.yarnpkg.com/@satoshi-ltd/nano-design/-/nano-design-0.2.67.tgz#df2a930a1d26290128b0795fb113401f2329caaf"
-  integrity sha512-Q2CcFXC1OVDXK88KwDt7meVnSQx55pqF974RwyS/j5QJffU90omn0/icGxWgMpCxQti29DGwCYRO7FW0Xx1a6Q==
+"@satoshi-ltd/nano-design@0.2.69":
+  version "0.2.69"
+  resolved "https://registry.yarnpkg.com/@satoshi-ltd/nano-design/-/nano-design-0.2.69.tgz#03747e165ca86563c2599b5a9ece1c1168f1ace8"
+  integrity sha512-CwenmGBXLMF9jocnnjtQljjeIkY7hmwTSSYxRWD1PHK2+f2OTPtIPmwdxSu3kTuWXdP/Eru6FzPjVP+5bCNSNA==
   dependencies:
-    expo "^52.0.0"
+    expo "~52.0.25"
 
 "@segment/loosely-validate-event@^2.0.0":
   version "2.0.0"
@@ -4826,7 +4826,7 @@ expo-updates-interface@~1.0.0:
   resolved "https://registry.yarnpkg.com/expo-updates-interface/-/expo-updates-interface-1.0.0.tgz#b98c66b800d29561c62409556948b2af3d5316e5"
   integrity sha512-93oWtvULJOj+Pp+N/lpTcFfuREX1wNeHtp7Lwn8EbzYYmdn37MvZU3TPW2tYYCZuhzmKEXnUblYcruYoDu7IrQ==
 
-expo@^52.0.0, expo@~52.0.25:
+expo@~52.0.25:
   version "52.0.25"
   resolved "https://registry.yarnpkg.com/expo/-/expo-52.0.25.tgz#06f074b92c8d3f7a005c088c0debd1d227849991"
   integrity sha512-BWHveMyDSST7vuGNn8zbrSGboJdvXDE9auUEkFa14ETAWRtsghYnZ0KmjOEQNxNmrBHzct/JgZ8efh5sJGd0xA==
