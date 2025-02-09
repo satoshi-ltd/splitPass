@@ -28,7 +28,7 @@ const Scanner = ({
 
   // ! TODO: We need this effect?
   useFocusEffect(
-    useCallback(async () => {
+    useCallback(() => {
       handleReaderType(propReaderType);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),

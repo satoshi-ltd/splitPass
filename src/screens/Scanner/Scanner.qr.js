@@ -15,9 +15,9 @@ const ScannerQR = ({ is, onRead, reveal, scanning }) => {
   const [active, setActive] = useState(false);
 
   useFocusEffect(
-    useCallback(async () => {
+    useCallback(() => {
       setActive(true);
-      if (!permission?.granted) return requestPermission();
+      if (!permission?.granted) requestPermission();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
