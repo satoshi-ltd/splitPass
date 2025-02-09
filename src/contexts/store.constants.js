@@ -1,5 +1,3 @@
-import { DEFAULT_THEME } from '../App.constants';
-
 const DEFAULTS = {
   secrets: [],
   settings: {

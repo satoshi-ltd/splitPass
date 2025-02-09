@@ -30,6 +30,7 @@ const Scanner = ({
   useFocusEffect(
     useCallback(async () => {
       handleReaderType(propReaderType);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 
@@ -52,11 +53,11 @@ const Scanner = ({
     if (SHARD_TYPES.includes(type)) {
       if (values.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
       if (values.includes(data)) {
-        return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.FIRST_SHARD_SAME });
+        return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.FIRST_SHARD_SAME });
       } else if (!values.length) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.FIRST_SHARD_SCANNED });
+        eventEmitter.emit(EVENT.NOTIFICATION, { title: L10N.FIRST_SHARD_SCANNED });
       } else {
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SHARDS_COMBINED });
+        eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SHARDS_COMBINED, title: L10N.SUCCESS });
       }
     }
     setValues([...values, data]);
@@ -74,7 +75,7 @@ const Scanner = ({
 
     if (nextForm.secret) {
       const secret = await createSecret({ name: nextForm.secret, value: values[0] });
-      if (secret) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
+      if (secret) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
     }
   };
 

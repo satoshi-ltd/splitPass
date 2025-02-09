@@ -24,7 +24,7 @@ export const L10N = {
     'Deleting this secret is permanent. You will lose access to it and its details. Are you sure you want to proceed?',
   DELETE_SECRET_TITLE: 'Confirm Secret Deletion',
 
-  ERROR: 'Something went wrong',
+  ERROR: 'Something went wrong.',
   ERROR_EXPORT: 'Unable to export as you don’t have sharing permissions.',
   ERROR_IMPORT: 'Unsupported file format. Please select a compatible file type.',
   ERROR_NFC_NOT_SUPPORTED: 'NFC is not supported by this device.',
@@ -144,6 +144,7 @@ export const L10N = {
   SUBSCRIPTION_TERMS_CAPTION:
     'By tapping "Start free 7 day trial", you will not be charged for the next 7 days, your subscription will auto-renew for the same price and package length until you cancel via App Store Settings. and you agree to our',
   SUBSCRIPTION_TITLE: 'Maximize Your secrets',
+  SUCCESS: 'Success!',
 
   TERMS: 'Terms',
 

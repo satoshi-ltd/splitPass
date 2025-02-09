@@ -50,13 +50,13 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
 
     const { records = [] } = tag || {};
     if (readMode && records.length === 1) handleRecord(records[0].value);
-    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_NFC });
+    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_NFC, title: L10N.SUCCESS });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tag]);
 
   const handleError = (error) => {
     setError(error);
-    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: error });
+    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
   };
 
   const handleRecord = (record) => {
@@ -77,7 +77,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
       onAccept: async () => {
         const nextTag = await NFCService.remove(value, name, tag.info.id).catch(handleError);
         read(nextTag);
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_DELETED });
+        eventEmitter.emit(EVENT.NOTIFICATION, { title: L10N.SECRET_DELETED });
       },
     });
   };
@@ -85,8 +85,9 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
   const read = async (nextTag) => {
     const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
 
-    if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: L10N.NFC_SPLITCARD_ERROR });
-    if (nextTag?.records?.length === 0) eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.NFC_CARD_IS_EMPTY });
+    if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_SPLITCARD_ERROR });
+    if (nextTag?.records?.length === 0)
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_CARD_IS_EMPTY });
 
     setTag(nextTag);
   };

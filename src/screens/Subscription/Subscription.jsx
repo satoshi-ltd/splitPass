@@ -30,7 +30,7 @@ const Subscription = ({ route: { params: { plans = [] } = {} } = {}, navigation 
       .catch(handleError);
   };
 
-  const handleError = (error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, message: JSON.stringify(error) });
+  const handleError = (error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: JSON.stringify(error) });
 
   const handleTermsAndConditions = () => {
     Linking.openURL(SATOSHI_URLS.TERMS);

@@ -32,6 +32,7 @@ const Viewer = ({
   useFocusEffect(
     useCallback(() => {
       readSecret({ hash });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 
@@ -43,7 +44,7 @@ const Viewer = ({
     const secret = await createSecret({ name, value: values[currentIndex] });
     if (!secret) return;
 
-    eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_SAVED_IN_DEVICE });
+    eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
     if (values.length > 1) next();
     else navigation.goBack();
   };
@@ -54,7 +55,7 @@ const Viewer = ({
       title: L10N.DELETE_SECRET_TITLE,
       onAccept: async () => {
         await deleteSecret({ hash });
-        eventEmitter.emit(EVENT.NOTIFICATION, { message: L10N.SECRET_DELETED });
+        eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_DELETED, title: L10N.SUCCESS });
         navigation.goBack();
       },
     });

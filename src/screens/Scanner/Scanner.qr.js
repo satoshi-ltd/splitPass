@@ -18,6 +18,7 @@ const ScannerQR = ({ is, onRead, reveal, scanning }) => {
     useCallback(async () => {
       setActive(true);
       if (!permission?.granted) return requestPermission();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
 

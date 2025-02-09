@@ -1,7 +1,6 @@
 import { Notification as NotificationBase } from '@satoshi-ltd/nano-design';
 import React, { useEffect, useState } from 'react';
 
-import { style } from './Notification.style';
 import { EVENT } from '../../App.constants';
 import { eventEmitter, L10N } from '../../modules';
 
@@ -30,16 +29,13 @@ export const Notification = () => {
 
   const handleClose = () => setVisible(false);
 
-  const { error, message = L10N.ERROR } = value || {};
+  const { error, text, title } = value || {};
 
   return (
     <NotificationBase
-      caption
-      error={error}
-      text={message}
-      visible={visible}
+      {...{ error, text, visible }}
+      title={title || (error ? L10N.ERROR : 'Info')}
       onClose={handleClose}
-      style={style.notification}
     />
   );
 };
