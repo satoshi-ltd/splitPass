@@ -6,9 +6,9 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
-import { DEFAULT_THEME } from '../../App.constants';
+import { DEFAULT_THEME, EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
-import { ICON, L10N } from '../../modules';
+import { eventEmitter, ICON, L10N } from '../../modules';
 import { BackupService, NotificationsService, PurchaseService } from '../../services';
 import { DarkTheme, LightTheme } from '../../theme';
 
@@ -34,7 +34,7 @@ const Settings = ({ navigation = {} }) => {
 
     setActivity({ ...activity, handleExport: true });
     const exported = await BackupService.export({ secrets, settings });
-    if (exported) alert(L10N.CONFIRM_EXPORT_SUCCESS);
+    if (exported) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_EXPORT_SUCCESS });
     setActivity({ ...activity, handleExport: false });
   };
 
@@ -42,7 +42,9 @@ const Settings = ({ navigation = {} }) => {
     if (!isPremium) return handleSubscription('import');
 
     setActivity({ ...activity, handleImport: true });
-    const backup = await BackupService.import().catch((error) => alert(error));
+    const backup = await BackupService.import().catch((error) =>
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }),
+    );
 
     if (backup) {
       navigation.navigate('confirm', {
@@ -54,7 +56,7 @@ const Settings = ({ navigation = {} }) => {
             StyleSheet.build(backup.settings.theme === DEFAULT_THEME ? LightTheme : DarkTheme);
           }
           navigation.navigate('home');
-          alert(L10N.CONFIRM_IMPORT_SUCCESS);
+          eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_IMPORT_SUCCESS });
           setActivity({ ...activity, handleImport: false });
         },
       });
@@ -71,7 +73,7 @@ const Settings = ({ navigation = {} }) => {
         navigation.navigate('subscription', { plans });
         setActivity();
       })
-      .catch((error) => alert(error));
+      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
   };
 
   const handleRestorePurchases = () => {
@@ -80,11 +82,11 @@ const Settings = ({ navigation = {} }) => {
       .then((activeSubscription) => {
         if (activeSubscription) {
           updateSubscription(activeSubscription);
-          alert(L10N.PURCHASE_RESTORED);
+          eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.PURCHASE_RESTORED });
           setActivity();
         }
       })
-      .catch((error) => alert(error));
+      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
   };
 
   const handleTheme = () => {

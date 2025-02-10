@@ -5,10 +5,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
-import { SECRET_TYPE } from '../../App.constants';
+import { EVENT, SECRET_TYPE } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON, isSeedPhrase, L10N, Cypher, QRParser } from '../../modules';
+import { eventEmitter, ICON, isSeedPhrase, L10N, Cypher, QRParser } from '../../modules';
 import { PurchaseService } from '../../services';
 
 const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
@@ -36,7 +36,7 @@ const Create = ({ navigation = {} }) => {
         .then((plans) => {
           navigation.navigate('subscription', { plans });
         })
-        .catch((error) => alert(error));
+        .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
     }
 
     const qr = QRParser.encode(secret, !!passcode);

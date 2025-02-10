@@ -5,9 +5,10 @@ import React, { useEffect } from 'react';
 import { CardAction, VaultItem } from './components';
 import { style } from './Home.style';
 import { getFavorites, groupByVault } from './modules';
+import { EVENT } from '../../App.constants';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { ICON, L10N } from '../../modules';
+import { eventEmitter, ICON, L10N } from '../../modules';
 import { PurchaseService } from '../../services';
 
 const Home = ({ navigation }) => {
@@ -35,7 +36,7 @@ const Home = ({ navigation }) => {
       .then((plans) => {
         navigation.navigate('subscription', { plans });
       })
-      .catch((error) => alert(error));
+      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
   };
 
   // !TODO: We should determine if is a shard or not
