@@ -6,7 +6,7 @@ import { L10N } from '../modules';
 const IS_WEB = Platform.OS === 'web';
 const APIKEY = {
   ios: 'appl_UpcVUSYlXYWPnJiAoroqRrpKuhT',
-  android: 'goog_bzzicUKLHqrXEdrltqKGmdXgyyI',
+  android: 'goog_BscgWGevMaNsvVYzddizbktUIse',
 };
 
 const PREMIUM_MOCK = {

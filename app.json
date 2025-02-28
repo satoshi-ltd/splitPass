@@ -4,7 +4,7 @@
     "slug": "satoshi-ltd-splitpass",
     "owner": "satoshi-ltd",
     "scheme": "splitpass",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,12 +13,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#111"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.satoshi-limited.splitpass",
-      "buildNumber": "7",
-      "usesIcloudStorage": false
+      "buildNumber": "8",
+      "usesIcloudStorage": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,8 +31,12 @@
         "backgroundColor": "#111"
       },
       "package": "com.satoshilimited.splitpass",
-      "versionCode": 7,
-      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
+      "versionCode": 8,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.NFC"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -48,8 +57,12 @@
         "react-native-nfc-manager",
         {
           "nfcPermission": "$(PRODUCT_NAME) needs NFC access to scan cards.",
-          "selectIdentifiers": ["*"],
-          "systemCodes": ["*"],
+          "selectIdentifiers": [
+            "*"
+          ],
+          "systemCodes": [
+            "*"
+          ],
           "includeNdefEntitlement": false
         }
       ]
