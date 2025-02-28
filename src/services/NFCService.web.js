@@ -1,6 +1,6 @@
 import { StorageService } from './StorageService';
 
-const store = await new StorageService({ defaults: { records: [] }, filename: 'com.satoshi-ltd.splitpass:nfc' });
+const store = new StorageService({ defaults: { records: [] }, filename: 'com.satoshi-ltd.splitpass:nfc' });
 const INFO = { id: '19801992202022', totalMemory: 492 };
 const DELAY_RESPONSE = 500;
 

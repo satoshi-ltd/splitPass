@@ -1,5 +1,6 @@
-import { L10N } from '../modules';
+import { Platform } from 'react-native';
 
+import { L10N } from '../modules';
 const NTAG_TYPES = {
   15: { type: 'NTAG213', totalMemory: 144 },
   17: { type: 'NTAG215', totalMemory: 504 },
@@ -34,6 +35,9 @@ export const NFCService = {
   }),
 
   getNtag: async (NfcManager) => {
+    // ! TODO
+    if (Platform.OS === 'android') return { type: 'NTAG215', totalMemory: 504 };
+
     let ntagType;
     try {
       const version = await NfcManager.nfcAHandler.transceive([0x60]);
@@ -79,15 +83,10 @@ export const NFCService = {
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);
         const tag = await NfcManager.getTag();
+        backupBytes = tag.ndefMessage;
 
         const nTag = await NFCService.getNtag(NfcManager);
         if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
-
-        try {
-          backupBytes = await NfcManager.ndefHandler.getNdefMessage();
-        } catch {
-          // ! TODO: Seems card is empty
-        }
 
         const newRecord = `${name ? `${name}|` : ''}${value}`;
         const records = NFCService.filterRecords(tag, Ndef);
