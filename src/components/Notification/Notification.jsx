@@ -1,10 +1,14 @@
 import { Notification as NotificationBase } from '@satoshi-ltd/nano-design';
 import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EVENT } from '../../App.constants';
 import { eventEmitter, L10N } from '../../modules';
 
 export const Notification = () => {
+  const { top } = useSafeAreaInsets();
+
   const [value, setValue] = useState();
   const [visible, setVisible] = useState(false);
 
@@ -36,6 +40,7 @@ export const Notification = () => {
       {...{ error, text, visible }}
       title={title || (error ? L10N.ERROR : 'Info')}
       onClose={handleClose}
+      style={Platform.OS === 'android' ? { marginTop: top } : undefined}
     />
   );
 };

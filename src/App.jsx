@@ -1,6 +1,7 @@
 import { useFonts } from 'expo-font';
 import React from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Navigator } from './App.Navigator';
 import { Notification } from './components';
@@ -18,9 +19,11 @@ export const App = () => {
   });
 
   return ready ? (
-    <StoreProvider>
-      <Navigator />
-      <Notification />
-    </StoreProvider>
+    <SafeAreaProvider>
+      <StoreProvider>
+        <Navigator />
+        <Notification />
+      </StoreProvider>
+    </SafeAreaProvider>
   ) : null;
 };
