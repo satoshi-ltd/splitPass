@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.satoshi-limited.splitpass",
-      "buildNumber": "8",
+      "buildNumber": "9",
       "usesIcloudStorage": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -31,7 +31,7 @@
         "backgroundColor": "#111"
       },
       "package": "com.satoshilimited.splitpass",
-      "versionCode": 8,
+      "versionCode": 9,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
