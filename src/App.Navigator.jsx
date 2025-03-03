@@ -27,6 +27,7 @@ const Stack = createNativeStackNavigator();
 
 const commonScreenOptions = (theme = 'light') => ({
   headerBackground: () => <BlurView intensity={60} tint={theme} style={{ flex: 1 }} />,
+  headerBackVisible: false,
   headerShown: true,
   headerTintColor: StyleSheet.value('$colorContent'),
   headerTitle: () => <Logo forceTheme={theme} />,
