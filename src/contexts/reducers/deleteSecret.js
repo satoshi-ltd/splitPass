@@ -3,5 +3,5 @@ export const deleteSecret = async ({ hash }, [state, setState]) => {
 
   store.get('secrets');
   await store.remove({ hash });
-  setState({ ...state, secrets: await store.value });
+  setState({ ...state, secrets: await store.value, security: state.store.security });
 };

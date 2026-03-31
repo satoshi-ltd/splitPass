@@ -4,14 +4,18 @@ import { Platform } from 'react-native';
 import { L10N } from '../modules';
 
 const GRANTED = 'granted';
+let responseSubscription;
 
 export const NotificationsService = {
-  init: async () => {
-    await NotificationsService.reminders();
+  init: async (reminders) => {
+    if (!(await NotificationsService.permission())) return;
+
+    NotificationsService.listen();
+    await NotificationsService.dismissLastResponse();
+    await NotificationsService.reminders(reminders, { skipPermission: true });
   },
 
   permission: async () => {
-    if (Platform.OS === 'web') return false;
     if (Platform.OS === 'android') {
       Notifications.setNotificationChannelAsync('default', {
         name: 'default',
@@ -34,8 +38,40 @@ export const NotificationsService = {
     return true;
   },
 
-  reminders: async ([backup = 1] = []) => {
-    if (!(await NotificationsService.permission())) return;
+  listen: () => {
+    if (responseSubscription) return;
+
+    responseSubscription = Notifications.addNotificationResponseReceivedListener(async (response) => {
+      await NotificationsService.dismissResponse(response);
+    });
+  },
+
+  dismissLastResponse: async () => {
+    const response = await Notifications.getLastNotificationResponseAsync();
+    if (!response) return;
+
+    await NotificationsService.dismissResponse(response);
+  },
+
+  dismissResponse: async (response) => {
+    const identifier = response?.notification?.request?.identifier;
+    if (!identifier) return;
+
+    try {
+      await Notifications.dismissNotificationAsync(identifier);
+    } catch {
+      // The notification may already be gone from the tray.
+    }
+
+    try {
+      await Notifications.clearLastNotificationResponseAsync();
+    } catch {
+      // Older platforms may not expose the response cache API.
+    }
+  },
+
+  reminders: async ([backup = 1] = [], { skipPermission = false } = {}) => {
+    if (!skipPermission && !(await NotificationsService.permission())) return;
 
     await Notifications.cancelAllScheduledNotificationsAsync();
 

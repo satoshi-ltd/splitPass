@@ -1,4 +1,4 @@
-import { Screen } from '@satoshi-ltd/nano-design';
+import { Screen } from '../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { WebView } from 'react-native-webview';

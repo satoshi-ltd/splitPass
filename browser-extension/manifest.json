@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "split/Pass Scanner",
+  "version": "0.1.0",
+  "description": "Scan a SplitPass QR and copy it from the popup or fill it from a password field launcher.",
+  "icons": {
+    "16": "assets/icon-extension-16.png",
+    "32": "assets/icon-extension-32.png",
+    "48": "assets/icon-extension-48.png",
+    "128": "assets/icon-extension-128.png"
+  },
+  "permissions": [
+    "clipboardWrite"
+  ],
+  "action": {
+    "default_title": "split/Pass Scanner",
+    "default_icon": {
+      "16": "assets/icon-extension-16.png",
+      "32": "assets/icon-extension-32.png",
+      "48": "assets/icon-extension-48.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "lib/splitpass.js",
+        "lib/scanner-ui.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content.css",
+        "scanner-ui.css",
+        "assets/icon-extension.svg",
+        "assets/fonts/*"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
+  ]
+}

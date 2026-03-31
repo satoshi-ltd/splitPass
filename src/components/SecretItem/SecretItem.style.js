@@ -2,13 +2,19 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
   item: {
-    gap: '$viewOffset / 2',
-    paddingVertical: '$viewOffset / 2',
+    alignItems: 'center',
+    gap: '$spaceS',
+    minHeight: '$spaceXXL + $spaceS',
+    paddingVertical: '$spaceXXS',
+  },
+
+  body: {
+    gap: '$spaceXXS',
   },
 
   thumbnail: {
-    backgroundColor: '$colorBorder',
-    borderRadius: '$spaceXXL / 2',
+    backgroundColor: '$colorSurface',
+    borderRadius: 0,
     height: '$spaceXXL',
     width: '$spaceXXL',
     alignItems: 'center',
@@ -21,6 +27,16 @@ export const style = StyleSheet.create({
   },
 
   name: {
-    maxWidth: '75%',
+    maxWidth: '100%',
+  },
+
+  subtitle: {
+    maxWidth: '100%',
+  },
+
+  action: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '$spaceM',
   },
 });

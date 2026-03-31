@@ -1,53 +1,108 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  anchor: {
-    borderColor: '$colorContent',
-    borderStyle: '$borderStyle',
-    borderTopWidth: '$borderWidth',
-    marginLeft: '$spaceM * -1',
-    marginRight: '$spaceM * -1',
-  },
-
-  separator: {
-    borderColor: '$colorContentLight',
-    borderStyle: '$borderStyle',
-    borderTopWidth: '$borderWidth',
-    // opacity: 0.33,
-  },
-
-  cardForm: {
-    paddingBottom: '$spaceXS',
-    paddingTop: '$spaceXS',
-  },
-
-  field: {
-    gap: '$viewOffset / 2',
-    minHeight: '$spaceXXL + $spaceM',
-    maxWidth: '100%',
-  },
-
-  input: {
-    backgroundColor: 'transparent',
+  keyboardAvoid: {
     flex: 1,
-    fontSize: '$fontSizeCaption',
-    paddingRight: 0,
   },
 
-  inputPasscode: {
-    width: '30%',
+  headerSafeArea: {
+    backgroundColor: '$colorBase',
   },
 
-  hint: {
-    gap: '$viewOffset / 4',
-    marginVertical: '$viewOffset / 2',
+  headerContainer: {
+    backgroundColor: '$colorBase',
+  },
+
+  header: {
+    gap: '$spaceXXS',
+  },
+
+  headerSubtitle: {
+    maxWidth: '90%',
+  },
+
+  content: {
+    gap: '$spaceL',
+    paddingTop: '$spaceS',
+  },
+
+  form: {
+    gap: '$spaceM',
+  },
+
+  fieldBox: {
+    gap: '$spaceXS',
+    paddingVertical: '$spaceXXS',
+  },
+
+  cardDetailsRow: {
+    gap: '$spaceM',
+  },
+
+  cardDetailField: {
+    flex: 1,
+  },
+
+  cardDetailFieldCompact: {
+    flex: 0.62,
+  },
+
+  fieldLabel: {
+    color: '$colorContent',
+  },
+
+  inputShell: {
+    backgroundColor: '$colorSurface',
+    borderRadius: 0,
+    minHeight: '$spaceXL',
+  },
+
+  inputShellMultiline: {
+    alignItems: 'flex-start',
+    minHeight: '$spaceXXL * 2',
+  },
+
+  inputField: {
+    borderRadius: 0,
+    fontSize: 16,
+    paddingHorizontal: '$spaceS',
+  },
+
+  inputFieldMultiline: {
+    minHeight: '$spaceXXL * 2',
+    paddingBottom: '$spaceS',
+    paddingTop: '$spaceS',
+  },
+
+  inputActionButton: {
+    alignItems: 'center',
+    borderRadius: 0,
+    backgroundColor: '$colorSurface',
+    height: '$spaceXL',
+    justifyContent: 'center',
+    width: '$spaceXL',
+  },
+
+  inputActionButtonMultiline: {
+    marginTop: '$spaceXS',
+  },
+
+  inputActionButtonDisabled: {
+    opacity: 0.35,
+  },
+
+  recoveryRow: {
+    alignItems: 'center',
+    gap: '$spaceS',
   },
 
   caption: {
-    maxWidth: '70%',
+    flex: 1,
   },
 
   button: {
-    marginTop: '$viewOffset',
+    borderRadius: '$borderRadius',
+    marginTop: '$spaceM',
+    minHeight: '$spaceXL + $spaceS',
   },
 });

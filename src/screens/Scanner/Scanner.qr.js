@@ -1,15 +1,12 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Text, View } from '@satoshi-ltd/nano-design';
+import { View } from '../../design-system';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
-import StyleSheet from 'react-native-extended-stylesheet';
 
 import { Frame } from './components';
 import { style } from './Scanner.style';
-import { L10N } from '../../modules';
-
-const ScannerQR = ({ is, onRead, reveal, scanning }) => {
+const ScannerQR = ({ camera = false, frame = false, onRead, scanning }) => {
   const [permission, requestPermission] = useCameraPermissions();
 
   const [active, setActive] = useState(false);
@@ -24,7 +21,7 @@ const ScannerQR = ({ is, onRead, reveal, scanning }) => {
 
   return (
     <>
-      {permission?.granted && !is.modeNFC && (
+      {camera && permission?.granted && (
         <CameraView
           active={active}
           autofocus="on"
@@ -34,38 +31,29 @@ const ScannerQR = ({ is, onRead, reveal, scanning }) => {
           style={style.camera}
         />
       )}
-      <View style={[style.instructions, style.background]}>
-        <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
-          {L10N.SCANNER_QR}
-        </Text>
-        <Text align="center" caption color="contentLight" style={style.instructionsContent}>
-          {L10N.SCANNER_QR_CAPTION}
-        </Text>
-      </View>
+      {frame ? (
+        <View style={style.qrFrameStage}>
+          <View style={[style.scannerMask, style.maskTop]} />
 
-      <View row wide>
-        <View style={[style.section, style.background]} wide />
+          <View style={style.maskMiddle}>
+            <View style={[style.scannerMask, style.maskSide, style.maskSideLeft]} />
 
-        <Frame align="center">
-          {reveal && (
-            <Text align="center" bold color={StyleSheet.value('$qrBackgroundColor')} secondary>
-              {reveal}
-            </Text>
-          )}
-        </Frame>
+            <Frame align="center" />
 
-        <View style={[style.section, style.background]} wide />
-      </View>
+            <View style={[style.scannerMask, style.maskSide, style.maskSideRight]} />
+          </View>
+
+          <View style={[style.scannerMask, style.maskBottom]} />
+        </View>
+      ) : null}
     </>
   );
 };
 
 ScannerQR.propTypes = {
-  is: PropTypes.shape({
-    modeNFC: PropTypes.bool,
-  }),
+  camera: PropTypes.bool,
+  frame: PropTypes.bool,
   onRead: PropTypes.func,
-  reveal: PropTypes.string,
   scanning: PropTypes.bool,
 };
 

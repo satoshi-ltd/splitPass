@@ -1,214 +1,444 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Icon, Modal, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
+import * as Clipboard from 'expo-clipboard';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import StyleSheet from 'react-native-extended-stylesheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { style } from './Viewer.style';
-import { EVENT, FIELD, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import { CardOption, Form, QR } from '../../components';
-import { useStore } from '../../contexts';
-import { eventEmitter, ICON, L10N } from '../../modules';
+import { EVENT, READER_TYPE, SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { QR, SecretFooterContent } from '../../components';
+import { useApp, useStore } from '../../contexts';
+import {
+  AppScreen,
+  HeaderBackButton,
+  Icon,
+  Menu,
+  Pagination,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from '../../design-system';
+import { eventEmitter, ICON, L10N, openConfirm, QRParser } from '../../modules';
+import {
+  formatCardNumber,
+  getMaskedCardValue,
+  isCardValue,
+  maskSecret,
+  parseCardValue,
+} from '../../modules/secretValueDisplay';
 
-const QR_SIZE = 256;
+const QR_SIZE = 272;
+const LOCKED_QR_PREVIEW_VALUE = 'splitpass://locked-preview/easter-egg';
 
-const Viewer = ({
-  route: { params: { hash, favorite: propFavorite = false, name, readMode = false, values = [] } = {} },
-  navigation = {},
-}) => {
+const decodeSecret = (value = '', passcode = '') => {
+  try {
+    return QRParser.decode(value, passcode) || '';
+  } catch {
+    return '';
+  }
+};
+
+const serializeRouteDate = (value) =>
+  value && typeof value === 'object' && typeof value.toISOString === 'function' ? value.toISOString() : value;
+
+const Viewer = ({ route, navigation = {} }) => {
+  const {
+    params: {
+      brand,
+      hash,
+      favorite: propFavorite = false,
+      kind,
+      name,
+      passcode: initialPasscode = '',
+      readMode = false,
+      returnToMain = false,
+      values = [],
+      website,
+    } = {},
+  } = route || {};
+  const insets = useSafeAreaInsets();
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
+  const { colors, formatDate, theme } = useApp();
   const { createSecret, deleteSecret, readSecret, updateSecret } = useStore();
   const { width } = useWindowDimensions();
 
   const [favorite, setFavorite] = useState(propFavorite);
-  const [fields, setFields] = useState();
-  const [form, setForm] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [passcode, setPasscode] = useState(initialPasscode);
+  const [passcodeDraft, setPasscodeDraft] = useState('');
+  const [showPasscodeInput, setShowPasscodeInput] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const currentValue = values[currentIndex] || values[0] || '';
+  const [type] = currentValue;
+  const isCardType = [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type);
+
+  const is = {
+    secure: SECURE_TYPES.includes(type),
+    shard: SHARD_TYPES.includes(type),
+  };
+
+  const decodedSecret = useMemo(() => {
+    if (is.shard) return `shard:${currentIndex + 1}`;
+    return decodeSecret(currentValue, passcode);
+  }, [currentIndex, currentValue, is.shard, passcode]);
+  const [previousReadAt, setPreviousReadAt] = useState(() => serializeRouteDate(route?.params?.readAt));
+  const lastOpenedLabel = previousReadAt
+    ? L10N.LAST_OPENED({
+        value: formatDate(new Date(previousReadAt), {
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        }),
+      })
+    : L10N.NEVER_OPENED;
+
+  const footerSecret = revealed && decodedSecret ? decodedSecret : maskSecret(decodedSecret || '••••••••••••');
+  const locked = is.secure && !passcode;
+  const isCard = kind === 'card' || isCardType || isCardValue(decodedSecret);
+  const cardValue = isCard ? parseCardValue(decodedSecret) : undefined;
+  const footerCardValue = !cardValue
+    ? undefined
+    : revealed
+    ? {
+        cvv: cardValue.cvv,
+        expire: cardValue.expire,
+        number: formatCardNumber(cardValue.number),
+      }
+    : getMaskedCardValue(cardValue.canonical);
+  const isSeed = !isCard && /\s/.test(decodedSecret);
+  const createFlowShard = returnToMain && readMode && is.shard;
+  const shardLabel = values.length > 1 ? `${L10N.SECRET_TYPE_SHARD} ${currentIndex + 1}` : L10N.SECRET_TYPE_SHARD;
+  const lockedQrPreviewColors = useMemo(
+    () => ({ background: colors.qrBackground, foreground: colors.qrForeground }),
+    [colors.qrBackground, colors.qrForeground],
+  );
+
   useFocusEffect(
     useCallback(() => {
-      readSecret({ hash });
+      if (hash) readSecret({ hash });
+      // readSecret comes from context and is recreated on rerenders.
+      // Depending on it here can retrigger this focus effect in a loop.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []),
+    }, [hash]),
   );
+
+  useEffect(() => {
+    if (locked) setShowPasscodeInput(true);
+  }, [locked]);
+
+  useEffect(() => {
+    setPreviousReadAt(serializeRouteDate(route?.params?.readAt));
+  }, [hash, route?.params?.readAt]);
+
+  const handleBack = () => {
+    if (returnToMain) {
+      navigation.navigate('main', { screen: 'secrets' });
+      return;
+    }
+
+    navigation.goBack();
+  };
 
   const handleScroll = ({ nativeEvent: { contentOffset: { x } = {} } = {} }) => {
     setCurrentIndex(Math.round(x / width));
   };
 
   const handleSave = async () => {
-    const secret = await createSecret({ name, value: values[currentIndex] });
+    const secret = await createSecret({ name, value: currentValue, website, kind, brand });
     if (!secret) return;
 
     eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
-    if (values.length > 1) next();
-    else navigation.goBack();
+    if (values.length > 1 && currentIndex < values.length - 1) {
+      scrollViewRef.current?.scrollTo({ animated: true, x: width * (currentIndex + 1) });
+      return;
+    }
+
+    navigation.goBack();
   };
 
   const handleDelete = async () => {
-    navigation.navigate('confirm', {
-      caption: L10N.DELETE_SECRET_CAPTION,
-      title: L10N.DELETE_SECRET_TITLE,
-      onAccept: async () => {
-        await deleteSecret({ hash });
-        eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_DELETED, title: L10N.SUCCESS });
-        navigation.goBack();
+    openConfirm(
+      navigation,
+      {
+        caption: L10N.DELETE_SECRET_CAPTION,
+        title: L10N.DELETE_SECRET_TITLE,
       },
-    });
+      {
+        onAccept: async () => {
+          await deleteSecret({ hash });
+          eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_DELETED, title: L10N.SUCCESS });
+          navigation.goBack();
+        },
+      },
+    );
   };
 
   const handleShare = async () => {
-    const uri = await qrRef.current.capture();
+    if (locked) return;
+    const uri = await qrRef.current?.capture();
+    if (!uri) return;
     await Sharing.shareAsync(uri);
-  };
-
-  const handleGoToScanner = () => {
-    navigation.goBack();
-    navigation.navigate('scanner', { readMode: true, values });
   };
 
   const handleFavorite = async () => {
     const nextFavorite = !favorite;
-
     await updateSecret({ hash, favorite: nextFavorite });
     setFavorite(nextFavorite);
-  };
-
-  const handleGoToNFCCard = () => {
-    navigation.goBack();
-    navigation.navigate('splitcard', {
-      viewer: { name, readMode, values },
-      writeMode: { name, value: values[currentIndex] },
+    eventEmitter.emit(EVENT.NOTIFICATION, {
+      text: nextFavorite ? L10N.FAVORITE_ADDED : L10N.FAVORITE_REMOVED,
+      title: L10N.SUCCESS,
     });
   };
 
-  const handleOptions = () => {
-    const options = [
-      {
-        accent: favorite,
-        text: L10N.FAVORITE,
-        icon: favorite ? ICON.FAVORITE : ICON.UNFAVORITE,
-        onPress: handleFavorite,
-      },
-      {
-        critical: true,
-        text: L10N.DELETE_SECRET,
-        icon: ICON.DATABASE_REMOVE,
-        onPress: handleDelete,
-      },
-    ];
-
-    navigation.navigate('menu', { options });
+  const handleGoToScanner = () => {
+    navigation.navigate('scanner', { readMode: true, values });
   };
 
-  const next = () => {
-    if (!scrollViewRef.current) return;
-    scrollViewRef.current.scrollTo({ x: width * (currentIndex + 1), animated: true });
+  const handleGoToNFCCard = () => {
+    navigation.navigate('scanner', {
+      readerType: READER_TYPE.NFC,
+      writeMode: { name, value: currentValue },
+    });
   };
 
-  const [type] = values[0];
+  const menuOptions = [
+    createFlowShard
+      ? {
+          icon: ICON.DATABASE_ADD,
+          onPress: handleSave,
+          text: L10N.SAVE_IN_DEVICE,
+        }
+      : null,
+    createFlowShard
+      ? {
+          icon: ICON.NFC,
+          onPress: handleGoToNFCCard,
+          text: L10N.SAVE_IN_CARD,
+        }
+      : null,
+    createFlowShard
+      ? {
+          icon: ICON.SHARE,
+          onPress: handleShare,
+          text: L10N.SHARE,
+        }
+      : null,
+    hash
+      ? {
+          accent: favorite,
+          icon: favorite ? ICON.FAVORITE : ICON.UNFAVORITE,
+          onPress: handleFavorite,
+          text: L10N.FAVORITE,
+        }
+      : null,
+    !createFlowShard
+      ? {
+          icon: ICON.NFC,
+          onPress: handleGoToNFCCard,
+          text: L10N.SAVE_IN_CARD,
+        }
+      : null,
+    !createFlowShard && !locked
+      ? {
+          icon: ICON.SHARE,
+          onPress: handleShare,
+          text: L10N.SHARE,
+        }
+      : null,
+    readMode && is.shard && !createFlowShard
+      ? {
+          icon: ICON.SCAN,
+          onPress: handleGoToScanner,
+          text: L10N.SCAN_SHARD,
+        }
+      : null,
+    hash
+      ? {
+          critical: true,
+          icon: ICON.DATABASE_REMOVE,
+          onPress: handleDelete,
+          text: L10N.DELETE_SECRET,
+        }
+      : null,
+  ].filter(Boolean);
 
-  const is = {
-    form: !!Object.values(form).length,
-    secure: SECURE_TYPES.includes(type),
-    shard: SHARD_TYPES.includes(type),
+  const handleCopy = async () => {
+    if (locked || is.shard) return;
+    const valueToCopy = is.shard ? currentValue : decodedSecret;
+    if (!valueToCopy) return;
+
+    await Clipboard.setStringAsync(valueToCopy);
+    eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_COPIED, title: L10N.SUCCESS });
   };
+
+  const handleToggleReveal = () => {
+    if (is.shard) return;
+
+    if (is.secure && !passcode) {
+      setShowPasscodeInput(true);
+      return;
+    }
+
+    setRevealed((current) => !current);
+  };
+
+  const handlePasscodeSubmit = () => {
+    if (passcodeDraft.length !== 6) return;
+
+    setPasscode(passcodeDraft);
+    setShowPasscodeInput(false);
+    setPasscodeDraft('');
+    setRevealed(false);
+  };
+
+  const handlePasscodeCancel = () => {
+    setPasscodeDraft('');
+    setShowPasscodeInput(false);
+    handleBack();
+  };
+
+  const header = (
+    <View row align="center" style={style.header}>
+      <HeaderBackButton onPress={handleBack} />
+
+      <View style={style.headerText}>
+        <Text bold size="xl" tone="accent">
+          {name}
+        </Text>
+        {website ? (
+          <Text numberOfLines={1} size="l" tone="secondary" style={style.website}>
+            {website}
+          </Text>
+        ) : null}
+        {hash ? (
+          <Text numberOfLines={1} size="s" tone="secondary" style={style.website}>
+            {lastOpenedLabel}
+          </Text>
+        ) : null}
+      </View>
+
+      <Pressable onPress={() => setShowMenu((current) => !current)} style={style.headerAction}>
+        <Icon name={ICON.DOTS} size="m" />
+      </Pressable>
+
+      {showMenu ? (
+        <View style={style.menuWrap}>
+          <Menu onClose={() => setShowMenu(false)} options={menuOptions} />
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const footer = (
+    <View
+      style={[
+        style.footer,
+        theme === 'dark' ? style.footerLight : style.footerDark,
+        { paddingBottom: Math.max(insets.bottom, 16) },
+      ]}
+    >
+      <SecretFooterContent
+        cardValue={footerCardValue}
+        contrast={theme === 'dark' ? 'light' : 'dark'}
+        disableCopy={is.shard}
+        disableReveal={is.shard}
+        isCard={isCard}
+        isSeed={isSeed}
+        mode={showPasscodeInput ? 'passcode' : is.shard ? 'shard' : 'value'}
+        onCopy={handleCopy}
+        onPasscodeCancel={handlePasscodeCancel}
+        onPasscodeChange={(nextValue) => setPasscodeDraft(`${nextValue}`.replace(/\D/g, ''))}
+        onPasscodeSubmit={handlePasscodeSubmit}
+        onShardAction={!createFlowShard ? handleGoToScanner : undefined}
+        onToggleReveal={handleToggleReveal}
+        passcodePlaceholder={L10N.PASSCODE_PLACEHOLDER}
+        passcodeValue={passcodeDraft}
+        revealIcon={revealed ? ICON.EYE_OFF : ICON.EYE}
+        shardCaption={!createFlowShard ? L10N.SHARD_SCAN_CAPTION : undefined}
+        shardLabel={shardLabel}
+        showCopy={!createFlowShard}
+        showReveal={!createFlowShard}
+        value={footerSecret}
+      />
+    </View>
+  );
 
   return (
-    <Modal gap onClose={navigation.goBack}>
-      <Text align="center" bold secondary title style={style.name}>
-        {name}
-      </Text>
+    <AppScreen
+      contentContainerStyle={style.content}
+      footer={footer}
+      header={header}
+      headerContainerStyle={style.headerContainer}
+      headerSafeAreaStyle={style.headerSafeArea}
+      scrollable={false}
+      style={style.screen}
+    >
+      {showMenu ? <Pressable onPress={() => setShowMenu(false)} style={style.menuBackdrop} /> : null}
 
-      <ScrollView
-        horizontal
-        ref={scrollViewRef}
-        scrollEnabled={!readMode}
-        snap={width}
-        onScroll={handleScroll}
-        style={style.scrollView}
-      >
-        {values.map((value, index) => (
-          <View align="center" key={index} style={[style.item, { width }]}>
-            <QR
-              key={index}
-              {...{ passcode: form.passcode, readMode }}
-              ref={readMode || currentIndex === index ? qrRef : undefined}
-              size={QR_SIZE}
-              value={value}
-              onPress={!is.shard ? () => {} : undefined}
-            />
-            {is.shard && (
-              <View align="center" bold style={style.shard}>
-                <Text bold color={StyleSheet.value('$qrColor')} tiny>
-                  shard:{index + 1}
-                </Text>
+      <View style={style.qrSection}>
+        {locked ? (
+          <View align="center" style={style.qrSlide}>
+            <View style={[style.lockedQrShell, theme === 'dark' && style.lockedQrShellDark]}>
+              <QR
+                backgroundColor={lockedQrPreviewColors.background}
+                containerStyle={[style.lockedQrPreview, theme === 'dark' && style.lockedQrPreviewDark]}
+                foregroundColor={lockedQrPreviewColors.foreground}
+                pieceBorderRadius={0}
+                size={QR_SIZE}
+                value={LOCKED_QR_PREVIEW_VALUE}
+              />
+              <View pointerEvents="none" style={style.lockedQrOverlay}>
+                <View style={[style.lockedQrIconWrap, theme === 'dark' && style.lockedQrIconWrapDark]}>
+                  <Icon name={ICON.SECURE} size="xl" tone="secondary" />
+                </View>
               </View>
-            )}
+            </View>
           </View>
-        ))}
-      </ScrollView>
-
-      {values.length > 1 && (
-        <View align="center" wide>
-          <Pagination currentIndex={currentIndex} length={values.length} />
-        </View>
-      )}
-
-      {readMode && (
-        <View>
-          {is.shard && (
-            <Button outlined onPress={handleGoToScanner} style={style.buttonScanner}>
-              {L10N.SCAN_SHARD}
-            </Button>
-          )}
-          <View align="center" row style={style.caption}>
-            <Icon
-              caption
-              color="contentLight"
-              name={[...SECURE_TYPES, ...SHARD_TYPES].includes(type) ? ICON.WARNING : ICON.INFO}
-            />
-            <Text align="center" color="contentLight" tiny>
-              {is.secure
-                ? L10N.VIEWER_CAPTION_ENTER_PASSCODE
-                : is.shard
-                ? L10N.VIEWER_CAPTION_SHARD_SCANNER
-                : L10N.VIEWER_CAPTION_HOLD_TO_REVEAL}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {fields && !is.form ? (
-        <Form fields={fields} onCancel={setFields} onSubmit={setForm} style={style.cardOptions} />
-      ) : (
-        <View row style={style.cardOptions}>
-          {readMode && <CardOption icon={ICON.SETTINGS} squared onPress={handleOptions} />}
-
-          {readMode && is.secure && !form.passcode ? (
-            <CardOption icon={ICON.PASSCODE} text={L10N.SET_PASSCODE} onPress={() => setFields([FIELD.PASSCODE])} />
-          ) : (
-            <CardOption icon={ICON.SHARE} text={L10N.SHARE} onPress={handleShare} />
-          )}
-
-          {!readMode && currentIndex === 0 && (
-            <CardOption icon={ICON.DATABASE_ADD} text={L10N.SAVE_IN_DEVICE} onPress={handleSave} />
-          )}
-
-          <CardOption color="accent" icon={ICON.NFC} text={L10N.SAVE_IN_CARD} onPress={handleGoToNFCCard} />
-        </View>
-      )}
-    </Modal>
+        ) : (
+          <>
+            <ScrollView
+              horizontal
+              onScroll={handleScroll}
+              ref={scrollViewRef}
+              scrollEnabled={values.length > 1}
+              snapTo={width}
+              style={style.scrollView}
+            >
+              {values.map((value, index) => (
+                <View align="center" key={`${value}-${index}`} style={[style.qrSlide, { width }]}>
+                  <QR
+                    ref={index === currentIndex ? qrRef : undefined}
+                    containerStyle={style.qrShell}
+                    pieceBorderRadius={0}
+                    size={QR_SIZE}
+                    value={value}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+            {values.length > 1 ? (
+              <View align="center" style={style.pagination}>
+                <Pagination currentIndex={currentIndex} length={values.length} />
+              </View>
+            ) : null}
+          </>
+        )}
+      </View>
+    </AppScreen>
   );
 };
 
 Viewer.propTypes = {
-  route: PropTypes.any,
   navigation: PropTypes.any,
+  route: PropTypes.any,
 };
 
 export { Viewer };

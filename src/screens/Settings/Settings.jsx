@@ -1,164 +1,364 @@
-import { Screen, Setting, Text, View } from '@satoshi-ltd/nano-design';
+/* global Set, __DEV__ */
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Linking } from 'react-native';
-import StyleSheet from 'react-native-extended-stylesheet';
 
-import { ABOUT, OPTIONS, REMINDER_BACKUP_OPTIONS } from './Settings.constants';
+import {
+  ABOUT_OPTIONS,
+  ACCOUNT_DATA_OPTIONS,
+  DEVELOPMENT_OPTIONS,
+  GENERAL_OPTIONS,
+  REMINDER_BACKUP_OPTIONS,
+} from './Settings.constants';
 import { style } from './Settings.style';
-import { DEFAULT_THEME, EVENT } from '../../App.constants';
+import { EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
-import { eventEmitter, ICON, L10N } from '../../modules';
-import { BackupService, NotificationsService, PurchaseService } from '../../services';
-import { DarkTheme, LightTheme } from '../../theme';
+import { AppScreen, Icon, Setting, Text, View } from '../../design-system';
+import { eventEmitter, getLanguageLabel, ICON, L10N, openConfirm } from '../../modules';
+import { BackupService, BiometricAuthService, getDemoSecrets, NotificationsService } from '../../services';
 
 const Settings = ({ navigation = {} }) => {
-  const { secrets, settings, importBackup = () => {}, subscription, updateSettings, updateSubscription } = useStore();
+  const {
+    createSecrets,
+    lockStore,
+    secrets,
+    settings,
+    store,
+    importBackup = () => {},
+    resetAppData = () => {},
+    updateSettings,
+  } = useStore();
 
-  const [activity, setActivity] = useState();
+  const [activity, setActivity] = useState({});
+  const [biometricAvailability, setBiometricAvailability] = useState({ available: false, ready: false });
 
-  const { reminders, theme } = settings;
-  const isPremium = !!subscription?.productIdentifier;
+  const { biometricUnlockEnabled = false, language, reminders = [], theme = 'light' } = settings || {};
+  const reminderEnabled = (reminders[0] ?? 1) === 1;
+  const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
+  const biometricSubtitle =
+    !biometricAvailability.ready
+      ? undefined
+      : !biometricAvailability.available
+      ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
+      : biometricUnlockEnabled
+      ? L10N.ENABLED
+      : L10N.DISABLED;
+  const reminderSubtitle = reminderEnabled ? L10N.REMINDER_BACKUP_SCHEDULE : undefined;
+
+  useEffect(() => {
+    let active = true;
+
+    BiometricAuthService.isAvailable()
+      .then((availability) => {
+        if (!active) return;
+
+        setBiometricAvailability({ available: availability.available, ready: true });
+      })
+      .catch(() => {
+        if (!active) return;
+
+        setBiometricAvailability({ available: false, ready: true });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleOption = ({ callback, screen, url }) => {
     if (url) Linking.openURL(url);
     if (screen) navigation.navigate(screen);
-    else if (callback === 'handleSubscription') handleSubscription();
     else if (callback === 'handleExport') handleExport();
     else if (callback === 'handleImport') handleImport();
-    else if (callback === 'handleRestorePurchases') handleRestorePurchases();
+    else if (callback === 'handleLoadDemoSecrets') handleLoadDemoSecrets();
+    else if (callback === 'handleLogout') handleLogout();
+    else if (callback === 'handleResetData') handleResetData();
   };
 
   const handleExport = async () => {
-    if (!isPremium) return handleSubscription('export');
-
-    setActivity({ ...activity, handleExport: true });
-    const exported = await BackupService.export({ secrets, settings });
-    if (exported) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_EXPORT_SUCCESS });
-    setActivity({ ...activity, handleExport: false });
-  };
-
-  const handleImport = async () => {
-    if (!isPremium) return handleSubscription('import');
-
-    setActivity({ ...activity, handleImport: true });
-    const backup = await BackupService.import().catch((error) =>
-      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }),
-    );
-
-    if (backup) {
-      navigation.navigate('confirm', {
-        caption: L10N.CONFIRM_IMPORT_CAPTION(backup),
-        title: L10N.CONFIRM_IMPORT,
-        onAccept: async () => {
-          await importBackup(backup);
-          if (backup?.settings?.theme) {
-            StyleSheet.build(backup.settings.theme === DEFAULT_THEME ? LightTheme : DarkTheme);
-          }
-          navigation.navigate('home');
-          eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_IMPORT_SUCCESS });
-          setActivity({ ...activity, handleImport: false });
-        },
-      });
-    } else {
-      setActivity({ ...activity, handleImport: false });
+    try {
+      setActivity((prev) => ({ ...(prev || {}), handleExport: true }));
+      const exported = await BackupService.export({ store });
+      if (exported) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_EXPORT_SUCCESS, title: L10N.SUCCESS });
+    } catch (error) {
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
+    } finally {
+      setActivity((prev) => ({ ...(prev || {}), handleExport: false }));
     }
   };
 
-  const handleSubscription = (activityState) => {
-    if (subscription?.productIdentifier) navigation.navigate('subscription');
-    setActivity(activityState);
-    PurchaseService.getProducts()
-      .then((plans) => {
-        navigation.navigate('subscription', { plans });
-        setActivity();
-      })
-      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
-  };
+  const handleImport = async () => {
+    setActivity((prev) => ({ ...(prev || {}), handleImport: true }));
+    const backup = await BackupService.import().catch((error) => {
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
+      return undefined;
+    });
 
-  const handleRestorePurchases = () => {
-    setActivity('restore');
-    PurchaseService.restore()
-      .then((activeSubscription) => {
-        if (activeSubscription) {
-          updateSubscription(activeSubscription);
-          eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.PURCHASE_RESTORED });
-          setActivity();
-        }
-      })
-      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
-  };
+    if (backup?.format === 'encrypted') {
+      navigation.navigate('unlock', { backup, mode: 'import' });
+      setActivity((prev) => ({ ...(prev || {}), handleImport: false }));
+      return;
+    }
 
-  const handleTheme = () => {
-    StyleSheet.build(StyleSheet.value('$theme') === DEFAULT_THEME ? DarkTheme : LightTheme);
-    updateSettings({ theme: StyleSheet.value('$theme') });
+    if (backup) {
+      openConfirm(
+        navigation,
+        {
+          caption: L10N.CONFIRM_IMPORT_CAPTION(backup.payload),
+          title: L10N.CONFIRM_IMPORT,
+        },
+        {
+          onCancel: () => setActivity((prev) => ({ ...(prev || {}), handleImport: false })),
+          onAccept: async () => {
+            await importBackup(backup);
+            navigation.navigate('secrets');
+            eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_IMPORT_SUCCESS, title: L10N.SUCCESS });
+            setActivity((prev) => ({ ...(prev || {}), handleImport: false }));
+          },
+        },
+      );
+    } else {
+      setActivity((prev) => ({ ...(prev || {}), handleImport: false }));
+    }
   };
 
   const handleChangeReminder = (item = {}) => {
-    NotificationsService.reminders([item.value]);
-    updateSettings({ reminders: [item.value] });
+    const value = typeof item === 'object' ? item.value : item ? 1 : 0;
+    NotificationsService.reminders([value]);
+    updateSettings({ reminders: [value] });
   };
 
-  const settingProps = { iconColor: theme === 'dark' ? StyleSheet.value('$colorBase') : undefined };
+  const handleAppearance = (value) => {
+    updateSettings({ theme: value ? 'dark' : 'light' });
+  };
 
-  return (
-    <Screen gap offset style={style.screen}>
-      <Text bold secondary subtitle>
+  const handleBiometricUnlock = async (value) => {
+    try {
+      setActivity((prev) => ({ ...(prev || {}), biometricUnlock: true }));
+
+      if (!value) {
+        await BiometricAuthService.clearPassphrase();
+        await updateSettings({ biometricUnlockEnabled: false });
+        eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.BIOMETRIC_UNLOCK_DISABLED, title: L10N.SUCCESS });
+        return;
+      }
+
+      if (!biometricAvailability.available) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE });
+        return;
+      }
+
+      if (!store?.sessionPassphrase) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.BIOMETRIC_UNLOCK_REQUIRES_SESSION });
+        return;
+      }
+
+      await BiometricAuthService.savePassphrase(store.sessionPassphrase);
+      await updateSettings({ biometricUnlockEnabled: true });
+      eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.BIOMETRIC_UNLOCK_ENABLED, title: L10N.SUCCESS });
+    } catch (error) {
+      eventEmitter.emit(EVENT.NOTIFICATION, {
+        error: true,
+        text:
+          error?.code === 'ERR_BIOMETRIC_NOT_AVAILABLE' ||
+          error?.code === 'ERR_BIOMETRIC_NOT_ENROLLED' ||
+          error?.code === 'ERR_BIOMETRIC_WEAK'
+            ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
+            : error?.message || L10N.ERROR,
+      });
+    } finally {
+      setActivity((prev) => ({ ...(prev || {}), biometricUnlock: false }));
+    }
+  };
+
+  const handleLoadDemoSecrets = async () => {
+    try {
+      setActivity((prev) => ({ ...(prev || {}), handleLoadDemoSecrets: true }));
+      const existing = new Set(
+        (secrets || []).map(({ name, value, website }) => `${name}::${value}::${website || ''}`),
+      );
+      const pending = getDemoSecrets().filter(
+        ({ name, value, website }) => !existing.has(`${name}::${value}::${website || ''}`),
+      );
+
+      await createSecrets(pending);
+
+      eventEmitter.emit(EVENT.NOTIFICATION, {
+        text: pending.length ? L10N.DEMO_SECRETS_ADDED({ count: pending.length }) : L10N.DEMO_SECRETS_ALREADY_LOADED,
+      });
+      navigation.navigate('secrets');
+    } catch (error) {
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
+    } finally {
+      setActivity((prev) => ({ ...(prev || {}), handleLoadDemoSecrets: false }));
+    }
+  };
+
+  const handleLogout = () => {
+    openConfirm(
+      navigation,
+      {
+        caption: L10N.CONFIRM_LOG_OUT_CAPTION,
+        title: L10N.CONFIRM_LOG_OUT,
+      },
+      {
+        onAccept: async () => {
+          await lockStore();
+          navigation.reset({ index: 0, routes: [{ name: 'unlock' }] });
+        },
+      },
+    );
+  };
+
+  const handleResetData = () => {
+    openConfirm(
+      navigation,
+      {
+        accept: L10N.RESET_DATA_ACTION,
+        caption: L10N.RESET_DATA_CAPTION,
+        title: L10N.RESET_DATA,
+      },
+      {
+        onAccept: async () => {
+          await resetAppData();
+          navigation.reset({ index: 0, routes: [{ name: 'onboarding' }] });
+        },
+      },
+    );
+  };
+
+  const RightValueChevron = ({ value }) => (
+    <View row align="center" gap="xxs">
+      <Text size="s" tone="secondary">
+        {value}
+      </Text>
+      <Icon name={ICON.RIGHT} tone="secondary" />
+    </View>
+  );
+
+  RightValueChevron.propTypes = {
+    value: PropTypes.string,
+  };
+
+  const header = (
+    <View style={style.header}>
+      <Text bold size="xl" tone="accent">
         {L10N.SETTINGS}
       </Text>
+      <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+        {L10N.SETTINGS_SUBTITLE}
+      </Text>
+    </View>
+  );
 
+  return (
+    <AppScreen contentContainerStyle={style.content} header={header}>
       <View style={style.group}>
-        <Text bold caption>
+        <Text semibold size="s" style={style.groupTitle}>
           {L10N.GENERAL}
         </Text>
-        {OPTIONS(isPremium, subscription).map(({ caption, disabled, icon, id, text, ...rest }) => (
+        {GENERAL_OPTIONS().map(({ disabled, icon, id, text, ...rest }) => (
           <Setting
-            {...settingProps}
             activity={activity?.[rest.callback]}
             key={`option-${id}`}
-            {...{ caption, disabled, icon, text }}
+            disabled={disabled}
+            icon={icon}
+            title={text}
             onPress={rest.callback || rest.screen ? () => handleOption(rest) : undefined}
           />
         ))}
       </View>
 
       <View style={style.group}>
-        <Text bold caption>
+        <Text semibold size="s" style={style.groupTitle}>
           {L10N.PREFERENCES}
         </Text>
         <Setting
-          {...settingProps}
           icon={ICON.INVERT_COLORS}
-          text={theme === 'dark' ? L10N.APPERANCE_LIGHT : L10N.APPERANCE_DARK}
-          onPress={handleTheme}
+          subtitle={appearanceSubtitle}
+          type="toggle"
+          title={L10N.APPEARANCE}
+          value={theme === 'dark'}
+          onValueChange={handleAppearance}
         />
         <Setting
-          {...settingProps}
-          caption={L10N.REMINDER_BACKUP_CAPTION}
+          activity={activity?.biometricUnlock}
+          disabled={biometricUnlockEnabled ? false : !biometricAvailability.ready || !biometricAvailability.available}
+          icon={ICON.BIOMETRIC}
+          subtitle={biometricSubtitle}
+          type="toggle"
+          title={L10N.BIOMETRIC_UNLOCK}
+          value={biometricUnlockEnabled}
+          onValueChange={handleBiometricUnlock}
+        />
+        <Setting
+          icon={ICON.LANGUAGE}
+          right={<RightValueChevron value={getLanguageLabel(language)} />}
+          title={L10N.LANGUAGE}
+          onPress={() => navigation.navigate('language')}
+        />
+        <Setting
           icon={ICON.BELL}
           onPress={() => {}}
           onChange={(value = 0) => handleChangeReminder(value)}
           options={REMINDER_BACKUP_OPTIONS}
-          selected={reminders[0]}
-          text={L10N.REMINDER_BACKUP}
+          selected={reminders[0] ?? 1}
+          subtitle={reminderSubtitle}
+          title={L10N.REMINDER_BACKUP}
         />
       </View>
 
       <View style={style.group}>
-        <Text bold caption>
-          {L10N.ABOUT}
+        <Text semibold size="s" style={style.groupTitle}>
+          {L10N.ABOUT_SPLITPASS}
         </Text>
-        {ABOUT(isPremium).map(({ disabled, icon, text, ...rest }, index) => (
+        {ABOUT_OPTIONS().map(({ disabled, icon, text, ...rest }, index) => (
           <Setting
-            {...settingProps}
             activity={activity && activity[rest.callback]}
             key={`about-${index}`}
-            {...{ disabled, icon, text }}
+            disabled={disabled}
+            icon={icon}
+            title={text}
             onPress={() => handleOption(rest)}
           />
         ))}
       </View>
-    </Screen>
+
+      <View style={style.group}>
+        <Text semibold size="s" style={style.groupTitle}>
+          {L10N.ACCOUNT_AND_DATA}
+        </Text>
+        {ACCOUNT_DATA_OPTIONS().map(({ callback, disabled, icon, text, tone }, index) => (
+          <Setting
+            activity={activity?.[callback]}
+            key={`account-data-${index}`}
+            disabled={disabled}
+            icon={icon}
+            title={text}
+            titleTone={tone}
+            onPress={() => handleOption({ callback })}
+          />
+        ))}
+      </View>
+
+      {__DEV__ ? (
+        <View style={style.group}>
+          <Text semibold size="s" style={style.groupTitle}>
+            {L10N.DEVELOPMENT}
+          </Text>
+          {DEVELOPMENT_OPTIONS().map(({ disabled, icon, id, text, ...rest }) => (
+            <Setting
+              activity={activity?.[rest.callback]}
+              key={`development-${id}`}
+              disabled={disabled}
+              icon={icon}
+              title={text}
+              onPress={() => handleOption(rest)}
+            />
+          ))}
+        </View>
+      ) : null}
+    </AppScreen>
   );
 };
 

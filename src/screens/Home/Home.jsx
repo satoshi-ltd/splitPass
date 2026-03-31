@@ -1,123 +1,165 @@
-import { Button, Card, Icon, ScrollView, Screen, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { CardAction, VaultItem } from './components';
 import { style } from './Home.style';
-import { getFavorites, groupByVault } from './modules';
-import { EVENT } from '../../App.constants';
+import { SHARD_TYPES } from '../../App.constants';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { eventEmitter, ICON, L10N } from '../../modules';
-import { PurchaseService } from '../../services';
+import { AppScreen, Input, Text, View } from '../../design-system';
+import { L10N } from '../../modules';
+
+const getSecretSortTime = ({ createdAt, readAt } = {}) => {
+  const timestamp = new Date(readAt || createdAt || 0).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+const serializeRouteDate = (value) =>
+  value && typeof value === 'object' && typeof value.toISOString === 'function' ? value.toISOString() : value;
 
 const Home = ({ navigation }) => {
-  const { subscription = {}, secrets = [] } = useStore();
+  const { secrets = [] } = useStore();
+  const [search, setSearch] = useState('');
+  const sortedSecrets = useMemo(
+    () => [...secrets].sort((a, b) => getSecretSortTime(b) - getSecretSortTime(a)),
+    [secrets],
+  );
+  const filteredSecrets = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    if (!needle) return sortedSecrets;
 
-  useEffect(() => {
-    setTimeout(() => {
-      // ? SHORTCUTS
-      // const [secret] = secrets;
-      // navigation.navigate('create', { ...secret, values: [secret.value], readMode: true });
-      // navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true });
-      // navigation.navigate('splitcard', { writeMode: secret });
-    }, 10);
-  }, []);
+    return sortedSecrets.filter(({ name = '', website = '' }) => `${name} ${website}`.toLowerCase().includes(needle));
+  }, [search, sortedSecrets]);
+  const mediocreCount = filteredSecrets.filter(({ value = '' }) => SHARD_TYPES.includes(value[0])).length;
+  const strongCount = filteredSecrets.length - mediocreCount;
+  const favoriteSecrets = useMemo(
+    () =>
+      [...filteredSecrets]
+        .filter(({ favorite }) => !!favorite)
+        .sort((a, b) => getSecretSortTime(b) - getSecretSortTime(a)),
+    [filteredSecrets],
+  );
+  const nonFavoriteSecrets = useMemo(() => filteredSecrets.filter(({ favorite }) => !favorite), [filteredSecrets]);
 
-  const favorites = getFavorites(secrets);
-  const vaults = groupByVault(secrets);
-  const subtitleProps = { bold: true, secondary: true, subtitle: true };
+  const sections = useMemo(() => {
+    const grouped = nonFavoriteSecrets.reduce((result, secret) => {
+      const letter = (secret.name || '#').trim().charAt(0).toUpperCase() || '#';
+      if (!result[letter]) result[letter] = [];
+      result[letter].push(secret);
+      return result;
+    }, {});
 
-  const [lastViewed] =
-    (secrets.length && secrets.sort((a, b) => new Date(b.readAt || null) - new Date(a.readAt || null))) || [];
+    return Object.fromEntries(
+      Object.entries(grouped).map(([letter, items = []]) => [
+        letter,
+        [...items].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+      ]),
+    );
+  }, [nonFavoriteSecrets]);
+  const orderedSections = useMemo(
+    () =>
+      Object.entries(sections).sort(([letterA], [letterB]) => {
+        if (letterA === '#') return -1;
+        if (letterB === '#') return 1;
+        return letterA.localeCompare(letterB);
+      }),
+    [sections],
+  );
 
-  const handleSubscription = () => {
-    PurchaseService.getProducts()
-      .then((plans) => {
-        navigation.navigate('subscription', { plans });
-      })
-      .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
-  };
-
-  // !TODO: We should determine if is a shard or not
+  const header = (
+    <View style={style.header}>
+      <View style={style.headerText}>
+        <Text size="xl">
+          <Text semibold size="xl" tone="accent">
+            split/
+          </Text>
+          <Text bold size="xl" tone="accent">
+            Pass
+          </Text>
+        </Text>
+        <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+          {L10N.HOME_SUBTITLE_INTRO}{' '}
+          <Text bold size="l" tone="primary">
+            {filteredSecrets.length}
+          </Text>{' '}
+          {L10N.HOME_SUBTITLE_SECRETS},{' '}
+          <Text bold size="l" tone="primary">
+            {strongCount}
+          </Text>{' '}
+          {L10N.HOME_SUBTITLE_STRONG} {L10N.HOME_SUBTITLE_AND}{' '}
+          <Text bold size="l" tone="primary">
+            {mediocreCount}
+          </Text>{' '}
+          {L10N.HOME_SUBTITLE_MEDIOCRE}.
+        </Text>
+      </View>
+      <Input
+        containerStyle={style.searchInputShell}
+        placeholder={L10N.SEARCH}
+        placeholderWhenBlur={L10N.SEARCH}
+        style={style.searchInput}
+        value={search}
+        onChange={setSearch}
+      />
+    </View>
+  );
 
   return (
-    <Screen disableScroll style={style.screen}>
-      <ScrollView contentContainerStyle={style.scrollviewContentContainer}>
-        <View row spaceBetween style={[style.section, style.cardActions]}>
-          <CardAction
-            color="accent"
-            icon={ICON.SCAN}
-            text={L10N.SCAN_SECRET}
-            tiny={L10N.SCAN_SECRET_CAPTION}
-            onPress={() => navigation.navigate('scanner')}
-          />
-          {lastViewed ? (
-            <CardAction
-              caption="Last used"
-              icon={ICON[lastViewed.vault]}
-              text={lastViewed.name}
-              tiny={new Intl.DateTimeFormat('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              }).format(lastViewed.readAt)}
-              onPress={() =>
-                navigation.navigate('viewer', { ...lastViewed, values: [lastViewed.value], readMode: true })
-              }
-            />
-          ) : (
-            <CardAction
-              icon={ICON.ADD}
-              text={L10N.FIRST_SECRET}
-              tiny={L10N.FIRST_SECRET_CAPTION}
-              onPress={() => navigation.navigate('create')}
-            />
-          )}
-        </View>
-
-        {!subscription?.productIdentifier && (
-          <Card onPress={handleSubscription} style={[style.banner, style.section]}>
-            <View row>
-              <Icon name={ICON.STAR} style={style.bannerIcon} />
-              <Text bold caption>
-                {L10N.BANNER_SUBSCRIPTION_CAPTION}
-              </Text>
-            </View>
-
-            <Text bold title style={style.bannerText}>
-              {L10N.BANNER_SUBSCRIPTION_TITLE}
+    <AppScreen contentContainerStyle={style.content} header={header}>
+      <View>
+        {favoriteSecrets.length ? (
+          <View style={style.section}>
+            <Text size="s" style={style.sectionLabel}>
+              {L10N.FAVORITES}
             </Text>
-
-            <Text caption color="contentLight" secondary style={style.bannerText}>
-              {L10N.BANNER_SUBSCRIPTION_DESCRIPTION}
-            </Text>
-          </Card>
-        )}
-
-        <Text {...subtitleProps}>My Vaults</Text>
-        <View horizontal row style={[style.vaults, style.section]}>
-          {Object.entries(vaults).map(([type, secrets = []]) => (
-            <VaultItem key={type} {...{ type, secrets }} onPress={() => navigation.navigate('vault', { type })} />
-          ))}
-        </View>
-
-        {favorites.length > 0 && (
-          <>
-            <Text {...subtitleProps}>Favorites</Text>
-            {favorites.map((secret = {}) => (
+            {favoriteSecrets.map((secret = {}) => (
               <SecretItem
                 key={secret.hash}
                 {...secret}
-                onPress={() => navigation.navigate('viewer', { ...secret, values: [secret.value], readMode: true })}
+                onPress={() =>
+                  navigation.navigate('secret', {
+                    brand: secret.brand,
+                    favorite: secret.favorite,
+                    hash: secret.hash,
+                    kind: secret.kind,
+                    name: secret.name,
+                    readAt: serializeRouteDate(secret.readAt),
+                    readMode: true,
+                    website: secret.website,
+                    values: [secret.value],
+                  })
+                }
               />
             ))}
-          </>
-        )}
-      </ScrollView>
+          </View>
+        ) : null}
 
-      <Button icon={ICON.SCAN} large secondary onPress={() => navigation.navigate('scanner')} style={style.buttonAdd} />
-    </Screen>
+        {orderedSections.map(([letter, items = []]) => (
+          <View key={letter} style={style.section}>
+            <Text size="s" style={style.sectionLabel}>
+              {letter}
+            </Text>
+            {items.map((secret = {}) => (
+              <SecretItem
+                key={secret.hash}
+                {...secret}
+                onPress={() =>
+                  navigation.navigate('secret', {
+                    brand: secret.brand,
+                    favorite: secret.favorite,
+                    hash: secret.hash,
+                    kind: secret.kind,
+                    name: secret.name,
+                    readAt: serializeRouteDate(secret.readAt),
+                    readMode: true,
+                    website: secret.website,
+                    values: [secret.value],
+                  })
+                }
+              />
+            ))}
+          </View>
+        ))}
+      </View>
+    </AppScreen>
   );
 };
 

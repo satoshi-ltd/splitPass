@@ -1,11 +1,25 @@
-import { Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  screen: {
-    paddingBottom: '$spaceXXL * 2',
-    paddingTop: '$spaceXXL + $viewOffset',
-    ...Platform.select({ web: { marginTop: '$viewOffset' } }),
+  header: {
+    gap: '$spaceXXS',
+  },
+
+  headerSubtitle: {
+    maxWidth: '90%',
+  },
+
+  content: {
+    gap: '$spaceS',
+    paddingTop: '$spaceS',
+  },
+
+  group: {
+    gap: 0,
+  },
+
+  groupTitle: {
+    marginBottom: '$spaceXS',
   },
 
   hint: {

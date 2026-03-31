@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
@@ -17,10 +16,6 @@ export const style = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: '$spaceL',
     paddingVertical: '$spaceL - $spaceXS',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.33,
-    shadowRadius: 12,
     width: '$splitCardWidth',
   },
 
@@ -43,7 +38,7 @@ export const style = StyleSheet.create({
   },
 
   cardMemory: {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: '$qrBackgroundColor',
     borderRadius: '$borderRadius',
     gap: '$spaceXXS',
     paddingLeft: '$spaceXS',
@@ -52,45 +47,40 @@ export const style = StyleSheet.create({
   },
 
   action: {
-    marginTop: '$viewOffset / 2',
+    minHeight: '$spaceS',
+    marginTop: '$spaceXXS',
   },
 
   records: {
-    ...Platform.select({ web: { maxHeight: '$splitCardHeight' } }),
     flex: 1,
     overflow: 'hidden',
-    paddingVertical: '$viewOffset / 4',
+    paddingTop: '$spaceXS',
     width: '$splitCardWidth',
   },
 
   record: {
-    marginVertical: '$viewOffset / 4',
+    alignItems: 'center',
+    borderRadius: '$borderRadius',
+    flexDirection: 'row',
+    gap: '$spaceS',
+    marginVertical: '$spaceXXS',
+    minHeight: '$spaceXXL',
   },
 
-  recordName: {
-    marginHorizontal: '$viewOffset / 2',
+  recordThumb: {
+    alignItems: 'center',
+    backgroundColor: '$colorSurface',
+    height: '$spaceXXL',
+    justifyContent: 'center',
+    width: '$spaceXXL',
+  },
+
+  recordBody: {
     flex: 1,
   },
 
-  gradient: {
-    backgroundColor: '$colorBase',
-    height: '$viewOffset / 2',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    shadowColor: '$colorBase',
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    zIndex: 1,
-  },
-
-  gradientBottom: {
-    bottom: '$viewOffset * -0.5',
-    shadowOffset: { width: 0, height: -6 },
-  },
-
-  gradientTop: {
-    shadowOffset: { width: 0, height: 6 },
-    top: '$viewOffset * -0.5',
+  recordDelete: {
+    marginLeft: '$spaceM',
+    minWidth: '$spaceL',
   },
 });

@@ -7,7 +7,7 @@ export const updateSecret = async ({ hash, ...update } = {}, [state, setState]) 
 
   secret = { ...secret, ...update };
   await store.update({ hash }, secret);
-  setState({ ...state, secrets: await store.value });
+  setState({ ...state, secrets: await store.value, security: state.store.security });
 
   return secret;
 };

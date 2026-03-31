@@ -1,8 +1,10 @@
 export * from './BackupService';
+export * from './BiometricAuthService';
 export * from './NFCService';
 export * from './NotificationsService';
-export * from './PurchaseService';
+export * from './PublicSettingsService';
 export * from './SecurityService';
+export * from './mock';
 // export * from './_OnboardingService';
 // export * from './_VaultService';
 export * from './StorageService';

@@ -1,26 +1,26 @@
-const SLIDES = [
+import { L10N } from '../../modules';
+
+const getSlides = () => [
   {
-    title: 'Meet Alice and her Secret.',
-    message: 'Meet Alice, an individual with a valuable secret. Her clear desire: to securely and reliably protect it.',
+    title: L10N.ONBOARDING_1_TITLE,
+    message: L10N.ONBOARDING_1_MESSAGE,
     image: require('../../../assets/images/alice.png'),
   },
   {
-    title: 'Divide and Share with Friends.',
-    message: 'Alice securely shares and divides her secret with Bob and Eve. A seamless connection, no intermediaries.',
+    title: L10N.ONBOARDING_2_TITLE,
+    message: L10N.ONBOARDING_2_MESSAGE,
     image: require('../../../assets/images/bob-eve.png'),
   },
   {
-    title: 'Unlock secure Secret safely.',
-    message:
-      "Alice's divided secret is now safe. With just 2 out of the 3 parts held by Bob and Eve, Alice knows her treasure is secure.",
+    title: L10N.ONBOARDING_3_TITLE,
+    message: L10N.ONBOARDING_3_MESSAGE,
     image: require('../../../assets/images/alice-bob.png'),
   },
   {
-    title: 'Join Alice with split|Pass.',
-    message:
-      "It's your turn. Just like Alice, discover the security offered by split|Pass. Safeguard your secrets effortlessly and reliably.",
+    title: L10N.ONBOARDING_4_TITLE,
+    message: L10N.ONBOARDING_4_MESSAGE,
     image: require('../../../assets/images/alice-join.png'),
   },
 ];
 
-export { SLIDES };
+export { getSlides };

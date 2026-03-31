@@ -1,43 +1,39 @@
-import { Input } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React from 'react';
 
-const ALPHANUMERIC_REGEX = /^[a-zA-Z0-9]*$/;
+import { Input } from '../../design-system';
+
 const MASK_CHAR = '●';
 
-const InputMask = ({ value = '', onChange, ...props }) => {
-  const [reveal, setReveal] = useState(false);
+const InputMask = ({ value = '', onChange, revealed = false, ...props }) => {
+  const resolvedValue = `${value}`;
+  const maskedValue = resolvedValue.replace(/[^\s]/g, MASK_CHAR);
 
-  const formatedValue = value.replace(/\n/g, ' ');
+  const handleChange = (nextValue = '') => {
+    if (!onChange) return;
+    if (revealed) return onChange(nextValue);
+    if (!nextValue.length) return onChange('');
 
-  const handleChange = (nextValue = '') =>
-    onChange(
-      ALPHANUMERIC_REGEX.test(nextValue) || !nextValue.length
-        ? nextValue
-        : nextValue.length >= value.length
-        ? `${formatedValue}${nextValue.substring(formatedValue.length, nextValue.length)}`
-        : `${formatedValue.substring(0, nextValue.length)}`,
-    );
+    if (nextValue.length >= resolvedValue.length) {
+      return onChange(`${resolvedValue}${nextValue.substring(resolvedValue.length)}`);
+    }
 
-  const handlePressStart = () => setReveal(true);
-
-  const handlePressEnd = () => setReveal(false);
+    return onChange(resolvedValue.substring(0, nextValue.length));
+  };
 
   return (
     <Input
       {...props}
       autoCapitalize="none"
       autoCorrect={false}
-      value={reveal ? formatedValue : formatedValue.replace(/\S/g, MASK_CHAR)}
-      onTouchCancel={handlePressEnd}
-      onTouchEnd={handlePressEnd}
-      onTouchStart={handlePressStart}
+      value={revealed ? resolvedValue : maskedValue}
       onChange={handleChange}
     />
   );
 };
 
 InputMask.propTypes = {
+  revealed: PropTypes.bool,
   value: PropTypes.any,
   onChange: PropTypes.func,
 };

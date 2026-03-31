@@ -1,0 +1,11 @@
+:root {
+  --splitpass-shell-width: 304px;
+}
+
+body {
+  width: var(--splitpass-shell-width);
+}
+
+.popup {
+  margin: 0;
+}

@@ -1,46 +1,62 @@
-import { Icon, Pressable, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './SecretItem.style';
-import { DEFAULT_THEME, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import { useStore } from '../../contexts';
-import { ICON } from '../../modules';
+import { SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { Icon, Pressable, Text, View } from '../../design-system';
+import { ICON, L10N, resolveSecretIcon } from '../../modules';
 
-const SecretItem = ({ favorite = false, name, value = '', vault = 1, createdAt, onPress }) => {
-  const { settings: { theme } = {} } = useStore();
+const resolveSecretSubtitle = ({ type, website }) => {
+  if (website) return website;
 
+  switch (type) {
+    case SECRET_TYPE.PASSWORD:
+    case SECRET_TYPE.PASSWORD_SECURE:
+      return L10N.SECRET_TYPE_PASSWORD;
+    case SECRET_TYPE.PASSWORD_SHARD:
+      return L10N.SECRET_TYPE_SHARD;
+    case SECRET_TYPE.CARD:
+    case SECRET_TYPE.CARD_SECURE:
+      return L10N.SECRET_TYPE_CARD;
+    case SECRET_TYPE.CARD_SHARD:
+      return L10N.SECRET_TYPE_SHARD;
+    case SECRET_TYPE.SEED_PHRASE:
+    case SECRET_TYPE.SEED_PHRASE_SECURE:
+      return L10N.SECRET_TYPE_SEED_PHRASE;
+    case SECRET_TYPE.SEED_PHRASE_SHARD:
+      return L10N.SECRET_TYPE_SHARD;
+    default:
+      return undefined;
+  }
+};
+
+const SecretItem = ({ brand, favorite = false, kind, name, value = '', website, onPress }) => {
   const [type] = value;
+  const iconName = SHARD_TYPES.includes(type)
+    ? ICON.SHARD
+    : resolveSecretIcon({ brand, kind, name, type: SECURE_TYPES.includes(type) ? ICON.SECURE : ICON.QRCODE, website });
+  const subtitle = resolveSecretSubtitle({ type, website });
 
   return (
     <Pressable onPress={onPress}>
       <View row style={style.item}>
         <View style={[style.thumbnail, favorite && style.favorite]}>
-          <Icon
-            color={theme === DEFAULT_THEME || !favorite ? 'content' : 'base'}
-            name={SECURE_TYPES.includes(type) ? ICON.SECURE : SHARD_TYPES.includes(type) ? ICON.SHARD : ICON.QRCODE}
-          />
+          <Icon tone={favorite ? 'onAccent' : 'primary'} name={iconName} />
         </View>
 
-        <View flex>
-          <View gap row spaceBetween>
-            <Text bold ellipsizeMode style={style.name}>
-              {name}
+        <View flex style={style.body}>
+          <Text semibold ellipsizeMode="tail" numberOfLines={1} style={style.name}>
+            {name}
+          </Text>
+          {subtitle ? (
+            <Text ellipsizeMode="tail" numberOfLines={1} size="xs" tone="secondary" style={style.subtitle}>
+              {subtitle}
             </Text>
-            <Text color="content" tiny>
-              {new Intl.DateTimeFormat('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              }).format(createdAt)}
-            </Text>
-          </View>
+          ) : null}
+        </View>
 
-          <View row spaceBetween>
-            <Text color="contentLight" tiny>
-              {vault}
-            </Text>
-          </View>
+        <View style={style.action}>
+          <Icon name={ICON.DOTS} size="s" tone="secondary" />
         </View>
       </View>
     </Pressable>
@@ -48,12 +64,12 @@ const SecretItem = ({ favorite = false, name, value = '', vault = 1, createdAt, 
 };
 
 SecretItem.propTypes = {
+  brand: PropTypes.string,
   favorite: PropTypes.bool,
+  kind: PropTypes.string,
   name: PropTypes.string,
   value: PropTypes.string,
-  vault: PropTypes.string,
-  createdAt: PropTypes.any,
-  readAt: PropTypes.any,
+  website: PropTypes.string,
   onPress: PropTypes.func,
 };
 

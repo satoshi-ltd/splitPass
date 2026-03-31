@@ -1,52 +1,44 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  screen: {
-    height: '100%',
+  content: {
+    paddingTop: '$spaceS',
+    paddingBottom: '$spaceXXL * 3',
   },
 
-  scrollviewContentContainer: {
-    paddingBottom: '$viewOffset',
-    paddingHorizontal: '$viewOffset',
-    paddingTop: '$viewOffset * 4',
-    // gap: '$viewOffset',
+  header: {
+    gap: '$spaceS',
+    paddingBottom: '$spaceXS',
+  },
+
+  headerText: {
+    gap: '$spaceXXS',
+  },
+
+  headerSubtitle: {
+    maxWidth: '96%',
+  },
+
+  searchInputShell: {
+    backgroundColor: '$colorSurface',
+    borderRadius: 0,
+    minHeight: '$spaceXL',
+    width: '100%',
+  },
+
+  searchInput: {
+    borderRadius: 0,
+    fontSize: 16,
+    paddingHorizontal: '$spaceS',
+    paddingVertical: 0,
   },
 
   section: {
-    marginBottom: '$viewOffset',
+    marginBottom: '$spaceS',
   },
 
-  cardActions: {
-    gap: '$viewOffset / 2',
-  },
-
-  cardAction: {
-    flex: 1,
-  },
-
-  banner: {
-    gap: '$viewOffset/2',
-  },
-
-  bannerIcon: {
-    marginRight: '$viewOffset / 4',
-  },
-
-  bannerText: {
-    maxWidth: '85%',
-  },
-
-  bannerTitle: {},
-
-  vaults: {
-    flexWrap: 'wrap',
-    gap: '$viewOffset / 2',
-    marginTop: '$viewOffset / 2',
-  },
-
-  buttonAdd: {
-    position: 'absolute',
-    bottom: '$viewOffset',
-    right: '$viewOffset',
+  sectionLabel: {
+    marginBottom: '$spaceXS',
+    paddingLeft: '$spaceXXS',
   },
 });

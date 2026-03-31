@@ -4,13 +4,14 @@ export const DarkTheme = {
   $theme: 'dark',
 
   ...CommonTheme,
-
-  // -- palette ----------------------------------------------------------------
-  $colorBase: '#000000',
-  $colorBorder: '#222222',
-  $colorContent: '#ffffff',
-  $colorContentLight: '#999999',
-
-  // -- <Button> ---------------------------------------------------------------
-  $buttonChildrenColorSecondary: '$colorBase',
+  $colorBase: '#13100E',
+  $colorSurface: '#1D1815',
+  $colorBorder: '#40352F',
+  $colorContent: '#F7EFE8',
+  $colorContentLight: '#C2B6AC',
+  $colorLight: '#FBF4ED',
+  $colorDark: '#000',
+  $modalOverflowBackgroundColor: 'rgba(0, 0, 0, 0.6)',
+  $qrBackgroundColor: '$colorLight',
+  $qrColor: '#181310',
 };

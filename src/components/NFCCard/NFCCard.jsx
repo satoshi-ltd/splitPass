@@ -1,27 +1,61 @@
+/* global __DEV__ */
+
 import { useNavigation } from '@react-navigation/native';
-import { Action, Card, Icon, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 
 import { ANIMATION } from './NFCCard.constants';
 import { style } from './NFCCard.style';
-import { EVENT } from '../../App.constants';
-import { useStore } from '../../contexts';
-import { eventEmitter, findVault, ICON, L10N } from '../../modules';
-import { NFCService, SecurityService } from '../../services';
+import { EVENT, SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
+import { Button, Card, Icon, Pressable, ScrollView, Text, View } from '../../design-system';
+import { eventEmitter, ICON, L10N, openConfirm, QRParser, resolveSecretIcon } from '../../modules';
+import { isCardValue } from '../../modules/secretValueDisplay';
+import { buildNfcMockWrittenTag, NFC_MOCK_TAG, NFCService, SecurityService } from '../../services';
+import { getAppColors } from '../../theme';
 
-const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) => {
+const scannerColors = getAppColors('light');
+
+const getRecordMeta = ({ name = '', value = '' } = {}) => {
+  const [type] = value;
+  const secure = SECURE_TYPES.includes(type);
+  const shard = SHARD_TYPES.includes(type);
+  const card = [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type);
+  const decoded = !secure && !shard ? QRParser.decode(value) : '';
+  const icon = shard
+    ? ICON.SHARD
+    : card || isCardValue(decoded)
+    ? 'credit-card-outline'
+    : resolveSecretIcon({
+        name,
+        secret: decoded,
+        type: secure ? ICON.SECURE : ICON.QRCODE,
+      });
+
+  return {
+    icon,
+    subtitle: shard
+      ? L10N.SECRET_TYPE_SHARD
+      : card
+      ? L10N.SECRET_TYPE_CARD
+      : secure
+      ? L10N.SECRET_TYPE_SECURE
+      : L10N.SECRET,
+  };
+};
+
+const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRecord = () => {} }) => {
   const navigation = useNavigation();
   const opacity = useRef(new Animated.Value(0.8)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
   const translateY = useRef(new Animated.Value(8)).current;
-  const { settings: { theme } = {}, subscription } = useStore();
 
   const [active, setActive] = useState();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [tag, setTag] = useState();
+
+  const resolveErrorMessage = (error) => error?.message || error?.error || error || L10N.NFC_ACCESS_ERROR;
 
   useEffect(() => {
     setTag();
@@ -37,9 +71,24 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
     setTimeout(async () => {
       setError();
       if (readMode) {
-        const nextTag = await NFCService.read().catch(handleError);
+        const nextTag = await NFCService.read().catch((error) => {
+          const message = resolveErrorMessage(error);
+
+          if (__DEV__ && message === L10N.NFC_NOT_SUPPORTED) return NFC_MOCK_TAG;
+
+          return handleError(message);
+        });
         read(nextTag);
-      } else if (writeMode) setTag(await NFCService.write(writeMode.value, writeMode.name).catch(handleError));
+      } else if (writeMode) {
+        const nextTag = await NFCService.write(writeMode.value, writeMode.name).catch((error) => {
+          const message = resolveErrorMessage(error);
+
+          if (__DEV__ && message === L10N.NFC_NOT_SUPPORTED) return buildNfcMockWrittenTag(writeMode);
+
+          return handleError(message);
+        });
+        setTag(nextTag);
+      }
       setBusy(false);
     }, ANIMATION.duration);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,18 +98,26 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
     if (!tag) return;
 
     const { records = [] } = tag || {};
-    if (readMode && records.length === 1) handleRecord(records[0].value);
-    if (writeMode) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_NFC, title: L10N.SUCCESS });
+    if (readMode && records.length === 1) handleRecord(records[0]);
+    if (writeMode)
+      eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_NFC, title: L10N.SUCCESS, variant: 'accent' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tag]);
 
   const handleError = (error) => {
-    setError(error);
-    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
+    const message = resolveErrorMessage(error);
+
+    setError(message);
+    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: message, variant: 'accent' });
   };
 
-  const handleRecord = (record) => {
-    onRecord(record);
+  const handleRecord = ({ name, value }) => {
+    onRecord({
+      name,
+      onDelete: () => handleDelete({ name, value }),
+      tagId: tag?.info?.id,
+      value,
+    });
     setTag();
   };
 
@@ -71,119 +128,141 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
   };
 
   const handleDelete = ({ name, value }) => {
-    navigation.navigate('confirm', {
-      caption: L10N.DELETE_SECRET_CAPTION,
-      title: L10N.DELETE_SECRET_TITLE,
-      onAccept: async () => {
-        const nextTag = await NFCService.remove(value, name, tag.info.id).catch(handleError);
-        read(nextTag);
-        eventEmitter.emit(EVENT.NOTIFICATION, { title: L10N.SECRET_DELETED });
+    openConfirm(
+      navigation,
+      {
+        caption: L10N.NFC_REMOVE_CONFIRM,
+        title: L10N.DELETE_SECRET_TITLE,
       },
-    });
+      {
+        onAccept: async () => {
+          eventEmitter.emit(EVENT.NOTIFICATION, {
+            text: L10N.NFC_REMOVE_SCAN_AGAIN,
+            title: L10N.NFC_CARD,
+            variant: 'accent',
+          });
+          const nextTag = await NFCService.remove(value, name, tag.info.id).catch(handleError);
+          read(nextTag);
+          eventEmitter.emit(EVENT.NOTIFICATION, {
+            text: L10N.SECRET_DELETED,
+            title: L10N.SUCCESS,
+            variant: 'accent',
+          });
+        },
+      },
+    );
   };
 
   const read = async (nextTag) => {
-    const valid = await SecurityService.checkCard({ subscription, tag: nextTag }).catch();
+    const valid = await SecurityService.checkCard({ tag: nextTag }).catch();
 
-    if (!valid) return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_SPLITCARD_ERROR });
+    if (!valid)
+      return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_SPLITCARD_ERROR, variant: 'accent' });
     if (nextTag?.records?.length === 0)
-      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_CARD_IS_EMPTY });
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.NFC_CARD_IS_EMPTY, variant: 'accent' });
 
     setTag(nextTag);
   };
 
   const { info: { id, name, totalMemory, usedMemory } = {}, records = [] } = tag || {};
-  const color = id ? '#000' : 'contentLight';
-  const isPremium = !!subscription?.productIdentifier;
+  const cardTextColor = scannerColors.qrForeground;
+  const cardMetaColor = scannerColors.qrForeground;
+  const actionText = error ? L10N.SCANNER_NFC_ERROR : busy ? L10N.SCANNER_NFC_BUSY : tag ? '' : L10N.SCANNER_NFC_SCAN;
 
   return (
     <View align="center">
-      <View align="center" style={style.header}>
-        <Text align="center" bold secondary title style={[style.instructionsContent, style.text]}>
-          {L10N.SCANNER_NFC}
-        </Text>
-        <Text align="center" caption color="contentLight" style={style.instructionsContent}>
-          {L10N.SCANNER_NFC_CAPTION}
-        </Text>
-      </View>
+      {showHeader ? (
+        <View align="center" style={style.header}>
+          <Text align="center" bold size="xl" tone="secondary" style={[style.instructionsContent, style.text]}>
+            {L10N.SCANNER_NFC}
+          </Text>
+          <Text align="center" size="s" tone="secondary" style={style.instructionsContent}>
+            {L10N.SCANNER_NFC_CAPTION}
+          </Text>
+        </View>
+      ) : null}
 
       <Animated.View style={[{ opacity, transform: [{ translateY }, { scale }] }]}>
-        <Card spaceBetween color={id ? 'accent' : undefined} gap style={style.card} onPress={handleActive}>
+        <Card
+          spaceBetween
+          color={id ? 'accent' : undefined}
+          gap
+          style={[
+            style.card,
+            !id ? { backgroundColor: scannerColors.qrBackground, borderColor: scannerColors.border } : null,
+          ]}
+          onPress={handleActive}
+        >
           <View row spaceBetween style={style.cardRow}>
-            <Text color={color} bold subtitle>
-              split|Card
+            <Text bold size="l" style={{ color: cardTextColor }}>
+              split/Card
             </Text>
             {id && usedMemory > 0 && (
-              <View row style={style.cardMemory}>
-                <Icon color={color} caption name={ICON.MEMORY} />
-                <Text bold color={color} tiny>
+              <View row style={[style.cardMemory, { backgroundColor: scannerColors.qrBackground }]}>
+                <Icon name={ICON.MEMORY} size="s" style={{ color: cardTextColor }} />
+                <Text bold size="xs" style={{ color: cardTextColor }}>
                   {usedMemory > 0 ? `${parseInt((usedMemory * 100) / totalMemory)}%` : ''}
                 </Text>
               </View>
             )}
           </View>
 
-          <Icon color={color} name={ICON.NFC} style={style.cardIcon} />
+          <Icon name={ICON.NFC} style={[style.cardIcon, { color: cardTextColor }]} />
 
           <View row spaceBetween style={style.cardRow}>
-            <Text color={color} tiny style={style.cardEmbossedText}>
+            <Text size="xs" style={[style.cardEmbossedText, { color: cardMetaColor }]}>
               {(id || '0'.repeat(14)).match(/.{1,4}/g).join(' ')}
             </Text>
-            <Text color={color} tiny style={style.cardEmbossedText}>
+            <Text size="xs" style={[style.cardEmbossedText, { color: cardMetaColor }]}>
               {name || 'SATOSHI LTD.'}
             </Text>
           </View>
         </Card>
       </Animated.View>
 
-      <Action
-        caption
-        color={tag || busy ? 'contentLight' : theme === 'light' ? 'content' : undefined}
-        onPress={handleActive}
-        style={style.action}
-      >
-        {error
-          ? L10N.SCANNER_NFC_ERROR
-          : busy
-          ? L10N.SCANNER_NFC_BUSY
-          : tag
-          ? writeMode
-            ? L10N.SCANNER_NFC_WRITE
-            : L10N.SCANNER_NFC_RESCAN
-          : L10N.SCANNER_NFC_SCAN}
-      </Action>
+      {actionText ? (
+        <Pressable onPress={handleActive} style={style.action}>
+          <Text bold size="s" style={{ color: scannerColors.onInverse, opacity: 0.72 }}>
+            {actionText}
+          </Text>
+        </Pressable>
+      ) : null}
 
       {readMode && records.length ? (
         <View style={style.records}>
-          <View style={[style.gradient, style.gradientTop]} />
           <ScrollView>
-            {records.map(({ name, value }, index) => (
-              <Card key={index} row onPress={() => handleRecord(value)} style={style.record}>
-                <View row>
-                  <Icon name={ICON.NFC} />
-                  <Text bold caption ellipsizeMode style={style.recordName}>
-                    {name}
-                  </Text>
+            {records.map(({ name, value }, index) => {
+              const { icon, subtitle } = getRecordMeta({ name, value });
 
-                  {!isPremium ? (
-                    <Text color="contentLight" tiny>
-                      {findVault({ name })}
+              return (
+                <Pressable key={index} onPress={() => handleRecord({ name, value })} style={style.record}>
+                  <View style={[style.recordThumb, { backgroundColor: scannerColors.surface }]}>
+                    <Icon name={icon} style={{ color: scannerColors.qrForeground }} />
+                  </View>
+
+                  <View flex style={style.recordBody}>
+                    <Text semibold ellipsizeMode="tail" numberOfLines={1} style={{ color: scannerColors.onInverse }}>
+                      {name}
                     </Text>
-                  ) : (
-                    <Action
-                      tiny
-                      onPress={() => {
-                        handleDelete({ name, value });
-                      }}
-                    >
-                      Delete
-                    </Action>
-                  )}
-                </View>
-              </Card>
-            ))}
+                    <Text numberOfLines={1} size="xs" style={{ color: scannerColors.onInverse, opacity: 0.72 }}>
+                      {subtitle}
+                    </Text>
+                  </View>
+
+                  <Button
+                    icon={ICON.DATABASE_REMOVE}
+                    tone="onAccent"
+                    size="s"
+                    onPress={() => {
+                      handleDelete({ name, value });
+                    }}
+                    variant="outlined"
+                    style={style.recordDelete}
+                  />
+                </Pressable>
+              );
+            })}
           </ScrollView>
-          <View style={[style.gradient, style.gradientBottom]} />
         </View>
       ) : null}
     </View>
@@ -192,6 +271,7 @@ const NFCCard = ({ readMode = false, writeMode = false, onRecord = () => {} }) =
 
 NFCCard.propTypes = {
   readMode: PropTypes.bool,
+  showHeader: PropTypes.bool,
   writeMode: PropTypes.shape({
     name: PropTypes.string,
     value: PropTypes.string,

@@ -1,4 +1,4 @@
-import { Card, Icon, Pressable, Text, View } from '@satoshi-ltd/nano-design';
+import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
@@ -9,26 +9,26 @@ import { useStore } from '../../../contexts';
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
   const { settings: { theme } = {} } = useStore();
 
-  const common = { color: color === 'accent' && theme !== DEFAULT_THEME ? 'base' : undefined };
+  const commonTone = color === 'accent' && theme !== DEFAULT_THEME ? 'onAccent' : 'primary';
 
   return (
     <Pressable onPress={onPress} style={style.container}>
       <Card color={color} spaceBetween style={style.content}>
         <View row>
-          <Icon {...common} name={icon} style={style.icon} />
-          <Text {...common} bold caption ellipsizeMode>
+          <Icon name={icon} style={style.icon} tone={commonTone} />
+          <Text bold ellipsizeMode="tail" numberOfLines={1} size="s" tone={commonTone}>
             {text}
           </Text>
         </View>
 
         <View>
           {caption && (
-            <Text {...common} caption>
+            <Text size="s" tone={commonTone}>
               {caption}
             </Text>
           )}
           {tiny && (
-            <Text color="contentLight" {...common} tiny>
+            <Text size="xs" tone="secondary">
               {tiny}
             </Text>
           )}

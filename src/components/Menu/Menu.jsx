@@ -1,9 +1,12 @@
-import { Menu as MenuBase } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import { Menu as MenuBase, Modal } from '../../design-system';
+
 const Menu = ({ route: { params: { options = [] } = {} } = {}, navigation = {} }) => (
-  <MenuBase options={options} onClose={navigation.goBack} />
+  <Modal onClose={navigation.goBack}>
+    <MenuBase options={options} onClose={navigation.goBack} />
+  </Modal>
 );
 
 Menu.displayName = 'Menu';

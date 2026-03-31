@@ -1,42 +1,53 @@
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Button, Icon, Pressable, View } from '@satoshi-ltd/nano-design';
-import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
+import PropTypes from 'prop-types';
 import React, { useState } from 'react';
-import StyleSheet from 'react-native-extended-stylesheet';
 
 import { style } from './App.style';
-import { Confirm, Logo, Menu } from './components';
+import { Logo, Menu } from './components';
 import { useStore } from './contexts';
-import { getNavigationTheme, ICON } from './modules';
-import {
-  Create,
-  Home,
-  Marketplace,
-  Onboarding,
-  Scanner,
-  Settings,
-  SplitCard,
-  Subscription,
-  Vault,
-  Viewer,
-} from './screens';
+import { Confirm, HeaderBackButton, Modal } from './design-system';
+import { consumeConfirmCallbacks, getNavigationTheme, L10N } from './modules';
+import { Language, Main, Marketplace, Onboarding, Passwords, Scanner, Unlock, Vault, Viewer } from './screens';
 
 const Stack = createNativeStackNavigator();
 
-const commonScreenOptions = (theme = 'light') => ({
-  headerBackground: () => <BlurView intensity={60} tint={theme} style={{ flex: 1 }} />,
+const ConfirmScreen = ({ route: { params: { callbackId, ...params } = {} } = {}, navigation: { goBack } = {} }) => {
+  const handleCancel = () => {
+    const { onCancel } = consumeConfirmCallbacks(callbackId);
+    goBack();
+    onCancel?.();
+  };
+
+  const handleAccept = () => {
+    const { onAccept } = consumeConfirmCallbacks(callbackId);
+    goBack();
+    onAccept?.();
+  };
+
+  return (
+    <Modal onClose={handleCancel}>
+      <Confirm accept={L10N.ACCEPT} cancel={L10N.CANCEL} {...params} onCancel={handleCancel} onAccept={handleAccept} />
+    </Modal>
+  );
+};
+
+ConfirmScreen.propTypes = {
+  navigation: PropTypes.any,
+  route: PropTypes.any,
+};
+
+const commonScreenOptions = () => ({
   headerBackVisible: false,
   headerShown: true,
-  headerTintColor: StyleSheet.value('$colorContent'),
-  headerTitle: () => <Logo forceTheme={theme} />,
+  headerTitle: () => <Logo />,
   headerTitleAlign: 'center',
-  headerTransparent: true,
+  headerTransparent: false,
 });
 
 export const Navigator = () => {
-  const { settings: { onboarded, theme } = {} } = useStore();
+  const { security: { configured, unlocked } = {}, settings: { onboarded, theme } = {} } = useStore();
   const [routeName, setRouteName] = useState('');
 
   const screenOptions = {
@@ -45,33 +56,18 @@ export const Navigator = () => {
     headerShown: false,
   };
   const screen = {
-    ...commonScreenOptions(theme),
+    ...commonScreenOptions(),
     headerLeft: ({ canGoBack = false }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const navigation = useNavigation();
 
       return canGoBack ? (
-        <Button
-          secondary={routeName === 'scanner'}
-          icon={ICON.BACK}
-          small
+        <HeaderBackButton
           onPress={navigation.goBack}
           style={style.buttonBack}
+          tone={routeName === 'scanner' ? 'onAccent' : 'primary'}
         />
       ) : null;
-    },
-    headerRight: () => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const navigation = useNavigation();
-
-      return (
-        <View row style={style.headerRight}>
-          <Button icon={ICON.ADD} rounded small squared onPress={() => navigation.navigate('create')} />
-          <Pressable onPress={() => navigation.navigate('settings')}>
-            <Icon name={ICON.SETTINGS} title />
-          </Pressable>
-        </View>
-      );
     },
   };
   const modal = {
@@ -80,35 +76,43 @@ export const Navigator = () => {
     presentation: 'transparentModal',
   };
 
+  const initialRouteName = !configured ? 'onboarding' : !unlocked ? 'unlock' : onboarded ? 'main' : 'onboarding';
+
   return (
     <NavigationContainer
       onStateChange={(state) => setRouteName(state.routes[state.index].name)}
-      theme={getNavigationTheme(routeName)}
+      theme={getNavigationTheme(theme)}
     >
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} translucent />
+      <StatusBar style={routeName === 'scanner' ? 'light' : 'dark'} translucent />
 
-      <Stack.Navigator initialRouteName={onboarded ? 'home' : 'onboarding'} screenOptions={screenOptions}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="home" component={Home} options={screen} />
+        <Stack.Screen name="passphrase" component={Unlock} options={{ headerShown: false }} />
+        <Stack.Screen name="unlock" component={Unlock} options={{ headerShown: false }} />
+        <Stack.Screen name="main" component={Main} options={{ headerShown: false }} />
         <Stack.Screen
           name="scanner"
           component={Scanner}
           options={{
             ...screen,
-            headerRight: undefined,
-            ...(theme === 'light' ? commonScreenOptions('dark') : undefined),
+            headerTitleAlign: 'left',
+            headerStyle: { backgroundColor: '#000000' },
+            headerTintColor: '#FFFFFF',
           }}
         />
-        <Stack.Screen name="settings" component={Settings} options={{ ...screen, headerRight: undefined }} />
-        <Stack.Screen name="splitcard" component={SplitCard} options={{ ...screen, headerRight: undefined }} />
+        <Stack.Screen
+          name="passwordGenerator"
+          component={Passwords}
+          options={{
+            ...screenOptions,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen name="language" component={Language} options={{ headerShown: false }} />
         <Stack.Screen name="marketplace" component={Marketplace} options={{ ...screen, headerRight: undefined }} />
         <Stack.Screen name="vault" component={Vault} options={screen} />
-        {/* Modal */}
-        <Stack.Screen name="create" component={Create} options={modal} />
-        <Stack.Screen name="subscription" component={Subscription} options={modal} />
-        <Stack.Screen name="viewer" component={Viewer} options={modal} />
-        {/* Wrapper */}
-        <Stack.Screen name="confirm" component={Confirm} options={modal} />
+        <Stack.Screen name="secret" component={Viewer} options={{ headerShown: false }} />
+        <Stack.Screen name="confirm" component={ConfirmScreen} options={modal} />
         <Stack.Screen name="menu" component={Menu} options={modal} />
       </Stack.Navigator>
     </NavigationContainer>

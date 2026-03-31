@@ -1,10 +1,10 @@
 import Constants from 'expo-constants';
-import { Platform } from 'react-native';
 
 const DEFAULT_THEME = 'light';
 
 const EVENT = {
   NOTIFICATION: 'notification',
+  PASSWORD_SELECTED: 'password-selected',
 };
 
 const FIELD = {
@@ -14,8 +14,6 @@ const FIELD = {
 
 const IS_EXPO = Constants.appOwnership === 'expo';
 
-const IS_WEB = Platform.OS === 'web';
-
 const SECRET_TYPE = {
   PASSWORD: '1',
   PASSWORD_SECURE: '2',
@@ -23,11 +21,14 @@ const SECRET_TYPE = {
   SEED_PHRASE: '4',
   SEED_PHRASE_SECURE: '5',
   SEED_PHRASE_SHARD: '6',
+  CARD: '7',
+  CARD_SECURE: '8',
+  CARD_SHARD: '9',
 };
 
-const SECURE_TYPES = [SECRET_TYPE.PASSWORD_SECURE, SECRET_TYPE.SEED_PHRASE_SECURE];
+const SECURE_TYPES = [SECRET_TYPE.PASSWORD_SECURE, SECRET_TYPE.SEED_PHRASE_SECURE, SECRET_TYPE.CARD_SECURE];
 
-const SHARD_TYPES = [SECRET_TYPE.PASSWORD_SHARD, SECRET_TYPE.SEED_PHRASE_SHARD];
+const SHARD_TYPES = [SECRET_TYPE.PASSWORD_SHARD, SECRET_TYPE.SEED_PHRASE_SHARD, SECRET_TYPE.CARD_SHARD];
 
 const STORAGE_DOMAIN = 'com.satoshi-ltd.splitpass';
 
@@ -122,7 +123,6 @@ export {
   EVENT,
   FIELD,
   IS_EXPO,
-  IS_WEB,
   SECRET_TYPE,
   READER_TYPE,
   SECURE_TYPES,

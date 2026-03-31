@@ -30,7 +30,7 @@ export class AsyncStorageAdapter {
     const { key } = this;
 
     try {
-      AsyncStorage.setItem(key, JSON.stringify(data));
+      await AsyncStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
       throw new Error(`${key} could not be saved correctly.`);
     }

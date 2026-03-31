@@ -1,0 +1,15 @@
+.splitpass-panel {
+  all: initial;
+  display: block;
+  box-sizing: border-box;
+  position: fixed;
+  top: var(--splitpass-panel-top, 12px);
+  left: var(--splitpass-panel-left, 12px);
+  z-index: 2147483647;
+  max-width: calc(100vw - 24px);
+  max-height: var(--splitpass-panel-max-height, calc(100vh - 24px));
+  overflow: auto;
+  box-shadow: 0 24px 64px rgba(24, 19, 16, 0.18);
+  color: #181310;
+  font-family: 'Doto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}

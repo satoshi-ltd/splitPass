@@ -1,0 +1,248 @@
+.splitpass-scanner-shell,
+.splitpass-scanner-shell * {
+  box-sizing: border-box;
+  font-family: 'Doto', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  font-feature-settings: normal !important;
+  font-kerning: normal !important;
+  font-optical-sizing: auto !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-indent: 0 !important;
+  text-shadow: none !important;
+  -webkit-text-security: none !important;
+}
+
+.splitpass-surface {
+  width: var(--splitpass-shell-width, 304px);
+  max-width: 100%;
+  padding: 16px;
+  border: 1px solid #eadfd5;
+  border-radius: 6px;
+  background: #fffbf7;
+}
+
+.splitpass-inline-button {
+  all: initial;
+  box-sizing: border-box;
+  position: fixed;
+  top: var(--splitpass-inline-top, -9999px);
+  left: var(--splitpass-inline-left, -9999px);
+  z-index: 2147483646;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent url('./assets/icon-extension.svg') center / 24px 24px no-repeat;
+  cursor: pointer;
+}
+
+.splitpass-inline-button:hover {
+  filter: brightness(0.98);
+}
+
+.splitpass-inline-button:focus-visible,
+.splitpass-close:focus-visible,
+.splitpass-button:focus-visible,
+.splitpass-passcode-input:focus-visible {
+  outline: 2px solid rgba(244, 106, 58, 0.28);
+  outline-offset: 2px;
+}
+
+.splitpass-panel-header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.splitpass-panel-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.splitpass-title {
+  margin: 0;
+  color: #f46a3a;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 32px;
+}
+
+.splitpass-subtitle {
+  margin: 0;
+  color: #6f635a;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.splitpass-close {
+  border: 0;
+  background: transparent;
+  color: #6f635a;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0;
+}
+
+.splitpass-stage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: #0f0c0a;
+  box-shadow: 0 18px 48px rgba(24, 19, 16, 0.08);
+}
+
+.splitpass-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #0f0c0a;
+  object-fit: cover;
+}
+
+.splitpass-stage-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.splitpass-frame {
+  width: 176px;
+  height: 176px;
+  border: 2px solid rgba(255, 252, 248, 0.92);
+  border-radius: 6px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.58);
+}
+
+.splitpass-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fffcf8;
+  text-align: center;
+}
+
+.splitpass-empty-title,
+.splitpass-empty-copy,
+.splitpass-caption,
+.splitpass-message {
+  margin: 0;
+}
+
+.splitpass-empty-title {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 24px;
+}
+
+.splitpass-empty-copy {
+  max-width: 240px;
+  margin-top: 12px;
+  color: rgba(255, 252, 248, 0.84);
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.splitpass-caption {
+  margin-top: 14px;
+  color: #6f635a;
+  font-size: 11px;
+  line-height: 14px;
+  text-align: center;
+}
+
+.splitpass-passcode {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid #e8ddd3;
+  border-radius: 6px;
+  background: #fffcf8;
+}
+
+.splitpass-passcode-label {
+  display: grid;
+  gap: 8px;
+  color: #6f635a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.splitpass-passcode-input {
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid #e8ddd3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #181310;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.splitpass-button {
+  min-height: 46px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.splitpass-button-primary {
+  margin-top: 0;
+  background: #f46a3a;
+  color: #ffffff;
+}
+
+.splitpass-button-secondary {
+  background: #fffcf8;
+  border-color: #e8ddd3;
+  color: #181310;
+}
+
+.splitpass-message {
+  margin-top: 14px;
+  color: #6f635a;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.splitpass-message-success {
+  color: #f46a3a;
+}
+
+.splitpass-message-warning {
+  color: #c27c00;
+}
+
+.splitpass-message-error {
+  color: #c62828;
+}
+
+.splitpass-hidden {
+  display: none !important;
+}

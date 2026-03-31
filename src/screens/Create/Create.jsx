@@ -1,171 +1,312 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { Button, Card, Icon, Input, Modal, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { KeyboardAvoidingView } from 'react-native';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
-import { EVENT, SECRET_TYPE } from '../../App.constants';
+import { EVENT } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { eventEmitter, ICON, isSeedPhrase, L10N, Cypher, QRParser } from '../../modules';
-import { PurchaseService } from '../../services';
+import { AppScreen, Button, Icon, Input, Pressable, Text, View } from '../../design-system';
+import {
+  deriveSecretVisual,
+  eventEmitter,
+  ICON,
+  isSeedPhrase,
+  isSeedPhraseCandidate,
+  L10N,
+  QRParser,
+} from '../../modules';
+import {
+  buildCardValue,
+  isCardNumber,
+  normalizeCardCvv,
+  normalizeCardExpire,
+  normalizeCardNumber,
+  parseCardValue,
+} from '../../modules/secretValueDisplay';
 
-const { PASSWORD, PASSWORD_ENCRYPTED, PASSWORD_SHARD, SEED_PHRASE, SEED_PHRASE_ENCRYPTED, SEED_PHRASE_SHARD } =
-  SECRET_TYPE;
-
-const Create = ({ navigation = {} }) => {
-  const { secrets, subscription, updateSubscription } = useStore();
+const Create = ({ navigation = {}, onComplete, route }) => {
+  const { createSecret } = useStore();
   const [form, setForm] = useState(DEFAULT_FORM);
-
-  const isPremium = !!subscription?.productIdentifier;
-
-  useFocusEffect(useCallback(() => setForm({ ...DEFAULT_FORM }), []));
+  const [revealSecret, setRevealSecret] = useState(false);
+  const hydrate = route?.params?.hydrate;
+  const onboarding = !!route?.params?.onboarding;
+  const hydrated = !!hydrate?.value;
+  const isCard = isCardNumber(form.secret);
+  const cardValue = isCard ? buildCardValue(form.secret, form.expire, form.cvv) : undefined;
 
   useEffect(() => {
-    setForm({ ...form, passcode: undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.split]);
+    if (hydrated || isCard || (!form.expire && !form.cvv)) return;
 
-  const handlePressContinue = () => {
-    const { name, passcode, secret, split = false } = form;
+    setForm((current) => (current.expire || current.cvv ? { ...current, cvv: undefined, expire: undefined } : current));
+  }, [form.cvv, form.expire, hydrated, isCard]);
 
-    const shardSecretsLength = secrets.filter((s) => [PASSWORD_SHARD, SEED_PHRASE_SHARD].includes(s.value[0])).length;
-    if (!isPremium && form.split && shardSecretsLength >= 2) {
-      return PurchaseService.getProducts()
-        .then((plans) => {
-          navigation.navigate('subscription', { plans });
-        })
-        .catch((error) => eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error }));
+  useEffect(() => {
+    if (!hydrate?.value) return;
+
+    const hydratedSecret = hydrate.secret || QRParser.decode(hydrate.value) || '••••••••';
+    const hydratedCard = parseCardValue(hydratedSecret);
+
+    setForm((current) => ({
+      ...current,
+      cvv: hydratedCard?.cvv,
+      expire: hydratedCard?.expire,
+      name: hydrate.name || current.name,
+      secret: hydratedCard?.number || hydratedSecret,
+      split: false,
+      website: hydrate.website || current.website,
+    }));
+  }, [hydrate]);
+
+  useEffect(() => {
+    const handlePasswordSelected = (secret) => {
+      if (!secret) return;
+      setForm((current) => ({ ...current, secret }));
+    };
+
+    eventEmitter.on(EVENT.PASSWORD_SELECTED, handlePasswordSelected);
+
+    return () => {
+      eventEmitter.off(EVENT.PASSWORD_SELECTED, handlePasswordSelected);
+    };
+  }, []);
+
+  const handlePressContinue = async () => {
+    const { cvv, expire, name, secret, split = false, website } = form;
+    const secretValue = isCard ? cardValue : secret;
+    const visual = deriveSecretVisual({ name, secret, website });
+
+    let values;
+
+    if (hydrated) {
+      values = [hydrate.value];
+    } else {
+      const qr = QRParser.encode(secretValue, isCard ? { type: 'card' } : false);
+      values = split ? QRParser.split(qr) : [qr];
     }
 
-    const qr = QRParser.encode(secret, !!passcode);
-    let values = split ? QRParser.split(qr) : [qr];
+    setForm({ ...DEFAULT_FORM });
 
-    values = values.map((qr, index) => {
-      const mustEncrypt = index === 0 && passcode;
-      if (!mustEncrypt) return qr;
+    if (split) {
+      navigation.navigate('secret', {
+        name,
+        readMode: true,
+        returnToMain: true,
+        values,
+        website,
+        ...visual,
+      });
+      return;
+    }
 
-      let [type, ...digits] = qr;
-      if (type === PASSWORD) type = PASSWORD_ENCRYPTED;
-      else if (type === SEED_PHRASE) type = SEED_PHRASE_ENCRYPTED;
-
-      return `${type}${Cypher.encrypt(digits.join(''), passcode)}`;
+    const persistedSecret = await createSecret({
+      brand: visual.brand,
+      cardNumber: isCard ? normalizeCardNumber(secret) : undefined,
+      cvv: isCard ? normalizeCardCvv(cvv) : undefined,
+      expire: isCard ? normalizeCardExpire(expire) : undefined,
+      kind: visual.kind,
+      name,
+      value: values[0],
+      website,
     });
 
-    PurchaseService.checkSubscription(subscription).then((activeSubscription) => {
-      if (!activeSubscription) {
-        updateSubscription({});
+    if (onComplete)
+      onComplete({
+        cardNumber: isCard ? normalizeCardNumber(secret) : undefined,
+        cvv: isCard ? normalizeCardCvv(cvv) : undefined,
+        expire: isCard ? normalizeCardExpire(expire) : undefined,
+        name,
+        values,
+        website,
+        ...visual,
+      });
+    else if (persistedSecret) {
+      eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
+      if (hydrated) {
+        navigation.navigate('main', { screen: 'secrets' });
+        return;
       }
-    });
 
-    navigation.goBack();
-
-    setTimeout(() => {
-      navigation.navigate('viewer', { name, values });
-    }, 10);
+      navigation.navigate('secret', {
+        brand: persistedSecret.brand,
+        hash: persistedSecret.hash,
+        kind: persistedSecret.kind,
+        name: persistedSecret.name,
+        returnToMain: true,
+        values: [persistedSecret.value],
+        website: persistedSecret.website,
+      });
+    }
   };
 
-  const fieldProps = { row: true, spaceBetween: true, style: style.field };
+  const handleSecretChange = (nextSecret = '') => {
+    const compact = `${nextSecret}`.replace(/\s/g, '');
+    const secret = compact && /^\d+$/.test(compact) ? normalizeCardNumber(nextSecret) : nextSecret;
 
-  const { passcode = '' } = form;
-  const isValid = !!form.name && !!form.secret && (form.split || passcode.length === 0 || form.passcode?.length === 6);
+    setForm((current) => ({ ...current, secret }));
+  };
+
+  const secretIsSeed = !isCard && (isSeedPhrase(form.secret) || isSeedPhraseCandidate(form.secret));
+  const isValidSecret = hydrated ? true : isCard ? !!cardValue : !!form.secret;
+  const isValid = !!form.name && isValidSecret;
+  const header = (
+    <View style={style.header}>
+      <Text bold size="xl" tone="accent">
+        {hydrated ? L10N.SAVE_SECRET : onboarding ? L10N.FIRST_SECRET : L10N.NEW_SECRET}
+      </Text>
+      <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+        {L10N.NEW_SECRET_SUBTITLE}
+      </Text>
+    </View>
+  );
 
   return (
-    <Modal gap onClose={navigation.goBack}>
-      <Text align="center" secondary bold title>
-        {L10N.NEW_SECRET}
-      </Text>
-
-      <Card outlined style={style.cardForm}>
-        <View {...fieldProps}>
-          <Text bold tiny>
-            {L10N.NAME}
-          </Text>
-          <Input
-            align="right"
-            autoFocus
-            placeholder={L10N.NAME_PLACEHOLDER}
-            value={form.name}
-            onChange={(name) => setForm({ ...form, name })}
-            style={style.input}
-          />
-        </View>
-
-        <View style={style.separator} />
-
-        <View {...fieldProps}>
-          <Text bold tiny>
-            {L10N.SECRET}
-          </Text>
-          <InputMask
-            align="right"
-            multiline
-            placeholder={L10N.SECRET_PLACEHOLDER}
-            value={form.secret}
-            onChange={(secret) => setForm({ ...form, secret })}
-            contextMenuHidden
-            style={style.input}
-          />
-        </View>
-
-        {isSeedPhrase(form.secret) && (
-          <View row style={style.hint}>
-            <Icon name={ICON.INFO} />
-            <Text tiny>{L10N.SEED_PHRASE_DETECTED}</Text>
-          </View>
-        )}
-
-        <View style={style.separator} />
-
-        <View {...fieldProps}>
-          <Text tiny style={style.caption}>
-            {L10N.SHARD_EXPLANATION}
-            <Text bold tiny>
-              {L10N.SHARD_EXPLANATION_NUMBER}
+    <KeyboardAvoidingView behavior="padding" style={style.keyboardAvoid}>
+      <AppScreen
+        contentContainerStyle={style.content}
+        header={header}
+        headerContainerStyle={style.headerContainer}
+        headerSafeAreaStyle={style.headerSafeArea}
+      >
+        <View style={style.form}>
+          <View style={style.fieldBox}>
+            <Text semibold size="s" style={style.fieldLabel}>
+              {L10N.NAME}
             </Text>
-            {L10N.SHARD_EXPLANATION_GUARDIANS}
-          </Text>
-          <Switch checked={form.split} onChange={(split) => setForm({ ...form, split })} />
+            <Input
+              autoFocus
+              containerStyle={style.inputShell}
+              placeholder={L10N.NAME_PLACEHOLDER}
+              value={form.name}
+              onChange={(name) => setForm({ ...form, name })}
+              style={style.inputField}
+            />
+          </View>
+
+          <View style={style.fieldBox}>
+            <Text semibold size="s" style={style.fieldLabel}>
+              {L10N.SECRET}
+            </Text>
+            <InputMask
+              blurOnSubmit={!secretIsSeed}
+              containerStyle={[style.inputShell, secretIsSeed && style.inputShellMultiline]}
+              contextMenuHidden
+              editable={!hydrated}
+              keyboardType={isCard ? 'number-pad' : undefined}
+              maxLength={isCard ? 19 : undefined}
+              multiline={secretIsSeed}
+              numberOfLines={secretIsSeed ? 3 : 1}
+              placeholder={L10N.SECRET_PLACEHOLDER}
+              revealed={revealSecret}
+              style={[style.inputField, secretIsSeed && style.inputFieldMultiline]}
+              value={form.secret}
+              onChange={handleSecretChange}
+              actions={
+                <>
+                  <Pressable
+                    onPress={() => setRevealSecret((current) => !current)}
+                    style={[
+                      style.inputActionButton,
+                      secretIsSeed && style.inputActionButtonMultiline,
+                      !form.secret && style.inputActionButtonDisabled,
+                    ]}
+                  >
+                    <Icon name={revealSecret ? ICON.EYE_OFF : ICON.EYE} tone="secondary" size="s" />
+                  </Pressable>
+                  {!hydrated && !isCard ? (
+                    <Pressable
+                      onPress={() => navigation.navigate('passwordGenerator', { picker: true })}
+                      style={[style.inputActionButton, secretIsSeed && style.inputActionButtonMultiline]}
+                    >
+                      <Icon name={ICON.CREATE_PASSWORD} tone="accent" size="s" />
+                    </Pressable>
+                  ) : null}
+                </>
+              }
+            />
+          </View>
+
+          {isCard ? (
+            <View row style={style.cardDetailsRow}>
+              <View style={style.cardDetailField}>
+                <Text semibold size="s" style={style.fieldLabel}>
+                  {L10N.EXPIRE}
+                </Text>
+                <InputMask
+                  containerStyle={style.inputShell}
+                  editable={!hydrated}
+                  keyboardType="number-pad"
+                  maxLength={5}
+                  placeholder={L10N.EXPIRE_PLACEHOLDER}
+                  revealed={revealSecret}
+                  style={style.inputField}
+                  value={form.expire}
+                  onChange={(expire) => setForm((current) => ({ ...current, expire: normalizeCardExpire(expire) }))}
+                />
+              </View>
+
+              <View style={[style.cardDetailField, style.cardDetailFieldCompact]}>
+                <Text semibold size="s" style={style.fieldLabel}>
+                  {L10N.CVV}
+                </Text>
+                <InputMask
+                  containerStyle={style.inputShell}
+                  editable={!hydrated}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  placeholder={L10N.CVV_PLACEHOLDER}
+                  revealed={revealSecret}
+                  style={style.inputField}
+                  value={form.cvv}
+                  onChange={(cvv) => setForm((current) => ({ ...current, cvv: normalizeCardCvv(cvv) }))}
+                />
+              </View>
+            </View>
+          ) : null}
+
+          <View style={style.fieldBox}>
+            <Text semibold size="s" style={style.fieldLabel}>
+              {L10N.WEBSITE}
+            </Text>
+            <Input
+              autoCapitalize="none"
+              autoCorrect={false}
+              containerStyle={style.inputShell}
+              keyboardType="url"
+              placeholder={L10N.WEBSITE_PLACEHOLDER}
+              value={form.website}
+              onChange={(website) => setForm({ ...form, website })}
+              style={style.inputField}
+            />
+          </View>
+
+          {!hydrated ? (
+            <View row align="center" style={style.recoveryRow}>
+              <Switch checked={form.split} onChange={(split) => setForm({ ...form, split })} />
+              <Text size="s" style={style.caption}>
+                {L10N.SHARD_EXPLANATION}
+                <Text semibold size="s">
+                  {L10N.SHARD_EXPLANATION_NUMBER}
+                </Text>
+                {L10N.SHARD_EXPLANATION_GUARDIANS}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
-        {!form.split && (
-          <>
-            <View style={style.separator} />
-
-            <View {...fieldProps}>
-              <View style={style.caption}>
-                <Text bold tiny>
-                  {L10N.PASSCODE}
-                </Text>
-                <Text color="contentLight" tiny>
-                  {L10N.PASSCODE_HINT}
-                </Text>
-              </View>
-              <InputMask
-                align="right"
-                editable={!form.split}
-                keyboard="numeric"
-                maxLength={6}
-                placeholder={L10N.PASSCODE_PLACEHOLDER}
-                value={form.passcode}
-                onChange={(passcode) => setForm({ ...form, passcode })}
-                style={[style.input, style.inputPasscode]}
-              />
-            </View>
-          </>
-        )}
-      </Card>
-
-      <Button disabled={!isValid} secondary onPress={handlePressContinue} style={style.button}>
-        {L10N.CONTINUE}
-      </Button>
-    </Modal>
+        <Button disabled={!isValid} size="l" variant="primary" onPress={handlePressContinue} style={style.button}>
+          {L10N.CONTINUE}
+        </Button>
+      </AppScreen>
+    </KeyboardAvoidingView>
   );
 };
 
 Create.propTypes = {
   navigation: PropTypes.any,
+  onComplete: PropTypes.func,
+  route: PropTypes.any,
 };
 
 export { Create };

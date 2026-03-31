@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 192" role="img" aria-label="SplitPass icon">
+  <g fill="#f46a3a">
+    <circle cx="30" cy="146" r="10" />
+    <circle cx="30" cy="170" r="10" />
+    <circle cx="54" cy="122" r="10" />
+    <circle cx="78" cy="98" r="10" />
+    <circle cx="102" cy="74" r="10" />
+    <circle cx="126" cy="26" r="10" />
+    <circle cx="126" cy="50" r="10" />
+  </g>
+  <g fill="#181310">
+    <circle cx="156" cy="26" r="10" />
+    <circle cx="180" cy="26" r="10" />
+    <circle cx="204" cy="26" r="10" />
+    <circle cx="228" cy="26" r="10" />
+    <circle cx="156" cy="50" r="10" />
+    <circle cx="228" cy="50" r="10" />
+    <circle cx="156" cy="74" r="10" />
+    <circle cx="228" cy="74" r="10" />
+    <circle cx="156" cy="98" r="10" />
+    <circle cx="180" cy="98" r="10" />
+    <circle cx="204" cy="98" r="10" />
+    <circle cx="228" cy="98" r="10" />
+    <circle cx="156" cy="122" r="10" />
+    <circle cx="156" cy="146" r="10" />
+  </g>
+</svg>

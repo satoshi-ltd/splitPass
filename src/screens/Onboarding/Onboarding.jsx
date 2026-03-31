@@ -1,20 +1,18 @@
-import { Button, Pagination, ScrollView, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
 import React, { useRef, useState } from 'react';
-import { SafeAreaView, useWindowDimensions } from 'react-native';
-import { Image } from 'react-native';
+import { Image, useWindowDimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SLIDES } from './Onboarding.constants';
+import { getSlides } from './Onboarding.constants';
 import { style } from './Onboarding.style';
-import { useStore } from '../../contexts';
+import { Button, Pagination, ScrollView, Text, View } from '../../design-system';
 import { L10N } from '../../modules';
-import { NotificationsService } from '../../services';
 
 const Onboarding = ({ navigation }) => {
   const scrollviewRef = useRef(null);
-  const { updateSettings } = useStore();
   const { width } = useWindowDimensions();
+  const slides = getSlides();
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -29,13 +27,11 @@ const Onboarding = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    await updateSettings({ onboarded: true });
-    NotificationsService.init();
-    navigation.reset({ index: 0, routes: [{ name: 'home' }] });
+    navigation.navigate('passphrase', { mode: 'setup' });
   };
 
   const spaceXL = StyleSheet.value('$spaceXL');
-  const lastSlide = currentIndex === SLIDES.length - 1;
+  const lastSlide = currentIndex === slides.length - 1;
   const slideSize = width - spaceXL * 2;
 
   return (
@@ -50,14 +46,14 @@ const Onboarding = ({ navigation }) => {
         snapToInterval={width}
         onScroll={handleScroll}
       >
-        {SLIDES.map(({ image, message, title }, index) => (
+        {slides.map(({ image, message, title }, index) => (
           <View key={index} style={[style.slide, { width }]}>
             <Image
               resizeMode="contain"
               source={image}
               style={[style.image, { height: slideSize * 1.2, width: slideSize }]}
             />
-            <Text secondary bold title>
+            <Text bold size="xl" tone="secondary">
               {title}
             </Text>
             <Text>{message}</Text>
@@ -66,9 +62,13 @@ const Onboarding = ({ navigation }) => {
       </ScrollView>
 
       <View row style={style.footer}>
-        <Pagination currentIndex={currentIndex} length={SLIDES.length} />
+        <Pagination currentIndex={currentIndex} length={slides.length} />
 
-        <Button secondary={lastSlide} onPress={lastSlide ? handleSubmit : handleNext} style={style.button}>
+        <Button
+          variant={lastSlide ? 'primary' : 'secondary'}
+          onPress={lastSlide ? handleSubmit : handleNext}
+          style={style.button}
+        >
           {lastSlide ? L10N.START : L10N.NEXT}
         </Button>
       </View>

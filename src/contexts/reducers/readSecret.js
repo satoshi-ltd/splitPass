@@ -5,9 +5,9 @@ export const readSecret = async ({ hash } = {}, [state, setState]) => {
   let secret = await store.findOne({ hash });
   if (!secret) return undefined;
 
-  secret = { ...secret, readAt: new Date() };
+  secret = { ...secret, readAt: new Date().toISOString() };
   await store.update({ hash }, secret);
-  setState({ ...state, memories: await store.value });
+  setState({ ...state, secrets: [...(store.value || [])], security: state.store.security });
 
   return secret;
 };

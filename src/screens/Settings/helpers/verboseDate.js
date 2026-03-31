@@ -1,2 +1,3 @@
-export const verboseDate = (date = new Date(), { locale = 'en-US', ...props } = {}) =>
-  date.toLocaleDateString ? date.toLocaleDateString(locale, props) : date;
+import { formatDateTime } from '../../../modules';
+
+export const verboseDate = (date = new Date(), { locale, ...props } = {}) => formatDateTime(date, locale, props);

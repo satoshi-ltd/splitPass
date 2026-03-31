@@ -1,11 +1,15 @@
-import { Platform } from 'react-native';
 import { Dimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const QR_FRAME_SIZE = 232;
+const MASK_SIDE_WIDTH = Math.max(0, (SCREEN_WIDTH - QR_FRAME_SIZE) / 2);
 
 export const style = StyleSheet.create({
   screen: {
     backgroundColor: '$scannerBackground',
     height: '100%',
+    paddingBottom: 0,
   },
 
   container: {
@@ -18,15 +22,22 @@ export const style = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: -1,
+    zIndex: 0,
   },
 
   background: {
     backgroundColor: '$scannerBackgroundOpacity',
+    zIndex: 1,
+  },
+
+  headerTabs: {
+    width: 128,
   },
 
   instructions: {
-    paddingBottom: '$viewOffset',
+    paddingBottom: '$spaceS',
+    paddingHorizontal: '$viewOffset',
+    paddingTop: '$spaceM',
   },
 
   instructionsContent: {
@@ -34,15 +45,22 @@ export const style = StyleSheet.create({
   },
 
   tabs: {
-    alignSelf: 'center',
-    marginBottom: '$viewOffset * 2',
-    marginTop: '$viewOffset * 3',
-    ...Platform.select({ web: { marginTop: '$viewOffset * 5' } }),
+    width: '100%',
   },
 
   section: {
     flex: 1,
     height: '100%',
+  },
+
+  stage: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  qrFrameStage: {
+    flex: 1,
+    width: '100%',
   },
 
   input: {
@@ -60,21 +78,98 @@ export const style = StyleSheet.create({
   },
 
   footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    padding: '$viewOffset',
-    backgroundColor: 'orange',
+    width: '100%',
+    zIndex: 1,
   },
 
-  cardOptions: {
-    gap: '$viewOffset / 2',
+  footerAccent: {
+    backgroundColor: '$colorAccent',
+  },
+
+  footerSafeArea: {
+    backgroundColor: '$colorAccent',
+  },
+
+  footerInner: {
+    paddingHorizontal: '$viewOffset',
+    paddingTop: '$spaceM',
+    paddingBottom: '$spaceXS',
+  },
+
+  footerReveal: {
+    marginBottom: '$spaceS',
+  },
+
+  footerMenuWrap: {
+    bottom: '$spaceXL + $spaceM',
+    position: 'absolute',
+    right: '$viewOffset',
+  },
+
+  footerMenuBackdrop: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
 
   // -- Scanner.QR (partial)
 
   // -- Scanner.NFC (partial)
   scannerNFC: {
-    maxHeight: `${Dimensions.get('window').height} * 0.65`,
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
     width: '100%',
+  },
+
+  scannerQR: {
+    flex: 1,
+    width: '100%',
+  },
+
+  scannerMask: {
+    backgroundColor: '$scannerBackgroundOpacity',
+    position: 'absolute',
+  },
+
+  maskTop: {
+    left: 0,
+    right: 0,
+    top: 0,
+    height: '31%',
+  },
+
+  maskMiddle: {
+    alignItems: 'center',
+    height: '$qrSize',
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: '31%',
+  },
+
+  maskSide: {
+    height: '$qrSize',
+    top: 0,
+    width: MASK_SIDE_WIDTH,
+  },
+
+  maskSideLeft: {
+    left: 0,
+  },
+
+  maskSideRight: {
+    right: 0,
+  },
+
+  maskBottom: {
+    bottom: 0,
+    left: 0,
+    right: 0,
+    top: '31%',
+    marginTop: '$qrSize',
   },
 });

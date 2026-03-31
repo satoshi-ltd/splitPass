@@ -54,7 +54,15 @@ export const NFCService = {
   read: async () =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      const { Ndef, NfcManager, NfcTech } = await NFCService.instance();
+      let instance;
+
+      try {
+        instance = await NFCService.instance();
+      } catch (error) {
+        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
+      }
+
+      const { Ndef, NfcManager, NfcTech } = instance;
 
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);
@@ -77,8 +85,16 @@ export const NFCService = {
   write: (value, name) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      const { Ndef, NfcManager, NfcTech } = await NFCService.instance();
+      let instance;
       let backupBytes;
+
+      try {
+        instance = await NFCService.instance();
+      } catch (error) {
+        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
+      }
+
+      const { Ndef, NfcManager, NfcTech } = instance;
 
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);
@@ -109,8 +125,16 @@ export const NFCService = {
   remove: (value, name, targetTagId) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
-      const { Ndef, NfcManager, NfcTech } = await NFCService.instance();
+      let instance;
       let backupBytes;
+
+      try {
+        instance = await NFCService.instance();
+      } catch (error) {
+        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
+      }
+
+      const { Ndef, NfcManager, NfcTech } = instance;
 
       try {
         await NfcManager.requestTechnology(NfcTech.Ndef);

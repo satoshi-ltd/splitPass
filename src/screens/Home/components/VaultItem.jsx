@@ -1,24 +1,24 @@
-import { Card, Icon, Pressable, Text, View } from '@satoshi-ltd/nano-design';
+import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './VaultItem.style';
-import { ICON } from '../../../modules';
+import { getVaultLabel, ICON, L10N } from '../../../modules';
 
 const VaultItem = ({ type, secrets = [], onPress }) => {
-  const color = !secrets.length ? 'contentLight' : undefined;
+  const tone = !secrets.length ? 'secondary' : 'primary';
 
   return (
     <Pressable onPress={secrets.length ? onPress : undefined} style={style.container}>
       <Card spaceBetween style={style.content}>
-        <Icon color={color} name={ICON[type]} title />
+        <Icon name={ICON[type]} size="xl" tone={tone} />
         <View>
-          <Text bold capitalize color={color} caption>
-            {type}
+          <Text bold size="s" tone={tone}>
+            {getVaultLabel(type)}
           </Text>
           <View row>
-            <Text color="contentLight" tiny>
-              {`${secrets.length} Items`}
+            <Text size="xs" tone="secondary">
+              {L10N.ITEMS_COUNT({ count: secrets.length })}
             </Text>
           </View>
         </View>

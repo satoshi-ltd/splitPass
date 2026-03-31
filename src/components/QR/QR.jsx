@@ -1,56 +1,70 @@
-import { Pressable, Text, View } from '@satoshi-ltd/nano-design';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
-import StyleSheet from 'react-native-extended-stylesheet';
+import QRCode from 'qrcode';
+import React, { useMemo } from 'react';
 import QRCodeStyled from 'react-native-qrcode-styled';
 import ViewShot from 'react-native-view-shot';
 
-import { calculatePieceSize } from './helpers';
+import { calculatePieceSize } from './helpers/calculatePieceSize';
 import { style } from './Qr.style';
-import { QRParser } from '../../modules';
+import { View } from '../../design-system';
+import { useApp } from '../../contexts';
 
-const QR = React.forwardRef(({ passcode = '', readMode = false, value = '', ...others }, ref) => {
-  const [reveal, setReveal] = useState(false);
+const QR = React.forwardRef(
+  ({ backgroundColor, className, containerStyle, foregroundColor, pieceBorderRadius = 4, size, value = '', ...others }, ref) => {
+    const { colors } = useApp();
+    const defaultPieceSize = calculatePieceSize(value);
+    const qrCodeSize = useMemo(() => {
+      if (!size || !value) return undefined;
 
-  const handlePressStart = () => setReveal(true);
+      try {
+        return QRCode.create(value, { errorCorrectionLevel: 'M' })?.modules?.size;
+      } catch {
+        return undefined;
+      }
+    }, [size, value]);
 
-  const handlePressEnd = () => setReveal(false);
+    const resolvedPieceSize = useMemo(() => {
+      if (!size || !qrCodeSize) return defaultPieceSize;
 
-  return (
-    <ViewShot ref={ref} options={{ format: 'png', quality: 1 }}>
-      <Pressable
-        {...others}
-        feedback={false}
-        onTouchCancel={readMode ? handlePressEnd : undefined}
-        onTouchEnd={readMode ? handlePressEnd : undefined}
-        onTouchMove={readMode ? handlePressEnd : undefined}
-        onTouchStart={readMode ? handlePressStart : undefined}
-        style={[style.container, others.className]}
-      >
-        <QRCodeStyled
-          color={StyleSheet.value('$qrColor')}
-          data={value}
-          isPiecesGlued
-          pieceSize={calculatePieceSize(value)}
-          pieceBorderRadius={4}
-        />
-        {reveal && (
-          <View align="center" style={style.secret}>
-            <Text align="center" bold caption>
-              {QRParser.decode(value, passcode)}
-            </Text>
-          </View>
-        )}
-      </Pressable>
-    </ViewShot>
-  );
-});
+      const availableSize = Math.max(size, qrCodeSize);
+      return Math.max(2, Math.min(defaultPieceSize, Math.floor(availableSize / qrCodeSize)));
+    }, [defaultPieceSize, qrCodeSize, size]);
+    const rawQrSize = qrCodeSize ? resolvedPieceSize * qrCodeSize : undefined;
+    const dimensionProps =
+      size && rawQrSize
+        ? {
+            height: size,
+            viewBox: `0 0 ${rawQrSize} ${rawQrSize}`,
+            width: size,
+          }
+        : null;
+
+    return (
+      <ViewShot ref={ref} options={{ format: 'png', quality: 1 }}>
+        <View {...others} style={[style.container, containerStyle, className]}>
+          <QRCodeStyled
+            backgroundColor={backgroundColor || colors.qrBackground}
+            color={foregroundColor || colors.qrForeground}
+            data={value}
+            isPiecesGlued
+            {...dimensionProps}
+            pieceBorderRadius={pieceBorderRadius}
+            pieceSize={resolvedPieceSize}
+          />
+        </View>
+      </ViewShot>
+    );
+  },
+);
 
 QR.displayName = 'QR';
 
 QR.propTypes = {
-  passcode: PropTypes.string,
-  readMode: PropTypes.bool,
+  backgroundColor: PropTypes.string,
+  containerStyle: PropTypes.any,
+  foregroundColor: PropTypes.string,
+  pieceBorderRadius: PropTypes.number,
+  size: PropTypes.number,
   value: PropTypes.string,
 };
 

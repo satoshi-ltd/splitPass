@@ -2,20 +2,25 @@ import PropTypes from 'prop-types';
 import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
 import StyleSheet from 'react-native-extended-stylesheet';
 
-import { StorageService } from '../services';
-import { DarkTheme, LightTheme } from '../theme';
+import { DEFAULT_THEME } from '../App.constants';
+import { detectDeviceLanguage, setLanguage } from '../modules';
+import { PublicSettingsService, StorageService } from '../services';
+import { resolveAppTheme } from '../theme';
 import { consolidate } from './modules';
 import {
   createSecret,
+  createSecrets,
   readSecret,
   updateSecret,
   deleteSecret,
   updateSettings,
-  updateSubscription,
   importBackup,
+  resetAppData,
+  setupSecurity,
+  unlockStore,
+  lockStore,
 } from './reducers';
 import { DEFAULTS, FILENAME } from './store.constants';
-import { DEFAULT_THEME } from '../App.constants';
 
 const StoreContext = createContext(`context:store`);
 
@@ -25,15 +30,21 @@ const StoreProvider = ({ children }) => {
   useLayoutEffect(() => {
     (async () => {
       const store = await new StorageService({ defaults: DEFAULTS, filename: FILENAME });
+      const publicSettings = await PublicSettingsService.load();
+      const preview = store.previewData;
+      const storedSettings = preview?.settings || publicSettings || DEFAULTS.settings;
+      const resolvedLanguage = storedSettings.language || detectDeviceLanguage();
+      const resolvedTheme = storedSettings.theme || DEFAULT_THEME;
 
-      const { theme } = await store.get('settings').value;
-      StyleSheet.build(theme === DEFAULT_THEME ? LightTheme : DarkTheme);
+      await setLanguage(resolvedLanguage);
+      StyleSheet.build(resolveAppTheme(resolvedTheme));
 
       setState({
+        ...DEFAULTS,
         store,
-        secrets: await store.get('secrets')?.value,
-        settings: await store.get('settings')?.value,
-        subscription: await store.get('subscription')?.value,
+        secrets: preview?.secrets || DEFAULTS.secrets,
+        settings: { ...DEFAULTS.settings, ...storedSettings, language: resolvedLanguage, theme: resolvedTheme },
+        security: store.security,
       });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -45,13 +56,17 @@ const StoreProvider = ({ children }) => {
         ...consolidate(state),
         // -- secret
         createSecret: (...props) => createSecret(...props, [state, setState]),
+        createSecrets: (...props) => createSecrets(...props, [state, setState]),
         readSecret: (...props) => readSecret(...props, [state, setState]),
         updateSecret: (...props) => updateSecret(...props, [state, setState]),
         deleteSecret: (...props) => deleteSecret(...props, [state, setState]),
         //
         updateSettings: (...props) => updateSettings(...props, [state, setState]),
-        updateSubscription: (...props) => updateSubscription(...props, [state, setState]),
         importBackup: (...props) => importBackup(...props, [state, setState]),
+        resetAppData: (...props) => resetAppData(...props, [state, setState]),
+        setupSecurity: (...props) => setupSecurity(...props, [state, setState]),
+        unlockStore: (...props) => unlockStore(...props, [state, setState]),
+        lockStore: (...props) => lockStore(...props, [state, setState]),
       }}
     >
       {state.store ? children : undefined}

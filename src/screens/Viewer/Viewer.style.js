@@ -1,50 +1,150 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  scrollView: {
-    marginLeft: '$viewOffset * -1',
-    marginRight: '$viewOffset * -1',
+  screen: {
+    backgroundColor: '$colorBase',
   },
 
-  item: {
-    alignSelf: 'flex-end',
+  headerSafeArea: {
+    backgroundColor: '$colorBase',
+  },
+
+  headerContainer: {
+    backgroundColor: '$colorBase',
+    paddingBottom: '$spaceM',
+  },
+
+  header: {
+    alignItems: 'center',
+    gap: '$spaceS',
+    minHeight: '$spaceXL',
+    paddingBottom: '$spaceXS',
+    position: 'relative',
+  },
+
+  headerAction: {
+    alignItems: 'center',
+    height: '$spaceL',
+    justifyContent: 'center',
+    width: '$spaceL',
+  },
+
+  headerText: {
     flex: 1,
-    justifyContent: 'flex-end',
+    gap: '$spaceXXS',
   },
 
-  name: {
-    marginTop: '$viewOffset',
+  website: {
+    color: '$colorContent',
+    maxWidth: '95%',
+    opacity: 0.72,
   },
 
-  caption: {
-    gap: '$viewOffset / 4',
-  },
-
-  shard: {
-    backgroundColor: '$qrBackgroundColor',
-    borderColor: '$qrColor',
-    borderRadius: '$borderRadius',
-    borderStyle: '$borderStyle',
-
+  menuWrap: {
     position: 'absolute',
-    borderWidth: '$viewOffset / 2',
-    color: '$qrColor',
-    height: '$qrSize / 3',
-    width: '$qrSize / 3',
-    top: '$qrSize / 2',
-    marginTop: '$viewOffset * -1.75',
+    right: 0,
+    top: '$spaceL',
+    zIndex: 20,
   },
 
-  buttonScanner: {
-    alignSelf: 'center',
-    marginBottom: '$viewOffset / 2',
-    width: '$qrSize',
+  menuBackdrop: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 10,
   },
 
-  index: {},
+  content: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingBottom: '$spaceM',
+    paddingHorizontal: 0,
+    paddingTop: '$spaceS',
+  },
 
-  cardOptions: {
-    gap: '$viewOffset / 2',
-    marginTop: '$viewOffset',
+  qrSection: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+
+  scrollView: {
+    width: '100%',
+  },
+
+  qrSlide: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: '$viewOffset',
+  },
+
+  qrShell: {
+    borderRadius: 0,
+  },
+
+  lockedQrShell: {
+    backgroundColor: '$qrBackgroundColor',
+    borderRadius: 0,
+    padding: 0,
+    position: 'relative',
+  },
+
+  lockedQrShellDark: {
+    backgroundColor: '$colorSurface',
+  },
+
+  lockedQrPreview: {
+    opacity: 0.22,
+  },
+
+  lockedQrPreviewDark: {
+    opacity: 1,
+  },
+
+  lockedQrOverlay: {
+    alignItems: 'center',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+
+  lockedQrIconWrap: {
+    alignItems: 'center',
+    backgroundColor: '$qrBackgroundColor',
+    height: '$spaceXXL',
+    justifyContent: 'center',
+    opacity: 0.82,
+    width: '$spaceXXL',
+  },
+
+  lockedQrIconWrapDark: {
+    backgroundColor: '$colorSurface',
+    opacity: 0.92,
+  },
+
+  shardBadge: {
+    marginTop: '$spaceS',
+  },
+
+  pagination: {
+    marginTop: '$spaceM',
+  },
+
+  footer: {
+    paddingHorizontal: '$viewOffset',
+    paddingTop: '$spaceM',
+  },
+
+  footerDark: {
+    backgroundColor: '$colorDark',
+  },
+
+  footerLight: {
+    backgroundColor: '$qrBackgroundColor',
   },
 });
