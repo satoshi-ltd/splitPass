@@ -1,8 +1,9 @@
 import { SECRET_TYPE } from '../../App.constants';
 import { Cypher, QRParser } from '../../modules';
 import { buildCardValue } from '../../modules/secretValueDisplay';
+import { buildTOTPURI } from '../../modules/totp';
 
-const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, CARD, CARD_SECURE } = SECRET_TYPE;
+const { PASSWORD, PASSWORD_SECURE, SEED_PHRASE, SEED_PHRASE_SECURE, CARD, CARD_SECURE, TOTP } = SECRET_TYPE;
 
 const MOCK_PASSCODE = '123456';
 
@@ -74,12 +75,29 @@ const createCardShardSecrets = (baseName, website, number, expire, cvv, extra = 
     website,
   }));
 
+const createTOTPSecret = (name, website, config = {}) => {
+  const value = buildTOTPURI(config);
+
+  return {
+    account: config.account,
+    algorithm: config.algorithm || 'SHA1',
+    digits: config.digits || 6,
+    issuer: config.issuer,
+    kind: 'totp',
+    name,
+    period: config.period || 30,
+    value: QRParser.encode(value, { type: TOTP }),
+    website,
+  };
+};
+
 export {
   createCardSecret,
   createCardShardSecrets,
   createLegacySecureCardSecret,
   createLegacySecureSecret,
   createShardSecrets,
+  createTOTPSecret,
   createWebsiteSecret,
   encodeSecret,
   MOCK_PASSCODE,
