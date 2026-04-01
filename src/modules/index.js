@@ -10,3 +10,4 @@ export * from './passwordGenerator';
 export * from './persistenceCrypto';
 export * from './QRParser';
 export * from './secretVisual';
+export * from './totp';

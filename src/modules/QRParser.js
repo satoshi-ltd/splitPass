@@ -4,6 +4,7 @@ import { SECRET_TYPE } from '../App.constants';
 import { bip39 } from './repositories/bip39';
 import { chars } from './repositories/chars';
 import { buildCardValue, parseCardValue } from './secretValueDisplay';
+import { isTOTPURI } from './totp';
 
 const {
   PASSWORD,
@@ -15,6 +16,7 @@ const {
   CARD,
   CARD_SECURE,
   CARD_SHARD,
+  TOTP,
 } = SECRET_TYPE;
 
 const CONFIG = {
@@ -24,7 +26,9 @@ const CONFIG = {
 
 const isTypeSeedPhrase = (type) => [SEED_PHRASE, SEED_PHRASE_SECURE, SEED_PHRASE_SHARD].includes(type);
 const isTypeCard = (type) => [CARD, CARD_SECURE, CARD_SHARD].includes(type);
+const isTypeTOTP = (type) => [TOTP].includes(type);
 const isCardTypeRequest = (type) => ['card', CARD, CARD_SECURE, CARD_SHARD].includes(type);
+const isTOTPTypeRequest = (type) => ['totp', TOTP].includes(type);
 
 const getConfig = (type) => CONFIG[isTypeSeedPhrase(type) ? 'seedPhrase' : 'password'];
 const PASSWORD_CONFIG = CONFIG.password;
@@ -120,7 +124,10 @@ export const QRParser = {
     let digits = Array.isArray(secret) ? secret.join(' ') : `${secret}`.trim();
     let type = secure ? PASSWORD_SECURE : PASSWORD;
 
-    if (isCardTypeRequest(requestedType)) {
+    if (isTOTPTypeRequest(requestedType) || isTOTPURI(digits)) {
+      type = TOTP;
+      digits = encodeWithConfig(digits, PASSWORD_CONFIG);
+    } else if (isCardTypeRequest(requestedType)) {
       type = secure ? CARD_SECURE : CARD;
       digits = encodeWithConfig(digits, PASSWORD_CONFIG);
     } else if (isSeedPhrase(digits)) {
@@ -150,6 +157,7 @@ export const QRParser = {
     const decoded = decodeWithConfig(digits, { regexp, set, join });
 
     if (isTypeCard(type) && type !== CARD_SHARD && !parseCardValue(decoded)) return undefined;
+    if (isTypeTOTP(type) && !isTOTPURI(decoded)) return undefined;
 
     return decoded;
   },
@@ -157,6 +165,7 @@ export const QRParser = {
   split: (qr = '', shares = 3) => {
     let [type, ...digits] = qr;
     if (type === CARD) return splitCardQr(qr, shares);
+    if (type === TOTP) return [];
 
     const { regexp, mask } = getConfig(type);
     type = isTypeSeedPhrase(type) ? SEED_PHRASE_SHARD : PASSWORD_SHARD;

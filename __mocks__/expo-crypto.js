@@ -116,7 +116,7 @@ const aesDecryptAsync = async (sealedData, key, options = {}) => {
 };
 
 const digest = async (algorithm, data) => {
-  const normalizedAlgorithm = `${algorithm}`.replace(/^SHA/i, 'sha').toLowerCase();
+  const normalizedAlgorithm = `${algorithm}`.replace(/^SHA/i, 'sha').replace(/-/g, '').toLowerCase();
   const value = createHash(normalizedAlgorithm).update(Buffer.from(data)).digest();
 
   return value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength);
@@ -130,7 +130,9 @@ module.exports = {
   aesDecryptAsync,
   aesEncryptAsync,
   CryptoDigestAlgorithm: {
+    SHA1: 'sha1',
     SHA256: 'sha256',
+    SHA512: 'sha512',
   },
   digest,
   getRandomBytes,
