@@ -20,6 +20,8 @@ const resolveSecretSubtitle = ({ type, website }) => {
       return L10N.SECRET_TYPE_CARD;
     case SECRET_TYPE.CARD_SHARD:
       return L10N.SECRET_TYPE_SHARD;
+    case SECRET_TYPE.TOTP:
+      return L10N.SECRET_TYPE_TOTP;
     case SECRET_TYPE.SEED_PHRASE:
     case SECRET_TYPE.SEED_PHRASE_SECURE:
       return L10N.SECRET_TYPE_SEED_PHRASE;

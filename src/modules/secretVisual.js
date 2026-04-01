@@ -67,7 +67,8 @@ const normalizeWords = (...values) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-const findServiceEntry = (haystack = '') => SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => haystack.includes(keyword)));
+const findServiceEntry = (haystack = '') =>
+  SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => haystack.includes(keyword)));
 
 const getHostname = (website = '') => {
   if (!website) return '';
@@ -96,6 +97,18 @@ const detectCardBrand = (digits = '') => {
 };
 
 const deriveSecretVisual = ({ name, secret, website } = {}) => {
+  const totp = parseTOTPURI(secret);
+  if (totp) {
+    const haystack = normalizeWords(name, totp.issuer, totp.account, website);
+    const matched = findServiceEntry(haystack);
+
+    return {
+      brand: matched?.brand,
+      icon: matched?.icon || 'shield-key-outline',
+      kind: 'totp',
+    };
+  }
+
   const digits = `${secret || ''}`.replace(/\D/g, '');
   if (digits.length >= 13 && digits.length <= 19 && digits.length === `${secret || ''}`.trim().length) {
     return {
@@ -118,6 +131,7 @@ const deriveSecretVisual = ({ name, secret, website } = {}) => {
 
 const resolveSecretIcon = ({ kind, brand, name, type, website } = {}) => {
   if (kind === 'card') return 'credit-card-outline';
+  if (kind === 'totp') return 'shield-key-outline';
   if (brand && SERVICE_ICON_MAP[brand]) return SERVICE_ICON_MAP[brand];
 
   const hostname = getHostname(website);
@@ -130,3 +144,4 @@ const resolveSecretIcon = ({ kind, brand, name, type, website } = {}) => {
 };
 
 export { deriveSecretVisual, resolveSecretIcon };
+import { parseTOTPURI } from './totp';

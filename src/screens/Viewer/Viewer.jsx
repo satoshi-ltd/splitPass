@@ -21,7 +21,7 @@ import {
   Text,
   View,
 } from '../../design-system';
-import { eventEmitter, ICON, L10N, openConfirm, QRParser } from '../../modules';
+import { eventEmitter, getTOTPState, ICON, isTOTPURI, L10N, openConfirm, parseTOTPURI, QRParser } from '../../modules';
 import {
   formatCardNumber,
   getMaskedCardValue,
@@ -73,6 +73,7 @@ const Viewer = ({ route, navigation = {} }) => {
   const [showPasscodeInput, setShowPasscodeInput] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [totpState, setTotpState] = useState();
 
   const currentValue = values[currentIndex] || values[0] || '';
   const [type] = currentValue;
@@ -103,6 +104,8 @@ const Viewer = ({ route, navigation = {} }) => {
   const footerSecret = revealed && decodedSecret ? decodedSecret : maskSecret(decodedSecret || '••••••••••••');
   const locked = is.secure && !passcode;
   const isCard = kind === 'card' || isCardType || isCardValue(decodedSecret);
+  const isTotp = kind === 'totp' || type === SECRET_TYPE.TOTP || (!isCard && isTOTPURI(decodedSecret));
+  const parsedTOTP = !locked && !is.shard ? parseTOTPURI(decodedSecret) : undefined;
   const cardValue = isCard ? parseCardValue(decodedSecret) : undefined;
   const footerCardValue = !cardValue
     ? undefined
@@ -113,7 +116,9 @@ const Viewer = ({ route, navigation = {} }) => {
         number: formatCardNumber(cardValue.number),
       }
     : getMaskedCardValue(cardValue.canonical);
-  const isSeed = !isCard && /\s/.test(decodedSecret);
+  const isSeed = !isCard && !isTotp && /\s/.test(decodedSecret);
+  const footerTotpCode = totpState?.code || '------';
+  const footerTotpCaption = totpState?.expiresIn ? L10N.TOTP_COUNTDOWN({ seconds: totpState.expiresIn }) : '';
   const createFlowShard = returnToMain && readMode && is.shard;
   const shardLabel = values.length > 1 ? `${L10N.SECRET_TYPE_SHARD} ${currentIndex + 1}` : L10N.SECRET_TYPE_SHARD;
   const lockedQrPreviewColors = useMemo(
@@ -137,6 +142,28 @@ const Viewer = ({ route, navigation = {} }) => {
   useEffect(() => {
     setPreviousReadAt(serializeRouteDate(route?.params?.readAt));
   }, [hash, route?.params?.readAt]);
+
+  useEffect(() => {
+    if (!isTotp || !parsedTOTP) {
+      setTotpState(undefined);
+      return;
+    }
+
+    let cancelled = false;
+
+    const syncCode = async () => {
+      const nextState = await getTOTPState(parsedTOTP);
+      if (!cancelled) setTotpState(nextState);
+    };
+
+    syncCode();
+    const timer = setInterval(syncCode, 1000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [isTotp, parsedTOTP]);
 
   const handleBack = () => {
     if (returnToMain) {
@@ -239,7 +266,7 @@ const Viewer = ({ route, navigation = {} }) => {
           text: L10N.FAVORITE,
         }
       : null,
-    !createFlowShard
+    !createFlowShard && !isTotp
       ? {
           icon: ICON.NFC,
           onPress: handleGoToNFCCard,
@@ -272,11 +299,14 @@ const Viewer = ({ route, navigation = {} }) => {
 
   const handleCopy = async () => {
     if (locked || is.shard) return;
-    const valueToCopy = is.shard ? currentValue : decodedSecret;
+    const valueToCopy = isTotp ? totpState?.code : is.shard ? currentValue : decodedSecret;
     if (!valueToCopy) return;
 
     await Clipboard.setStringAsync(valueToCopy);
-    eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_COPIED, title: L10N.SUCCESS });
+    eventEmitter.emit(EVENT.NOTIFICATION, {
+      text: isTotp ? L10N.OTP_CODE_COPIED : L10N.SECRET_COPIED,
+      title: L10N.SUCCESS,
+    });
   };
 
   const handleToggleReveal = () => {
@@ -313,9 +343,9 @@ const Viewer = ({ route, navigation = {} }) => {
         <Text bold size="xl" tone="accent">
           {name}
         </Text>
-        {website ? (
+        {website || (isTotp && parsedTOTP?.account) ? (
           <Text numberOfLines={1} size="l" tone="secondary" style={style.website}>
-            {website}
+            {website || parsedTOTP?.account}
           </Text>
         ) : null}
         {hash ? (
@@ -348,8 +378,8 @@ const Viewer = ({ route, navigation = {} }) => {
       <SecretFooterContent
         cardValue={footerCardValue}
         contrast={theme === 'dark' ? 'light' : 'dark'}
-        disableCopy={is.shard}
-        disableReveal={is.shard}
+        disableCopy={is.shard || (isTotp && !totpState?.code)}
+        disableReveal={is.shard || isTotp}
         isCard={isCard}
         isSeed={isSeed}
         mode={showPasscodeInput ? 'passcode' : is.shard ? 'shard' : 'value'}
@@ -365,8 +395,10 @@ const Viewer = ({ route, navigation = {} }) => {
         shardCaption={!createFlowShard ? L10N.SHARD_SCAN_CAPTION : undefined}
         shardLabel={shardLabel}
         showCopy={!createFlowShard}
-        showReveal={!createFlowShard}
-        value={footerSecret}
+        showReveal={!createFlowShard && !isTotp}
+        value={isTotp ? footerTotpCode : footerSecret}
+        valueCaption={isTotp ? footerTotpCaption : undefined}
+        valueVariant={isTotp ? 'totp' : 'default'}
       />
     </View>
   );

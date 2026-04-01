@@ -31,12 +31,15 @@ const SecretFooterContent = ({
   showMenu = false,
   showReveal = false,
   value = '',
+  valueCaption = '',
+  valueVariant = 'default',
 }) => {
   const { colors, theme } = useApp();
   const styles = useMemo(() => getStyles(colors, contrast), [colors, contrast]);
   const textTone = contrast === 'accent' ? 'onAccent' : 'onInverse';
   const contrastTone = contrast === 'accent' ? 'onAccent' : 'onInverse';
   const digitTone = contrast === 'accent' ? 'primary' : 'accent';
+  const totpTone = textTone;
   const confirmButtonTone =
     contrast === 'accent'
       ? theme === 'dark'
@@ -50,10 +53,11 @@ const SecretFooterContent = ({
   const contentLength = normalizedValue.replace(/\s+/g, ' ').length;
   const isPasscodeReady = passcodeValue.length === 6;
   const useTopAlignedRow = (isSeed || isCard) && actionCount > 0;
+  const isCompactValue = valueVariant === 'totp';
   const useTitleSize = !isSeed && !isCard && contentLength > 0 && contentLength <= (actionCount >= 2 ? 10 : 12);
   const useBodySize = isCard || (!isSeed && contentLength > (actionCount >= 2 ? 14 : 18));
   const useCaptionSize = isSeed || contentLength > (actionCount >= 2 ? 24 : 30);
-  const valueSize = useCaptionSize ? 's' : useTitleSize ? 'xl' : useBodySize ? undefined : 'l';
+  const valueSize = isCompactValue ? 'xl' : useCaptionSize ? 's' : useTitleSize ? 'xl' : useBodySize ? undefined : 'l';
   const valueTextStyle = useCaptionSize
     ? styles.valueTextDense
     : useBodySize
@@ -154,33 +158,51 @@ const SecretFooterContent = ({
             </View>
           ) : null}
         </View>
+      ) : isCompactValue ? (
+        <View style={styles.totpWrap}>
+          <Text bold size="xl" style={styles.totpCodeText} tone={totpTone}>
+            {value}
+          </Text>
+          {valueCaption ? (
+            <Text size="s" style={[styles.valueCaption, styles.totpCaptionText]} tone={textTone}>
+              {valueCaption}
+            </Text>
+          ) : null}
+        </View>
       ) : (
-        <View style={styles.valueWrap}>
-          {getSecretValueTokens(value).map((token, index) => {
-            if (/^\s+$/.test(token)) {
-              return (
-                <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
-                  {token}
-                </Text>
-              );
-            }
-
-            return (
-              <View key={`${token}-${index}`} style={styles.valueGroup}>
-                {token.split('').map((character, charIndex) => (
-                  <Text
-                    key={`${character}-${index}-${charIndex}`}
-                    bold
-                    size={valueSize}
-                    style={valueTextStyle}
-                    tone={/\d/.test(character) ? digitTone : textTone}
-                  >
-                    {character}
+        <View style={styles.valueBlock}>
+          <View style={styles.valueWrap}>
+            {getSecretValueTokens(value).map((token, index) => {
+              if (/^\s+$/.test(token)) {
+                return (
+                  <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
+                    {token}
                   </Text>
-                ))}
-              </View>
-            );
-          })}
+                );
+              }
+
+              return (
+                <View key={`${token}-${index}`} style={styles.valueGroup}>
+                  {token.split('').map((character, charIndex) => (
+                    <Text
+                      key={`${character}-${index}-${charIndex}`}
+                      bold
+                      size={valueSize}
+                      style={valueTextStyle}
+                      tone={/\d/.test(character) ? digitTone : textTone}
+                    >
+                      {character}
+                    </Text>
+                  ))}
+                </View>
+              );
+            })}
+          </View>
+          {valueCaption ? (
+            <Text size="s" style={styles.valueCaption} tone={textTone}>
+              {valueCaption}
+            </Text>
+          ) : null}
         </View>
       )}
 
@@ -243,6 +265,8 @@ SecretFooterContent.propTypes = {
   showMenu: PropTypes.bool,
   showReveal: PropTypes.bool,
   value: PropTypes.string,
+  valueCaption: PropTypes.string,
+  valueVariant: PropTypes.oneOf(['default', 'totp']),
 };
 
 export { SecretFooterContent };

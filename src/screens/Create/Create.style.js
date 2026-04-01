@@ -30,6 +30,19 @@ export const style = StyleSheet.create({
     gap: '$spaceM',
   },
 
+  totpScannerCard: {
+    backgroundColor: '$colorSurface',
+    borderColor: '$colorBorder',
+    borderWidth: 1,
+    gap: '$spaceXS',
+    padding: '$spaceM',
+  },
+
+  totpScannerMeta: {
+    color: '$colorContent',
+    opacity: 0.72,
+  },
+
   fieldBox: {
     gap: '$spaceXS',
     paddingVertical: '$spaceXXS',
@@ -100,9 +113,17 @@ export const style = StyleSheet.create({
     flex: 1,
   },
 
+  actions: {
+    gap: '$spaceXS',
+    marginTop: '$spaceS',
+  },
+
   button: {
     borderRadius: '$borderRadius',
-    marginTop: '$spaceM',
     minHeight: '$spaceXL + $spaceS',
+  },
+
+  secondaryButton: {
+    minHeight: '$spaceXL',
   },
 });

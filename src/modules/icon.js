@@ -42,6 +42,7 @@ export const ICON = {
   SHIELD: 'shield-check-outline',
   SHARD: 'call-split',
   SHARE: 'share-outline',
+  TOTP: 'shield-key-outline',
   SHOPPING: 'shopping-outline',
 
   UNFAVORITE: 'star-outline',

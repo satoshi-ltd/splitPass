@@ -11,7 +11,16 @@ import { EVENT } from '../../App.constants';
 import { SecretFooterContent } from '../../components';
 import { useStore } from '../../contexts';
 import { Menu, Pressable, Screen, Tabs, Text, View } from '../../design-system';
-import { deriveSecretVisual, eventEmitter, ICON, L10N, QRParser } from '../../modules';
+import {
+  deriveSecretVisual,
+  eventEmitter,
+  getTOTPDisplayName,
+  ICON,
+  isTOTPURI,
+  L10N,
+  parseTOTPURI,
+  QRParser,
+} from '../../modules';
 import {
   formatCardNumber,
   getMaskedCardValue,
@@ -67,6 +76,21 @@ const Scanner = ({
 
   const handleScanned = (payload = '') => {
     const scannedValue = typeof payload === 'string' ? payload : payload?.value || '';
+    const externalTOTP =
+      typeof payload === 'string' && isTOTPURI(scannedValue) ? parseTOTPURI(scannedValue) : undefined;
+
+    if (externalTOTP) {
+      setScanning(false);
+      navigation.navigate('create', {
+        hydrate: {
+          name: getTOTPDisplayName(externalTOTP),
+          secret: scannedValue,
+          totp: externalTOTP,
+        },
+      });
+      return;
+    }
+
     const [type] = scannedValue;
 
     if (!Object.values(SECRET_TYPE).includes(type)) return;
@@ -114,6 +138,7 @@ const Scanner = ({
   const maskedFooterValue = maskSecret(decodedSecret || '••••••••••••');
   const isCard =
     [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type) || isCardValue(decodedSecret);
+  const isTotp = type === SECRET_TYPE.TOTP || (!isCard && isTOTPURI(decodedSecret));
   const cardValue = isCard ? parseCardValue(decodedSecret) : undefined;
   const footerCardValue = !cardValue
     ? undefined
@@ -133,6 +158,7 @@ const Scanner = ({
   const resolveFallbackName = (secretType) => {
     if ([SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(secretType))
       return L10N.SECRET_TYPE_CARD;
+    if (secretType === SECRET_TYPE.TOTP) return L10N.SECRET_TYPE_TOTP;
     if ([SECRET_TYPE.SEED_PHRASE, SECRET_TYPE.SEED_PHRASE_SECURE].includes(secretType))
       return L10N.SECRET_TYPE_SEED_PHRASE;
     if ([SECRET_TYPE.PASSWORD, SECRET_TYPE.PASSWORD_SECURE].includes(secretType)) return L10N.SECRET_TYPE_PASSWORD;
@@ -178,18 +204,28 @@ const Scanner = ({
         ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret, website: selectedItem?.website })
         : {};
     const persistedValue =
-      is.shard || !is.complete ? values[0] : QRParser.encode(decodedSecret, isCard ? { type: 'card' } : false);
+      is.shard || !is.complete
+        ? values[0]
+        : QRParser.encode(decodedSecret, isCard ? { type: 'card' } : isTotp ? { type: 'totp' } : false);
+    const parsedTOTP = isTotp ? parseTOTPURI(decodedSecret) : undefined;
     const savedSecret = await createSecret({
       brand: visual.brand,
+      account: parsedTOTP?.account,
+      algorithm: parsedTOTP?.algorithm,
       cardNumber: cardValue?.number,
       cvv: cardValue?.cvv,
+      digits: parsedTOTP?.digits,
       expire: cardValue?.expire,
+      issuer: parsedTOTP?.issuer,
       kind: is.shard
         ? 'shard'
         : [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type)
         ? 'card'
+        : isTotp
+        ? 'totp'
         : visual.kind,
-      name: selectedItem?.name || resolveFallbackName(type),
+      period: parsedTOTP?.period,
+      name: selectedItem?.name || (parsedTOTP ? getTOTPDisplayName(parsedTOTP) : resolveFallbackName(type)),
       value: persistedValue,
       website: selectedItem?.website,
     });

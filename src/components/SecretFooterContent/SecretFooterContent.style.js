@@ -60,6 +60,32 @@ const getStyles = (colors, contrast) => {
       gap: 0,
       minWidth: 0,
     },
+    totpWrap: {
+      alignItems: 'flex-start',
+      flex: 1,
+      gap: theme.spacing.xs,
+      justifyContent: 'center',
+      minWidth: 0,
+      padding: 0,
+    },
+    valueBlock: {
+      flex: 1,
+      gap: theme.spacing.xxs,
+      minWidth: 0,
+    },
+    valueCaption: {
+      opacity: 0.82,
+    },
+    totpCodeText: {
+      fontSize: theme.typography.sizes.title,
+      letterSpacing: 2,
+      lineHeight: theme.typography.sizes.title,
+    },
+    totpCaptionText: {
+      fontSize: theme.typography.sizes.caption,
+      lineHeight: theme.typography.sizes.caption,
+      opacity: 0.82,
+    },
     shardWrap: {
       flex: 1,
       justifyContent: 'center',
