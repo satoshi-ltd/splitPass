@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 
-import { inputPaddingHorizontal, inputPaddingVertical, inputTextHeight } from '../../theme/layout';
 import { theme } from '../../theme';
+import { inputPaddingHorizontal, inputPaddingVertical, inputTextHeight } from '../../theme/layout';
 
 export const getStyles = (colors) =>
   StyleSheet.create({
@@ -11,9 +11,9 @@ export const getStyles = (colors) =>
     },
     base: {
       color: colors.text,
-      fontFamily: 'font-default',
-      fontSize: theme.typography.sizes.body,
-      lineHeight: theme.typography.lineHeights.body,
+      fontFamily: 'font-semibold',
+      fontSize: theme.typography.sizes.input,
+      lineHeight: theme.typography.lineHeights.input,
       flex: 1,
       paddingHorizontal: inputPaddingHorizontal,
       paddingVertical: inputPaddingVertical,

@@ -26,15 +26,6 @@ export const getStyles = (colors) =>
       maxHeight: '92%',
       overflow: 'hidden',
     },
-    handle: {
-      alignSelf: 'center',
-      backgroundColor: colors.border,
-      borderRadius: theme.borderRadius.full,
-      height: 4,
-      marginBottom: theme.spacing.sm,
-      marginTop: theme.spacing.sm,
-      width: theme.spacing.xl,
-    },
     container: {
       alignSelf: 'stretch',
       paddingBottom: viewOffset,

@@ -65,7 +65,6 @@ const Modal = ({ children, gap, onClose }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'height' : 'padding'} style={styles.keyboardAvoid}>
           <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
             <SafeAreaView edges={['bottom']} style={styles.container}>
-              <View style={styles.handle} />
               <View gap={gap} style={styles.content}>
                 {children}
               </View>

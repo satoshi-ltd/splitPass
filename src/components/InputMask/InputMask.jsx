@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Input } from '../../design-system';
 
-const MASK_CHAR = '●';
+const MASK_CHAR = '*';
 
 const InputMask = ({ value = '', onChange, revealed = false, ...props }) => {
   const resolvedValue = `${value}`;
