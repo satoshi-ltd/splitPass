@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
 
 import { style } from './Unlock.style';
@@ -7,18 +7,20 @@ import { EVENT } from '../../App.constants';
 import { InputMask } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Button, Text, View } from '../../design-system';
-import { eventEmitter, ICON, L10N } from '../../modules';
+import { eventEmitter, L10N } from '../../modules';
 import { BiometricAuthService } from '../../services';
 
 const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } = {} } = {} }) => {
   const { importBackup, resetAppData, settings, setupSecurity, unlockStore, updateSettings } = useStore();
-  const [attemptedBiometric, setAttemptedBiometric] = useState(false);
   const [biometricInvalidated, setBiometricInvalidated] = useState(false);
   const [biometricSubmitting, setBiometricSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [form, setForm] = useState({ confirmPassphrase: '', passphrase: '' });
   const [submitting, setSubmitting] = useState(false);
   const biometricEnabled = mode === 'unlock' && !!settings?.biometricUnlockEnabled;
+  const isImport = mode === 'import';
+  const isSignIn = mode === 'unlock';
+  const isSetup = mode === 'setup';
 
   const resolveUnlockError = async (error) => {
     if (error?.code === 'ERR_PERSISTENCE_FORMAT') {
@@ -88,26 +90,18 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     }
   };
 
-  useEffect(() => {
-    if (!biometricEnabled || attemptedBiometric) return;
-
-    setAttemptedBiometric(true);
-    handleBiometricUnlock({ silent: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attemptedBiometric, biometricEnabled]);
-
   const title =
     mode === 'setup'
       ? L10N.ONBOARDING_MASTER_PASSPHRASE_TITLE
       : mode === 'import'
-      ? L10N.CONFIRM_IMPORT_ENCRYPTED
-      : L10N.UNLOCK_APP;
+      ? L10N.IMPORT_BACKUP
+      : L10N.SIGNIN_TITLE;
   const caption =
     mode === 'setup'
       ? L10N.ONBOARDING_MASTER_PASSPHRASE_MESSAGE
       : mode === 'import'
       ? L10N.UNLOCK_BACKUP_CAPTION
-      : L10N.UNLOCK_APP_CAPTION;
+      : L10N.SIGNIN_SUBTITLE;
 
   const handleSubmit = async () => {
     if (form.passphrase.length < 8) {
@@ -152,42 +146,34 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   return (
     <KeyboardAvoidingView behavior="padding" style={style.keyboardAvoid}>
       <AppScreen
-        contentContainerStyle={style.content}
+        contentContainerStyle={[style.content, isSignIn ? style.signInContent : null]}
         header={
           <View style={style.header}>
             <Text bold size="xl" tone="accent">
               {title}
             </Text>
-            <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
-              {caption}
-            </Text>
+            {caption ? (
+              <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+                {caption}
+              </Text>
+            ) : null}
           </View>
         }
         headerContainerStyle={style.headerContainer}
         headerSafeAreaStyle={style.headerSafeArea}
       >
-        <View style={style.form}>
-          {biometricEnabled ? (
-            <Button
-              icon={ICON.BIOMETRIC}
-              loading={biometricSubmitting}
-              size="l"
-              style={style.biometricButton}
-              variant="outlined"
-              onPress={() => handleBiometricUnlock({ silent: false })}
-            >
-              {L10N.BIOMETRIC_UNLOCK_BUTTON}
-            </Button>
-          ) : null}
-
-          <View style={style.fieldBox}>
-            <Text semibold size="s" style={style.fieldLabel}>
-              {L10N.MASTER_PASSPHRASE}
-            </Text>
+        <View style={[style.form, isSignIn ? style.signInForm : null, isSetup ? style.setupForm : null]}>
+          <View style={[style.fieldBox, isSignIn ? style.signInFieldBox : null]}>
+            {!isSignIn && !isSetup && !isImport ? (
+              <Text semibold size="s" style={style.fieldLabel}>
+                {L10N.MASTER_PASSPHRASE}
+              </Text>
+            ) : null}
             <InputMask
               autoFocus
               containerStyle={style.inputShell}
               placeholder={L10N.MASTER_PASSPHRASE_PLACEHOLDER}
+              showToggle
               style={style.inputField}
               value={form.passphrase}
               onChange={(passphrase) => setForm((current) => ({ ...current, passphrase }))}
@@ -196,12 +182,10 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
 
           {mode === 'setup' ? (
             <View style={style.fieldBox}>
-              <Text semibold size="s" style={style.fieldLabel}>
-                {L10N.MASTER_PASSPHRASE_CONFIRM}
-              </Text>
               <InputMask
                 containerStyle={style.inputShell}
-                placeholder={L10N.MASTER_PASSPHRASE_PLACEHOLDER}
+                placeholder={L10N.MASTER_PASSPHRASE_CONFIRM}
+                showToggle
                 style={style.inputField}
                 value={form.confirmPassphrase}
                 onChange={(confirmPassphrase) => setForm((current) => ({ ...current, confirmPassphrase }))}
@@ -209,14 +193,33 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
             </View>
           ) : null}
 
-          <Text size="s" tone="secondary" style={style.caption}>
-            {L10N.MASTER_PASSPHRASE_HINT}
-          </Text>
+          {isSetup ? (
+            <Text size="xs" tone="secondary" style={[style.caption, style.setupCaption]}>
+              {L10N.MASTER_PASSPHRASE_HINT}
+            </Text>
+          ) : null}
         </View>
 
-        <Button loading={submitting} size="l" style={style.button} variant="primary" onPress={handleSubmit}>
-          {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.CONFIRM_IMPORT_ENCRYPTED : L10N.UNLOCK}
+        <Button
+          loading={submitting}
+          size="l"
+          style={[style.button, isSignIn ? style.signInButton : null, isSetup ? style.setupButton : null, isImport ? style.importButton : null]}
+          variant="primary"
+          onPress={handleSubmit}
+        >
+          {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.IMPORT : L10N.UNLOCK}
         </Button>
+        {biometricEnabled ? (
+          <Button
+            loading={biometricSubmitting}
+            size="l"
+            style={style.biometricSecondaryButton}
+            variant="outlined"
+            onPress={() => handleBiometricUnlock({ silent: false })}
+          >
+            {L10N.BIOMETRIC_UNLOCK_BUTTON}
+          </Button>
+        ) : null}
       </AppScreen>
     </KeyboardAvoidingView>
   );

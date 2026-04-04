@@ -71,12 +71,17 @@ const Input = React.forwardRef(
       <TextInput
         ref={ref}
         autoCapitalize="none"
+        autoComplete="off"
         autoCorrect={false}
         blurOnSubmit={blurOnSubmit}
         editable={editable}
+        importantForAutofill="no"
         multiline={multiline}
         placeholder={resolvedPlaceholder}
         placeholderTextColor={resolvedPlaceholderTextColor}
+        smartInsertDelete={false}
+        spellCheck={false}
+        textContentType="none"
         underlineColorAndroid="transparent"
         value={value}
         onBlur={handleBlur}

@@ -3816,6 +3816,11 @@ expo-notifications@~55.0.13:
     expo-application "~55.0.10"
     expo-constants "~55.0.8"
 
+expo-screen-capture@~55.0.9:
+  version "55.0.9"
+  resolved "https://registry.yarnpkg.com/expo-screen-capture/-/expo-screen-capture-55.0.9.tgz#606c192feafc82500c0722c70729508aca7d1acc"
+  integrity sha512-/jNQfURm2A8mqsrCf25qztNhAa1lhPRWkEU5tS+u/hgEII/z8UdyGMz54lNoan3rYy3pFUxOxa0JhV29XKxiyA==
+
 expo-secure-store@~55.0.9:
   version "55.0.9"
   resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-55.0.9.tgz#c07006de1c0dfadf2e09fef047e3bb0a96f80ce3"

@@ -18,6 +18,6 @@ xcrun safari-web-extension-converter /Users/javi/git/splitPass/browser-extension
 ## Current implementation note
 
 - The main toolbar flow runs in the extension popup. That means camera access depends on the popup being allowed to use `getUserMedia`, and on the target Safari version exposing `BarcodeDetector` in that popup context.
-- Password fields also get an inline `SP` launcher. That inline camera flow depends on the current page being a secure context.
+- The in-page flow is a floating passwords panel. It does not use the camera and only appears when the vault is unlocked and the current domain has saved passwords.
 
 If either condition is missing, the UI will fail fast with a clear message instead of silently failing.

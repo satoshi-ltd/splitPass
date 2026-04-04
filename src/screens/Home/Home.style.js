@@ -33,6 +33,13 @@ export const style = StyleSheet.create({
     paddingVertical: 0,
   },
 
+  searchClearButton: {
+    alignItems: 'center',
+    height: '$spaceL',
+    justifyContent: 'center',
+    width: '$spaceL',
+  },
+
   section: {
     marginBottom: '$spaceS',
   },

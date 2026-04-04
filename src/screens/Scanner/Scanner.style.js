@@ -8,12 +8,16 @@ const MASK_SIDE_WIDTH = Math.max(0, (SCREEN_WIDTH - QR_FRAME_SIZE) / 2);
 export const style = StyleSheet.create({
   screen: {
     backgroundColor: '$scannerBackground',
-    height: '100%',
+    flex: 1,
     paddingBottom: 0,
   },
 
   container: {
-    height: '100%',
+    flex: 1,
+  },
+
+  keyboard: {
+    flex: 1,
   },
 
   camera: {
@@ -50,7 +54,6 @@ export const style = StyleSheet.create({
 
   section: {
     flex: 1,
-    height: '100%',
   },
 
   stage: {
@@ -78,6 +81,7 @@ export const style = StyleSheet.create({
   },
 
   footer: {
+    flexShrink: 0,
     width: '100%',
     zIndex: 1,
   },
@@ -91,9 +95,10 @@ export const style = StyleSheet.create({
   },
 
   footerInner: {
+    flexShrink: 0,
     paddingHorizontal: '$viewOffset',
     paddingTop: '$spaceM',
-    paddingBottom: '$spaceXS',
+    paddingBottom: '$spaceM',
   },
 
   footerReveal: {

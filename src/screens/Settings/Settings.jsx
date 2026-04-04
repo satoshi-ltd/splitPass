@@ -175,10 +175,10 @@ const Settings = ({ navigation = {} }) => {
     try {
       setActivity((prev) => ({ ...(prev || {}), handleLoadDemoSecrets: true }));
       const existing = new Set(
-        (secrets || []).map(({ name, value, website }) => `${name}::${value}::${website || ''}`),
+        (secrets || []).map(({ name, value, username }) => `${name}::${value}::${username || ''}`),
       );
       const pending = getDemoSecrets().filter(
-        ({ name, value, website }) => !existing.has(`${name}::${value}::${website || ''}`),
+        ({ name, value, username }) => !existing.has(`${name}::${value}::${username || ''}`),
       );
 
       await createSecrets(pending);

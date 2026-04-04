@@ -4,7 +4,7 @@ import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { style } from './Viewer.style';
 import { EVENT, READER_TYPE, SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
@@ -52,18 +52,18 @@ const Viewer = ({ route, navigation = {} }) => {
       favorite: propFavorite = false,
       kind,
       name,
+      notes,
       passcode: initialPasscode = '',
       readMode = false,
       returnToMain = false,
+      username,
       values = [],
-      website,
     } = {},
   } = route || {};
-  const insets = useSafeAreaInsets();
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
   const { colors, formatDate, theme } = useApp();
-  const { createSecret, deleteSecret, readSecret, updateSecret } = useStore();
+  const { createSecret, deleteSecret, readSecret, secrets, updateSecret } = useStore();
   const { width } = useWindowDimensions();
 
   const [favorite, setFavorite] = useState(propFavorite);
@@ -75,7 +75,11 @@ const Viewer = ({ route, navigation = {} }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [totpState, setTotpState] = useState();
 
+  const persistedSecret = hash ? (secrets || []).find((secret) => secret.hash === hash) : undefined;
   const currentValue = values[currentIndex] || values[0] || '';
+  const resolvedName = persistedSecret?.name ?? name;
+  const resolvedNotes = persistedSecret?.notes ?? notes;
+  const resolvedUsername = persistedSecret?.username ?? username;
   const [type] = currentValue;
   const isCardType = [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type);
 
@@ -120,6 +124,7 @@ const Viewer = ({ route, navigation = {} }) => {
   const footerTotpCode = totpState?.code || '------';
   const footerTotpCaption = totpState?.expiresIn ? L10N.TOTP_COUNTDOWN({ seconds: totpState.expiresIn }) : '';
   const createFlowShard = returnToMain && readMode && is.shard;
+  const canEditSecretValue = hash && !createFlowShard && !is.shard && !isCard && !isTotp && !is.secure && !locked;
   const shardLabel = values.length > 1 ? `${L10N.SECRET_TYPE_SHARD} ${currentIndex + 1}` : L10N.SECRET_TYPE_SHARD;
   const lockedQrPreviewColors = useMemo(
     () => ({ background: colors.qrBackground, foreground: colors.qrForeground }),
@@ -179,7 +184,14 @@ const Viewer = ({ route, navigation = {} }) => {
   };
 
   const handleSave = async () => {
-    const secret = await createSecret({ name, value: currentValue, website, kind, brand });
+    const secret = await createSecret({
+      name: resolvedName,
+      notes: resolvedNotes,
+      username: resolvedUsername,
+      value: currentValue,
+      kind,
+      brand,
+    });
     if (!secret) return;
 
     eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
@@ -225,6 +237,20 @@ const Viewer = ({ route, navigation = {} }) => {
     });
   };
 
+  const handleEditDetails = () => {
+    navigation.navigate('create', {
+      edit: {
+        editableSecret: !!canEditSecretValue,
+        hash,
+        name: resolvedName,
+        notes: resolvedNotes,
+        secret: canEditSecretValue ? decodedSecret : undefined,
+        username: resolvedUsername,
+      },
+    });
+    setShowMenu(false);
+  };
+
   const handleGoToScanner = () => {
     navigation.navigate('scanner', { readMode: true, values });
   };
@@ -232,7 +258,7 @@ const Viewer = ({ route, navigation = {} }) => {
   const handleGoToNFCCard = () => {
     navigation.navigate('scanner', {
       readerType: READER_TYPE.NFC,
-      writeMode: { name, value: currentValue },
+      writeMode: { name: resolvedName, notes: resolvedNotes, value: currentValue, username: resolvedUsername },
     });
   };
 
@@ -264,6 +290,13 @@ const Viewer = ({ route, navigation = {} }) => {
           icon: favorite ? ICON.FAVORITE : ICON.UNFAVORITE,
           onPress: handleFavorite,
           text: L10N.FAVORITE,
+        }
+      : null,
+    hash && !createFlowShard
+      ? {
+          icon: ICON.NEW_SECRET,
+          onPress: handleEditDetails,
+          text: L10N.EDIT_DETAILS,
         }
       : null,
     !createFlowShard && !isTotp
@@ -341,11 +374,11 @@ const Viewer = ({ route, navigation = {} }) => {
 
       <View style={style.headerText}>
         <Text bold size="xl" tone="accent">
-          {name}
+          {resolvedName}
         </Text>
-        {website || (isTotp && parsedTOTP?.account) ? (
+        {resolvedUsername || (isTotp && parsedTOTP?.account) ? (
           <Text numberOfLines={1} size="l" tone="secondary" style={style.website}>
-            {website || parsedTOTP?.account}
+            {resolvedUsername || parsedTOTP?.account}
           </Text>
         ) : null}
         {hash ? (
@@ -368,38 +401,36 @@ const Viewer = ({ route, navigation = {} }) => {
   );
 
   const footer = (
-    <View
-      style={[
-        style.footer,
-        theme === 'dark' ? style.footerLight : style.footerDark,
-        { paddingBottom: Math.max(insets.bottom, 16) },
-      ]}
-    >
-      <SecretFooterContent
-        cardValue={footerCardValue}
-        contrast={theme === 'dark' ? 'light' : 'dark'}
-        disableCopy={is.shard || (isTotp && !totpState?.code)}
-        disableReveal={is.shard || isTotp}
-        isCard={isCard}
-        isSeed={isSeed}
-        mode={showPasscodeInput ? 'passcode' : is.shard ? 'shard' : 'value'}
-        onCopy={handleCopy}
-        onPasscodeCancel={handlePasscodeCancel}
-        onPasscodeChange={(nextValue) => setPasscodeDraft(`${nextValue}`.replace(/\D/g, ''))}
-        onPasscodeSubmit={handlePasscodeSubmit}
-        onShardAction={!createFlowShard ? handleGoToScanner : undefined}
-        onToggleReveal={handleToggleReveal}
-        passcodePlaceholder={L10N.PASSCODE_PLACEHOLDER}
-        passcodeValue={passcodeDraft}
-        revealIcon={revealed ? ICON.EYE_OFF : ICON.EYE}
-        shardCaption={!createFlowShard ? L10N.SHARD_SCAN_CAPTION : undefined}
-        shardLabel={shardLabel}
-        showCopy={!createFlowShard}
-        showReveal={!createFlowShard && !isTotp}
-        value={isTotp ? footerTotpCode : footerSecret}
-        valueCaption={isTotp ? footerTotpCaption : undefined}
-        valueVariant={isTotp ? 'totp' : 'default'}
-      />
+    <View style={[style.footer, theme === 'dark' ? style.footerLight : style.footerDark]}>
+      <SafeAreaView edges={['bottom']} style={[style.footerSafeArea, theme === 'dark' ? style.footerLight : style.footerDark]}>
+        <View style={style.footerInner}>
+          <SecretFooterContent
+            cardValue={footerCardValue}
+            contrast={theme === 'dark' ? 'light' : 'dark'}
+            disableCopy={is.shard || (isTotp && !totpState?.code)}
+            disableReveal={is.shard || isTotp}
+            isCard={isCard}
+            isSeed={isSeed}
+            mode={showPasscodeInput ? 'passcode' : is.shard ? 'shard' : 'value'}
+            onCopy={handleCopy}
+            onPasscodeCancel={handlePasscodeCancel}
+            onPasscodeChange={(nextValue) => setPasscodeDraft(`${nextValue}`.replace(/\D/g, ''))}
+            onPasscodeSubmit={handlePasscodeSubmit}
+            onShardAction={!createFlowShard ? handleGoToScanner : undefined}
+            onToggleReveal={handleToggleReveal}
+            passcodePlaceholder={L10N.PASSCODE_PLACEHOLDER}
+            passcodeValue={passcodeDraft}
+            revealIcon={revealed ? ICON.EYE_OFF : ICON.EYE}
+            shardCaption={!createFlowShard ? L10N.SHARD_SCAN_CAPTION : undefined}
+            shardLabel={shardLabel}
+            showCopy={!createFlowShard}
+            showReveal={!createFlowShard && !isTotp}
+            value={isTotp ? footerTotpCode : footerSecret}
+            valueCaption={isTotp ? footerTotpCaption : undefined}
+            valueVariant={isTotp ? 'totp' : 'default'}
+          />
+        </View>
+      </SafeAreaView>
     </View>
   );
 

@@ -171,33 +171,39 @@ const SecretFooterContent = ({
         </View>
       ) : (
         <View style={styles.valueBlock}>
-          <View style={styles.valueWrap}>
-            {getSecretValueTokens(value).map((token, index) => {
-              if (/^\s+$/.test(token)) {
-                return (
-                  <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
-                    {token}
-                  </Text>
-                );
-              }
-
-              return (
-                <View key={`${token}-${index}`} style={styles.valueGroup}>
-                  {token.split('').map((character, charIndex) => (
-                    <Text
-                      key={`${character}-${index}-${charIndex}`}
-                      bold
-                      size={valueSize}
-                      style={valueTextStyle}
-                      tone={/\d/.test(character) ? digitTone : textTone}
-                    >
-                      {character}
+          {isSeed ? (
+            <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
+              {value}
+            </Text>
+          ) : (
+            <View style={styles.valueWrap}>
+              {getSecretValueTokens(value).map((token, index) => {
+                if (/^\s+$/.test(token)) {
+                  return (
+                    <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
+                      {token}
                     </Text>
-                  ))}
-                </View>
-              );
-            })}
-          </View>
+                  );
+                }
+
+                return (
+                  <View key={`${token}-${index}`} style={styles.valueGroup}>
+                    {token.split('').map((character, charIndex) => (
+                      <Text
+                        key={`${character}-${index}-${charIndex}`}
+                        bold
+                        size={valueSize}
+                        style={valueTextStyle}
+                        tone={/\d/.test(character) ? digitTone : textTone}
+                      >
+                        {character}
+                      </Text>
+                    ))}
+                  </View>
+                );
+              })}
+            </View>
+          )}
           {valueCaption ? (
             <Text size="s" style={styles.valueCaption} tone={textTone}>
               {valueCaption}
@@ -207,7 +213,7 @@ const SecretFooterContent = ({
       )}
 
       {showReveal || showCopy || showMenu ? (
-        <View style={styles.actionsWrap}>
+        <View style={[styles.actionsWrap, useTopAlignedRow && styles.actionsWrapTopAligned]}>
           {showReveal ? (
             <Button
               disabled={disableReveal}

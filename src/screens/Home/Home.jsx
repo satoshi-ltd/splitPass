@@ -2,11 +2,10 @@ import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 
 import { style } from './Home.style';
-import { SHARD_TYPES } from '../../App.constants';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { AppScreen, Input, Text, View } from '../../design-system';
-import { L10N } from '../../modules';
+import { AppScreen, Icon, Input, Pressable, Text, View } from '../../design-system';
+import { getSecretStrength, ICON, L10N } from '../../modules';
 
 const getSecretSortTime = ({ createdAt, readAt } = {}) => {
   const timestamp = new Date(readAt || createdAt || 0).getTime();
@@ -26,10 +25,19 @@ const Home = ({ navigation }) => {
     const needle = search.trim().toLowerCase();
     if (!needle) return sortedSecrets;
 
-    return sortedSecrets.filter(({ name = '', website = '' }) => `${name} ${website}`.toLowerCase().includes(needle));
+    return sortedSecrets.filter(({ name = '', username = '' }) => `${name} ${username}`.toLowerCase().includes(needle));
   }, [search, sortedSecrets]);
-  const mediocreCount = filteredSecrets.filter(({ value = '' }) => SHARD_TYPES.includes(value[0])).length;
-  const strongCount = filteredSecrets.length - mediocreCount;
+  const strongCount = filteredSecrets.filter((secret) => getSecretStrength(secret) === 'strong').length;
+  const mediocreCount = filteredSecrets.length - strongCount;
+  const summaryCountText = filteredSecrets.length === 0 ? L10N.HOME_SUBTITLE_EMPTY : `${filteredSecrets.length}`;
+  const summaryText =
+    filteredSecrets.length === 0
+      ? ''
+      : strongCount === filteredSecrets.length
+      ? L10N.HOME_SUBTITLE_ALL_STRONG
+      : mediocreCount === filteredSecrets.length
+      ? L10N.HOME_SUBTITLE_ALL_MEDIOCRE
+      : L10N.HOME_SUBTITLE_MIXED({ mediocreCount, strongCount });
   const favoriteSecrets = useMemo(
     () =>
       [...filteredSecrets]
@@ -50,7 +58,9 @@ const Home = ({ navigation }) => {
     return Object.fromEntries(
       Object.entries(grouped).map(([letter, items = []]) => [
         letter,
-        [...items].sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+        [...items].sort((a, b) =>
+          (a.name || '').localeCompare(b.name || '') || (a.username || '').localeCompare(b.username || ''),
+        ),
       ]),
     );
   }, [nonFavoriteSecrets]);
@@ -78,20 +88,19 @@ const Home = ({ navigation }) => {
         <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
           {L10N.HOME_SUBTITLE_INTRO}{' '}
           <Text bold size="l" tone="primary">
-            {filteredSecrets.length}
-          </Text>{' '}
-          {L10N.HOME_SUBTITLE_SECRETS},{' '}
-          <Text bold size="l" tone="primary">
-            {strongCount}
-          </Text>{' '}
-          {L10N.HOME_SUBTITLE_STRONG} {L10N.HOME_SUBTITLE_AND}{' '}
-          <Text bold size="l" tone="primary">
-            {mediocreCount}
-          </Text>{' '}
-          {L10N.HOME_SUBTITLE_MEDIOCRE}.
+            {summaryCountText}
+          </Text>
+          {summaryText ? ` ${summaryText}` : ''}
         </Text>
       </View>
       <Input
+        actions={
+          search ? (
+            <Pressable onPress={() => setSearch('')} style={style.searchClearButton}>
+              <Icon name={ICON.CLOSE} size="s" tone="secondary" />
+            </Pressable>
+          ) : null
+        }
         containerStyle={style.searchInputShell}
         placeholder={L10N.SEARCH}
         placeholderWhenBlur={L10N.SEARCH}
@@ -123,7 +132,7 @@ const Home = ({ navigation }) => {
                     name: secret.name,
                     readAt: serializeRouteDate(secret.readAt),
                     readMode: true,
-                    website: secret.website,
+                    username: secret.username,
                     values: [secret.value],
                   })
                 }
@@ -150,7 +159,7 @@ const Home = ({ navigation }) => {
                     name: secret.name,
                     readAt: serializeRouteDate(secret.readAt),
                     readMode: true,
-                    website: secret.website,
+                    username: secret.username,
                     values: [secret.value],
                   })
                 }

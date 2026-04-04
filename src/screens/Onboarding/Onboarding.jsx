@@ -46,17 +46,19 @@ const Onboarding = ({ navigation }) => {
         snapToInterval={width}
         onScroll={handleScroll}
       >
-        {slides.map(({ image, message, title }, index) => (
+        {slides.map(({ image, subtitle, title }, index) => (
           <View key={index} style={[style.slide, { width }]}>
             <Image
               resizeMode="contain"
               source={image}
               style={[style.image, { height: slideSize * 1.2, width: slideSize }]}
             />
-            <Text bold size="xl" tone="secondary">
+            <Text bold size="xl" tone="accent" style={style.title}>
               {title}
             </Text>
-            <Text>{message}</Text>
+            <Text bold size="l" tone="secondary" style={style.subtitle}>
+              {subtitle}
+            </Text>
           </View>
         ))}
       </ScrollView>
@@ -65,7 +67,7 @@ const Onboarding = ({ navigation }) => {
         <Pagination currentIndex={currentIndex} length={slides.length} />
 
         <Button
-          variant={lastSlide ? 'primary' : 'secondary'}
+          variant="primary"
           onPress={lastSlide ? handleSubmit : handleNext}
           style={style.button}
         >

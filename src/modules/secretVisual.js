@@ -1,3 +1,5 @@
+import { parseTOTPURI } from './totp';
+
 const SERVICE_ICON_CATALOG = [
   { brand: 'gmail', icon: 'email', keywords: ['gmail', 'google mail'] },
   { brand: 'google', icon: 'google', keywords: ['google', 'google workspace', 'google one', 'google drive'] },
@@ -16,6 +18,8 @@ const SERVICE_ICON_CATALOG = [
   { brand: 'whatsapp', icon: 'whatsapp', keywords: ['whatsapp', 'whatsapp com'] },
   { brand: 'slack', icon: 'slack', keywords: ['slack', 'slack com'] },
   { brand: 'youtube', icon: 'youtube', keywords: ['youtube', 'youtube premium', 'youtube com'] },
+  { brand: 'docker', icon: 'docker', keywords: ['docker', 'docker hub', 'docker com'] },
+  { brand: 'dribbble', icon: 'basketball', keywords: ['dribbble', 'dribbble com'] },
 
   { brand: 'netflix', icon: 'movie-open-outline', keywords: ['netflix', 'netflix family'] },
   { brand: 'spotify', icon: 'spotify', keywords: ['spotify', 'spotify family'] },
@@ -67,20 +71,19 @@ const normalizeWords = (...values) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-const findServiceEntry = (haystack = '') =>
-  SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => haystack.includes(keyword)));
+const hasKeywordMatch = (haystack = '', keyword = '') => {
+  const normalizedHaystack = ` ${normalizeWords(haystack)} `;
+  const normalizedKeyword = normalizeWords(keyword);
 
-const getHostname = (website = '') => {
-  if (!website) return '';
+  if (!normalizedKeyword) return false;
 
-  const normalized = website.startsWith('http://') || website.startsWith('https://') ? website : `https://${website}`;
-
-  try {
-    return new URL(normalized).hostname.replace(/^www\./, '').toLowerCase();
-  } catch {
-    return normalize(website);
-  }
+  return normalizedHaystack.includes(` ${normalizedKeyword} `);
 };
+
+const findServiceEntry = (haystack = '') =>
+  SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => hasKeywordMatch(haystack, keyword)));
+
+const findServiceEntryByBrand = (brand = '') => SERVICE_ICON_CATALOG.find(({ brand: entryBrand }) => entryBrand === normalize(brand));
 
 const detectCardBrand = (digits = '') => {
   if (!digits) return undefined;
@@ -96,10 +99,10 @@ const detectCardBrand = (digits = '') => {
   return 'card';
 };
 
-const deriveSecretVisual = ({ name, secret, website } = {}) => {
+const deriveSecretVisual = ({ name, secret } = {}) => {
   const totp = parseTOTPURI(secret);
   if (totp) {
-    const haystack = normalizeWords(name, totp.issuer, totp.account, website);
+    const haystack = normalizeWords(name, totp.issuer, totp.account);
     const matched = findServiceEntry(haystack);
 
     return {
@@ -118,8 +121,7 @@ const deriveSecretVisual = ({ name, secret, website } = {}) => {
     };
   }
 
-  const hostname = getHostname(website);
-  const haystack = normalizeWords(name, hostname);
+  const haystack = normalizeWords(name);
   const matched = findServiceEntry(haystack);
 
   return {
@@ -129,19 +131,21 @@ const deriveSecretVisual = ({ name, secret, website } = {}) => {
   };
 };
 
-const resolveSecretIcon = ({ kind, brand, name, type, website } = {}) => {
+const resolveSecretIcon = ({ kind, brand, name, type } = {}) => {
   if (kind === 'card') return 'credit-card-outline';
   if (kind === 'totp') return 'shield-key-outline';
-  if (brand && SERVICE_ICON_MAP[brand]) return SERVICE_ICON_MAP[brand];
 
-  const hostname = getHostname(website);
-  const haystack = normalizeWords(name, hostname);
+  const haystack = normalizeWords(name);
   const matched = findServiceEntry(haystack);
+  const persisted = findServiceEntryByBrand(brand);
+
+  if (persisted && (!haystack || matched?.brand === persisted.brand)) return persisted.icon;
 
   if (matched) return matched.icon;
+
+  if (!haystack && brand && SERVICE_ICON_MAP[brand]) return SERVICE_ICON_MAP[brand];
 
   return type;
 };
 
 export { deriveSecretVisual, resolveSecretIcon };
-import { parseTOTPURI } from './totp';

@@ -6,10 +6,11 @@ const DEFAULT_FORM = {
   expire: undefined,
   issuer: undefined,
   name: undefined,
+  notes: undefined,
   period: '30',
   secret: undefined,
-  split: true,
-  website: undefined,
+  split: false,
+  username: undefined,
 };
 
 export { DEFAULT_FORM };

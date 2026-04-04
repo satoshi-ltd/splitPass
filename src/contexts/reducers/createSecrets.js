@@ -3,14 +3,18 @@ import { UUID } from './modules';
 export const createSecrets = async (items = [], [state, setState]) => {
   const { store } = state;
   const pending = Array.isArray(items)
-    ? items.filter(Boolean).map(({ name, value, website, kind, brand, ...meta } = {}) => {
+    ? items.filter(Boolean).map((item = {}) => {
         const createdAt = new Date().toISOString();
+        const { name, value, username, notes, kind, brand, ...meta } = item;
+
+        delete meta.website;
 
         return {
           hash: UUID({ entity: 'secret', name, value, createdAt }),
           name,
           value,
-          website,
+          username,
+          notes,
           kind,
           brand,
           ...meta,

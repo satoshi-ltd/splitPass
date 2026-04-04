@@ -14,7 +14,10 @@ const ScannerNFC = ({ onRead = () => {}, onTag, writeMode = false }) => (
 ScannerNFC.propTypes = {
   onRead: PropTypes.func,
   onTag: PropTypes.func,
-  writeMode: PropTypes.oneOfType([PropTypes.bool, PropTypes.shape({ name: PropTypes.string, value: PropTypes.string })]),
+  writeMode: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.shape({ name: PropTypes.string, notes: PropTypes.string, value: PropTypes.string, username: PropTypes.string }),
+  ]),
 };
 
 export { ScannerNFC };

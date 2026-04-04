@@ -1,7 +1,60 @@
+import { SECRET_TYPE } from '../App.constants';
+import { QRParser } from './QRParser';
+
 const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
 const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const DIGITS = '0123456789';
 const SYMBOLS = '!@#$%^&*()-_=+[]{};:,.?';
+const NON_PASSWORD_STRONG_TYPES = [
+  SECRET_TYPE.PASSWORD_SHARD,
+  SECRET_TYPE.SEED_PHRASE,
+  SECRET_TYPE.SEED_PHRASE_SECURE,
+  SECRET_TYPE.SEED_PHRASE_SHARD,
+  SECRET_TYPE.CARD,
+  SECRET_TYPE.CARD_SECURE,
+  SECRET_TYPE.CARD_SHARD,
+  SECRET_TYPE.TOTP,
+];
+
+const countCharacterCategories = (value = '') =>
+  [/[a-z]/.test(value), /[A-Z]/.test(value), /\d/.test(value), /[^A-Za-z0-9\s]/.test(value)].filter(Boolean).length;
+
+const getTextStrength = (value = '') => {
+  const normalizedValue = `${value}`;
+  const length = normalizedValue.length;
+  const categories = countCharacterCategories(normalizedValue);
+  let score = 0;
+
+  if (length >= 8) score += 1;
+  if (length >= 12) score += 1;
+  if (length >= 16) score += 1;
+
+  if (categories >= 2) score += 1;
+  if (categories >= 3) score += 1;
+  if (categories === 4) score += 1;
+
+  if (/[a-z]/.test(normalizedValue) && /[A-Z]/.test(normalizedValue)) score += 1;
+  if (/\d/.test(normalizedValue) && /[^A-Za-z0-9\s]/.test(normalizedValue)) score += 1;
+
+  if (length < 8) return 'weak';
+  if (length < 10 && categories < 4) return 'weak';
+  if (length < 12 && categories < 3) return 'weak';
+
+  return score >= 6 ? 'strong' : 'weak';
+};
+
+const getSecretStrength = ({ value = '' } = {}) => {
+  const [type, ...digits] = `${value}`;
+  const encodedLength = digits.join('').length;
+
+  if (!type) return 'weak';
+  if (NON_PASSWORD_STRONG_TYPES.includes(type)) return 'strong';
+
+  if (type === SECRET_TYPE.PASSWORD) return getTextStrength(QRParser.decode(value) || '');
+  if (type === SECRET_TYPE.PASSWORD_SECURE) return encodedLength >= 20 ? 'strong' : 'weak';
+
+  return 'weak';
+};
 
 const getCrypto = () => {
   if (globalThis.crypto?.getRandomValues) return globalThis.crypto;
@@ -88,4 +141,4 @@ const getPasswordStrength = (input = {}) => {
   return 'weak';
 };
 
-export { clampConfig, generatePassword, getPasswordStrength };
+export { clampConfig, generatePassword, getPasswordStrength, getSecretStrength, getTextStrength };

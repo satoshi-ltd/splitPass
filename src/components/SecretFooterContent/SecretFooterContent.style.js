@@ -45,9 +45,10 @@ const getStyles = (colors, contrast) => {
     valueRow: {
       alignItems: 'center',
       flexDirection: 'row',
+      justifyContent: 'space-between',
       gap: theme.spacing.md,
       minHeight: theme.spacing.xxl + theme.spacing.md,
-      justifyContent: 'space-between',
+      width: '100%',
     },
     valueRowTopAligned: {
       alignItems: 'flex-start',
@@ -72,6 +73,11 @@ const getStyles = (colors, contrast) => {
       flex: 1,
       gap: theme.spacing.xxs,
       minWidth: 0,
+    },
+    seedValueText: {
+      flexShrink: 1,
+      minWidth: 0,
+      paddingBottom: theme.spacing.xs,
     },
     valueCaption: {
       opacity: 0.82,
@@ -101,6 +107,10 @@ const getStyles = (colors, contrast) => {
       flexDirection: 'row',
       gap: theme.spacing.sm,
       marginLeft: theme.spacing.md,
+    },
+    actionsWrapTopAligned: {
+      alignSelf: 'flex-start',
+      marginTop: theme.spacing.xxs,
     },
     valueGroup: {
       alignItems: 'center',

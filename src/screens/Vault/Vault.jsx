@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { style } from './Vault.style';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
-import { Input, Screen, Text, View } from '../../design-system';
-import { getVaultLabel, L10N } from '../../modules';
+import { Icon, Input, Pressable, Screen, Text, View } from '../../design-system';
+import { getVaultLabel, ICON, L10N } from '../../modules';
 
 const serializeRouteDate = (value) =>
   value && typeof value === 'object' && typeof value.toISOString === 'function' ? value.toISOString() : value;
@@ -17,15 +17,30 @@ const Vault = ({ navigation, route: { params: { type } = {} } }) => {
 
   return (
     <Screen gap style={style.screen}>
-      <Input placeholder={L10N.SEARCH} value={search} onChange={setSearch} style={style.input} />
+      <Input
+        actions={
+          search ? (
+            <Pressable onPress={() => setSearch('')} style={style.clearButton}>
+              <Icon name={ICON.CLOSE} size="s" tone="secondary" />
+            </Pressable>
+          ) : null
+        }
+        placeholder={L10N.SEARCH}
+        value={search}
+        onChange={setSearch}
+        style={style.input}
+      />
 
       <View>
         <Text bold size="l" tone="secondary">
           {getVaultLabel(type)}
         </Text>
         {secrets
-          .filter(({ name, vault }) => vault === type && (!search || name.includes(search)))
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .filter(
+            ({ name = '', username = '', vault }) =>
+              vault === type && (!search || `${name} ${username}`.toLowerCase().includes(search.toLowerCase())),
+          )
+          .sort((a, b) => a.name.localeCompare(b.name) || (a.username || '').localeCompare(b.username || ''))
           .map((secret = {}) => (
             <SecretItem
               key={secret.hash}
@@ -39,7 +54,7 @@ const Vault = ({ navigation, route: { params: { type } = {} } }) => {
                   name: secret.name,
                   readAt: serializeRouteDate(secret.readAt),
                   readMode: true,
-                  website: secret.website,
+                  username: secret.username,
                   values: [secret.value],
                 })
               }

@@ -20,6 +20,12 @@ export const style = StyleSheet.create({
   image: {
     marginBottom: '$spaceM',
   },
+  title: {
+    maxWidth: '90%',
+  },
+  subtitle: {
+    maxWidth: '90%',
+  },
 
   footer: {
     alignItems: 'center',

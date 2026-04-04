@@ -136,8 +136,7 @@ export const style = StyleSheet.create({
   },
 
   footer: {
-    paddingHorizontal: '$viewOffset',
-    paddingTop: '$spaceM',
+    flexShrink: 0,
   },
 
   footerDark: {
@@ -146,5 +145,15 @@ export const style = StyleSheet.create({
 
   footerLight: {
     backgroundColor: '$qrBackgroundColor',
+  },
+
+  footerSafeArea: {
+    flexShrink: 0,
+  },
+
+  footerInner: {
+    paddingBottom: '$spaceM',
+    paddingHorizontal: '$viewOffset',
+    paddingTop: '$spaceM',
   },
 });

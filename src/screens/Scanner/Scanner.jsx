@@ -84,6 +84,7 @@ const Scanner = ({
       navigation.navigate('create', {
         hydrate: {
           name: getTOTPDisplayName(externalTOTP),
+          notes: payload?.notes,
           secret: scannedValue,
           totp: externalTOTP,
         },
@@ -201,7 +202,7 @@ const Scanner = ({
 
     const visual =
       is.complete && decodedSecret
-        ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret, website: selectedItem?.website })
+        ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret })
         : {};
     const persistedValue =
       is.shard || !is.complete
@@ -226,8 +227,9 @@ const Scanner = ({
         : visual.kind,
       period: parsedTOTP?.period,
       name: selectedItem?.name || (parsedTOTP ? getTOTPDisplayName(parsedTOTP) : resolveFallbackName(type)),
+      notes: selectedItem?.notes,
+      username: selectedItem?.username,
       value: persistedValue,
-      website: selectedItem?.website,
     });
     if (!savedSecret) return;
 
@@ -306,7 +308,7 @@ const Scanner = ({
 
   return (
     <Screen disableScroll style={style.screen}>
-      <KeyboardAvoidingView behavior="padding">
+      <KeyboardAvoidingView behavior="padding" style={style.keyboard}>
         <View style={style.container}>
           {!is.modeNFC && <ScannerQR camera onRead={handleScanned} scanning={scanning} />}
 

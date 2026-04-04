@@ -11,4 +11,11 @@ export const style = StyleSheet.create({
   input: {
     backgroundColor: '$inputBackgroundColor',
   },
+
+  clearButton: {
+    alignItems: 'center',
+    height: '$spaceL',
+    justifyContent: 'center',
+    width: '$spaceL',
+  },
 });

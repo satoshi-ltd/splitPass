@@ -80,7 +80,7 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
         });
         read(nextTag);
       } else if (writeMode) {
-        const nextTag = await NFCService.write(writeMode.value, writeMode.name).catch((error) => {
+        const nextTag = await NFCService.write(writeMode.value, writeMode.name, writeMode.username, writeMode.notes).catch((error) => {
           const message = resolveErrorMessage(error);
 
           if (__DEV__ && message === L10N.NFC_NOT_SUPPORTED) return buildNfcMockWrittenTag(writeMode);
@@ -111,11 +111,13 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
     eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: message, variant: 'accent' });
   };
 
-  const handleRecord = ({ name, value }) => {
+  const handleRecord = ({ name, notes, value, username }) => {
     onRecord({
       name,
-      onDelete: () => handleDelete({ name, value }),
+      notes,
+      onDelete: () => handleDelete({ name, notes, value, username }),
       tagId: tag?.info?.id,
+      username,
       value,
     });
     setTag();
@@ -127,7 +129,7 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
     setTimeout(() => setActive(true), 300);
   };
 
-  const handleDelete = ({ name, value }) => {
+  const handleDelete = ({ name, notes, value, username }) => {
     openConfirm(
       navigation,
       {
@@ -141,7 +143,7 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
             title: L10N.NFC_CARD,
             variant: 'accent',
           });
-          const nextTag = await NFCService.remove(value, name, tag.info.id).catch(handleError);
+          const nextTag = await NFCService.remove(value, name, tag.info.id, username, notes).catch(handleError);
           read(nextTag);
           eventEmitter.emit(EVENT.NOTIFICATION, {
             text: L10N.SECRET_DELETED,
@@ -231,11 +233,11 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
       {readMode && records.length ? (
         <View style={style.records}>
           <ScrollView>
-            {records.map(({ name, value }, index) => {
+            {records.map(({ name, notes, value, username }, index) => {
               const { icon, subtitle } = getRecordMeta({ name, value });
 
               return (
-                <Pressable key={index} onPress={() => handleRecord({ name, value })} style={style.record}>
+                <Pressable key={index} onPress={() => handleRecord({ name, notes, value, username })} style={style.record}>
                   <View style={[style.recordThumb, { backgroundColor: scannerColors.surface }]}>
                     <Icon name={icon} style={{ color: scannerColors.qrForeground }} />
                   </View>
@@ -254,7 +256,7 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
                     tone="onAccent"
                     size="s"
                     onPress={() => {
-                      handleDelete({ name, value });
+                      handleDelete({ name, value, username });
                     }}
                     variant="outlined"
                     style={style.recordDelete}
@@ -274,6 +276,8 @@ NFCCard.propTypes = {
   showHeader: PropTypes.bool,
   writeMode: PropTypes.shape({
     name: PropTypes.string,
+    notes: PropTypes.string,
+    username: PropTypes.string,
     value: PropTypes.string,
   }),
   onRecord: PropTypes.func,

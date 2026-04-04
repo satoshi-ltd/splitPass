@@ -5,13 +5,14 @@ import * as Sharing from 'expo-sharing';
 import { isEncryptedEnvelope, L10N } from '../modules';
 
 const getErrorMessage = (error) => error?.message || String(error) || 'Unknown error';
+const getBackupFileName = () => `splitpass-backup-${new Date().toISOString()}.json`;
 
 export const BackupService = {
   export: async ({ store } = {}) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
       try {
-        const fileName = `secret-qr-${new Date().toISOString()}.json`;
+        const fileName = getBackupFileName();
         const payload = await store.exportBackup();
         const data = JSON.stringify(payload);
 

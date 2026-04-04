@@ -1,11 +1,230 @@
 :root {
-  --splitpass-shell-width: 304px;
+  --splitpass-shell-width: 360px;
+}
+
+html,
+body {
+  display: inline-block;
+  height: auto;
+  min-height: 0;
+  width: var(--splitpass-shell-width);
+  min-width: var(--splitpass-shell-width);
 }
 
 body {
-  width: var(--splitpass-shell-width);
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .popup {
+  display: grid;
+  align-content: start;
   margin: 0;
+  padding: var(--space-md);
+}
+
+.popup.splitpass-surface {
+  border: 0;
+  border-radius: 0;
+  background: var(--color-background);
+  box-shadow: none;
+}
+
+.splitpass-panel-header {
+  gap: 0;
+  margin-bottom: var(--space-sm);
+}
+
+.splitpass-panel-header-top {
+  align-items: flex-start;
+}
+
+.splitpass-title {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  line-height: var(--line-height-caption);
+}
+
+.splitpass-subtitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-subtitle);
+  font-weight: 700;
+  line-height: var(--line-height-subtitle);
+}
+
+.splitpass-close {
+  display: none;
+}
+
+.splitpass-stage {
+  border-radius: 0;
+}
+
+.splitpass-caption {
+  display: none;
+  text-align: left;
+}
+
+.splitpass-stage-actionable,
+.splitpass-caption-actionable {
+  cursor: pointer;
+}
+
+.splitpass-auth-panel,
+.splitpass-recent-panel {
+  display: grid;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.splitpass-auth-label,
+.splitpass-recent-title,
+.splitpass-recent-item-name,
+.splitpass-recent-item-meta,
+.splitpass-recent-empty,
+.splitpass-recent-note {
+  margin: 0;
+}
+
+.splitpass-recent-title {
+  color: var(--color-text);
+}
+
+.splitpass-recent-title {
+  font-size: var(--font-size-input);
+  font-weight: 700;
+  line-height: var(--line-height-input);
+}
+
+.splitpass-recent-empty,
+.splitpass-recent-note {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+}
+
+.splitpass-auth-label {
+  display: grid;
+  gap: 0;
+}
+
+.splitpass-auth-input {
+  min-height: var(--space-xxl);
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-input);
+  font-weight: 700;
+  line-height: var(--line-height-input);
+}
+
+.splitpass-auth-input::placeholder {
+  color: var(--color-placeholder);
+}
+
+.splitpass-auth-input:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+.splitpass-auth-submit,
+.splitpass-recent-copy {
+  min-height: 44px;
+  border-radius: var(--radius-md);
+}
+
+.splitpass-auth-submit {
+  margin-top: var(--space-xs);
+}
+
+.splitpass-recent-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+}
+
+.splitpass-recent-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.splitpass-recent-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-xxs) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.splitpass-recent-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 0;
+  background: var(--color-on-accent);
+  overflow: hidden;
+}
+
+.splitpass-recent-item-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.splitpass-recent-item-fallback {
+  color: var(--color-text);
+  font-size: var(--font-size-input);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.splitpass-recent-item-body {
+  display: grid;
+  gap: var(--space-xxs);
+  min-width: 0;
+}
+
+.splitpass-recent-item-name {
+  color: var(--color-text);
+  font-size: var(--font-size-input);
+  font-weight: 700;
+  line-height: var(--line-height-input);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splitpass-recent-item-meta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splitpass-passcode,
+.splitpass-message {
+  margin-top: var(--space-md);
 }

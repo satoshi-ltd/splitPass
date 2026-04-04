@@ -8,7 +8,7 @@ import { CreateTotpScanner } from './Create.totpScanner';
 import { EVENT } from '../../App.constants';
 import { InputMask, Switch } from '../../components';
 import { useStore } from '../../contexts';
-import { AppScreen, Button, Icon, Input, Pressable, Text, View } from '../../design-system';
+import { AppScreen, Button, HeaderBackButton, Icon, Input, Pressable, Text, View } from '../../design-system';
 import {
   buildTOTPURI,
   DEFAULT_ALGORITHM,
@@ -35,15 +35,34 @@ import {
   parseCardValue,
 } from '../../modules/secretValueDisplay';
 
+const collapseIdentifierSpacing = (value = '') =>
+  `${value}`.replace(/\s+([.@/_-])/g, '$1').replace(/([.@/_-])\s+/g, '$1');
+
+const normalizeNameInput = (value = '') => {
+  const normalized = collapseIdentifierSpacing(value);
+  const compact = normalized.trim();
+
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(compact)) return compact.toLowerCase();
+  if (/^[a-z0-9-]+@[a-z0-9.-]+\.[a-z]{2,}$/i.test(compact)) return compact.toLowerCase();
+
+  return normalized;
+};
+
+const normalizeUsernameInput = (value = '') => collapseIdentifierSpacing(value).replace(/\s+/g, '');
+const normalizeNotesInput = (value = '') => `${value}`.replace(/\|/g, '');
+
 const Create = ({ navigation = {}, onComplete, route }) => {
-  const { createSecret } = useStore();
+  const { createSecret, updateSecret } = useStore();
   const [form, setForm] = useState(DEFAULT_FORM);
   const [revealSecret, setRevealSecret] = useState(false);
   const [showTotpFlow, setShowTotpFlow] = useState(false);
   const standardDraftRef = useRef({});
+  const edit = route?.params?.edit;
   const hydrate = route?.params?.hydrate;
+  const editMode = !!edit?.hash;
   const onboarding = !!route?.params?.onboarding;
   const hydrated = !!hydrate?.value;
+  const editSecretEnabled = !!edit?.editableSecret;
   const isTotp = showTotpFlow;
   const isCard = !isTotp && isCardNumber(form.secret);
   const cardValue = isCard ? buildCardValue(form.secret, form.expire, form.cvv) : undefined;
@@ -58,6 +77,19 @@ const Create = ({ navigation = {}, onComplete, route }) => {
       })
     : undefined;
   const totpValue = isTotp ? buildTOTPURI(normalizedTOTP) : '';
+
+  useEffect(() => {
+    if (!editMode) return;
+
+    setForm((current) => ({
+      ...current,
+      name: edit.name ?? current.name,
+      notes: edit.notes ?? current.notes,
+      secret: edit.secret ?? current.secret,
+      username: edit.username ?? current.username,
+      split: false,
+    }));
+  }, [edit, editMode]);
 
   useEffect(() => {
     if (hydrated || isTotp || isCard || (!form.expire && !form.cvv)) return;
@@ -78,10 +110,11 @@ const Create = ({ navigation = {}, onComplete, route }) => {
         digits: `${hydratedTOTP.digits}`,
         issuer: hydratedTOTP.issuer,
         name: hydrate.name || current.name || getTOTPDisplayName(hydratedTOTP),
+        notes: hydrate.notes ?? current.notes,
         period: `${hydratedTOTP.period}`,
         secret: hydratedTOTP.secret,
         split: false,
-        website: hydrate.website || current.website,
+        username: hydrate.username ?? current.username,
       }));
       setShowTotpFlow(true);
       return;
@@ -94,9 +127,10 @@ const Create = ({ navigation = {}, onComplete, route }) => {
       cvv: hydratedCard?.cvv,
       expire: hydratedCard?.expire,
       name: hydrate.name || current.name,
+      notes: hydrate.notes ?? current.notes,
       secret: hydratedCard?.number || hydratedSecret,
       split: false,
-      website: hydrate.website || current.website,
+      username: hydrate.username ?? current.username,
     }));
   }, [hydrate]);
 
@@ -131,10 +165,29 @@ const Create = ({ navigation = {}, onComplete, route }) => {
   };
 
   const handlePressContinue = async () => {
-    const { account, cvv, expire, issuer, name, secret, split = false, website } = form;
+    if (editMode) {
+      const nextUpdate = {
+        hash: edit.hash,
+        name: `${form.name || ''}`.trim(),
+        notes: `${form.notes || ''}`.trim() || undefined,
+        username: `${form.username || ''}`.trim(),
+      };
+      if (editSecretEnabled) nextUpdate.value = QRParser.encode(form.secret || '');
+
+      const updatedSecret = await updateSecret({
+        ...nextUpdate,
+      });
+      if (!updatedSecret) return;
+
+      eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_DETAILS_UPDATED, title: L10N.SUCCESS });
+      navigation.goBack();
+      return;
+    }
+
+    const { account, cvv, expire, issuer, name, notes, secret, split = false, username } = form;
     const resolvedName = `${name || (isTotp ? issuer || account || L10N.SECRET_TYPE_TOTP : '')}`.trim();
     const secretValue = isCard ? cardValue : isTotp ? totpValue : secret;
-    const visual = deriveSecretVisual({ name: resolvedName, secret: secretValue, website });
+    const visual = deriveSecretVisual({ name: resolvedName, secret: secretValue });
 
     let values;
 
@@ -145,15 +198,14 @@ const Create = ({ navigation = {}, onComplete, route }) => {
       values = split ? QRParser.split(qr) : [qr];
     }
 
-    setForm({ ...DEFAULT_FORM });
-
     if (split) {
       navigation.navigate('secret', {
         name: resolvedName,
+        notes: `${notes || ''}`.trim() || undefined,
         readMode: true,
         returnToMain: true,
+        username,
         values,
-        website,
         ...visual,
       });
       return;
@@ -171,8 +223,9 @@ const Create = ({ navigation = {}, onComplete, route }) => {
       period: normalizedTOTP?.period,
       kind: isTotp ? 'totp' : visual.kind,
       name: resolvedName,
+      notes: `${notes || ''}`.trim() || undefined,
+      username,
       value: values[0],
-      website,
     });
 
     if (onComplete)
@@ -185,13 +238,13 @@ const Create = ({ navigation = {}, onComplete, route }) => {
         expire: isCard ? normalizeCardExpire(expire) : undefined,
         issuer: normalizedTOTP?.issuer,
         name: resolvedName,
+        notes: `${notes || ''}`.trim() || undefined,
         period: normalizedTOTP?.period,
+        username,
         values,
-        website,
         ...(isTotp ? { kind: 'totp' } : visual),
       });
     else if (persistedSecret) {
-      eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
       if (hydrated) {
         navigation.navigate('main', { screen: 'secrets' });
         return;
@@ -202,11 +255,14 @@ const Create = ({ navigation = {}, onComplete, route }) => {
         hash: persistedSecret.hash,
         kind: persistedSecret.kind,
         name: persistedSecret.name,
+        notes: persistedSecret.notes,
         returnToMain: true,
+        username: persistedSecret.username,
         values: [persistedSecret.value],
-        website: persistedSecret.website,
       });
     }
+
+    setForm({ ...DEFAULT_FORM });
   };
 
   const handleSecretChange = (nextSecret = '') => {
@@ -239,16 +295,21 @@ const Create = ({ navigation = {}, onComplete, route }) => {
     : isCard
     ? !!cardValue
     : !!form.secret;
-  const isValid = isTotp ? isValidSecret : !!form.name && isValidSecret;
+  const isValid = editMode
+    ? !!`${form.name || ''}`.trim() && (!editSecretEnabled || !!`${form.secret || ''}`)
+    : isTotp
+    ? isValidSecret
+    : !!form.name && isValidSecret;
   const handleOpenTotpFlow = () => {
     setShowTotpFlow(true);
     setForm((current) => {
       standardDraftRef.current = {
         cvv: current.cvv,
         expire: current.expire,
+        notes: current.notes,
         secret: current.secret,
         split: current.split,
-        website: current.website,
+        username: current.username,
       };
 
       return {
@@ -274,20 +335,37 @@ const Create = ({ navigation = {}, onComplete, route }) => {
       digits: '6',
       expire: standardDraftRef.current.expire,
       issuer: undefined,
+      notes: standardDraftRef.current.notes,
       period: '30',
       secret: standardDraftRef.current.secret,
-      split: standardDraftRef.current.split ?? true,
-      website: standardDraftRef.current.website,
+      split: standardDraftRef.current.split ?? false,
+      username: standardDraftRef.current.username,
     }));
   };
   const header = (
     <View style={style.header}>
-      <Text bold size="xl" tone="accent">
-        {hydrated ? L10N.SAVE_SECRET : onboarding ? L10N.FIRST_SECRET : L10N.NEW_SECRET}
-      </Text>
-      <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
-        {L10N.NEW_SECRET_SUBTITLE}
-      </Text>
+      {editMode ? (
+        <View row align="center" style={style.headerRow}>
+          <HeaderBackButton onPress={() => navigation.goBack()} />
+          <View flex style={style.headerText}>
+            <Text bold size="xl" tone="accent">
+              {L10N.EDIT_DETAILS}
+            </Text>
+            <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+              {form.name || edit.name || ''}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <>
+          <Text bold size="xl" tone="accent">
+            {hydrated ? L10N.SAVE_SECRET : onboarding ? L10N.FIRST_SECRET : L10N.NEW_SECRET}
+          </Text>
+          <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+            {L10N.NEW_SECRET_SUBTITLE}
+          </Text>
+        </>
+      )}
     </View>
   );
 
@@ -305,16 +383,18 @@ const Create = ({ navigation = {}, onComplete, route }) => {
               {L10N.NAME}
             </Text>
             <Input
-              autoFocus
+              autoCapitalize="none"
+              autoCorrect={false}
               containerStyle={style.inputShell}
+              keyboardType="visible-password"
               placeholder={L10N.NAME_PLACEHOLDER}
               value={form.name}
-              onChange={(name) => setForm({ ...form, name })}
+              onChange={(name) => setForm({ ...form, name: normalizeNameInput(name) })}
               style={style.inputField}
             />
           </View>
 
-          {isTotp ? (
+          {isTotp && !editMode ? (
             <View style={style.fieldBox}>
               <Text semibold size="s" style={style.fieldLabel}>
                 {L10N.OTP_QR_LABEL}
@@ -330,7 +410,7 @@ const Create = ({ navigation = {}, onComplete, route }) => {
             </View>
           ) : null}
 
-          {!isTotp ? (
+          {!isTotp && (!editMode || editSecretEnabled) ? (
             <View style={style.fieldBox}>
               <Text semibold size="s" style={style.fieldLabel}>
                 {L10N.SECRET}
@@ -346,22 +426,14 @@ const Create = ({ navigation = {}, onComplete, route }) => {
                 multiline={secretIsSeed}
                 numberOfLines={secretIsSeed ? 3 : 1}
                 placeholder={L10N.SECRET_PLACEHOLDER}
+                onRevealChange={setRevealSecret}
                 revealed={revealSecret}
+                showToggle
                 style={[style.inputField, secretIsSeed && style.inputFieldMultiline]}
                 value={form.secret}
                 onChange={handleSecretChange}
                 actions={
                   <>
-                    <Pressable
-                      onPress={() => setRevealSecret((current) => !current)}
-                      style={[
-                        style.inputActionButton,
-                        secretIsSeed && style.inputActionButtonMultiline,
-                        !form.secret && style.inputActionButtonDisabled,
-                      ]}
-                    >
-                      <Icon name={revealSecret ? ICON.EYE_OFF : ICON.EYE} tone="secondary" size="s" />
-                    </Pressable>
                     {!hydrated && !isCard ? (
                       <Pressable
                         onPress={() => navigation.navigate('passwordGenerator', { picker: true })}
@@ -376,7 +448,7 @@ const Create = ({ navigation = {}, onComplete, route }) => {
             </View>
           ) : null}
 
-          {isCard ? (
+          {isCard && !editMode ? (
             <View style={style.fieldBox}>
               <View row style={style.cardDetailsRow}>
                 <View style={style.cardDetailField}>
@@ -419,22 +491,37 @@ const Create = ({ navigation = {}, onComplete, route }) => {
           {!isTotp ? (
             <View style={style.fieldBox}>
               <Text semibold size="s" style={style.fieldLabel}>
-                {L10N.WEBSITE}
+                {L10N.USERNAME}
               </Text>
               <Input
                 autoCapitalize="none"
                 autoCorrect={false}
                 containerStyle={style.inputShell}
-                keyboardType="url"
-                placeholder={L10N.WEBSITE_PLACEHOLDER}
-                value={form.website}
-                onChange={(website) => setForm({ ...form, website })}
+                keyboardType="visible-password"
+                placeholder={L10N.USERNAME_PLACEHOLDER}
+                value={form.username}
+                onChange={(username) => setForm({ ...form, username: normalizeUsernameInput(username) })}
                 style={style.inputField}
               />
             </View>
           ) : null}
 
-          {!hydrated && !isTotp ? (
+          <View style={style.fieldBox}>
+            <Text semibold size="s" style={style.fieldLabel}>
+              {L10N.NOTES}
+            </Text>
+            <Input
+              containerStyle={[style.inputShell, style.inputShellMultiline]}
+              multiline
+              numberOfLines={4}
+              placeholder={L10N.NOTES_PLACEHOLDER}
+              style={[style.inputField, style.inputFieldMultiline]}
+              value={form.notes}
+              onChange={(notes) => setForm({ ...form, notes: normalizeNotesInput(notes) })}
+            />
+          </View>
+
+          {!editMode && !hydrated && !isTotp ? (
             <View row align="center" style={style.recoveryRow}>
               <Switch checked={form.split} onChange={(split) => setForm({ ...form, split })} />
               <Text size="s" style={style.caption}>
@@ -450,9 +537,9 @@ const Create = ({ navigation = {}, onComplete, route }) => {
 
         <View style={style.actions}>
           <Button disabled={!isValid} size="l" variant="primary" onPress={handlePressContinue} style={style.button}>
-            {L10N.CONTINUE}
+            {editMode ? L10N.SAVE_CHANGES : form.split ? L10N.CREATE_SHARDS : L10N.SAVE_SECRET}
           </Button>
-          {isTotp ? (
+          {editMode ? null : isTotp ? (
             <Button onPress={handleCloseTotpFlow} size="l" style={style.secondaryButton} variant="outlined">
               {L10N.BACK_TO_SECRET}
             </Button>

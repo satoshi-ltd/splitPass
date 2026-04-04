@@ -7,6 +7,17 @@ const NTAG_TYPES = {
   18: { type: 'NTAG216', totalMemory: 888 },
 };
 
+const parseRecord = (record = '') => {
+  const [name = '', value = '', username = '', notes = ''] = `${record}`.split('|');
+  return { name, notes: notes || undefined, value, username: username || undefined };
+};
+
+const stringifyRecord = ({ name = '', value = '', username, notes } = {}) => {
+  const fields = [name, value, username || '', notes || ''];
+  while (fields.length > 2 && fields[fields.length - 1] === '') fields.pop();
+  return fields.join('|');
+};
+
 export const NFCService = {
   // -- private
   instance: async () => {
@@ -24,13 +35,13 @@ export const NFCService = {
     ndefMessage
       .filter((record) => record.type.toString() === '84')
       .map((record) => Ndef.text.decodePayload(record.payload))
-      .filter((record) => /\|\d+$/.test(record)),
+      .filter((record) => {
+        const { name, value } = parseRecord(record);
+        return !!name && !!value;
+      }),
 
   response: (records = [], tag, bytes, { totalMemory } = {}) => ({
-    records: records.map((record) => {
-      const [name, value] = record.split('|');
-      return { name, value };
-    }),
+    records: records.map(parseRecord),
     info: { id: tag.id, totalMemory, usedMemory: bytes.length },
   }),
 
@@ -82,7 +93,7 @@ export const NFCService = {
       }
     }),
 
-  write: (value, name) =>
+  write: (value, name, username, notes) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
       let instance;
@@ -104,7 +115,7 @@ export const NFCService = {
         const nTag = await NFCService.getNtag(NfcManager);
         if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
 
-        const newRecord = `${name ? `${name}|` : ''}${value}`;
+        const newRecord = stringifyRecord({ name, notes, value, username });
         const records = NFCService.filterRecords(tag, Ndef);
 
         if (!records.includes(newRecord)) records.push(newRecord);
@@ -122,7 +133,7 @@ export const NFCService = {
       }
     }),
 
-  remove: (value, name, targetTagId) =>
+  remove: (value, name, targetTagId, username, notes) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
       let instance;
@@ -151,7 +162,7 @@ export const NFCService = {
           // ! TODO: Seems card is empty
         }
 
-        const targetRecord = `${name ? `${name}|` : ''}${value}`;
+        const targetRecord = stringifyRecord({ name, notes, value, username });
         const records = NFCService.filterRecords(tag, Ndef).filter((record) => record !== targetRecord);
         const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
 

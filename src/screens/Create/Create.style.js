@@ -17,6 +17,14 @@ export const style = StyleSheet.create({
     gap: '$spaceXXS',
   },
 
+  headerRow: {
+    gap: '$spaceS',
+  },
+
+  headerText: {
+    gap: '$spaceXXS',
+  },
+
   headerSubtitle: {
     maxWidth: '90%',
   },
@@ -85,6 +93,7 @@ export const style = StyleSheet.create({
     minHeight: '$spaceXXL * 2',
     paddingBottom: '$spaceS',
     paddingTop: '$spaceS',
+    textAlignVertical: 'top',
   },
 
   inputActionButton: {
@@ -98,10 +107,6 @@ export const style = StyleSheet.create({
 
   inputActionButtonMultiline: {
     marginTop: '$spaceXS',
-  },
-
-  inputActionButtonDisabled: {
-    opacity: 0.35,
   },
 
   recoveryRow: {

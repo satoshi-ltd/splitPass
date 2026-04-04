@@ -13,7 +13,12 @@
       <div class="splitpass-stage">
         <video autoplay class="splitpass-video" muted playsinline></video>
         <div class="splitpass-stage-inner">
-          <div class="splitpass-frame"></div>
+          <div class="splitpass-frame">
+            <span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span>
+            <span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span>
+            <span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span>
+            <span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span>
+          </div>
           <div class="splitpass-empty">
             <p class="splitpass-empty-title">Starting camera</p>
             <p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p>
@@ -39,7 +44,9 @@
         cameraEmpty: root.querySelector('.splitpass-empty'),
         cameraEmptyCopy: root.querySelector('.splitpass-empty-copy'),
         cameraEmptyTitle: root.querySelector('.splitpass-empty-title'),
+        caption: root.querySelector('.splitpass-caption'),
         closeButton: root.querySelector('.splitpass-close'),
+        headerSubtitle: root.querySelector('.splitpass-subtitle'),
         message: root.querySelector('.splitpass-message'),
         passcodeInput: root.querySelector('.splitpass-passcode-input'),
         passcodePanel: root.querySelector('.splitpass-passcode'),

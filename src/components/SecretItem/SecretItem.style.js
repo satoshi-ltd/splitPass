@@ -20,6 +20,7 @@ export const style = StyleSheet.create({
     alignItems: 'center',
     alignContent: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
 
   favorite: {
@@ -32,6 +33,20 @@ export const style = StyleSheet.create({
 
   subtitle: {
     maxWidth: '100%',
+  },
+
+  shardBadgeText: {
+    bottom: 3,
+    includeFontPadding: false,
+    lineHeight: 11,
+    opacity: 0.58,
+    position: 'absolute',
+    right: 3,
+    textAlign: 'right',
+  },
+
+  shardBadgeTextFavorite: {
+    opacity: 0.72,
   },
 
   action: {

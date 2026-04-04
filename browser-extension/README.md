@@ -1,11 +1,13 @@
 # SplitPass Scanner
 
-Browser extension that reuses the current SplitPass QR `value` and either copies the decoded secret from the popup or fills a password field from its inline launcher.
+Browser extension that reuses the current SplitPass QR `value`, copies decoded passwords from the popup, fills password fields from an in-page site panel, and keeps encrypted saved passwords per domain.
 
 ## What it supports
 
 - SplitPass password QR values (`type=1`)
 - SplitPass secure password QR values (`type=2`) after entering the 6-digit passcode
+- encrypted recent-password storage protected by a master password
+- encrypted saved passwords per domain with 7-day expiration and no fixed count limit
 - Chrome and Brave as unpacked extensions
 - Safari packaging through Safari Web Extensions conversion
 
@@ -14,22 +16,25 @@ Browser extension that reuses the current SplitPass QR `value` and either copies
 - shards
 - cards
 - seed phrases
+- username persistence
 - auto-detecting username vs password without field focus
 - scanning inline on insecure `http://` pages
 
 ## How it works
 
-1. Open the extension popup to scan and copy, or use the inline SplitPass launcher shown on password fields to scan and fill.
-2. The scanner starts the camera automatically.
-3. Scan the QR shown by SplitPass.
-4. If the QR is secure, enter the passcode.
-5. The popup copies the decoded secret to the clipboard and keeps the success state visible until you close it.
-6. The inline launcher fills only the password field that opened that scanner.
+1. Open the extension popup on an `http` or `https` page.
+2. The popup always shows the scanner in a single view.
+3. On first use, create a master password for the extension vault.
+4. Unlock the vault to start the camera and reveal the saved passwords for the current domain below the scanner.
+5. Scan the QR shown by SplitPass.
+6. If the QR is secure, enter the passcode.
+7. The popup copies the decoded password and saves it encrypted for the current domain.
+8. Saved passwords expire after 7 days.
 
 ## Camera requirement
 
-- The popup scanner runs inside the extension popup, so the camera permission belongs to the extension popup itself.
-- The inline scanner opened from a password field runs inside the current page and needs that page to allow camera access, which usually means `https://`, `localhost`, or `127.0.0.1`.
+- The scanner runs only inside the extension popup, so the camera permission belongs to the extension popup itself.
+- The in-page site panel does not use the camera. It only shows saved passwords for the current domain and fills password fields.
 
 ## Load in Chrome
 
@@ -62,8 +67,9 @@ Additional Safari notes are in [safari/README.md](/Users/javi/git/splitPass/brow
 ## Security notes
 
 - The extension decodes the QR locally inside the popup.
-- It does not persist the scanned secret.
-- The passcode is only used in memory for the current scanner session.
-- The popup does not hydrate page fields.
-- Password fields get a small inline SplitPass launcher on the right side.
+- Recent passwords are stored only in encrypted form inside extension storage.
+- The encrypted vault is unlocked with the master password.
+- The passcode is only used in memory for the current popup scanner session.
+- The extension stores only the hostname, never the full URL or path.
+- Pages with password fields can show a floating SplitPass panel for the current domain.
 - The content script is limited to regular `http` and `https` pages instead of every browser URL.
