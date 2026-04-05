@@ -1,5 +1,7 @@
+/* global __DEV__ */
+
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
 
 import { style } from './Unlock.style';
@@ -10,8 +12,11 @@ import { AppScreen, Button, Text, View } from '../../design-system';
 import { eventEmitter, L10N } from '../../modules';
 import { BiometricAuthService } from '../../services';
 
+const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
+
 const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } = {} } = {} }) => {
   const { importBackup, resetAppData, settings, setupSecurity, unlockStore, updateSettings } = useStore();
+  const [biometricAutoTriggered, setBiometricAutoTriggered] = useState(false);
   const [biometricInvalidated, setBiometricInvalidated] = useState(false);
   const [biometricSubmitting, setBiometricSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -89,6 +94,31 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       setBiometricSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    let active = true;
+
+    if (!isDevMode || !biometricEnabled || mode !== 'unlock' || biometricAutoTriggered) return undefined;
+
+    const autoUnlockInDev = async () => {
+      try {
+        const availability = await BiometricAuthService.isAvailable();
+        if (!active || !availability?.mocked) return;
+
+        setBiometricAutoTriggered(true);
+        await handleBiometricUnlock({ silent: false });
+      } catch {
+        if (!active) return;
+        setBiometricAutoTriggered(true);
+      }
+    };
+
+    autoUnlockInDev();
+
+    return () => {
+      active = false;
+    };
+  }, [biometricAutoTriggered, biometricEnabled, mode]);
 
   const title =
     mode === 'setup'
