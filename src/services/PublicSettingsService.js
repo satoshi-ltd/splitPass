@@ -11,6 +11,7 @@ const DEFAULT_PUBLIC_SETTINGS = {
   onboarded: false,
   reminders: [1],
   theme: DEFAULT_THEME,
+  websiteFaviconsEnabled: true,
 };
 
 const normalizePublicSettings = (value = {}) => ({
@@ -19,6 +20,7 @@ const normalizePublicSettings = (value = {}) => ({
   language: value?.language || detectDeviceLanguage(),
   reminders: Array.isArray(value?.reminders) ? value.reminders : DEFAULT_PUBLIC_SETTINGS.reminders,
   theme: value?.theme || DEFAULT_THEME,
+  websiteFaviconsEnabled: value?.websiteFaviconsEnabled !== false,
 });
 
 const load = async () => {

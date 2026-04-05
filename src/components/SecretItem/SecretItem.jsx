@@ -4,6 +4,7 @@ import { Image } from 'react-native';
 
 import { style } from './SecretItem.style';
 import { SECRET_TYPE, SHARD_TYPES } from '../../App.constants';
+import { useStore } from '../../contexts';
 import { Icon, Pressable, Text, View } from '../../design-system';
 import { extractWebsiteDomain, ICON, L10N, QRParser, resolveSecretIcon } from '../../modules';
 import { FaviconService } from '../../services';
@@ -96,6 +97,7 @@ const resolveIconFallback = (type) => {
 };
 
 const SecretItem = ({ brand, favorite = false, kind, name, username, value = '', website, onPress }) => {
+  const { settings } = useStore();
   const [type] = value;
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [faviconUri, setFaviconUri] = useState('');
@@ -103,16 +105,17 @@ const SecretItem = ({ brand, favorite = false, kind, name, username, value = '',
   const iconName = resolveSecretIcon({ brand, kind, name, type: resolveIconFallback(type) });
   const subtitle = resolveSecretSubtitle({ type, username });
   const faviconDomain = useMemo(() => extractWebsiteDomain(website, name), [name, website]);
+  const websiteFaviconsEnabled = settings?.websiteFaviconsEnabled !== false;
 
   useEffect(() => {
     setFaviconFailed(false);
     setFaviconUri('');
-  }, [faviconDomain]);
+  }, [faviconDomain, websiteFaviconsEnabled]);
 
   useEffect(() => {
     let cancelled = false;
 
-    if (!faviconDomain) return undefined;
+    if (!websiteFaviconsEnabled || !faviconDomain) return undefined;
 
     const loadFavicon = async () => {
       const nextUri = await FaviconService.resolve(faviconDomain);
@@ -124,18 +127,18 @@ const SecretItem = ({ brand, favorite = false, kind, name, username, value = '',
     return () => {
       cancelled = true;
     };
-  }, [faviconDomain]);
+  }, [faviconDomain, websiteFaviconsEnabled]);
 
   return (
     <Pressable onPress={onPress}>
       <View row style={style.item}>
         <View style={[style.thumbnail, favorite && style.favorite]}>
-          {faviconUri && !faviconFailed ? (
+          {websiteFaviconsEnabled && faviconUri && !faviconFailed ? (
             <Image
               source={{ uri: faviconUri }}
               style={style.thumbnailImage}
               onError={() => {
-                FaviconService.invalidate(faviconDomain);
+                if (faviconDomain) FaviconService.invalidate(faviconDomain);
                 setFaviconFailed(true);
               }}
             />

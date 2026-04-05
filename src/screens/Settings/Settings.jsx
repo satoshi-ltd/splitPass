@@ -32,9 +32,16 @@ const Settings = ({ navigation = {} }) => {
   const [activity, setActivity] = useState({});
   const [biometricAvailability, setBiometricAvailability] = useState({ available: false, ready: false });
 
-  const { biometricUnlockEnabled = false, language, reminders = [], theme = 'light' } = settings || {};
+  const {
+    biometricUnlockEnabled = false,
+    language,
+    reminders = [],
+    theme = 'light',
+    websiteFaviconsEnabled = true,
+  } = settings || {};
   const reminderEnabled = (reminders[0] ?? 1) === 1;
   const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
+  const websiteFaviconsSubtitle = websiteFaviconsEnabled ? L10N.ENABLED : L10N.DISABLED;
   const biometricSubtitle =
     !biometricAvailability.ready
       ? undefined
@@ -171,6 +178,10 @@ const Settings = ({ navigation = {} }) => {
     }
   };
 
+  const handleWebsiteFavicons = (value) => {
+    updateSettings({ websiteFaviconsEnabled: !!value });
+  };
+
   const handleLoadDemoSecrets = async () => {
     try {
       setActivity((prev) => ({ ...(prev || {}), handleLoadDemoSecrets: true }));
@@ -296,6 +307,14 @@ const Settings = ({ navigation = {} }) => {
           right={<RightValueChevron value={getLanguageLabel(language)} />}
           title={L10N.LANGUAGE}
           onPress={() => navigation.navigate('language')}
+        />
+        <Setting
+          icon={ICON.WEB}
+          subtitle={websiteFaviconsSubtitle}
+          type="toggle"
+          title={L10N.WEBSITE_FAVICONS}
+          value={websiteFaviconsEnabled}
+          onValueChange={handleWebsiteFavicons}
         />
         <Setting
           icon={ICON.BELL}

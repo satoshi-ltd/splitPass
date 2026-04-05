@@ -11,6 +11,7 @@ const DEFAULTS = {
     onboarded: false,
     reminders: [1],
     theme: 'light',
+    websiteFaviconsEnabled: true,
   },
 };
 
