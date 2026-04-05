@@ -45,10 +45,9 @@ const Home = ({ navigation }) => {
         .sort((a, b) => getSecretSortTime(b) - getSecretSortTime(a)),
     [filteredSecrets],
   );
-  const nonFavoriteSecrets = useMemo(() => filteredSecrets.filter(({ favorite }) => !favorite), [filteredSecrets]);
 
   const sections = useMemo(() => {
-    const grouped = nonFavoriteSecrets.reduce((result, secret) => {
+    const grouped = filteredSecrets.reduce((result, secret) => {
       const letter = (secret.name || '#').trim().charAt(0).toUpperCase() || '#';
       if (!result[letter]) result[letter] = [];
       result[letter].push(secret);
@@ -63,7 +62,7 @@ const Home = ({ navigation }) => {
         ),
       ]),
     );
-  }, [nonFavoriteSecrets]);
+  }, [filteredSecrets]);
   const orderedSections = useMemo(
     () =>
       Object.entries(sections).sort(([letterA], [letterB]) => {
