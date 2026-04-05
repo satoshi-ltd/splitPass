@@ -18,6 +18,12 @@ describe('secretVisual matching', () => {
     expect(deriveSecretVisual({ name: 'dribbble.com' })).toMatchObject({ brand: 'dribbble', icon: 'basketball' });
   });
 
+  it('recognizes neobanks like n26', () => {
+    expect(deriveSecretVisual({ name: 'N26' })).toMatchObject({ brand: 'n26', icon: 'bank-outline' });
+    expect(extractWebsiteDomain(undefined, 'n26')).toBe('n26.com');
+    expect(extractWebsiteDomain(undefined, 'Chase')).toBe('chase.com');
+  });
+
   it('ignores stale persisted brands when the current name does not match them', () => {
     expect(resolveSecretIcon({ brand: 'x', name: 'expo', type: 'qrcode' })).toBe('qrcode');
     expect(resolveSecretIcon({ brand: 'x', name: 'docker', type: 'qrcode' })).toBe('docker');
@@ -36,6 +42,12 @@ describe('secretVisual matching', () => {
     expect(extractWebsiteDomain(undefined, 'coins')).toBe('coins.co.th');
     expect(extractWebsiteDomain(undefined, 'Currenxie')).toBe('currenxie.com');
     expect(extractWebsiteDomain(undefined, 'Dribbble profile')).toBe('dribbble.com');
-    expect(extractWebsiteDomain(undefined, 'github')).toBe('');
+    expect(extractWebsiteDomain(undefined, 'github')).toBe('github.com');
+    expect(extractWebsiteDomain(undefined, 'google')).toBe('google.com');
+    expect(extractWebsiteDomain(undefined, 'apple')).toBe('apple.com');
+    expect(extractWebsiteDomain(undefined, 'instagram')).toBe('instagram.com');
+    expect(extractWebsiteDomain(undefined, 'netflix')).toBe('netflix.com');
+    expect(extractWebsiteDomain(undefined, 'microsoft')).toBe('microsoft.com');
+    expect(extractWebsiteDomain(undefined, 'tiktok')).toBe('tiktok.com');
   });
 });

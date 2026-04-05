@@ -3,6 +3,28 @@ import * as FileSystem from 'expo-file-system/legacy';
 const OFFLINE_COOLDOWN_MS = 60 * 1000;
 const FAILURE_COOLDOWN_MS = 10 * 60 * 1000;
 const DOWNLOAD_TIMEOUT_MS = 4500;
+const MULTI_PART_TLDS = new Set([
+  'co.uk',
+  'org.uk',
+  'ac.uk',
+  'gov.uk',
+  'com.au',
+  'net.au',
+  'org.au',
+  'com.br',
+  'com.mx',
+  'co.th',
+  'com.sg',
+  'com.tr',
+  'co.jp',
+  'co.kr',
+  'com.ar',
+  'com.co',
+  'com.pe',
+  'co.id',
+  'com.my',
+  'co.nz',
+]);
 
 const KNOWN_FAVICON_URLS = {
   'atlassian.com': ['https://www.atlassian.com/favicon.ico', 'https://icons.duckduckgo.com/ip3/atlassian.com.ico'],
@@ -38,6 +60,19 @@ const normalizeDomain = (value = '') =>
     .split(/[/?#:]/)[0]
     .replace(/\.+$/, '');
 
+const resolveRootDomain = (domain = '') => {
+  const normalized = normalizeDomain(domain);
+  if (!normalized) return '';
+
+  const parts = normalized.split('.');
+  if (parts.length <= 2) return normalized;
+
+  const lastTwo = parts.slice(-2).join('.');
+  if (MULTI_PART_TLDS.has(lastTwo) && parts.length >= 3) return parts.slice(-3).join('.');
+
+  return parts.slice(-2).join('.');
+};
+
 const isLikelyOffline = () => {
   if (now() < state.offlineUntil) return true;
   if (globalThis?.navigator?.onLine === false) return true;
@@ -66,12 +101,16 @@ const resolveCandidateUrls = (domain = '') => {
   const normalized = normalizeDomain(domain);
   const known = resolveKnownDomain(normalized);
   const candidates = [];
+  const root = resolveRootDomain(normalized);
+  const domains = root && root !== normalized ? [normalized, root] : [normalized];
 
   if (known && KNOWN_FAVICON_URLS[known]) candidates.push(...KNOWN_FAVICON_URLS[known]);
-  candidates.push(`https://www.${normalized}/favicon.ico`);
-  candidates.push(`https://${normalized}/favicon.ico`);
-  candidates.push(`https://icons.duckduckgo.com/ip3/${normalized}.ico`);
-  candidates.push(`https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(normalized)}`);
+  domains.forEach((item) => {
+    candidates.push(`https://www.${item}/favicon.ico`);
+    candidates.push(`https://${item}/favicon.ico`);
+    candidates.push(`https://icons.duckduckgo.com/ip3/${item}.ico`);
+    candidates.push(`https://www.google.com/s2/favicons?sz=64&domain=${encodeURIComponent(item)}`);
+  });
 
   return [...new Set(candidates)];
 };
