@@ -98,7 +98,7 @@ export const style = StyleSheet.create({
     flexShrink: 0,
     paddingHorizontal: '$viewOffset',
     paddingTop: '$spaceM',
-    paddingBottom: '$spaceM',
+    paddingBottom: '$spaceXS',
   },
 
   footerReveal: {

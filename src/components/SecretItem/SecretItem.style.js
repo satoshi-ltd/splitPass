@@ -22,6 +22,11 @@ export const style = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
+  thumbnailImage: {
+    borderRadius: '$spaceXXS',
+    height: '$spaceM + $spaceXXS',
+    width: '$spaceM + $spaceXXS',
+  },
 
   favorite: {
     backgroundColor: '$colorAccent',

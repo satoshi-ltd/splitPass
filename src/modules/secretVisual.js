@@ -63,6 +63,33 @@ const SERVICE_ICON_CATALOG = [
 const SERVICE_ICON_MAP = Object.fromEntries(SERVICE_ICON_CATALOG.map(({ brand, icon }) => [brand, icon]));
 
 const normalize = (value = '') => `${value}`.trim().toLowerCase();
+const WEBSITE_PATTERN = /((?:https?:\/\/)?(?:www\.)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+)/i;
+const DOMAIN_HINTS = {
+  atlassian: 'atlassian.com',
+  attlasian: 'atlassian.com',
+  booking: 'booking.com',
+  coins: 'coins.co.th',
+  currenxie: 'currenxie.com',
+  dribbble: 'dribbble.com',
+};
+
+const normalizeWebsiteDomain = (value = '') => {
+  const normalized = normalize(value)
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .split(/[/?#:]/)[0]
+    .replace(/\.+$/, '');
+  if (!normalized || !/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(normalized)) return '';
+
+  const parts = normalized.split('.');
+  const hasInvalidPart = parts.some((part) => !part || part.startsWith('-') || part.endsWith('-'));
+  if (hasInvalidPart) return '';
+
+  const tld = parts[parts.length - 1] || '';
+  if (!/^[a-z]{2,63}$/.test(tld)) return '';
+
+  return normalized;
+};
 
 const normalizeWords = (...values) =>
   values
@@ -84,6 +111,23 @@ const findServiceEntry = (haystack = '') =>
   SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => hasKeywordMatch(haystack, keyword)));
 
 const findServiceEntryByBrand = (brand = '') => SERVICE_ICON_CATALOG.find(({ brand: entryBrand }) => entryBrand === normalize(brand));
+
+const extractWebsiteDomain = (...values) => {
+  for (const value of values) {
+    const text = `${value || ''}`.trim();
+    if (!text) continue;
+
+    const match = text.match(WEBSITE_PATTERN);
+    const domain = normalizeWebsiteDomain(match ? match[1] : text);
+    if (domain) return domain;
+  }
+
+  const hintsHaystack = normalizeWords(...values);
+  const hinted = Object.entries(DOMAIN_HINTS).find(([keyword]) => hasKeywordMatch(hintsHaystack, keyword));
+  if (hinted) return hinted[1];
+
+  return '';
+};
 
 const detectCardBrand = (digits = '') => {
   if (!digits) return undefined;
@@ -147,4 +191,4 @@ const resolveSecretIcon = ({ kind, brand, name, type } = {}) => {
   return type;
 };
 
-export { deriveSecretVisual, resolveSecretIcon };
+export { deriveSecretVisual, extractWebsiteDomain, resolveSecretIcon };

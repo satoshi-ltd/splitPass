@@ -113,7 +113,6 @@ const SecretFooterContent = ({
   const normalizedValue = `${value}`.trim();
   const contentLength = normalizedValue.replace(/\s+/g, ' ').length;
   const isPasscodeReady = passcodeValue.length === 6;
-  const useTopAlignedRow = (isSeed || isCard) && actionCount > 0;
   const isCompactValue = valueVariant === 'totp';
   const showTotpCountdown = isCompactValue && Number.isFinite(totpExpiresIn);
   const useTitleSize = !isSeed && !isCard && contentLength > 0 && contentLength <= (actionCount >= 2 ? 10 : 12);
@@ -182,13 +181,15 @@ const SecretFooterContent = ({
         </View>
 
         {onShardAction || showMenu ? (
-          <View style={styles.actionsWrap}>
-            {onShardAction ? (
-              <Button icon={ICON.SCAN} onPress={onShardAction} size="m" tone={contrastTone} variant="outlined" />
-            ) : null}
-            {showMenu ? (
-              <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" />
-            ) : null}
+          <View style={styles.controlsWrap}>
+            <View style={styles.actionsWrap}>
+              {onShardAction ? (
+                <Button icon={ICON.SCAN} onPress={onShardAction} size="m" tone={contrastTone} variant="outlined" />
+              ) : null}
+              {showMenu ? (
+                <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" />
+              ) : null}
+            </View>
           </View>
         ) : null}
       </View>
@@ -196,42 +197,89 @@ const SecretFooterContent = ({
   }
 
   return (
-    <View style={[styles.valueRow, useTopAlignedRow && styles.valueRowTopAligned]}>
-      {isCard && cardValue?.number ? (
-        <View style={styles.cardValueWrap}>
-          <Text
-            adjustsFontSizeToFit
-            bold
-            ellipsizeMode="clip"
-            minimumFontScale={0.72}
-            numberOfLines={1}
-            size="l"
-            style={styles.cardNumberText}
-            tone={textTone}
-          >
-            {cardValue.number}
-          </Text>
-
-          {cardValue.expire || cardValue.cvv ? (
-            <View style={styles.cardMetaRow}>
-              <Text bold size="s" style={styles.cardMetaText} tone={textTone}>
-                {[cardValue.expire, cardValue.cvv].filter(Boolean).join('   ')}
-              </Text>
-            </View>
-          ) : null}
-        </View>
-      ) : isCompactValue ? (
-        <View style={styles.totpWrap}>
-          <View style={styles.totpTextBlock}>
-            <Text bold size="xl" style={styles.totpCodeText} tone={totpTone}>
-              {value}
+    <View style={styles.valueRow}>
+      <View style={styles.valueMain}>
+        {isCard && cardValue?.number ? (
+          <View style={styles.cardValueWrap}>
+            <Text
+              adjustsFontSizeToFit
+              bold
+              ellipsizeMode="clip"
+              minimumFontScale={0.72}
+              numberOfLines={1}
+              size="l"
+              style={styles.cardNumberText}
+              tone={textTone}
+            >
+              {cardValue.number}
             </Text>
+            {cardValue.expire || cardValue.cvv ? (
+              <View style={styles.cardMetaRow}>
+                <Text bold size="s" style={styles.cardMetaText} tone={textTone}>
+                  {[cardValue.expire, cardValue.cvv].filter(Boolean).join('   ')}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        ) : isCompactValue ? (
+          <View style={styles.totpWrap}>
+            <View style={styles.totpTextBlock}>
+              <Text bold size="xl" style={styles.totpCodeText} tone={totpTone}>
+                {value}
+              </Text>
+              {valueCaption ? (
+                <Text size="s" style={[styles.valueCaption, styles.totpCaptionText]} tone={textTone}>
+                  {valueCaption}
+                </Text>
+              ) : null}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.valueBlock}>
+            {isSeed ? (
+              <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
+                {value}
+              </Text>
+            ) : (
+              <View style={styles.valueWrap}>
+                {getSecretValueTokens(value).map((token, index) => {
+                  if (/^\s+$/.test(token)) {
+                    return (
+                      <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
+                        {token}
+                      </Text>
+                    );
+                  }
+
+                  return (
+                    <View key={`${token}-${index}`} style={styles.valueGroup}>
+                      {token.split('').map((character, charIndex) => (
+                        <Text
+                          key={`${character}-${index}-${charIndex}`}
+                          bold
+                          size={valueSize}
+                          style={valueTextStyle}
+                          tone={/\d/.test(character) ? digitTone : textTone}
+                        >
+                          {character}
+                        </Text>
+                      ))}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
             {valueCaption ? (
-              <Text size="s" style={[styles.valueCaption, styles.totpCaptionText]} tone={textTone}>
+              <Text size="s" style={styles.valueCaption} tone={textTone}>
                 {valueCaption}
               </Text>
             ) : null}
           </View>
+        )}
+      </View>
+
+      {showTotpCountdown || showReveal || showCopy || showMenu ? (
+        <View style={styles.controlsWrap}>
           {showTotpCountdown ? (
             <TotpCountdownRing
               colors={colors}
@@ -241,74 +289,32 @@ const SecretFooterContent = ({
               styles={styles}
             />
           ) : null}
-        </View>
-      ) : (
-        <View style={styles.valueBlock}>
-          {isSeed ? (
-            <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
-              {value}
-            </Text>
-          ) : (
-            <View style={styles.valueWrap}>
-              {getSecretValueTokens(value).map((token, index) => {
-                if (/^\s+$/.test(token)) {
-                  return (
-                    <Text key={`${token}-${index}`} bold size={valueSize} style={valueTextStyle} tone={textTone}>
-                      {token}
-                    </Text>
-                  );
-                }
-
-                return (
-                  <View key={`${token}-${index}`} style={styles.valueGroup}>
-                    {token.split('').map((character, charIndex) => (
-                      <Text
-                        key={`${character}-${index}-${charIndex}`}
-                        bold
-                        size={valueSize}
-                        style={valueTextStyle}
-                        tone={/\d/.test(character) ? digitTone : textTone}
-                      >
-                        {character}
-                      </Text>
-                    ))}
-                  </View>
-                );
-              })}
+          {showReveal || showCopy || showMenu ? (
+            <View style={styles.actionsWrap}>
+              {showReveal ? (
+                <Button
+                  disabled={disableReveal}
+                  icon={revealIcon}
+                  onPress={onToggleReveal}
+                  size="m"
+                  tone={contrastTone}
+                  variant="outlined"
+                />
+              ) : null}
+              {showCopy ? (
+                <Button
+                  disabled={disableCopy}
+                  icon={ICON.COPY}
+                  onPress={onCopy}
+                  size="m"
+                  tone={contrastTone}
+                  variant="outlined"
+                />
+              ) : null}
+              {showMenu ? (
+                <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" />
+              ) : null}
             </View>
-          )}
-          {valueCaption ? (
-            <Text size="s" style={styles.valueCaption} tone={textTone}>
-              {valueCaption}
-            </Text>
-          ) : null}
-        </View>
-      )}
-
-      {showReveal || showCopy || showMenu ? (
-        <View style={[styles.actionsWrap, useTopAlignedRow && styles.actionsWrapTopAligned]}>
-          {showReveal ? (
-            <Button
-              disabled={disableReveal}
-              icon={revealIcon}
-              onPress={onToggleReveal}
-              size="m"
-              tone={contrastTone}
-              variant="outlined"
-            />
-          ) : null}
-          {showCopy ? (
-            <Button
-              disabled={disableCopy}
-              icon={ICON.COPY}
-              onPress={onCopy}
-              size="m"
-              tone={contrastTone}
-              variant="outlined"
-            />
-          ) : null}
-          {showMenu ? (
-            <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" />
           ) : null}
         </View>
       ) : null}

@@ -152,7 +152,7 @@ export const style = StyleSheet.create({
   },
 
   footerInner: {
-    paddingBottom: '$spaceM',
+    paddingBottom: '$spaceXS',
     paddingHorizontal: '$viewOffset',
     paddingTop: '$spaceM',
   },

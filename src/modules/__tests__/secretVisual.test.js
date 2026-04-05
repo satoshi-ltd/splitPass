@@ -1,4 +1,4 @@
-import { deriveSecretVisual, resolveSecretIcon } from '../secretVisual';
+import { deriveSecretVisual, extractWebsiteDomain, resolveSecretIcon } from '../secretVisual';
 
 describe('secretVisual matching', () => {
   it('does not match X/Twitter on arbitrary x characters', () => {
@@ -26,5 +26,16 @@ describe('secretVisual matching', () => {
   it('uses the same icon matching policy for TOTP as other secrets', () => {
     expect(resolveSecretIcon({ brand: 'github', kind: 'totp', name: 'github', type: 'shield-key-outline' })).toBe('github');
     expect(resolveSecretIcon({ kind: 'totp', name: 'unknown service', type: 'shield-key-outline' })).toBe('shield-key-outline');
+  });
+
+  it('extracts website-like domains from website or name fields', () => {
+    expect(extractWebsiteDomain('https://www.github.com/login')).toBe('github.com');
+    expect(extractWebsiteDomain(undefined, 'Work account on stripe.com')).toBe('stripe.com');
+    expect(extractWebsiteDomain(undefined, 'Booking')).toBe('booking.com');
+    expect(extractWebsiteDomain(undefined, 'Attlasian workspace')).toBe('atlassian.com');
+    expect(extractWebsiteDomain(undefined, 'coins')).toBe('coins.co.th');
+    expect(extractWebsiteDomain(undefined, 'Currenxie')).toBe('currenxie.com');
+    expect(extractWebsiteDomain(undefined, 'Dribbble profile')).toBe('dribbble.com');
+    expect(extractWebsiteDomain(undefined, 'github')).toBe('');
   });
 });

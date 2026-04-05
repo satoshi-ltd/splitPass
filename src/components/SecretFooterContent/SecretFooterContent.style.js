@@ -50,48 +50,51 @@ const getStyles = (colors, contrast) => {
       minHeight: theme.spacing.xxl + theme.spacing.md,
       width: '100%',
     },
-    valueRowTopAligned: {
-      alignItems: 'flex-start',
+    valueMain: {
+      flex: 1,
+      justifyContent: 'center',
+      minHeight: theme.spacing.xl + theme.spacing.sm,
+      minWidth: 0,
     },
     valueWrap: {
       alignItems: 'flex-start',
-      flex: 1,
       flexDirection: 'row',
       flexWrap: 'wrap',
       gap: 0,
+      width: '100%',
       minWidth: 0,
     },
     totpWrap: {
-      alignItems: 'center',
+      alignItems: 'flex-start',
       flex: 1,
-      flexDirection: 'row',
-      gap: theme.spacing.sm,
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       minWidth: 0,
       padding: 0,
     },
     totpTextBlock: {
-      flex: 1,
       gap: theme.spacing.xs,
+      justifyContent: 'center',
       minWidth: 0,
+      width: '100%',
     },
     valueBlock: {
       flex: 1,
       gap: theme.spacing.xxs,
+      justifyContent: 'center',
       minWidth: 0,
     },
     seedValueText: {
       flexShrink: 1,
       minWidth: 0,
-      paddingBottom: theme.spacing.xs,
     },
     valueCaption: {
       opacity: 0.82,
     },
     totpCodeText: {
       fontSize: theme.typography.sizes.title,
+      includeFontPadding: false,
       letterSpacing: 2,
-      lineHeight: theme.typography.sizes.title,
+      lineHeight: theme.typography.lineHeights.title,
     },
     totpCaptionText: {
       fontSize: theme.typography.sizes.caption,
@@ -135,11 +138,15 @@ const getStyles = (colors, contrast) => {
       flexShrink: 0,
       flexDirection: 'row',
       gap: theme.spacing.sm,
-      marginLeft: theme.spacing.md,
     },
-    actionsWrapTopAligned: {
-      alignSelf: 'flex-start',
-      marginTop: theme.spacing.xxs,
+    controlsWrap: {
+      alignItems: 'center',
+      alignSelf: 'center',
+      flexDirection: 'row',
+      flexShrink: 0,
+      gap: theme.spacing.sm,
+      marginLeft: theme.spacing.md,
+      minHeight: theme.spacing.xl + theme.spacing.sm,
     },
     valueGroup: {
       alignItems: 'center',
@@ -148,6 +155,7 @@ const getStyles = (colors, contrast) => {
     cardValueWrap: {
       flex: 1,
       gap: theme.spacing.xxs,
+      justifyContent: 'center',
       minWidth: 0,
     },
     cardNumberText: {

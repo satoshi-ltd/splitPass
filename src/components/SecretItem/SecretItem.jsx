@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Image } from 'react-native';
 
 import { style } from './SecretItem.style';
 import { SECRET_TYPE, SHARD_TYPES } from '../../App.constants';
 import { Icon, Pressable, Text, View } from '../../design-system';
-import { ICON, L10N, QRParser, resolveSecretIcon } from '../../modules';
+import { extractWebsiteDomain, ICON, L10N, QRParser, resolveSecretIcon } from '../../modules';
+import { FaviconService } from '../../services';
 
 const SHARD_SHARES = 3;
 
@@ -93,17 +95,53 @@ const resolveIconFallback = (type) => {
   }
 };
 
-const SecretItem = ({ brand, favorite = false, kind, name, username, value = '', onPress }) => {
+const SecretItem = ({ brand, favorite = false, kind, name, username, value = '', website, onPress }) => {
   const [type] = value;
+  const [faviconFailed, setFaviconFailed] = useState(false);
+  const [faviconUri, setFaviconUri] = useState('');
   const shardIndex = SHARD_TYPES.includes(type) ? resolveShardIndex(type, value) : undefined;
   const iconName = resolveSecretIcon({ brand, kind, name, type: resolveIconFallback(type) });
   const subtitle = resolveSecretSubtitle({ type, username });
+  const faviconDomain = useMemo(() => extractWebsiteDomain(website, name), [name, website]);
+
+  useEffect(() => {
+    setFaviconFailed(false);
+    setFaviconUri('');
+  }, [faviconDomain]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!faviconDomain) return undefined;
+
+    const loadFavicon = async () => {
+      const nextUri = await FaviconService.resolve(faviconDomain);
+      if (!cancelled) setFaviconUri(nextUri || '');
+    };
+
+    loadFavicon();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [faviconDomain]);
 
   return (
     <Pressable onPress={onPress}>
       <View row style={style.item}>
         <View style={[style.thumbnail, favorite && style.favorite]}>
-          <Icon tone={favorite ? 'onAccent' : 'primary'} name={iconName} />
+          {faviconUri && !faviconFailed ? (
+            <Image
+              source={{ uri: faviconUri }}
+              style={style.thumbnailImage}
+              onError={() => {
+                FaviconService.invalidate(faviconDomain);
+                setFaviconFailed(true);
+              }}
+            />
+          ) : (
+            <Icon tone={favorite ? 'onAccent' : 'primary'} name={iconName} />
+          )}
           {shardIndex ? (
             <Text
               bold
@@ -142,6 +180,7 @@ SecretItem.propTypes = {
   name: PropTypes.string,
   username: PropTypes.string,
   value: PropTypes.string,
+  website: PropTypes.string,
   onPress: PropTypes.func,
 };
 
