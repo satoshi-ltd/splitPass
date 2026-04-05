@@ -22,4 +22,9 @@ describe('secretVisual matching', () => {
     expect(resolveSecretIcon({ brand: 'x', name: 'expo', type: 'qrcode' })).toBe('qrcode');
     expect(resolveSecretIcon({ brand: 'x', name: 'docker', type: 'qrcode' })).toBe('docker');
   });
+
+  it('uses the same icon matching policy for TOTP as other secrets', () => {
+    expect(resolveSecretIcon({ brand: 'github', kind: 'totp', name: 'github', type: 'shield-key-outline' })).toBe('github');
+    expect(resolveSecretIcon({ kind: 'totp', name: 'unknown service', type: 'shield-key-outline' })).toBe('shield-key-outline');
+  });
 });

@@ -133,7 +133,6 @@ const deriveSecretVisual = ({ name, secret } = {}) => {
 
 const resolveSecretIcon = ({ kind, brand, name, type } = {}) => {
   if (kind === 'card') return 'credit-card-outline';
-  if (kind === 'totp') return 'shield-key-outline';
 
   const haystack = normalizeWords(name);
   const matched = findServiceEntry(haystack);
