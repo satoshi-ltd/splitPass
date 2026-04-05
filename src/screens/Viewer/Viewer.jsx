@@ -122,6 +122,8 @@ const Viewer = ({ route, navigation = {} }) => {
     : getMaskedCardValue(cardValue.canonical);
   const isSeed = !isCard && !isTotp && /\s/.test(decodedSecret);
   const footerTotpCode = totpState?.code || '------';
+  const footerTotpExpiresIn = totpState?.expiresIn;
+  const footerTotpPeriod = totpState?.period;
   const footerTotpCaption = totpState?.expiresIn ? L10N.TOTP_COUNTDOWN({ seconds: totpState.expiresIn }) : '';
   const createFlowShard = returnToMain && readMode && is.shard;
   const canEditSecretValue = hash && !createFlowShard && !is.shard && !isCard && !isTotp && !is.secure && !locked;
@@ -425,8 +427,10 @@ const Viewer = ({ route, navigation = {} }) => {
             shardLabel={shardLabel}
             showCopy={!createFlowShard}
             showReveal={!createFlowShard && !isTotp}
+            totpExpiresIn={isTotp ? footerTotpExpiresIn : undefined}
+            totpPeriod={isTotp ? footerTotpPeriod : undefined}
             value={isTotp ? footerTotpCode : footerSecret}
-            valueCaption={isTotp ? footerTotpCaption : undefined}
+            valueCaption={isTotp && !footerTotpExpiresIn ? footerTotpCaption : undefined}
             valueVariant={isTotp ? 'totp' : 'default'}
           />
         </View>
