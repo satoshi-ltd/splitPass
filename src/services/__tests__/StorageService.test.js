@@ -100,7 +100,20 @@ describe('StorageService secure lifecycle', () => {
         secrets: [],
         settings: { ...DEFAULTS.settings, onboarded: true },
       });
-      await sourceStore.get('secrets').save({ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' });
+      await sourceStore.get('secrets').save([
+        { hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' },
+        {
+          account: 'satoshi',
+          algorithm: 'SHA1',
+          digits: 6,
+          hash: 'secret:2',
+          issuer: 'GitHub',
+          kind: 'totp',
+          name: 'GitHub 2FA',
+          period: 30,
+          value: 'otpauth://totp/GitHub:satoshi?secret=JBSWY3DPEHPK3PXP&issuer=GitHub',
+        },
+      ]);
 
       const backup = await sourceStore.exportBackup();
 
@@ -130,7 +143,20 @@ describe('StorageService secure lifecycle', () => {
       });
       const unlocked = await rebootedTargetStore.unlock(passphrase);
 
-      expect(unlocked.secrets).toEqual([{ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' }]);
+      expect(unlocked.secrets).toEqual([
+        { hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' },
+        {
+          account: 'satoshi',
+          algorithm: 'SHA1',
+          digits: 6,
+          hash: 'secret:2',
+          issuer: 'GitHub',
+          kind: 'totp',
+          name: 'GitHub 2FA',
+          period: 30,
+          value: 'otpauth://totp/GitHub:satoshi?secret=JBSWY3DPEHPK3PXP&issuer=GitHub',
+        },
+      ]);
     },
   );
 });
