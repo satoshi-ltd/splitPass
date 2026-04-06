@@ -21,7 +21,18 @@ import {
   Text,
   View,
 } from '../../design-system';
-import { eventEmitter, getTOTPState, ICON, isTOTPURI, L10N, openConfirm, parseTOTPURI, QRParser } from '../../modules';
+import {
+  eventEmitter,
+  getSecretRisk,
+  getSecretRiskMap,
+  getTOTPState,
+  ICON,
+  isTOTPURI,
+  L10N,
+  openConfirm,
+  parseTOTPURI,
+  QRParser,
+} from '../../modules';
 import {
   formatCardNumber,
   getMaskedCardValue,
@@ -76,6 +87,17 @@ const Viewer = ({ route, navigation = {} }) => {
   const [totpState, setTotpState] = useState();
 
   const persistedSecret = hash ? (secrets || []).find((secret) => secret.hash === hash) : undefined;
+  const riskMap = useMemo(() => getSecretRiskMap(secrets), [secrets]);
+  const secretRisk = useMemo(() => getSecretRisk(persistedSecret, riskMap), [persistedSecret, riskMap]);
+  const hasRisk = secretRisk.isMediocre || secretRisk.isRepeated;
+  const riskText =
+    secretRisk.isMediocre && secretRisk.isRepeated
+      ? L10N.RISK_MESSAGE_COMBINED
+      : secretRisk.isRepeated
+      ? L10N.RISK_MESSAGE_REPEATED
+      : secretRisk.isMediocre
+      ? L10N.RISK_MESSAGE_MEDIOCRE
+      : '';
   const currentValue = values[currentIndex] || values[0] || '';
   const resolvedName = persistedSecret?.name ?? name;
   const resolvedNotes = persistedSecret?.notes ?? notes;
@@ -388,6 +410,13 @@ const Viewer = ({ route, navigation = {} }) => {
             {lastOpenedLabel}
           </Text>
         ) : null}
+        {hasRisk ? (
+          <View row style={style.riskNotice}>
+            <Text semibold numberOfLines={1} ellipsizeMode="tail" size="s" tone="warning" style={style.riskNoticeText}>
+              {riskText}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <Pressable onPress={() => setShowMenu((current) => !current)} style={style.headerAction}>
@@ -404,7 +433,10 @@ const Viewer = ({ route, navigation = {} }) => {
 
   const footer = (
     <View style={[style.footer, theme === 'dark' ? style.footerLight : style.footerDark]}>
-      <SafeAreaView edges={['bottom']} style={[style.footerSafeArea, theme === 'dark' ? style.footerLight : style.footerDark]}>
+      <SafeAreaView
+        edges={['bottom']}
+        style={[style.footerSafeArea, theme === 'dark' ? style.footerLight : style.footerDark]}
+      >
         <View style={style.footerInner}>
           <SecretFooterContent
             cardValue={footerCardValue}

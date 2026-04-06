@@ -9,5 +9,6 @@ export * from './l10n';
 export * from './passwordGenerator';
 export * from './persistenceCrypto';
 export * from './QRParser';
+export * from './secretRisk';
 export * from './secretVisual';
 export * from './totp';

@@ -47,6 +47,15 @@ export const style = StyleSheet.create({
     opacity: 1,
   },
 
+  riskNotice: {
+    alignItems: 'flex-start',
+  },
+
+  riskNoticeText: {
+    flex: 1,
+    includeFontPadding: false,
+  },
+
   menuWrap: {
     position: 'absolute',
     right: 0,

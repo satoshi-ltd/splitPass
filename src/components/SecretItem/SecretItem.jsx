@@ -96,7 +96,18 @@ const resolveIconFallback = (type) => {
   }
 };
 
-const SecretItem = ({ brand, favorite = false, kind, name, username, value = '', website, onPress }) => {
+const SecretItem = ({
+  brand,
+  favorite = false,
+  isMediocre = false,
+  isRepeated = false,
+  kind,
+  name,
+  username,
+  value = '',
+  website,
+  onPress,
+}) => {
   const { settings } = useStore();
   const [type] = value;
   const [faviconFailed, setFaviconFailed] = useState(false);
@@ -168,7 +179,8 @@ const SecretItem = ({ brand, favorite = false, kind, name, username, value = '',
           ) : null}
         </View>
 
-        <View style={style.action}>
+        <View row style={style.action}>
+          {isMediocre || isRepeated ? <Icon name={ICON.WARNING} size="s" tone="warning" /> : null}
           <Icon name={ICON.DOTS} size="s" tone="secondary" />
         </View>
       </View>
@@ -179,6 +191,8 @@ const SecretItem = ({ brand, favorite = false, kind, name, username, value = '',
 SecretItem.propTypes = {
   brand: PropTypes.string,
   favorite: PropTypes.bool,
+  isMediocre: PropTypes.bool,
+  isRepeated: PropTypes.bool,
   kind: PropTypes.string,
   name: PropTypes.string,
   username: PropTypes.string,

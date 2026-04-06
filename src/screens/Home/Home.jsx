@@ -5,12 +5,14 @@ import { style } from './Home.style';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Icon, Input, Pressable, Text, View } from '../../design-system';
-import { getSecretStrength, ICON, L10N } from '../../modules';
+import { getSecretRiskMap, getSecretStrength, ICON, L10N } from '../../modules';
 
 const getSecretSortTime = ({ createdAt, readAt } = {}) => {
   const timestamp = new Date(readAt || createdAt || 0).getTime();
   return Number.isFinite(timestamp) ? timestamp : 0;
 };
+const compareSecretsByName = (a = {}, b = {}) =>
+  (a.name || '').localeCompare(b.name || '') || (a.username || '').localeCompare(b.username || '');
 const serializeRouteDate = (value) =>
   value && typeof value === 'object' && typeof value.toISOString === 'function' ? value.toISOString() : value;
 
@@ -27,6 +29,7 @@ const Home = ({ navigation }) => {
 
     return sortedSecrets.filter(({ name = '', username = '' }) => `${name} ${username}`.toLowerCase().includes(needle));
   }, [search, sortedSecrets]);
+  const secretRiskMap = useMemo(() => getSecretRiskMap(secrets), [secrets]);
   const strongCount = filteredSecrets.filter((secret) => getSecretStrength(secret) === 'strong').length;
   const mediocreCount = filteredSecrets.length - strongCount;
   const summaryCountText = filteredSecrets.length === 0 ? L10N.HOME_SUBTITLE_EMPTY : `${filteredSecrets.length}`;
@@ -55,12 +58,7 @@ const Home = ({ navigation }) => {
     }, {});
 
     return Object.fromEntries(
-      Object.entries(grouped).map(([letter, items = []]) => [
-        letter,
-        [...items].sort((a, b) =>
-          (a.name || '').localeCompare(b.name || '') || (a.username || '').localeCompare(b.username || ''),
-        ),
-      ]),
+      Object.entries(grouped).map(([letter, items = []]) => [letter, [...items].sort(compareSecretsByName)]),
     );
   }, [filteredSecrets]);
   const orderedSections = useMemo(
@@ -122,6 +120,8 @@ const Home = ({ navigation }) => {
               <SecretItem
                 key={secret.hash}
                 {...secret}
+                isMediocre={!!secretRiskMap?.[secret.hash]?.isMediocre}
+                isRepeated={!!secretRiskMap?.[secret.hash]?.isRepeated}
                 onPress={() =>
                   navigation.navigate('secret', {
                     brand: secret.brand,
@@ -149,6 +149,8 @@ const Home = ({ navigation }) => {
               <SecretItem
                 key={secret.hash}
                 {...secret}
+                isMediocre={!!secretRiskMap?.[secret.hash]?.isMediocre}
+                isRepeated={!!secretRiskMap?.[secret.hash]?.isRepeated}
                 onPress={() =>
                   navigation.navigate('secret', {
                     brand: secret.brand,

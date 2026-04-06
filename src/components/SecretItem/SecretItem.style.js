@@ -56,7 +56,9 @@ export const style = StyleSheet.create({
 
   action: {
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '$spaceM',
+    flexDirection: 'row',
+    gap: '$spaceXXS',
+    justifyContent: 'flex-end',
+    width: '$spaceL + $spaceM',
   },
 });
