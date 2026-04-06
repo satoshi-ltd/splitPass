@@ -1,11 +1,11 @@
 import { useFocusEffect } from '@react-navigation/native';
-import { View } from '../../design-system';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import PropTypes from 'prop-types';
+import PropTypes from 'react';
 import React, { useCallback, useState } from 'react';
 
 import { Frame } from './components';
 import { style } from './Scanner.style';
+import { View } from '../../design-system';
 const ScannerQR = ({ camera = false, frame = false, onRead, scanning }) => {
   const [permission, requestPermission] = useCameraPermissions();
 

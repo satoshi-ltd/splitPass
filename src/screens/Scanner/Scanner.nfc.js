@@ -1,9 +1,9 @@
-import { View } from '../../design-system';
-import PropTypes from 'prop-types';
+import PropTypes from 'react';
 import React from 'react';
 
 import { style } from './Scanner.style';
 import { NFCCard } from '../../components';
+import { View } from '../../design-system';
 
 const ScannerNFC = ({ onRead = () => {}, onTag, writeMode = false }) => (
   <View align="center" style={style.scannerNFC}>
@@ -16,7 +16,12 @@ ScannerNFC.propTypes = {
   onTag: PropTypes.func,
   writeMode: PropTypes.oneOfType([
     PropTypes.bool,
-    PropTypes.shape({ name: PropTypes.string, notes: PropTypes.string, value: PropTypes.string, username: PropTypes.string }),
+    PropTypes.shape({
+      name: PropTypes.string,
+      notes: PropTypes.string,
+      value: PropTypes.string,
+      username: PropTypes.string,
+    }),
   ]),
 };
 
