@@ -375,16 +375,16 @@ const Viewer = ({ route, navigation = {} }) => {
       <HeaderBackButton onPress={handleBack} />
 
       <View style={style.headerText}>
-        <Text bold size="xl" tone="accent">
+        <Text bold numberOfLines={1} ellipsizeMode="tail" size="l" tone="accent">
           {resolvedName}
         </Text>
         {resolvedUsername || (isTotp && parsedTOTP?.account) ? (
-          <Text numberOfLines={1} size="l" tone="secondary" style={style.website}>
+          <Text semibold numberOfLines={1} ellipsizeMode="tail" tone="primary" style={style.subtitle}>
             {resolvedUsername || parsedTOTP?.account}
           </Text>
         ) : null}
         {hash ? (
-          <Text numberOfLines={1} size="s" tone="secondary" style={style.website}>
+          <Text numberOfLines={1} ellipsizeMode="tail" size="s" tone="secondary" style={style.caption}>
             {lastOpenedLabel}
           </Text>
         ) : null}

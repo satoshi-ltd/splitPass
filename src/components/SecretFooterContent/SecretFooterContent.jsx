@@ -115,6 +115,7 @@ const SecretFooterContent = ({
   const isPasscodeReady = passcodeValue.length === 6;
   const isCompactValue = valueVariant === 'totp';
   const showTotpCountdown = isCompactValue && Number.isFinite(totpExpiresIn);
+  const isSingleTokenValue = normalizedValue.length > 0 && !/\s/.test(normalizedValue);
   const useTitleSize = !isSeed && !isCard && contentLength > 0 && contentLength <= (actionCount >= 2 ? 10 : 12);
   const useBodySize = isCard || (!isSeed && contentLength > (actionCount >= 2 ? 14 : 18));
   const useCaptionSize = isSeed || contentLength > (actionCount >= 2 ? 24 : 30);
@@ -240,6 +241,20 @@ const SecretFooterContent = ({
               <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
                 {value}
               </Text>
+            ) : isSingleTokenValue ? (
+              <View style={[styles.valueWrap, styles.singleValueWrap]}>
+                {value.split('').map((character, charIndex) => (
+                  <Text
+                    key={`${character}-${charIndex}`}
+                    bold
+                    size={valueSize}
+                    style={[styles.singleValueChar, valueTextStyle]}
+                    tone={/\d/.test(character) ? digitTone : textTone}
+                  >
+                    {character}
+                  </Text>
+                ))}
+              </View>
             ) : (
               <View style={styles.valueWrap}>
                 {getSecretValueTokens(value).map((token, index) => {

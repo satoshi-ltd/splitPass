@@ -12,11 +12,12 @@ export const style = StyleSheet.create({
   headerContainer: {
     backgroundColor: '$colorBase',
     paddingBottom: '$spaceM',
+    paddingHorizontal: '$spaceM',
   },
 
   header: {
     alignItems: 'center',
-    gap: '$spaceS',
+    gap: '$spaceXS',
     minHeight: '$spaceXL',
     paddingBottom: '$spaceXS',
     position: 'relative',
@@ -34,10 +35,16 @@ export const style = StyleSheet.create({
     gap: '$spaceXXS',
   },
 
-  website: {
+  subtitle: {
     color: '$colorContent',
     maxWidth: '95%',
-    opacity: 0.72,
+    opacity: 1,
+  },
+
+  caption: {
+    color: '$colorContentLight',
+    maxWidth: '95%',
+    opacity: 1,
   },
 
   menuWrap: {

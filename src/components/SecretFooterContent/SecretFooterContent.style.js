@@ -87,6 +87,15 @@ const getStyles = (colors, contrast) => {
       flexShrink: 1,
       minWidth: 0,
     },
+    singleValueWrap: {
+      flexShrink: 1,
+      maxWidth: '100%',
+      minWidth: 0,
+      width: '100%',
+    },
+    singleValueChar: {
+      flexShrink: 0,
+    },
     valueCaption: {
       opacity: 0.82,
     },
