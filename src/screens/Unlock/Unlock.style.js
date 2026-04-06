@@ -18,10 +18,16 @@ export const style = StyleSheet.create({
   },
   content: {
     gap: '$spaceL',
-    paddingTop: '$spaceS',
+    paddingTop: '$spaceM',
   },
   signInContent: {
     gap: '$spaceS',
+  },
+  formSection: {
+    marginTop: '$spaceS',
+  },
+  signInFormSection: {
+    marginTop: '$spaceXS',
   },
   form: {
     gap: '$spaceM',
@@ -36,27 +42,32 @@ export const style = StyleSheet.create({
     paddingVertical: 0,
   },
   biometricSecondaryButton: {
-    marginTop: '$spaceS',
+    marginTop: 0,
+  },
+  actions: {
+    gap: '$spaceXS',
+    marginTop: '$spaceL',
+  },
+  signInActions: {
+    marginTop: '$spaceM',
   },
   button: {
     borderRadius: '$borderRadius',
-    marginTop: '$spaceM',
     minHeight: '$spaceXL + $spaceS',
   },
   signInButton: {
     marginTop: 0,
   },
   setupButton: {
-    marginTop: '$spaceS',
+    marginTop: 0,
   },
   importButton: {
-    marginTop: '$spaceXS',
+    marginTop: 0,
   },
-  caption: {
-    flex: 1,
+  importCancelButton: {
+    marginTop: 0,
   },
-  setupCaption: {
-    flex: 0,
+  setupHint: {
     marginTop: '$spaceXXS',
   },
   fieldBox: {

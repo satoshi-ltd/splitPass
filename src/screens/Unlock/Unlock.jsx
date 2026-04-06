@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
 
+import { getUnlockModeFlags, resolveUnlockFailure } from './Unlock.helpers';
 import { style } from './Unlock.style';
 import { EVENT } from '../../App.constants';
 import { InputMask } from '../../components';
@@ -22,37 +23,39 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [form, setForm] = useState({ confirmPassphrase: '', passphrase: '' });
   const [submitting, setSubmitting] = useState(false);
-  const biometricEnabled = mode === 'unlock' && !!settings?.biometricUnlockEnabled;
-  const isImport = mode === 'import';
-  const isSignIn = mode === 'unlock';
-  const isSetup = mode === 'setup';
+  const { biometricEnabled, isImport, isSignIn, isSetup, showImportCancel } = getUnlockModeFlags(mode, settings);
+  const setupPassphraseValid = form.passphrase.length >= 8;
+  const setupConfirmValid = form.confirmPassphrase.length > 0 && form.passphrase === form.confirmPassphrase;
+  const setupSubmitDisabled = isSetup && (!setupPassphraseValid || !setupConfirmValid);
 
   const resolveUnlockError = async (error) => {
-    if (error?.code === 'ERR_PERSISTENCE_FORMAT') {
+    const resolution = resolveUnlockFailure({ errorCode: error?.code, failedAttempts });
+
+    if (resolution.type === 'storageReset') {
       await resetAppData();
       navigation.reset({ index: 0, routes: [{ name: 'onboarding' }] });
       eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_STORAGE_RESET });
       return;
     }
 
-    if (error?.code && error.code !== 'ERR_PERSISTENCE_UNLOCK_FAILED') {
+    if (resolution.type === 'genericError') {
       eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error?.message || L10N.ERROR });
       return;
     }
 
-    const nextFailedAttempts = failedAttempts + 1;
-    const remaining = Math.max(0, 3 - nextFailedAttempts);
+    setFailedAttempts(resolution.nextFailedAttempts);
 
-    setFailedAttempts(nextFailedAttempts);
-
-    if (nextFailedAttempts >= 3) {
+    if (resolution.type === 'wipeout') {
       await resetAppData();
       navigation.reset({ index: 0, routes: [{ name: 'onboarding' }] });
       eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_WIPEOUT });
       return;
     }
 
-    eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_INVALID({ remaining }) });
+    eventEmitter.emit(EVENT.NOTIFICATION, {
+      error: true,
+      text: L10N.MASTER_PASSPHRASE_INVALID({ remaining: resolution.remaining }),
+    });
   };
 
   const handleUnlocked = async (passphrase) => {
@@ -133,6 +136,24 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       ? L10N.UNLOCK_BACKUP_CAPTION
       : L10N.SIGNIN_SUBTITLE;
 
+  const submitSetup = async () => {
+    await setupSecurity(form.passphrase);
+    await updateSettings({ onboarded: true });
+    navigation.reset({ index: 0, routes: [{ name: 'main', params: { onboarding: true } }] });
+  };
+
+  const submitImport = async () => {
+    if (!backup) return;
+
+    await importBackup(backup, { passphrase: form.passphrase });
+    navigation.reset({ index: 0, routes: [{ name: 'main', params: { screen: 'secrets' } }] });
+    eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_IMPORT_SUCCESS, title: L10N.SUCCESS });
+  };
+
+  const submitUnlock = async () => {
+    await handleUnlocked(form.passphrase);
+  };
+
   const handleSubmit = async () => {
     if (form.passphrase.length < 8) {
       eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
@@ -146,21 +167,9 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     try {
       setSubmitting(true);
 
-      if (mode === 'setup') {
-        await setupSecurity(form.passphrase);
-        await updateSettings({ onboarded: true });
-        navigation.reset({ index: 0, routes: [{ name: 'main', params: { onboarding: true } }] });
-        return;
-      }
-
-      if (mode === 'import' && backup) {
-        await importBackup(backup, { passphrase: form.passphrase });
-        navigation.reset({ index: 0, routes: [{ name: 'main', params: { screen: 'secrets' } }] });
-        eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_IMPORT_SUCCESS, title: L10N.SUCCESS });
-        return;
-      }
-
-      await handleUnlocked(form.passphrase);
+      if (mode === 'setup') await submitSetup();
+      else if (mode === 'import') await submitImport();
+      else await submitUnlock();
     } catch (error) {
       if (mode === 'unlock') {
         await resolveUnlockError(error);
@@ -171,6 +180,17 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancelImport = () => {
+    if (!isImport) return;
+
+    if (typeof navigation?.canGoBack === 'function' && navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.reset({ index: 0, routes: [{ name: 'main' }] });
   };
 
   return (
@@ -192,64 +212,76 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
         headerContainerStyle={style.headerContainer}
         headerSafeAreaStyle={style.headerSafeArea}
       >
-        <View style={[style.form, isSignIn ? style.signInForm : null, isSetup ? style.setupForm : null]}>
-          <View style={[style.fieldBox, isSignIn ? style.signInFieldBox : null]}>
-            {!isSignIn && !isSetup && !isImport ? (
-              <Text semibold size="s" style={style.fieldLabel}>
-                {L10N.MASTER_PASSPHRASE}
-              </Text>
-            ) : null}
-            <InputMask
-              autoFocus
-              containerStyle={style.inputShell}
-              placeholder={L10N.MASTER_PASSPHRASE_PLACEHOLDER}
-              showToggle
-              style={style.inputField}
-              value={form.passphrase}
-              onChange={(passphrase) => setForm((current) => ({ ...current, passphrase }))}
-            />
-          </View>
-
-          {mode === 'setup' ? (
-            <View style={style.fieldBox}>
+        <View style={[style.formSection, isSignIn ? style.signInFormSection : null]}>
+          <View style={[style.form, isSignIn ? style.signInForm : null, isSetup ? style.setupForm : null]}>
+            <View style={[style.fieldBox, isSignIn ? style.signInFieldBox : null]}>
+              {!isSignIn && !isSetup && !isImport ? (
+                <Text semibold size="s" style={style.fieldLabel}>
+                  {L10N.MASTER_PASSPHRASE}
+                </Text>
+              ) : null}
               <InputMask
+                autoFocus
                 containerStyle={style.inputShell}
-                placeholder={L10N.MASTER_PASSPHRASE_CONFIRM}
+                placeholder={L10N.MASTER_PASSPHRASE_PLACEHOLDER}
                 showToggle
                 style={style.inputField}
-                value={form.confirmPassphrase}
-                onChange={(confirmPassphrase) => setForm((current) => ({ ...current, confirmPassphrase }))}
+                value={form.passphrase}
+                onChange={(passphrase) => setForm((current) => ({ ...current, passphrase }))}
               />
             </View>
-          ) : null}
 
-          {isSetup ? (
-            <Text size="xs" tone="secondary" style={[style.caption, style.setupCaption]}>
-              {L10N.MASTER_PASSPHRASE_HINT}
-            </Text>
-          ) : null}
+            {mode === 'setup' ? (
+              <View style={style.fieldBox}>
+                <InputMask
+                  containerStyle={style.inputShell}
+                  placeholder={L10N.MASTER_PASSPHRASE_CONFIRM}
+                  showToggle
+                  style={style.inputField}
+                  value={form.confirmPassphrase}
+                  onChange={(confirmPassphrase) => setForm((current) => ({ ...current, confirmPassphrase }))}
+                />
+                <Text size="xs" tone="secondary" style={style.setupHint}>
+                  {L10N.MASTER_PASSPHRASE_HINT}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
 
-        <Button
-          loading={submitting}
-          size="l"
-          style={[style.button, isSignIn ? style.signInButton : null, isSetup ? style.setupButton : null, isImport ? style.importButton : null]}
-          variant="primary"
-          onPress={handleSubmit}
-        >
-          {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.IMPORT : L10N.UNLOCK}
-        </Button>
-        {biometricEnabled ? (
+        <View style={[style.actions, isSignIn ? style.signInActions : null]}>
           <Button
-            loading={biometricSubmitting}
+            disabled={setupSubmitDisabled}
+            loading={submitting}
             size="l"
-            style={style.biometricSecondaryButton}
-            variant="outlined"
-            onPress={() => handleBiometricUnlock({ silent: false })}
+            style={[style.button, isSignIn ? style.signInButton : null, isSetup ? style.setupButton : null, isImport ? style.importButton : null]}
+            variant="primary"
+            onPress={handleSubmit}
           >
-            {L10N.BIOMETRIC_UNLOCK_BUTTON}
+            {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.IMPORT : L10N.UNLOCK}
           </Button>
-        ) : null}
+          {showImportCancel ? (
+            <Button
+              size="l"
+              style={style.importCancelButton}
+              variant="outlined"
+              onPress={handleCancelImport}
+            >
+              {L10N.CANCEL}
+            </Button>
+          ) : null}
+          {biometricEnabled ? (
+            <Button
+              loading={biometricSubmitting}
+              size="l"
+              style={style.biometricSecondaryButton}
+              variant="outlined"
+              onPress={() => handleBiometricUnlock({ silent: false })}
+            >
+              {L10N.BIOMETRIC_UNLOCK_BUTTON}
+            </Button>
+          ) : null}
+        </View>
       </AppScreen>
     </KeyboardAvoidingView>
   );

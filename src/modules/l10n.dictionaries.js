@@ -89,7 +89,7 @@ const EN = {
   LOGOUT: 'Logout',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirm passphrase',
-  MASTER_PASSPHRASE_HINT: 'Use at least 8 characters.',
+  MASTER_PASSPHRASE_HINT: 'Use 8+ characters. Better: 3-4 random words.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Incorrect master passphrase. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`
@@ -306,7 +306,7 @@ const ES = {
   LOGOUT: 'Cerrar sesion',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirma la passphrase',
-  MASTER_PASSPHRASE_HINT: 'Usa al menos 8 caracteres.',
+  MASTER_PASSPHRASE_HINT: 'Usa 8+ caracteres. Mejor: 3-4 palabras aleatorias.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorrecta. Quedan ${remaining} ${remaining === 1 ? 'intento' : 'intentos'}.`
@@ -503,7 +503,7 @@ const PT = {
   LOGOUT: 'Sair',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirmar passphrase',
-  MASTER_PASSPHRASE_HINT: 'Use pelo menos 8 caracteres.',
+  MASTER_PASSPHRASE_HINT: 'Use 8+ caracteres. Melhor: 3-4 palavras aleatorias.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorreta. Restam ${remaining} ${remaining === 1 ? 'tentativa' : 'tentativas'}.`
@@ -692,7 +692,7 @@ const FR = {
   LOGOUT: 'Se deconnecter',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirmer la passphrase',
-  MASTER_PASSPHRASE_HINT: 'Utilisez au moins 8 caracteres.',
+  MASTER_PASSPHRASE_HINT: 'Utilisez 8+ caracteres. Mieux: 3-4 mots aleatoires.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorrecte. Il reste ${remaining} ${remaining === 1 ? 'tentative' : 'tentatives'}.`
@@ -885,7 +885,7 @@ const DE = {
   LOGOUT: 'Abmelden',
   MASTER_PASSPHRASE: 'Master-Passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Passphrase bestaetigen',
-  MASTER_PASSPHRASE_HINT: 'Verwenden Sie mindestens 8 Zeichen.',
+  MASTER_PASSPHRASE_HINT: 'Verwenden Sie 8+ Zeichen. Besser: 3-4 zufaellige Woerter.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master-Passphrase falsch. Noch ${remaining} ${remaining === 1 ? 'Versuch' : 'Versuche'}.`
