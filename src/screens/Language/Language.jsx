@@ -1,9 +1,9 @@
-import { AppScreen, Card, HeaderBackButton, Icon, Pressable, Text, View } from '../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Language.style';
 import { useStore } from '../../contexts';
+import { AppScreen, Card, HeaderBackButton, Icon, Pressable, Text, View } from '../../design-system';
 import { getLanguageLabel, ICON, L10N, setLanguage } from '../../modules';
 import { NotificationsService } from '../../services';
 

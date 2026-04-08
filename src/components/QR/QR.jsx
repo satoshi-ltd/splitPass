@@ -6,11 +6,14 @@ import ViewShot from 'react-native-view-shot';
 
 import { calculatePieceSize } from './helpers/calculatePieceSize';
 import { style } from './Qr.style';
-import { View } from '../../design-system';
 import { useApp } from '../../contexts';
+import { View } from '../../design-system';
 
 const QR = React.forwardRef(
-  ({ backgroundColor, className, containerStyle, foregroundColor, pieceBorderRadius = 4, size, value = '', ...others }, ref) => {
+  (
+    { backgroundColor, className, containerStyle, foregroundColor, pieceBorderRadius = 4, size, value = '', ...others },
+    ref,
+  ) => {
     const { colors } = useApp();
     const defaultPieceSize = calculatePieceSize(value);
     const qrCodeSize = useMemo(() => {

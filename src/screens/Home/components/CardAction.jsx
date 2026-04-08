@@ -1,10 +1,10 @@
-import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './CardAction.style';
 import { DEFAULT_THEME } from '../../../App.constants';
 import { useStore } from '../../../contexts';
+import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
   const { settings: { theme } = {} } = useStore();

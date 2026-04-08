@@ -50,7 +50,9 @@ const Menu = ({ onClose, options = [] }) => {
           }}
           style={[styles.item, index > 0 && styles.separator]}
         >
-          {option.icon ? <Icon name={option.icon} tone={option.critical ? 'danger' : option.accent ? 'accent' : 'primary'} /> : null}
+          {option.icon ? (
+            <Icon name={option.icon} tone={option.critical ? 'danger' : option.accent ? 'accent' : 'primary'} />
+          ) : null}
           <Text bold tone={option.critical ? 'danger' : option.accent ? 'accent' : 'primary'}>
             {option.text}
           </Text>

@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 
+import { style } from './InputMask.style';
 import { Icon, Input, Pressable } from '../../design-system';
 import { ICON } from '../../modules';
-import { style } from './InputMask.style';
 
 const MASK_CHAR = '*';
 
@@ -36,7 +36,10 @@ const InputMask = ({ actions, onChange, onRevealChange, revealed, showToggle = f
     showToggle || actions ? (
       <>
         {showToggle ? (
-          <Pressable onPress={handleToggleReveal} style={[style.actionButton, !resolvedValue && style.actionButtonDisabled]}>
+          <Pressable
+            onPress={handleToggleReveal}
+            style={[style.actionButton, !resolvedValue && style.actionButtonDisabled]}
+          >
             <Icon name={isRevealed ? ICON.EYE_OFF : ICON.EYE} size="s" tone="secondary" />
           </Pressable>
         ) : null}

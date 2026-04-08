@@ -258,7 +258,8 @@ const hasKeywordMatch = (haystack = '', keyword = '') => {
 const findServiceEntry = (haystack = '') =>
   SERVICE_ICON_CATALOG.find(({ keywords = [] }) => keywords.some((keyword) => hasKeywordMatch(haystack, keyword)));
 
-const findServiceEntryByBrand = (brand = '') => SERVICE_ICON_CATALOG.find(({ brand: entryBrand }) => entryBrand === normalize(brand));
+const findServiceEntryByBrand = (brand = '') =>
+  SERVICE_ICON_CATALOG.find(({ brand: entryBrand }) => entryBrand === normalize(brand));
 
 const extractWebsiteDomain = (...values) => {
   for (const value of values) {

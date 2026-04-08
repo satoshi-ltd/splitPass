@@ -1,8 +1,8 @@
-import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './VaultItem.style';
+import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 import { getVaultLabel, ICON, L10N } from '../../../modules';
 
 const VaultItem = ({ type, secrets = [], onPress }) => {

@@ -16,5 +16,8 @@ export const isSeedPhraseCandidate = (value = '') => {
 export const isSeedPhrase = (value = '') => {
   const words = Array.isArray(value) ? value : value.trim().split(' ');
 
-  return SEED_PHRASE_LENGTH.includes(words.length) && words.every((word) => [undefined, ''].includes(word) || isBip39Word(word));
+  return (
+    SEED_PHRASE_LENGTH.includes(words.length) &&
+    words.every((word) => [undefined, ''].includes(word) || isBip39Word(word))
+  );
 };

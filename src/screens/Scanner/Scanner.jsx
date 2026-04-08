@@ -201,9 +201,7 @@ const Scanner = ({
     if (!is.shard && !decodedSecret) return;
 
     const visual =
-      is.complete && decodedSecret
-        ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret })
-        : {};
+      is.complete && decodedSecret ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret }) : {};
     const persistedValue =
       is.shard || !is.complete
         ? values[0]

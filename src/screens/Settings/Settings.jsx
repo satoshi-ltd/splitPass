@@ -42,14 +42,13 @@ const Settings = ({ navigation = {} }) => {
   const reminderEnabled = (reminders[0] ?? 1) === 1;
   const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
   const websiteFaviconsSubtitle = websiteFaviconsEnabled ? L10N.ENABLED : L10N.DISABLED;
-  const biometricSubtitle =
-    !biometricAvailability.ready
-      ? undefined
-      : !biometricAvailability.available
-      ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
-      : biometricUnlockEnabled
-      ? L10N.ENABLED
-      : L10N.DISABLED;
+  const biometricSubtitle = !biometricAvailability.ready
+    ? undefined
+    : !biometricAvailability.available
+    ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
+    : biometricUnlockEnabled
+    ? L10N.ENABLED
+    : L10N.DISABLED;
   const reminderSubtitle = reminderEnabled ? L10N.REMINDER_BACKUP_SCHEDULE : undefined;
 
   useEffect(() => {

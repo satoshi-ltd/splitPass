@@ -1,8 +1,8 @@
-import { View } from '../../../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './Frame.style';
+import { View } from '../../../../design-system';
 
 const Frame = ({ children, card = false, ...others }) => {
   return (

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { ActivityIndicator } from 'react-native';
 
-import { useApp } from '../../contexts';
+import { getStyles } from './Button.styles';
 import Icon from './Icon';
 import Pressable from './Pressable';
 import Text from './Text';
-import { getStyles } from './Button.styles';
+import { useApp } from '../../contexts';
 
 const Button = ({ children, disabled, grow, icon, loading, onPress, size, style, tone, variant, ...props }) => {
   const { colors } = useApp();

@@ -1,9 +1,9 @@
-import { Screen } from '../../design-system';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { WebView } from 'react-native-webview';
 
 import { style } from './Marketplace.style';
+import { Screen } from '../../design-system';
 
 const Marketplace = () => {
   return (

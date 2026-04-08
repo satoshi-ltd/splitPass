@@ -26,9 +26,12 @@ const normalizeBiometricError = (error) => {
 
   const message = `${error?.message || ''}`.toLowerCase();
 
-  if (message.includes('cancel')) return createError('Biometric authentication was cancelled.', 'ERR_BIOMETRIC_CANCELED');
-  if (message.includes('not available')) return createError('Biometric authentication is not available.', 'ERR_BIOMETRIC_NOT_AVAILABLE');
-  if (message.includes('not enrolled')) return createError('No biometric credentials are enrolled on this device.', 'ERR_BIOMETRIC_NOT_ENROLLED');
+  if (message.includes('cancel'))
+    return createError('Biometric authentication was cancelled.', 'ERR_BIOMETRIC_CANCELED');
+  if (message.includes('not available'))
+    return createError('Biometric authentication is not available.', 'ERR_BIOMETRIC_NOT_AVAILABLE');
+  if (message.includes('not enrolled'))
+    return createError('No biometric credentials are enrolled on this device.', 'ERR_BIOMETRIC_NOT_ENROLLED');
 
   return createError(error?.message || 'Biometric authentication failed.', 'ERR_BIOMETRIC_FAILED');
 };
@@ -50,13 +53,16 @@ const getAvailability = async () => {
   ]);
 
   const getEnrolledLevelAsync = LocalAuthentication.getEnrolledLevelAsync;
-  const securityLevel = getEnrolledLevelAsync ? await getEnrolledLevelAsync() : LocalAuthentication.SecurityLevel?.NONE || 0;
+  const securityLevel = getEnrolledLevelAsync
+    ? await getEnrolledLevelAsync()
+    : LocalAuthentication.SecurityLevel?.NONE || 0;
   const strongLevel = LocalAuthentication.SecurityLevel?.BIOMETRIC_STRONG;
   const strongBiometrics = strongLevel ? securityLevel >= strongLevel : supportedAuthenticationTypes.length > 0;
   const secureStoreSupported = SecureStore.canUseBiometricAuthentication
     ? await SecureStore.canUseBiometricAuthentication()
     : strongBiometrics;
-  const available = hasHardware && enrolled && supportedAuthenticationTypes.length > 0 && strongBiometrics && secureStoreSupported;
+  const available =
+    hasHardware && enrolled && supportedAuthenticationTypes.length > 0 && strongBiometrics && secureStoreSupported;
 
   if (available || !isDevMode) {
     return {
@@ -93,8 +99,10 @@ const ensureAvailability = async () => {
 
   if (availability.available) return availability;
 
-  if (!availability.hasHardware) throw createError('Biometric authentication is not available.', 'ERR_BIOMETRIC_NOT_AVAILABLE');
-  if (!availability.enrolled) throw createError('No biometric credentials are enrolled on this device.', 'ERR_BIOMETRIC_NOT_ENROLLED');
+  if (!availability.hasHardware)
+    throw createError('Biometric authentication is not available.', 'ERR_BIOMETRIC_NOT_AVAILABLE');
+  if (!availability.enrolled)
+    throw createError('No biometric credentials are enrolled on this device.', 'ERR_BIOMETRIC_NOT_ENROLLED');
   if (!availability.strongBiometrics || !availability.secureStoreSupported)
     throw createError('Strong biometric authentication is required.', 'ERR_BIOMETRIC_WEAK');
 

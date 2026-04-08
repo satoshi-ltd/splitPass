@@ -85,7 +85,12 @@ const Setting = ({
   };
 
   return (
-    <Pressable {...props} disabled={disabled} onPress={isToggle ? undefined : handlePress} style={[styles.container, disabled && styles.disabled, style]}>
+    <Pressable
+      {...props}
+      disabled={disabled}
+      onPress={isToggle ? undefined : handlePress}
+      style={[styles.container, disabled && styles.disabled, style]}
+    >
       <View style={styles.row}>
         <View style={styles.left}>
           {icon ? (
@@ -94,8 +99,18 @@ const Setting = ({
             </View>
           ) : null}
           <View flex>
-            {titleTone ? <Text semibold tone={titleTone}>{title}</Text> : <Text semibold>{title}</Text>}
-            {subtitle ? <Text size="s" tone={subtitleTone || 'secondary'}>{subtitle}</Text> : null}
+            {titleTone ? (
+              <Text semibold tone={titleTone}>
+                {title}
+              </Text>
+            ) : (
+              <Text semibold>{title}</Text>
+            )}
+            {subtitle ? (
+              <Text size="s" tone={subtitleTone || 'secondary'}>
+                {subtitle}
+              </Text>
+            ) : null}
           </View>
         </View>
         <View style={styles.action}>

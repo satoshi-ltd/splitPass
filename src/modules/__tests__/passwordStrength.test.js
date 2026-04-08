@@ -1,6 +1,6 @@
 import { SECRET_TYPE } from '../../App.constants';
-import { QRParser } from '../QRParser';
 import { getSecretStrength, getTextStrength } from '../passwordGenerator';
+import { QRParser } from '../QRParser';
 
 describe('getTextStrength', () => {
   it('marks long mixed passwords as strong', () => {
@@ -25,8 +25,12 @@ describe('getSecretStrength', () => {
   });
 
   it('treats shard, seed, card, and totp secrets as strong by default', () => {
-    const seed = QRParser.encode('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-    const totp = QRParser.encode('otpauth://totp/GitHub:satoshi?secret=JBSWY3DPEHPK3PXP&issuer=GitHub', { type: 'totp' });
+    const seed = QRParser.encode(
+      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+    );
+    const totp = QRParser.encode('otpauth://totp/GitHub:satoshi?secret=JBSWY3DPEHPK3PXP&issuer=GitHub', {
+      type: 'totp',
+    });
 
     expect(getSecretStrength({ value: seed })).toBe('strong');
     expect(getSecretStrength({ value: totp })).toBe('strong');

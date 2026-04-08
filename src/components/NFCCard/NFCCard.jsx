@@ -80,7 +80,12 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
         });
         read(nextTag);
       } else if (writeMode) {
-        const nextTag = await NFCService.write(writeMode.value, writeMode.name, writeMode.username, writeMode.notes).catch((error) => {
+        const nextTag = await NFCService.write(
+          writeMode.value,
+          writeMode.name,
+          writeMode.username,
+          writeMode.notes,
+        ).catch((error) => {
           const message = resolveErrorMessage(error);
 
           if (__DEV__ && message === L10N.NFC_NOT_SUPPORTED) return buildNfcMockWrittenTag(writeMode);
@@ -237,7 +242,11 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
               const { icon, subtitle } = getRecordMeta({ name, value });
 
               return (
-                <Pressable key={index} onPress={() => handleRecord({ name, notes, value, username })} style={style.record}>
+                <Pressable
+                  key={index}
+                  onPress={() => handleRecord({ name, notes, value, username })}
+                  style={style.record}
+                >
                   <View style={[style.recordThumb, { backgroundColor: scannerColors.surface }]}>
                     <Icon name={icon} style={{ color: scannerColors.qrForeground }} />
                   </View>

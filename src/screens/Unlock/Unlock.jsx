@@ -254,19 +254,19 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
             disabled={setupSubmitDisabled}
             loading={submitting}
             size="l"
-            style={[style.button, isSignIn ? style.signInButton : null, isSetup ? style.setupButton : null, isImport ? style.importButton : null]}
+            style={[
+              style.button,
+              isSignIn ? style.signInButton : null,
+              isSetup ? style.setupButton : null,
+              isImport ? style.importButton : null,
+            ]}
             variant="primary"
             onPress={handleSubmit}
           >
             {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.IMPORT : L10N.UNLOCK}
           </Button>
           {showImportCancel ? (
-            <Button
-              size="l"
-              style={style.importCancelButton}
-              variant="outlined"
-              onPress={handleCancelImport}
-            >
+            <Button size="l" style={style.importCancelButton} variant="outlined" onPress={handleCancelImport}>
               {L10N.CANCEL}
             </Button>
           ) : null}

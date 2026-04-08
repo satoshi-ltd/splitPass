@@ -57,7 +57,9 @@ const Tabs = ({ caption, compact, onChange, options = [], selected = 0, style })
   const styles = useMemo(() => getStyles(colors), [colors]);
   const [layoutWidth, setLayoutWidth] = useState(0);
   const indicatorX = useRef(new Animated.Value(0)).current;
-  const selectedIndex = options.findIndex((option, index) => (selectedId ? option.id === selectedId : index === selected));
+  const selectedIndex = options.findIndex((option, index) =>
+    selectedId ? option.id === selectedId : index === selected,
+  );
   const resolvedSelectedIndex = selectedIndex >= 0 ? selectedIndex : 0;
   const inset = compact ? 2 : 4;
   const tabWidth = layoutWidth && options.length ? (layoutWidth - inset * 2) / options.length : 0;
@@ -75,7 +77,11 @@ const Tabs = ({ caption, compact, onChange, options = [], selected = 0, style })
   }, [indicatorX, resolvedSelectedIndex, tabWidth]);
 
   return (
-    <View row onLayout={({ nativeEvent }) => setLayoutWidth(nativeEvent.layout.width)} style={[styles.container, compact && styles.compactContainer, style]}>
+    <View
+      row
+      onLayout={({ nativeEvent }) => setLayoutWidth(nativeEvent.layout.width)}
+      style={[styles.container, compact && styles.compactContainer, style]}
+    >
       {tabWidth ? (
         <Animated.View
           pointerEvents="none"
@@ -95,7 +101,13 @@ const Tabs = ({ caption, compact, onChange, options = [], selected = 0, style })
             onPress={() => onChange?.(option, index)}
             style={[styles.tab, compact && styles.compactTab]}
           >
-            {option.icon ? <Icon name={option.icon} size={compact || caption ? 's' : 'm'} style={{ color: isActive ? colors.onAccent : colors.text }} /> : null}
+            {option.icon ? (
+              <Icon
+                name={option.icon}
+                size={compact || caption ? 's' : 'm'}
+                style={{ color: isActive ? colors.onAccent : colors.text }}
+              />
+            ) : null}
             <Text bold size={compact || caption ? 's' : 'm'} tone={isActive ? 'onAccent' : 'primary'}>
               {option.text}
             </Text>

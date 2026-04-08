@@ -4,8 +4,8 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useApp } from '../../contexts';
-import { viewOffset } from '../../theme/layout';
 import { theme } from '../../theme';
+import { viewOffset } from '../../theme/layout';
 import ScrollView from '../primitives/ScrollView';
 import View from '../primitives/View';
 
@@ -61,11 +61,24 @@ const AppScreen = ({
       </SafeAreaView>
 
       {scrollable ? (
-        <ScrollView contentContainerStyle={[styles.contentContainer, contentContainerStyle]} style={[styles.contentWrap, contentStyle]}>
+        <ScrollView
+          contentContainerStyle={[styles.contentContainer, contentContainerStyle]}
+          style={[styles.contentWrap, contentStyle]}
+        >
           {children}
         </ScrollView>
       ) : (
-        <View style={[styles.contentWrap, styles.staticContent, styles.contentContainer, contentStyle, contentContainerStyle]}>{children}</View>
+        <View
+          style={[
+            styles.contentWrap,
+            styles.staticContent,
+            styles.contentContainer,
+            contentStyle,
+            contentContainerStyle,
+          ]}
+        >
+          {children}
+        </View>
       )}
 
       {footer}

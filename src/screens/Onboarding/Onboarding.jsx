@@ -66,11 +66,7 @@ const Onboarding = ({ navigation }) => {
       <View row style={style.footer}>
         <Pagination currentIndex={currentIndex} length={slides.length} />
 
-        <Button
-          variant="primary"
-          onPress={lastSlide ? handleSubmit : handleNext}
-          style={style.button}
-        >
+        <Button variant="primary" onPress={lastSlide ? handleSubmit : handleNext} style={style.button}>
           {lastSlide ? L10N.START : L10N.NEXT}
         </Button>
       </View>

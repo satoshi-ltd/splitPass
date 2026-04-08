@@ -61,7 +61,8 @@ const NFC_MOCK_TAG = {
 const buildNfcMockWrittenTag = ({ name, notes, value, username } = {}) => {
   const newRecord = { name, notes, value, username };
   const records = NFC_MOCK_TAG.records.some(
-    (record) => record.name === name && record.notes === notes && record.value === value && record.username === username,
+    (record) =>
+      record.name === name && record.notes === notes && record.value === value && record.username === username,
   )
     ? NFC_MOCK_TAG.records
     : [...NFC_MOCK_TAG.records, newRecord];

@@ -30,8 +30,12 @@ describe('secretVisual matching', () => {
   });
 
   it('uses the same icon matching policy for TOTP as other secrets', () => {
-    expect(resolveSecretIcon({ brand: 'github', kind: 'totp', name: 'github', type: 'shield-key-outline' })).toBe('github');
-    expect(resolveSecretIcon({ kind: 'totp', name: 'unknown service', type: 'shield-key-outline' })).toBe('shield-key-outline');
+    expect(resolveSecretIcon({ brand: 'github', kind: 'totp', name: 'github', type: 'shield-key-outline' })).toBe(
+      'github',
+    );
+    expect(resolveSecretIcon({ kind: 'totp', name: 'unknown service', type: 'shield-key-outline' })).toBe(
+      'shield-key-outline',
+    );
   });
 
   it('extracts website-like domains from website or name fields', () => {
