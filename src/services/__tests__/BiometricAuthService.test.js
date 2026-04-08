@@ -67,7 +67,7 @@ describe('BiometricAuthService', () => {
       `${STORAGE_DOMAIN}.biometric.passphrase`,
       'vault-passphrase',
       expect.objectContaining({
-        authenticationPrompt: 'Authenticate to enable biometric unlock.',
+        authenticationPrompt: 'Authenticate to save your SplitPass master passphrase.',
         keychainService: KEYCHAIN_SERVICE,
         requireAuthentication: true,
       }),
@@ -96,6 +96,14 @@ describe('BiometricAuthService', () => {
     });
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith(`${STORAGE_DOMAIN}.biometric.passphrase`, {
       keychainService: KEYCHAIN_SERVICE,
+    });
+  });
+
+  it('normalizes biometric cancellation errors from secure store', async () => {
+    SecureStore.getItemAsync.mockRejectedValue(new Error('Authentication cancelled by user.'));
+
+    await expect(BiometricAuthService.readPassphrase()).rejects.toMatchObject({
+      code: 'ERR_BIOMETRIC_CANCELED',
     });
   });
 

@@ -29,6 +29,14 @@ export const style = StyleSheet.create({
   signInFormSection: {
     marginTop: '$spaceXS',
   },
+  warningCard: {
+    backgroundColor: '$colorSurface',
+    borderColor: '$colorBorder',
+    borderRadius: '$borderRadius',
+    borderWidth: '$borderWidth',
+    marginBottom: '$spaceS',
+    padding: '$spaceS',
+  },
   form: {
     gap: '$spaceM',
   },

@@ -1,4 +1,4 @@
-/* global __DEV__ */
+/* global __DEV__, Promise */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
@@ -10,7 +10,7 @@ import { STORAGE_DOMAIN } from '../App.constants';
 const BIOMETRIC_KEY = `${STORAGE_DOMAIN}.biometric.passphrase`;
 const BIOMETRIC_SERVICE = `${STORAGE_DOMAIN}.biometric`;
 const BIOMETRIC_DEV_KEY = `${STORAGE_DOMAIN}.biometric.dev-passphrase`;
-const AUTH_PROMPT_ENABLE = 'Authenticate to enable biometric unlock.';
+const AUTH_PROMPT_ENABLE = 'Authenticate to save your SplitPass master passphrase.';
 const AUTH_PROMPT_UNLOCK = 'Unlock SplitPass with biometrics.';
 const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
 

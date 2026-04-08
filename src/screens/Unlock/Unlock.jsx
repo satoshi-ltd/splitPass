@@ -27,6 +27,12 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   const setupPassphraseValid = form.passphrase.length >= 8;
   const setupConfirmValid = form.confirmPassphrase.length > 0 && form.passphrase === form.confirmPassphrase;
   const setupSubmitDisabled = isSetup && (!setupPassphraseValid || !setupConfirmValid);
+  const remainingAttempts = Math.max(0, 3 - failedAttempts);
+  const warningText = biometricInvalidated
+    ? L10N.BIOMETRIC_UNLOCK_INVALIDATED
+    : failedAttempts > 0
+    ? L10N.MASTER_PASSPHRASE_ATTEMPTS_HINT({ remaining: remainingAttempts })
+    : undefined;
 
   const resolveUnlockError = async (error) => {
     const resolution = resolveUnlockFailure({ errorCode: error?.code, failedAttempts });
@@ -121,13 +127,14 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [biometricAutoTriggered, biometricEnabled, mode]);
 
   const title =
     mode === 'setup'
       ? L10N.ONBOARDING_MASTER_PASSPHRASE_TITLE
       : mode === 'import'
-      ? L10N.IMPORT_BACKUP
+      ? L10N.CONFIRM_IMPORT_ENCRYPTED
       : L10N.SIGNIN_TITLE;
   const caption =
     mode === 'setup'
@@ -213,6 +220,13 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
         headerSafeAreaStyle={style.headerSafeArea}
       >
         <View style={[style.formSection, isSignIn ? style.signInFormSection : null]}>
+          {warningText ? (
+            <View style={style.warningCard}>
+              <Text size="s" tone="warning">
+                {warningText}
+              </Text>
+            </View>
+          ) : null}
           <View style={[style.form, isSignIn ? style.signInForm : null, isSetup ? style.setupForm : null]}>
             <View style={[style.fieldBox, isSignIn ? style.signInFieldBox : null]}>
               {!isSignIn && !isSetup && !isImport ? (

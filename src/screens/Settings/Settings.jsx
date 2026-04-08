@@ -3,13 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { Linking } from 'react-native';
 
-import {
-  ABOUT_OPTIONS,
-  ACCOUNT_DATA_OPTIONS,
-  DEVELOPMENT_OPTIONS,
-  GENERAL_OPTIONS,
-  REMINDER_BACKUP_OPTIONS,
-} from './Settings.constants';
+import { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, GENERAL_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
 import { EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
@@ -41,14 +35,6 @@ const Settings = ({ navigation = {} }) => {
   } = settings || {};
   const reminderEnabled = (reminders[0] ?? 1) === 1;
   const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
-  const websiteFaviconsSubtitle = websiteFaviconsEnabled ? L10N.ENABLED : L10N.DISABLED;
-  const biometricSubtitle = !biometricAvailability.ready
-    ? undefined
-    : !biometricAvailability.available
-    ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
-    : biometricUnlockEnabled
-    ? L10N.ENABLED
-    : L10N.DISABLED;
   const reminderSubtitle = reminderEnabled ? L10N.REMINDER_BACKUP_SCHEDULE : undefined;
 
   useEffect(() => {
@@ -284,6 +270,12 @@ const Settings = ({ navigation = {} }) => {
           {L10N.PREFERENCES}
         </Text>
         <Setting
+          icon={ICON.LANGUAGE}
+          right={<RightValueChevron value={getLanguageLabel(language)} />}
+          title={L10N.LANGUAGE}
+          onPress={() => navigation.navigate('language')}
+        />
+        <Setting
           icon={ICON.INVERT_COLORS}
           subtitle={appearanceSubtitle}
           type="toggle"
@@ -295,21 +287,13 @@ const Settings = ({ navigation = {} }) => {
           activity={activity?.biometricUnlock}
           disabled={biometricUnlockEnabled ? false : !biometricAvailability.ready || !biometricAvailability.available}
           icon={ICON.BIOMETRIC}
-          subtitle={biometricSubtitle}
           type="toggle"
           title={L10N.BIOMETRIC_UNLOCK}
           value={biometricUnlockEnabled}
           onValueChange={handleBiometricUnlock}
         />
         <Setting
-          icon={ICON.LANGUAGE}
-          right={<RightValueChevron value={getLanguageLabel(language)} />}
-          title={L10N.LANGUAGE}
-          onPress={() => navigation.navigate('language')}
-        />
-        <Setting
           icon={ICON.WEB}
-          subtitle={websiteFaviconsSubtitle}
           type="toggle"
           title={L10N.WEBSITE_FAVICONS}
           value={websiteFaviconsEnabled}
@@ -317,12 +301,11 @@ const Settings = ({ navigation = {} }) => {
         />
         <Setting
           icon={ICON.BELL}
-          onPress={() => {}}
-          onChange={(value = 0) => handleChangeReminder(value)}
-          options={REMINDER_BACKUP_OPTIONS}
-          selected={reminders[0] ?? 1}
           subtitle={reminderSubtitle}
+          type="toggle"
           title={L10N.REMINDER_BACKUP}
+          value={reminderEnabled}
+          onValueChange={handleChangeReminder}
         />
       </View>
 

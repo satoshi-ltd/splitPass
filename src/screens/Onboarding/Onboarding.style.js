@@ -36,6 +36,6 @@ export const style = StyleSheet.create({
   },
 
   button: {
-    width: '33%',
+    width: '38%',
   },
 });

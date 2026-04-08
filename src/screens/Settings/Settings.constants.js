@@ -31,11 +31,6 @@ const DEVELOPMENT_OPTIONS = () => [
   },
 ];
 
-const REMINDER_BACKUP_OPTIONS = [
-  { text: L10N.OFF, value: 0 },
-  { text: L10N.ON, value: 1 },
-];
-
 const ABOUT_OPTIONS = () => [
   { icon: ICON.FILE, url: SATOSHI_URLS.TERMS, text: L10N.TERMS },
   { icon: ICON.FILE, url: SATOSHI_URLS.PRIVACY, text: L10N.PRIVACY },
@@ -43,7 +38,12 @@ const ABOUT_OPTIONS = () => [
 
 const ACCOUNT_DATA_OPTIONS = () => [
   { callback: 'handleLogout', icon: ICON.LOGOUT, text: L10N.LOGOUT },
-  { callback: 'handleResetData', icon: ICON.RESET, text: L10N.RESET_DATA, tone: 'danger' },
+  {
+    callback: 'handleResetData',
+    icon: ICON.RESET,
+    text: L10N.RESET_DATA,
+    tone: 'danger',
+  },
 ];
 
-export { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, GENERAL_OPTIONS, REMINDER_BACKUP_OPTIONS };
+export { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, GENERAL_OPTIONS };
