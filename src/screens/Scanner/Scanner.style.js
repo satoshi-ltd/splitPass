@@ -33,6 +33,25 @@ export const style = StyleSheet.create({
     backgroundColor: '$scannerBackgroundOpacity',
     zIndex: 1,
   },
+  permissionCard: {
+    alignItems: 'center',
+    backgroundColor: '$scannerBackgroundOpacity',
+    bottom: 0,
+    justifyContent: 'center',
+    left: 0,
+    paddingHorizontal: '$viewOffset',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 1,
+  },
+  permissionContent: {
+    gap: '$spaceS',
+    maxWidth: '80%',
+  },
+  permissionCaption: {
+    maxWidth: '100%',
+  },
 
   headerTabs: {
     width: 128,

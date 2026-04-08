@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getScannerInstructions, resolveScannerPayload } from './Scanner.helpers';
 import { ScannerNFC } from './Scanner.nfc';
 import { ScannerQR } from './Scanner.qr';
 import { style } from './Scanner.style';
@@ -57,6 +58,7 @@ const Scanner = ({
   const [selectedItem, setSelectedItem] = useState();
   const [showFooterMenu, setShowFooterMenu] = useState(false);
   const [passcodeDraft, setPasscodeDraft] = useState('');
+  const [unsupportedNoticeAt, setUnsupportedNoticeAt] = useState(0);
   const [values, setValues] = useState([]);
 
   useEffect(() => {
@@ -75,40 +77,61 @@ const Scanner = ({
   };
 
   const handleScanned = (payload = '') => {
-    const scannedValue = typeof payload === 'string' ? payload : payload?.value || '';
-    const externalTOTP =
-      typeof payload === 'string' && isTOTPURI(scannedValue) ? parseTOTPURI(scannedValue) : undefined;
+    const resolvedPayload = resolveScannerPayload(payload);
 
-    if (externalTOTP) {
+    if (resolvedPayload.kind === 'unsupported') {
+      const now = Date.now();
+
+      if (resolvedPayload.scannedValue && now - unsupportedNoticeAt > 1500) {
+        setUnsupportedNoticeAt(now);
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.SCANNER_UNSUPPORTED_PAYLOAD });
+      }
+
+      return;
+    }
+
+    if (resolvedPayload.kind === 'totp') {
+      const { scannedValue } = resolvedPayload;
+
       setScanning(false);
       navigation.navigate('create', {
         hydrate: {
-          name: getTOTPDisplayName(externalTOTP),
+          name: getTOTPDisplayName(resolvedPayload.totp),
           notes: payload?.notes,
           secret: scannedValue,
-          totp: externalTOTP,
+          totp: resolvedPayload.totp,
         },
       });
       return;
     }
 
-    const [type] = scannedValue;
-
-    if (!Object.values(SECRET_TYPE).includes(type)) return;
+    const { scannedValue, type } = resolvedPayload;
     setSelectedItem(typeof payload === 'string' ? undefined : payload);
-
+    setFields();
+    setForm((current) => ({ ...current, passcode: '' }));
+    setPasscodeDraft('');
+    setReveal(false);
     setScanning(false);
     if (SHARD_TYPES.includes(type)) {
-      if (values.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
       if (values.includes(scannedValue)) {
         return eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.FIRST_SHARD_SAME, variant: 'accent' });
-      } else if (!values.length) {
+      }
+
+      const nextValues = [...values, scannedValue];
+
+      if (!values.length) {
         eventEmitter.emit(EVENT.NOTIFICATION, { title: L10N.FIRST_SHARD_SCANNED, variant: 'accent' });
       } else {
         eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SHARDS_COMBINED, title: L10N.SUCCESS, variant: 'accent' });
       }
+
+      setValues(nextValues);
+
+      if (nextValues.length < 2) setTimeout(() => handleReaderType(readerType), 1000);
+      return;
     }
-    setValues([...values, scannedValue]);
+
+    setValues([scannedValue]);
   };
 
   const handleReset = () => {
@@ -119,6 +142,7 @@ const Scanner = ({
     setSelectedItem(undefined);
     setShowFooterMenu(false);
     setPasscodeDraft('');
+    setUnsupportedNoticeAt(0);
     setValues([]);
   };
 
@@ -132,8 +156,6 @@ const Scanner = ({
     complete: values.length > 0 && (!SHARD_TYPES.includes(type) || values.length > 1),
   };
 
-  const instructionTitle = is.modeNFC ? L10N.SCANNER_NFC : L10N.SCANNER_QR;
-  const instructionCaption = is.modeNFC ? L10N.SCANNER_NFC_CAPTION : L10N.SCANNER_QR_CAPTION;
   const combinedValue = is.complete ? QRParser.combine(...values) : '';
   const decodedSecret = !combinedValue ? '' : decodeSecret(combinedValue, form.passcode);
   const maskedFooterValue = maskSecret(decodedSecret || '••••••••••••');
@@ -154,7 +176,15 @@ const Scanner = ({
   const footerValue = reveal ? decodedSecret : maskedFooterValue;
   const showPasscodePrompt = fields?.includes('passcode');
   const showFooter = showPasscodePrompt || !is.empty;
-  const shardLabel = L10N.SECRET_TYPE_SHARD;
+  const { caption: instructionCaption, title: instructionTitle } = getScannerInstructions({
+    readerType,
+    showPasscodePrompt,
+    values,
+  });
+  const shardLabel =
+    is.shard && !is.complete
+      ? L10N.SCANNER_SHARD_PROGRESS_LABEL({ current: Math.min(values.length, 2), total: 2 })
+      : L10N.SECRET_TYPE_SHARD;
 
   const resolveFallbackName = (secretType) => {
     if ([SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(secretType))
@@ -250,6 +280,14 @@ const Scanner = ({
   const handleSubmitPasscode = () => {
     if (passcodeDraft.length !== 6) return;
 
+    const nextDecodedSecret = decodeSecret(combinedValue, passcodeDraft);
+
+    if (!nextDecodedSecret) {
+      setPasscodeDraft('');
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.SCANNER_PASSCODE_INVALID });
+      return;
+    }
+
     setForm((current) => ({ ...current, passcode: passcodeDraft }));
     setFields();
     setReveal(false);
@@ -304,6 +342,11 @@ const Scanner = ({
     },
   ].filter(Boolean);
 
+  const handleContinueShardScan = () => {
+    setShowFooterMenu(false);
+    handleReaderType(readerType);
+  };
+
   return (
     <Screen disableScroll style={style.screen}>
       <KeyboardAvoidingView behavior="padding" style={style.keyboard}>
@@ -337,6 +380,7 @@ const Scanner = ({
                     onPasscodeCancel={handleCancelPasscode}
                     onPasscodeChange={handlePasscodeChange}
                     onPasscodeSubmit={handleSubmitPasscode}
+                    onShardAction={is.shard && !is.complete ? handleContinueShardScan : undefined}
                     onToggleReveal={handleToggleReveal}
                     passcodePlaceholder={L10N.PASSCODE_PLACEHOLDER}
                     passcodeValue={passcodeDraft}
@@ -345,6 +389,7 @@ const Scanner = ({
                     shardLabel={shardLabel}
                     showMenu={!showPasscodePrompt && !is.empty}
                     showReveal={is.complete && !showPasscodePrompt && !is.empty}
+                    valueCaption={!showPasscodePrompt && is.complete ? L10N.SCANNER_SECRET_READY_CAPTION : undefined}
                     value={footerValue}
                   />
 

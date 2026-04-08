@@ -1,11 +1,14 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import PropTypes from 'react';
+import PropTypes from 'prop-types';
 import React, { useCallback, useState } from 'react';
+import { Linking } from 'react-native';
 
 import { Frame } from './components';
 import { style } from './Scanner.style';
-import { View } from '../../design-system';
+import { Button, Text, View } from '../../design-system';
+import { L10N } from '../../modules';
+
 const ScannerQR = ({ camera = false, frame = false, onRead, scanning }) => {
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -19,6 +22,10 @@ const ScannerQR = ({ camera = false, frame = false, onRead, scanning }) => {
     }, []),
   );
 
+  const permissionBlocked = permission?.canAskAgain === false;
+  const handlePermissionPress = () =>
+    permissionBlocked && Linking.openSettings ? Linking.openSettings() : requestPermission();
+
   return (
     <>
       {camera && permission?.granted && (
@@ -31,6 +38,21 @@ const ScannerQR = ({ camera = false, frame = false, onRead, scanning }) => {
           style={style.camera}
         />
       )}
+      {camera && !permission?.granted ? (
+        <View align="center" style={style.permissionCard}>
+          <View align="center" style={style.permissionContent}>
+            <Text align="center" bold size="l" tone="onInverse">
+              {permissionBlocked ? L10N.SCANNER_QR_PERMISSION_DENIED : L10N.SCANNER_QR_PERMISSION}
+            </Text>
+            <Text align="center" size="s" tone="onInverse" style={style.permissionCaption}>
+              {permissionBlocked ? L10N.SCANNER_QR_PERMISSION_DENIED : L10N.SCANNER_QR_PERMISSION_CAPTION}
+            </Text>
+            <Button size="s" variant="outlined" onPress={handlePermissionPress}>
+              {permissionBlocked ? L10N.SCANNER_QR_PERMISSION_SETTINGS : L10N.CONTINUE}
+            </Button>
+          </View>
+        </View>
+      ) : null}
       {frame ? (
         <View style={style.qrFrameStage}>
           <View style={[style.scannerMask, style.maskTop]} />
