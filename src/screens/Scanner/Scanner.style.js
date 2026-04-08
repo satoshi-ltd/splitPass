@@ -1,9 +1,4 @@
-import { Dimensions } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const QR_FRAME_SIZE = 232;
-const MASK_SIDE_WIDTH = Math.max(0, (SCREEN_WIDTH - QR_FRAME_SIZE) / 2);
 
 export const style = StyleSheet.create({
   screen: {
@@ -82,7 +77,9 @@ export const style = StyleSheet.create({
 
   qrFrameStage: {
     flex: 1,
+    marginTop: -1,
     width: '100%',
+    justifyContent: 'center',
   },
 
   input: {
@@ -155,45 +152,28 @@ export const style = StyleSheet.create({
 
   scannerMask: {
     backgroundColor: '$scannerBackgroundOpacity',
-    position: 'absolute',
   },
 
   maskTop: {
-    left: 0,
-    right: 0,
-    top: 0,
-    height: '31%',
+    flex: 1,
+    width: '100%',
   },
 
   maskMiddle: {
     alignItems: 'center',
+    flexDirection: 'row',
     height: '$qrSize',
     justifyContent: 'center',
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: '31%',
+    width: '100%',
   },
 
   maskSide: {
+    flex: 1,
     height: '$qrSize',
-    top: 0,
-    width: MASK_SIDE_WIDTH,
-  },
-
-  maskSideLeft: {
-    left: 0,
-  },
-
-  maskSideRight: {
-    right: 0,
   },
 
   maskBottom: {
-    bottom: 0,
-    left: 0,
-    right: 0,
-    top: '31%',
-    marginTop: '$qrSize',
+    flex: 1,
+    width: '100%',
   },
 });

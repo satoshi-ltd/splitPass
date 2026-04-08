@@ -58,6 +58,8 @@ const Scanner = ({
   const [selectedItem, setSelectedItem] = useState();
   const [showFooterMenu, setShowFooterMenu] = useState(false);
   const [passcodeDraft, setPasscodeDraft] = useState('');
+  const [instructionsHeight, setInstructionsHeight] = useState(0);
+  const [stageHeight, setStageHeight] = useState(0);
   const [unsupportedNoticeAt, setUnsupportedNoticeAt] = useState(0);
   const [values, setValues] = useState([]);
 
@@ -176,6 +178,7 @@ const Scanner = ({
   const footerValue = reveal ? decodedSecret : maskedFooterValue;
   const showPasscodePrompt = fields?.includes('passcode');
   const showFooter = showPasscodePrompt || !is.empty;
+  const verticalOffset = Math.round(instructionsHeight / 2);
   const { caption: instructionCaption, title: instructionTitle } = getScannerInstructions({
     readerType,
     showPasscodePrompt,
@@ -353,7 +356,15 @@ const Scanner = ({
         <View style={style.container}>
           {!is.modeNFC && <ScannerQR camera onRead={handleScanned} scanning={scanning} />}
 
-          <View align="center" style={[style.instructions, style.background]}>
+          <View
+            align="center"
+            style={[style.instructions, style.background]}
+            onLayout={({ nativeEvent: { layout } }) => {
+              const nextHeight = Math.round(layout?.height || 0);
+
+              setInstructionsHeight((current) => (current === nextHeight ? current : nextHeight));
+            }}
+          >
             <Text align="center" bold size="l" tone="onInverse" style={style.instructionsContent}>
               {instructionTitle}
             </Text>
@@ -362,8 +373,21 @@ const Scanner = ({
             </Text>
           </View>
 
-          <View align="center" flex style={[style.stage, is.modeNFC && style.background]}>
-            {is.modeNFC ? <ScannerNFC onRead={handleScanned} writeMode={writeMode} /> : <ScannerQR frame />}
+          <View
+            align="center"
+            flex
+            style={[style.stage, is.modeNFC && style.background]}
+            onLayout={({ nativeEvent: { layout } }) => {
+              const nextHeight = Math.round(layout?.height || 0);
+
+              setStageHeight((current) => (current === nextHeight ? current : nextHeight));
+            }}
+          >
+            {is.modeNFC ? (
+              <ScannerNFC onRead={handleScanned} verticalOffset={verticalOffset} writeMode={writeMode} />
+            ) : (
+              <ScannerQR frame stageHeight={stageHeight} verticalOffset={verticalOffset} />
+            )}
           </View>
 
           {showFooter ? (

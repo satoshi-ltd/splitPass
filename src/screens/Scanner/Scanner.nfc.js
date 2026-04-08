@@ -5,8 +5,11 @@ import { style } from './Scanner.style';
 import { NFCCard } from '../../components';
 import { View } from '../../design-system';
 
-const ScannerNFC = ({ onRead = () => {}, onTag, writeMode = false }) => (
-  <View align="center" style={style.scannerNFC}>
+const ScannerNFC = ({ onRead = () => {}, onTag, verticalOffset = 0, writeMode = false }) => (
+  <View
+    align="center"
+    style={[style.scannerNFC, verticalOffset ? { transform: [{ translateY: verticalOffset * -1 }] } : null]}
+  >
     <NFCCard readMode={!writeMode} showHeader={false} writeMode={writeMode} onRecord={onRead} onRead={onTag} />
   </View>
 );
@@ -14,6 +17,7 @@ const ScannerNFC = ({ onRead = () => {}, onTag, writeMode = false }) => (
 ScannerNFC.propTypes = {
   onRead: PropTypes.func,
   onTag: PropTypes.func,
+  verticalOffset: PropTypes.number,
   writeMode: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.shape({
