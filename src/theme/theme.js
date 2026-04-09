@@ -82,10 +82,10 @@ export const theme = {
     xxl: 48,
   },
   borderRadius: {
-    sm: 4,
-    md: 6,
-    lg: 8,
-    xl: 12,
+    sm: 2,
+    md: 4,
+    lg: 6,
+    xl: 8,
     full: 9999,
   },
   animations: {

@@ -9,7 +9,7 @@ export const CommonTheme = {
   $colorContentLight: '#6F635A',
   $colorDisabled: '#999999',
 
-  $borderRadius: 6,
+  $borderRadius: 4,
   $borderStyle: 'solid',
   $borderWidth: 1,
 
@@ -25,7 +25,7 @@ export const CommonTheme = {
   $spaceXXL: 48,
   $viewOffset: '$spaceL',
 
-  $buttonRadius: 6,
+  $buttonRadius: 4,
   $buttonSmallHeight: '$spaceXL',
   $buttonChildrenColorSecondary: '$colorDark',
 
