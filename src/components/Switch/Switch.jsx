@@ -27,7 +27,7 @@ const Switch = ({ checked = false, disabled, onChange, ...others }) => {
       {
         translateX: progress.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, 17],
+          outputRange: [0, 15],
         }),
       },
     ],

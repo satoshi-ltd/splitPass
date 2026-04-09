@@ -15,7 +15,7 @@ const getStyles = (colors) =>
     },
     dot: {
       backgroundColor: colors.border,
-      borderRadius: theme.borderRadius.full,
+      borderRadius: theme.borderRadius.sm,
       height: 6,
       width: 6,
     },
