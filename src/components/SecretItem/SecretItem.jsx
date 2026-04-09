@@ -6,7 +6,7 @@ import { style } from './SecretItem.style';
 import { SECRET_TYPE, SHARD_TYPES } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { Icon, Pressable, Text, View } from '../../design-system';
-import { extractWebsiteDomain, ICON, L10N, QRParser, resolveSecretIcon } from '../../modules';
+import { extractWebsiteDomain, ICON, L10N, parseTOTPURI, QRParser, resolveSecretIcon } from '../../modules';
 import { FaviconService } from '../../services';
 
 const SHARD_SHARES = 3;
@@ -51,7 +51,7 @@ const resolveShardIndex = (type, value = '') => {
   return ((SHARD_SHARES - expectedRemainder) % SHARD_SHARES) + 1;
 };
 
-const resolveSecretSubtitle = ({ type, username }) => {
+const resolveSecretSubtitle = ({ type, username, value }) => {
   if (username) return username;
 
   switch (type) {
@@ -66,6 +66,11 @@ const resolveSecretSubtitle = ({ type, username }) => {
     case SECRET_TYPE.CARD_SHARD:
       return L10N.SECRET_TYPE_SHARD;
     case SECRET_TYPE.TOTP:
+      if (value) {
+        const decoded = QRParser.decode(value);
+        const totp = decoded ? parseTOTPURI(decoded) : undefined;
+        if (totp?.account) return `${L10N.SECRET_TYPE_TOTP} - ${totp.account}`;
+      }
       return L10N.SECRET_TYPE_TOTP;
     case SECRET_TYPE.SEED_PHRASE:
     case SECRET_TYPE.SEED_PHRASE_SECURE:
@@ -114,7 +119,7 @@ const SecretItem = ({
   const [faviconUri, setFaviconUri] = useState('');
   const shardIndex = SHARD_TYPES.includes(type) ? resolveShardIndex(type, value) : undefined;
   const iconName = resolveSecretIcon({ brand, kind, name, type: resolveIconFallback(type) });
-  const subtitle = resolveSecretSubtitle({ type, username });
+  const subtitle = resolveSecretSubtitle({ type, username, value });
   const faviconDomain = useMemo(() => extractWebsiteDomain(website, name), [name, website]);
   const websiteFaviconsEnabled = settings?.websiteFaviconsEnabled === true;
 
