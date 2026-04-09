@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { Linking } from 'react-native';
 
-import { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, GENERAL_OPTIONS } from './Settings.constants';
+import { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, SECURITY_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
 import { EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
@@ -28,10 +28,11 @@ const Settings = ({ navigation = {} }) => {
 
   const {
     biometricUnlockEnabled = false,
+    externalSharingEnabled = false,
     language,
     reminders = [],
     theme = 'light',
-    websiteFaviconsEnabled = true,
+    websiteFaviconsEnabled = false,
   } = settings || {};
   const reminderEnabled = (reminders[0] ?? 1) === 1;
   const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
@@ -167,6 +168,10 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ websiteFaviconsEnabled: !!value });
   };
 
+  const handleExternalSharing = (value) => {
+    updateSettings({ externalSharingEnabled: !!value });
+  };
+
   const handleLoadDemoSecrets = async () => {
     try {
       setActivity((prev) => ({ ...(prev || {}), handleLoadDemoSecrets: true }));
@@ -199,6 +204,8 @@ const Settings = ({ navigation = {} }) => {
       },
       {
         onAccept: async () => {
+          await BiometricAuthService.clearPassphrase();
+          if (settings?.biometricUnlockEnabled) await updateSettings({ biometricUnlockEnabled: false });
           await lockStore();
           navigation.reset({ index: 0, routes: [{ name: 'unlock' }] });
         },
@@ -251,9 +258,26 @@ const Settings = ({ navigation = {} }) => {
     <AppScreen contentContainerStyle={style.content} header={header}>
       <View style={style.group}>
         <Text semibold size="s" style={style.groupTitle}>
-          {L10N.GENERAL}
+          {L10N.SECURITY_SECTION}
         </Text>
-        {GENERAL_OPTIONS().map(({ disabled, icon, id, text, ...rest }) => (
+        <Setting
+          activity={activity?.biometricUnlock}
+          disabled={biometricUnlockEnabled ? false : !biometricAvailability.ready || !biometricAvailability.available}
+          icon={ICON.BIOMETRIC}
+          type="toggle"
+          title={L10N.BIOMETRIC_UNLOCK}
+          value={biometricUnlockEnabled}
+          onValueChange={handleBiometricUnlock}
+        />
+        <Setting
+          icon={ICON.BELL}
+          subtitle={reminderSubtitle}
+          type="toggle"
+          title={L10N.REMINDER_BACKUP}
+          value={reminderEnabled}
+          onValueChange={handleChangeReminder}
+        />
+        {SECURITY_OPTIONS().map(({ disabled, icon, id, text, ...rest }) => (
           <Setting
             activity={activity?.[rest.callback]}
             key={`option-${id}`}
@@ -263,6 +287,26 @@ const Settings = ({ navigation = {} }) => {
             onPress={rest.callback || rest.screen ? () => handleOption(rest) : undefined}
           />
         ))}
+      </View>
+
+      <View style={style.group}>
+        <Text semibold size="s" style={style.groupTitle}>
+          {L10N.PRIVACY_SECTION}
+        </Text>
+        <Setting
+          icon={ICON.SHARE}
+          type="toggle"
+          title={L10N.EXTERNAL_SHARING}
+          value={externalSharingEnabled}
+          onValueChange={handleExternalSharing}
+        />
+        <Setting
+          icon={ICON.WEB}
+          type="toggle"
+          title={L10N.WEBSITE_FAVICONS}
+          value={websiteFaviconsEnabled}
+          onValueChange={handleWebsiteFavicons}
+        />
       </View>
 
       <View style={style.group}>
@@ -283,35 +327,11 @@ const Settings = ({ navigation = {} }) => {
           value={theme === 'dark'}
           onValueChange={handleAppearance}
         />
-        <Setting
-          activity={activity?.biometricUnlock}
-          disabled={biometricUnlockEnabled ? false : !biometricAvailability.ready || !biometricAvailability.available}
-          icon={ICON.BIOMETRIC}
-          type="toggle"
-          title={L10N.BIOMETRIC_UNLOCK}
-          value={biometricUnlockEnabled}
-          onValueChange={handleBiometricUnlock}
-        />
-        <Setting
-          icon={ICON.WEB}
-          type="toggle"
-          title={L10N.WEBSITE_FAVICONS}
-          value={websiteFaviconsEnabled}
-          onValueChange={handleWebsiteFavicons}
-        />
-        <Setting
-          icon={ICON.BELL}
-          subtitle={reminderSubtitle}
-          type="toggle"
-          title={L10N.REMINDER_BACKUP}
-          value={reminderEnabled}
-          onValueChange={handleChangeReminder}
-        />
       </View>
 
       <View style={style.group}>
         <Text semibold size="s" style={style.groupTitle}>
-          {L10N.ABOUT_SPLITPASS}
+          {L10N.ABOUT_SECTION}
         </Text>
         {ABOUT_OPTIONS().map(({ disabled, icon, text, ...rest }, index) => (
           <Setting

@@ -6,12 +6,14 @@ const DEFAULTS = {
   },
   secrets: [],
   settings: {
+    autoLockSeconds: 30,
     biometricUnlockEnabled: false,
+    externalSharingEnabled: false,
     language: undefined,
     onboarded: false,
     reminders: [1],
     theme: 'light',
-    websiteFaviconsEnabled: true,
+    websiteFaviconsEnabled: false,
   },
 };
 

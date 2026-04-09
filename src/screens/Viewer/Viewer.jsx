@@ -1,5 +1,4 @@
 import { useFocusEffect } from '@react-navigation/native';
-import * as Clipboard from 'expo-clipboard';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -40,6 +39,7 @@ import {
   maskSecret,
   parseCardValue,
 } from '../../modules/secretValueDisplay';
+import { ClipboardService } from '../../services';
 
 const QR_SIZE = 272;
 const LOCKED_QR_PREVIEW_VALUE = 'splitpass://locked-preview/easter-egg';
@@ -74,7 +74,14 @@ const Viewer = ({ route, navigation = {} }) => {
   const qrRef = useRef(null);
   const scrollViewRef = useRef(null);
   const { colors, formatDate, theme } = useApp();
-  const { createSecret, deleteSecret, readSecret, secrets, updateSecret } = useStore();
+  const {
+    createSecret,
+    deleteSecret,
+    readSecret,
+    secrets,
+    settings: { externalSharingEnabled = false } = {},
+    updateSecret,
+  } = useStore();
   const { width } = useWindowDimensions();
 
   const [favorite, setFavorite] = useState(propFavorite);
@@ -301,7 +308,7 @@ const Viewer = ({ route, navigation = {} }) => {
           text: L10N.SAVE_IN_CARD,
         }
       : null,
-    createFlowShard
+    createFlowShard && externalSharingEnabled
       ? {
           icon: ICON.SHARE,
           onPress: handleShare,
@@ -330,7 +337,7 @@ const Viewer = ({ route, navigation = {} }) => {
           text: L10N.SAVE_IN_CARD,
         }
       : null,
-    !createFlowShard && !locked
+    !createFlowShard && !locked && externalSharingEnabled
       ? {
           icon: ICON.SHARE,
           onPress: handleShare,
@@ -359,7 +366,7 @@ const Viewer = ({ route, navigation = {} }) => {
     const valueToCopy = isTotp ? totpState?.code : is.shard ? currentValue : decodedSecret;
     if (!valueToCopy) return;
 
-    await Clipboard.setStringAsync(valueToCopy);
+    await ClipboardService.copyWithAutoClear(valueToCopy);
     eventEmitter.emit(EVENT.NOTIFICATION, {
       text: isTotp ? L10N.OTP_CODE_COPIED : L10N.SECRET_COPIED,
       title: L10N.SUCCESS,

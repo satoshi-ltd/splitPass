@@ -77,6 +77,9 @@ export const Navigator = () => {
   };
 
   const initialRouteName = !configured ? 'onboarding' : !unlocked ? 'unlock' : onboarded ? 'main' : 'onboarding';
+  const navigationKey = `${configured ? 'configured' : 'fresh'}:${unlocked ? 'open' : 'locked'}:${
+    onboarded ? 'ready' : 'new'
+  }`;
 
   return (
     <NavigationContainer
@@ -85,7 +88,7 @@ export const Navigator = () => {
     >
       <StatusBar style={routeName === 'scanner' ? 'light' : 'dark'} translucent />
 
-      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
+      <Stack.Navigator key={navigationKey} initialRouteName={initialRouteName} screenOptions={screenOptions}>
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="passphrase" component={Unlock} options={{ headerShown: false }} />
         <Stack.Screen name="unlock" component={Unlock} options={{ headerShown: false }} />

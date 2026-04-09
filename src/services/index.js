@@ -1,5 +1,6 @@
 export * from './BackupService';
 export * from './BiometricAuthService';
+export * from './ClipboardService';
 export * from './FaviconService';
 export * from './NFCService';
 export * from './NotificationsService';

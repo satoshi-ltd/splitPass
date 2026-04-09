@@ -116,7 +116,7 @@ const SecretItem = ({
   const iconName = resolveSecretIcon({ brand, kind, name, type: resolveIconFallback(type) });
   const subtitle = resolveSecretSubtitle({ type, username });
   const faviconDomain = useMemo(() => extractWebsiteDomain(website, name), [name, website]);
-  const websiteFaviconsEnabled = settings?.websiteFaviconsEnabled !== false;
+  const websiteFaviconsEnabled = settings?.websiteFaviconsEnabled === true;
 
   useEffect(() => {
     setFaviconFailed(false);

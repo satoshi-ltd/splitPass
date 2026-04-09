@@ -1,5 +1,4 @@
 import Slider from '@react-native-community/slider';
-import * as Clipboard from 'expo-clipboard';
 import PropTypes from 'prop-types';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +8,7 @@ import { EVENT } from '../../App.constants';
 import { useApp } from '../../contexts';
 import { AppScreen, Button, HeaderBackButton, Icon, Text, View } from '../../design-system';
 import { eventEmitter, generatePassword, getPasswordStrength, ICON, L10N } from '../../modules';
+import { ClipboardService } from '../../services';
 
 const DEFAULT_CONFIG = {
   length: 14,
@@ -75,7 +75,7 @@ const Passwords = ({ navigation, route }) => {
   };
 
   const handleCopy = async () => {
-    await Clipboard.setStringAsync(password);
+    await ClipboardService.copyWithAutoClear(password);
     eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CREATE_PASSWORD_COPY_SUCCESS, title: L10N.SUCCESS });
 
     if (isPicker) {
