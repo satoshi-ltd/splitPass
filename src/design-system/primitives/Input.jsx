@@ -103,7 +103,7 @@ const Input = React.forwardRef(
     if (!actions && !containerStyle) return inputNode;
 
     return (
-      <View style={[styles.wrapper, containerStyle]}>
+      <View style={[styles.wrapper, containerStyle, focused && styles.focused]}>
         {inputNode}
         {actions ? <View style={styles.actions}>{actions}</View> : null}
       </View>

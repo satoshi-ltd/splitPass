@@ -7,6 +7,8 @@ export const getStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
       alignItems: 'center',
+      borderColor: 'transparent',
+      borderWidth: 1,
       flexDirection: 'row',
     },
     base: {
@@ -38,6 +40,10 @@ export const getStyles = (colors) =>
       flexDirection: 'row',
       gap: 8,
       paddingRight: inputPaddingHorizontal,
+    },
+    focused: {
+      borderColor: colors.accent,
+      borderWidth: 1,
     },
     tonePrimary: {
       color: colors.text,
