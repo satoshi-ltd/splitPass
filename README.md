@@ -8,7 +8,7 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 - Encodes secrets into numeric payloads suitable for QR and NFC transport.
 - Supports split recovery flows for passwords, seed phrases, and cards.
 - Encrypts the on-device vault with a master passphrase requested during setup and on app unlock.
-- Exports encrypted local backups and requires the same master passphrase to import them.
+- Exports encrypted local backups as opaque archive files and requires the same master passphrase to import them.
 - Keeps legacy PIN-based `secure` QR/NFC payloads readable for compatibility.
 - Includes reminder scheduling, a password generator flow, and a marketplace webview entry.
 - Exposes a password generator flow and a marketplace webview entry.
@@ -16,11 +16,14 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 ## Security model
 - The main security boundary is now the master passphrase.
 - The app encrypts local `secrets` and `settings` before writing them to AsyncStorage.
+- New vault writes and backup exports use the opaque `v3` envelope with `Argon2id` key derivation and AES-GCM encryption.
+- Existing `v1` and `v2` encrypted payloads remain readable and are migrated forward after a correct unlock.
 - The app requests the master passphrase on first setup and again each time the vault is unlocked after app restart or logout.
 - There is no recovery path if the master passphrase is lost.
-- Backups are exported as encrypted JSON envelopes, not plaintext secret lists.
+- Backups are exported as encrypted archive files, not plaintext secret lists or branded JSON payloads.
 - Legacy `secure` secrets still exist only as compatibility for old QR/NFC data. New secrets are no longer created in that legacy mode.
 - PINs remain ephemeral and are only used where legacy `secure` payload compatibility still requires them.
+- The app auto-locks shortly after moving to the background and keeps sharing/favicons off by default until the user opts in.
 
 ## Core recovery model
 - A secret is normalized into a numeric representation.
@@ -33,9 +36,9 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 - Split a secret into shards for external storage or QR/NFC recovery.
 - Scan QR or NFC inputs to recover an existing secret.
 - Read legacy PIN-protected `secure` QR/NFC payloads and re-save them under the new encrypted local storage model.
-- Export and import encrypted local backup data.
+- Export and import encrypted local archive files.
 - Log out to lock the in-memory vault and return to the sign-in screen.
-- Manage theme, language, and reminder settings.
+- Manage theme, language, reminder, biometric, sharing, and favicon privacy settings.
 - Open the built-in password generator and marketplace flows.
 
 ## Security boundaries
@@ -44,12 +47,15 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 - PINs are intended to stay in the user's memory only when legacy compatibility flows ask for them.
 - Compatibility matters: QR payloads, shard formats, and stored backups must continue to work across releases.
 - Backup files and local storage must never contain plaintext secrets after secure setup.
+- Backup files should avoid revealing SplitPass branding or vault purpose before decryption.
+- Biometric unlock is an explicit convenience tradeoff and requires re-entering the current master passphrase before enabling it.
 - This is still client software. Recovery safety depends on the user storing enough material in separate locations and testing recovery before relying on it.
 
 ## Tech stack
 - Expo / React Native
 - React Navigation
 - AsyncStorage
+- Native Argon2id bridge for local key derivation
 - Jest
 - `react-native-extended-stylesheet`
 - Device integrations for camera, sharing, document picker, notifications, NFC, and webview
@@ -91,13 +97,15 @@ npx expo-doctor
 - The repo is being aligned to Expo SDK 55.
 - Use `yarn` as the single package manager for this project.
 - Keep dependency changes paired with `expo-doctor` and targeted smoke testing.
+- `react-native-argon2` is patched locally with `patch-package` during `postinstall` to keep Android builds off `jcenter()`.
 
 ## Test focus
 - QR encode / decode compatibility
 - shard split / combine compatibility
 - master passphrase signup / signin / unlock lifecycle
+- `v1` / `v2` -> `v3` encrypted store migration
 - encrypted local persistence across app restart
-- encrypted backup export / import
+- encrypted backup export / import, including opaque archive naming
 - legacy PIN encryption and decryption compatibility
 - card encode / decode compatibility
 - scanner and viewer flows

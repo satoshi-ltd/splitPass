@@ -12,6 +12,8 @@
 - Main secret types are passwords, payment cards, and BIP39 seed phrases.
 - Recovery flows rely on QR and NFC import paths.
 - The security model now centers on a master passphrase for local vault encryption and encrypted backup import/export.
+- Current encrypted writes use an opaque `v3` envelope with `Argon2id` key derivation and AES-GCM encryption.
+- Existing `v1` / `v2` encrypted stores and backups remain readable and are migrated forward after a successful unlock.
 - Legacy PIN-based `secure` payloads still exist only for compatibility with previously created QR/NFC data.
 
 ## Architecture Map
@@ -31,6 +33,7 @@
 - `src/modules/persistenceCrypto.js`: encrypted envelope format for local storage and backup payloads.
 - `src/modules/isSeedPhrase.js`: seed phrase detection.
 - `src/services/StorageService.js`: persistence contract for secrets and settings.
+- `src/services/ClipboardService.js`: clipboard writes with best-effort timed clearing.
 - `src/services/NFCService.js`, `src/screens/Scanner/*`: hardware-dependent recovery path.
 - `src/services/BackupService.js`, `src/services/NotificationsService.js`: backup import/export and reminder flows.
 
@@ -40,7 +43,11 @@
 - Existing stored secrets and backups must remain readable.
 - The master passphrase is the primary local security control. Never log it, persist it outside the current session, or downgrade the vault back to plaintext storage.
 - Backup export must stay encrypted once secure setup is enabled.
+- Backup export should stay opaque: avoid branded filenames, branded envelope markers, or plaintext hints about the file purpose.
+- New encrypted writes must use the `v3` envelope; legacy envelopes are compatibility-only.
 - PIN handling must remain ephemeral. Never log secret values, shards, PINs, decoded payloads, or decrypted backup contents.
+- Remote privacy-sensitive conveniences should stay opt-in. Website favicons and external sharing default to off.
+- App backgrounding must not leave the vault open indefinitely; keep auto-lock behavior coherent with unlock/logout/reset flows.
 - Errors must not leak sensitive content.
 
 ## Current Environment Baseline
@@ -68,6 +75,8 @@ npx expo-doctor
 - Preserve the current JavaScript + StyleSheet pattern unless a change is required for compatibility.
 - Treat the master passphrase lifecycle as a critical path: onboarding setup, unlock, logout, reset, export, and import must stay coherent together.
 - If secure storage format changes, document the migration story explicitly in the same change.
+- `react-native-argon2` is patched via `patch-package`; if Android build errors mention its Gradle files, inspect `patches/react-native-argon2+4.0.0.patch` before changing app code.
+- When editing privacy defaults, keep `websiteFaviconsEnabled` and `externalSharingEnabled` opt-in unless the user explicitly asks otherwise.
 
 ## Subagent Policy
 - Do not default to solo execution for broad tasks. If a request spans multiple subsystems, delegate.
@@ -94,23 +103,27 @@ npx expo-doctor
 - Smoke test these flows when possible:
   - onboarding -> master passphrase setup
   - app restart -> unlock with the same master passphrase
+  - legacy encrypted vault unlock -> automatic `v3` migration
   - logout -> sign-in screen -> unlock
   - create secret
   - reveal secure secret with PIN
   - split and recombine shards
   - create and reveal card secrets
   - QR scan path
-  - backup export and import
+  - backup export and import, including opaque archive naming
+  - background app -> auto-lock timeout -> unlock again
   - settings, language, marketplace, and password generator entry flows
 
 ## Known Risk Areas
 - `react-native-extended-stylesheet` may be sensitive to React Native upgrades.
 - `react-native-nfc-manager` and Expo camera integrations need compatibility checks on each Expo SDK jump.
 - `expo-constants` usage via `appOwnership` may need revisiting if Expo changes runtime semantics.
+- `react-native-argon2` needs the local patch to avoid deprecated Android repositories during builds.
 - The repo currently has user changes in progress. Read diffs before editing shared files.
 
 ## Backlog To Keep In View
 - Stabilize Expo SDK 55 across camera, notifications, sharing, document picker, constants, and filesystem usage.
 - Keep README and subagent definitions aligned with the real codebase.
 - Keep master passphrase, encrypted storage, and encrypted backup behavior documented whenever flows change.
+- Revisit the long-term viability of the Argon2 native integration versus a repo-owned implementation.
 - Replace legacy assumptions only when tests and manual flows confirm compatibility.
