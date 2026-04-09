@@ -6,6 +6,7 @@ export * from './getNavigationTheme';
 export * from './icon';
 export * from './isSeedPhrase';
 export * from './l10n';
+export * from './navigation';
 export * from './passwordGenerator';
 export * from './persistenceCrypto';
 export * from './QRParser';

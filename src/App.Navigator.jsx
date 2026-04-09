@@ -2,13 +2,13 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { style } from './App.style';
 import { Logo, Menu } from './components';
 import { useStore } from './contexts';
 import { Confirm, HeaderBackButton, Modal } from './design-system';
-import { consumeConfirmCallbacks, getNavigationTheme, L10N } from './modules';
+import { consumeConfirmCallbacks, getNavigationTheme, L10N, navigationRef } from './modules';
 import { Language, Main, Marketplace, Onboarding, Passwords, Scanner, Unlock, Vault, Viewer } from './screens';
 
 const Stack = createNativeStackNavigator();
@@ -81,14 +81,29 @@ export const Navigator = () => {
     onboarded ? 'ready' : 'new'
   }`;
 
+  useEffect(() => {
+    setRouteName(initialRouteName);
+  }, [initialRouteName, navigationKey]);
+
+  useEffect(() => {
+    if (!configured || unlocked || !navigationRef.isReady()) return;
+
+    if (navigationRef.getCurrentRoute()?.name !== 'unlock') {
+      navigationRef.resetRoot({ index: 0, routes: [{ name: 'unlock' }] });
+    }
+    setRouteName('unlock');
+  }, [configured, unlocked]);
+
   return (
     <NavigationContainer
+      key={navigationKey}
+      ref={navigationRef}
       onStateChange={(state) => setRouteName(state.routes[state.index].name)}
       theme={getNavigationTheme(theme)}
     >
       <StatusBar style={routeName === 'scanner' ? 'light' : 'dark'} translucent />
 
-      <Stack.Navigator key={navigationKey} initialRouteName={initialRouteName} screenOptions={screenOptions}>
+      <Stack.Navigator initialRouteName={initialRouteName} screenOptions={screenOptions}>
         <Stack.Screen name="onboarding" component={Onboarding} options={{ headerShown: false }} />
         <Stack.Screen name="passphrase" component={Unlock} options={{ headerShown: false }} />
         <Stack.Screen name="unlock" component={Unlock} options={{ headerShown: false }} />
