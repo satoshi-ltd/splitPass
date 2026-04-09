@@ -6,8 +6,10 @@ import { detectDeviceLanguage } from '../modules';
 const PUBLIC_SETTINGS_KEY = `${STORAGE_DOMAIN}.public-settings`;
 
 const DEFAULT_PUBLIC_SETTINGS = {
+  autoLockImmediatelyEnabled: false,
   autoLockSeconds: 30,
   biometricUnlockEnabled: false,
+  clipboardAutoClearEnabled: true,
   externalSharingEnabled: false,
   language: undefined,
   onboarded: false,
@@ -19,10 +21,12 @@ const DEFAULT_PUBLIC_SETTINGS = {
 const normalizePublicSettings = (value = {}) => ({
   ...DEFAULT_PUBLIC_SETTINGS,
   ...(value && typeof value === 'object' && !Array.isArray(value) ? value : {}),
+  autoLockImmediatelyEnabled: value?.autoLockImmediatelyEnabled === true,
   autoLockSeconds:
     Number.isFinite(Number(value?.autoLockSeconds)) && Number(value?.autoLockSeconds) > 0
       ? Number(value.autoLockSeconds)
       : DEFAULT_PUBLIC_SETTINGS.autoLockSeconds,
+  clipboardAutoClearEnabled: value?.clipboardAutoClearEnabled !== false,
   externalSharingEnabled: value?.externalSharingEnabled === true,
   language: value?.language || detectDeviceLanguage(),
   reminders: Array.isArray(value?.reminders) ? value.reminders : DEFAULT_PUBLIC_SETTINGS.reminders,

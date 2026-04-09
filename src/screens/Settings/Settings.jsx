@@ -27,7 +27,9 @@ const Settings = ({ navigation = {} }) => {
   const [biometricAvailability, setBiometricAvailability] = useState({ available: false, ready: false });
 
   const {
+    autoLockImmediatelyEnabled = false,
     biometricUnlockEnabled = false,
+    clipboardAutoClearEnabled = true,
     externalSharingEnabled = false,
     language,
     reminders = [],
@@ -125,6 +127,10 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ theme: value ? 'dark' : 'light' });
   };
 
+  const handleAutoLockImmediately = (value) => {
+    updateSettings({ autoLockImmediatelyEnabled: !!value });
+  };
+
   const handleBiometricUnlock = async (value) => {
     try {
       setActivity((prev) => ({ ...(prev || {}), biometricUnlock: true }));
@@ -170,6 +176,10 @@ const Settings = ({ navigation = {} }) => {
 
   const handleExternalSharing = (value) => {
     updateSettings({ externalSharingEnabled: !!value });
+  };
+
+  const handleClipboardAutoClear = (value) => {
+    updateSettings({ clipboardAutoClearEnabled: !!value });
   };
 
   const handleLoadDemoSecrets = async () => {
@@ -270,6 +280,13 @@ const Settings = ({ navigation = {} }) => {
           onValueChange={handleBiometricUnlock}
         />
         <Setting
+          icon={ICON.SECURE}
+          type="toggle"
+          title={L10N.AUTO_LOCK_IMMEDIATELY}
+          value={autoLockImmediatelyEnabled}
+          onValueChange={handleAutoLockImmediately}
+        />
+        <Setting
           icon={ICON.BELL}
           subtitle={reminderSubtitle}
           type="toggle"
@@ -299,6 +316,13 @@ const Settings = ({ navigation = {} }) => {
           title={L10N.EXTERNAL_SHARING}
           value={externalSharingEnabled}
           onValueChange={handleExternalSharing}
+        />
+        <Setting
+          icon={ICON.COPY}
+          type="toggle"
+          title={L10N.AUTO_CLEAR_CLIPBOARD}
+          value={clipboardAutoClearEnabled}
+          onValueChange={handleClipboardAutoClear}
         />
         <Setting
           icon={ICON.WEB}

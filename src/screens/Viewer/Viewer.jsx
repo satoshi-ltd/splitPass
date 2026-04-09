@@ -55,6 +55,9 @@ const decodeSecret = (value = '', passcode = '') => {
 const serializeRouteDate = (value) =>
   value && typeof value === 'object' && typeof value.toISOString === 'function' ? value.toISOString() : value;
 
+const getClipboardNotificationText = (baseText, clipboardAutoClearEnabled) =>
+  clipboardAutoClearEnabled ? `${baseText} ${L10N.CLIPBOARD_AUTO_CLEAR_NOTICE}` : baseText;
+
 const Viewer = ({ route, navigation = {} }) => {
   const {
     params: {
@@ -79,7 +82,7 @@ const Viewer = ({ route, navigation = {} }) => {
     deleteSecret,
     readSecret,
     secrets,
-    settings: { externalSharingEnabled = false } = {},
+    settings: { clipboardAutoClearEnabled = true, externalSharingEnabled = false } = {},
     updateSecret,
   } = useStore();
   const { width } = useWindowDimensions();
@@ -366,9 +369,9 @@ const Viewer = ({ route, navigation = {} }) => {
     const valueToCopy = isTotp ? totpState?.code : is.shard ? currentValue : decodedSecret;
     if (!valueToCopy) return;
 
-    await ClipboardService.copyWithAutoClear(valueToCopy);
+    await ClipboardService.copyWithAutoClear(valueToCopy, { ttlMs: clipboardAutoClearEnabled ? undefined : 0 });
     eventEmitter.emit(EVENT.NOTIFICATION, {
-      text: isTotp ? L10N.OTP_CODE_COPIED : L10N.SECRET_COPIED,
+      text: getClipboardNotificationText(isTotp ? L10N.OTP_CODE_COPIED : L10N.SECRET_COPIED, clipboardAutoClearEnabled),
       title: L10N.SUCCESS,
     });
   };

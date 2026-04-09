@@ -1,9 +1,11 @@
 import * as Clipboard from 'expo-clipboard';
 
+const DEFAULT_TTL_MS = 10000;
+
 let clearTimer;
 let lastCopiedValue = '';
 
-const scheduleClear = (value = '', ttlMs = 30000) => {
+const scheduleClear = (value = '', ttlMs = DEFAULT_TTL_MS) => {
   if (clearTimer) clearTimeout(clearTimer);
 
   clearTimer = setTimeout(async () => {
@@ -21,12 +23,13 @@ const scheduleClear = (value = '', ttlMs = 30000) => {
 };
 
 const copyWithAutoClear = async (value = '', options = {}) => {
-  const ttlMs = Number(options?.ttlMs) > 0 ? Number(options.ttlMs) : 30000;
+  const ttlMs =
+    options?.ttlMs === 0 ? 0 : Number(options?.ttlMs) > 0 ? Number(options.ttlMs) : DEFAULT_TTL_MS;
   const nextValue = `${value}`;
 
   lastCopiedValue = nextValue;
   await Clipboard.setStringAsync(nextValue);
-  scheduleClear(nextValue, ttlMs);
+  if (ttlMs > 0) scheduleClear(nextValue, ttlMs);
 
   return true;
 };

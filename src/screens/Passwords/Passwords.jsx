@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { style } from './Passwords.style';
 import { EVENT } from '../../App.constants';
-import { useApp } from '../../contexts';
+import { useApp, useStore } from '../../contexts';
 import { AppScreen, Button, HeaderBackButton, Icon, Text, View } from '../../design-system';
 import { eventEmitter, generatePassword, getPasswordStrength, ICON, L10N } from '../../modules';
 import { ClipboardService } from '../../services';
@@ -30,9 +30,15 @@ const renderPassword = (password = '') =>
     </Text>
   ));
 
+const getClipboardNotificationText = (baseText, clipboardAutoClearEnabled) =>
+  clipboardAutoClearEnabled ? `${baseText} ${L10N.CLIPBOARD_AUTO_CLEAR_NOTICE}` : baseText;
+
 const Passwords = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { colors, theme } = useApp();
+  const {
+    settings: { clipboardAutoClearEnabled = true } = {},
+  } = useStore();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [password, setPassword] = useState('');
   const isPicker = !!route?.params?.picker;
@@ -75,8 +81,11 @@ const Passwords = ({ navigation, route }) => {
   };
 
   const handleCopy = async () => {
-    await ClipboardService.copyWithAutoClear(password);
-    eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CREATE_PASSWORD_COPY_SUCCESS, title: L10N.SUCCESS });
+    await ClipboardService.copyWithAutoClear(password, { ttlMs: clipboardAutoClearEnabled ? undefined : 0 });
+    eventEmitter.emit(EVENT.NOTIFICATION, {
+      text: getClipboardNotificationText(L10N.CREATE_PASSWORD_COPY_SUCCESS, clipboardAutoClearEnabled),
+      title: L10N.SUCCESS,
+    });
 
     if (isPicker) {
       eventEmitter.emit(EVENT.PASSWORD_SELECTED, password);

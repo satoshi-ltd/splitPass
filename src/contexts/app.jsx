@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import { DEFAULT_THEME } from '../App.constants';
 import { detectDeviceLanguage, formatDateTime, setLanguage, translate } from '../modules';
@@ -20,23 +20,30 @@ const AppProvider = ({ children }) => {
   const {
     lockStore,
     security: { configured, unlocked } = {},
-    settings: { autoLockSeconds = 30, language, onboarded, reminders, theme } = {},
+    settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 30, language, onboarded, reminders, theme } = {},
   } = useStore();
   const resolvedLanguage = language || detectDeviceLanguage();
   const resolvedTheme = theme || DEFAULT_THEME;
   const autoLockTimerRef = useRef();
-  const autoLockStateRef = useRef({ configured, lockStore, seconds: autoLockSeconds, unlocked });
+  const autoLockStateRef = useRef({
+    configured,
+    immediate: autoLockImmediatelyEnabled,
+    lockStore,
+    seconds: autoLockSeconds,
+    unlocked,
+  });
   const notificationsReadyRef = useRef(false);
   setLanguage(resolvedLanguage);
 
   useEffect(() => {
     autoLockStateRef.current = {
       configured,
+      immediate: autoLockImmediatelyEnabled,
       lockStore,
       seconds: autoLockSeconds,
       unlocked,
     };
-  }, [autoLockSeconds, configured, lockStore, unlocked]);
+  }, [autoLockImmediatelyEnabled, autoLockSeconds, configured, lockStore, unlocked]);
 
   useEffect(() => {
     if (!onboarded) {
@@ -76,18 +83,38 @@ const AppProvider = ({ children }) => {
       }, Number(seconds) * 1000);
     };
 
+    const lockImmediately = () => {
+      clearAutoLock();
+
+      const { configured: ready, lockStore: latestLock, unlocked: open } = autoLockStateRef.current;
+      if (!ready || !open) return;
+
+      const pendingLock = latestLock();
+      if (pendingLock?.catch) pendingLock.catch(() => undefined);
+    };
+
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         clearAutoLock();
         return;
       }
 
-      if (nextState === 'background' || nextState === 'inactive') scheduleAutoLock();
+      if (nextState === 'background' || nextState === 'inactive') {
+        if (autoLockStateRef.current.immediate) lockImmediately();
+        else scheduleAutoLock();
+      }
     });
+    const blurSubscription =
+      Platform.OS === 'android'
+        ? AppState.addEventListener('blur', () => {
+            if (autoLockStateRef.current.immediate) lockImmediately();
+          })
+        : undefined;
 
     return () => {
       clearAutoLock();
       subscription.remove();
+      blurSubscription?.remove?.();
     };
   }, []);
 
