@@ -67,7 +67,7 @@ describe('BiometricAuthService', () => {
       `${STORAGE_DOMAIN}.biometric.passphrase`,
       'vault-passphrase',
       expect.objectContaining({
-        authenticationPrompt: 'Authenticate to save your SplitPass master passphrase.',
+        authenticationPrompt: 'Authenticate to save your vault passphrase.',
         keychainService: KEYCHAIN_SERVICE,
         requireAuthentication: true,
       }),
@@ -81,7 +81,7 @@ describe('BiometricAuthService', () => {
     expect(SecureStore.getItemAsync).toHaveBeenCalledWith(
       `${STORAGE_DOMAIN}.biometric.passphrase`,
       expect.objectContaining({
-        authenticationPrompt: 'Unlock SplitPass with biometrics.',
+        authenticationPrompt: 'Unlock your vault with biometrics.',
         keychainService: KEYCHAIN_SERVICE,
         requireAuthentication: true,
       }),

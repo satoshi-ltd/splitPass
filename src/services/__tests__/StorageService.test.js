@@ -1,7 +1,12 @@
+/* global Uint8Array */
 jest.mock('expo-crypto');
+jest.mock('react-native-argon2');
 jest.mock('../../modules', () => require('../../modules/persistenceCrypto'));
 
+import { AESEncryptionKey, aesEncryptAsync, CryptoDigestAlgorithm, digest, getRandomBytes } from 'expo-crypto';
+
 import { DEFAULTS } from '../../contexts/store.constants';
+import { LEGACY_STORE_FORMAT, STORE_FORMAT } from '../../modules/persistenceCrypto';
 import { StorageService } from '../StorageService';
 
 let storage = {};
@@ -30,6 +35,84 @@ class MemoryAdapter {
     delete storage[this.key];
   }
 }
+
+const KEY_LENGTH = 32;
+const LEGACY_ROUNDS = 10000;
+const TEXT_ENCODER = new TextEncoder();
+
+const concatBytes = (...parts) => {
+  const length = parts.reduce((total, part = new Uint8Array()) => total + part.length, 0);
+  const joined = new Uint8Array(length);
+  let offset = 0;
+
+  parts.forEach((part = new Uint8Array()) => {
+    joined.set(part, offset);
+    offset += part.length;
+  });
+
+  return joined;
+};
+
+const toHex = (bytes = new Uint8Array()) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+const toBase64 = (bytes = new Uint8Array()) => Buffer.from(bytes).toString('base64');
+const encodeJson = (value = {}) => TEXT_ENCODER.encode(JSON.stringify(value));
+
+const deriveLegacyKey = async (passphrase = '', salt = getRandomBytes(16)) => {
+  let output = concatBytes(salt, TEXT_ENCODER.encode(`${passphrase}`));
+
+  for (let round = 0; round < LEGACY_ROUNDS; round += 1) {
+    output = new Uint8Array(await digest(CryptoDigestAlgorithm.SHA256, concatBytes(output, salt)));
+  }
+
+  return { keyBytes: output.slice(0, KEY_LENGTH), salt };
+};
+
+const sealLegacyParts = async (bytes = new Uint8Array(), keyBytes = new Uint8Array()) => {
+  const key = await AESEncryptionKey.import(keyBytes);
+  const sealed = await aesEncryptAsync(toBase64(bytes), key);
+
+  return {
+    ciphertext: toBase64(await sealed.ciphertext({ includeTag: true })),
+    iv: toBase64(await sealed.iv()),
+    tagLength: sealed.tagSize,
+  };
+};
+
+const sealLegacyCombined = async (bytes = new Uint8Array(), keyBytes = new Uint8Array()) => {
+  const key = await AESEncryptionKey.import(keyBytes);
+  const sealed = await aesEncryptAsync(toBase64(bytes), key);
+
+  return toBase64(await sealed.combined());
+};
+
+const createLegacyEnvelope = async (payload = {}, passphrase = '', format = STORE_FORMAT) => {
+  const { keyBytes, salt } = await deriveLegacyKey(passphrase);
+
+  if (format === LEGACY_STORE_FORMAT) {
+    const dataKey = getRandomBytes(KEY_LENGTH);
+
+    return {
+      ciphertext: await sealLegacyCombined(encodeJson(payload), dataKey),
+      kdf: {
+        algorithm: 'sha256-iterative',
+        rounds: LEGACY_ROUNDS,
+        salt: toHex(salt),
+      },
+      type: LEGACY_STORE_FORMAT,
+      wrappedKey: await sealLegacyCombined(dataKey, keyBytes),
+    };
+  }
+
+  return {
+    ciphertext: await sealLegacyParts(encodeJson(payload), keyBytes),
+    kdf: {
+      algorithm: 'sha256-iterative',
+      rounds: LEGACY_ROUNDS,
+      salt: toHex(salt),
+    },
+    type: STORE_FORMAT,
+  };
+};
 
 describe('StorageService secure lifecycle', () => {
   beforeEach(() => {
@@ -117,8 +200,10 @@ describe('StorageService secure lifecycle', () => {
 
       const backup = await sourceStore.exportBackup();
 
-      expect(backup.type).toBe('splitpass.encrypted.v2');
+      expect(backup.v).toBe(3);
+      expect(backup.type).toBeUndefined();
       expect(JSON.stringify(backup)).not.toContain('wallet-2026!');
+      expect(JSON.stringify(backup)).not.toContain('splitpass');
       await expect(sourceStore.decryptBackup(backup, 'wrong-passphrase')).rejects.toThrow(
         'Unable to unlock encrypted payload.',
       );
@@ -159,4 +244,44 @@ describe('StorageService secure lifecycle', () => {
       ]);
     },
   );
+
+  it('unlocks a v2 vault and rewrites it to the current encrypted envelope', async () => {
+    const filename = 'legacy-v2-store';
+    const payload = {
+      secrets: [{ hash: 'legacy:1', name: 'Legacy', value: 'legacy-passphrase' }],
+      settings: { ...DEFAULTS.settings, onboarded: true },
+    };
+
+    storage[filename] = JSON.stringify(await createLegacyEnvelope(payload, PASSPHRASE_CASES[1][1], STORE_FORMAT));
+
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+    const unlocked = await store.unlock(PASSPHRASE_CASES[1][1]);
+    const persisted = JSON.parse(storage[filename]);
+
+    expect(unlocked.secrets).toEqual(payload.secrets);
+    expect(store.lastUnlockMigrated).toBe(true);
+    expect(persisted.v).toBe(3);
+    expect(persisted.type).toBeUndefined();
+  });
+
+  it('unlocks a v1 vault and rewrites it to the current encrypted envelope', async () => {
+    const filename = 'legacy-v1-store';
+    const payload = {
+      secrets: [{ hash: 'legacy:2', name: 'Cold wallet', value: 'seed-protected' }],
+      settings: { ...DEFAULTS.settings, onboarded: true },
+    };
+
+    storage[filename] = JSON.stringify(
+      await createLegacyEnvelope(payload, PASSPHRASE_CASES[0][1], LEGACY_STORE_FORMAT),
+    );
+
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+    const unlocked = await store.unlock(PASSPHRASE_CASES[0][1]);
+    const persisted = JSON.parse(storage[filename]);
+
+    expect(unlocked.secrets).toEqual(payload.secrets);
+    expect(store.lastUnlockMigrated).toBe(true);
+    expect(persisted.v).toBe(3);
+    expect(persisted.type).toBeUndefined();
+  });
 });

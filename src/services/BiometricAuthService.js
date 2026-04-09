@@ -10,8 +10,8 @@ import { STORAGE_DOMAIN } from '../App.constants';
 const BIOMETRIC_KEY = `${STORAGE_DOMAIN}.biometric.passphrase`;
 const BIOMETRIC_SERVICE = `${STORAGE_DOMAIN}.biometric`;
 const BIOMETRIC_DEV_KEY = `${STORAGE_DOMAIN}.biometric.dev-passphrase`;
-const AUTH_PROMPT_ENABLE = 'Authenticate to save your SplitPass master passphrase.';
-const AUTH_PROMPT_UNLOCK = 'Unlock SplitPass with biometrics.';
+const AUTH_PROMPT_ENABLE = 'Authenticate to save your vault passphrase.';
+const AUTH_PROMPT_UNLOCK = 'Unlock your vault with biometrics.';
 const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const createError = (message, code) => {

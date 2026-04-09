@@ -5,7 +5,13 @@ import * as Sharing from 'expo-sharing';
 import { isEncryptedEnvelope, L10N } from '../modules';
 
 const getErrorMessage = (error) => error?.message || String(error) || 'Unknown error';
-const getBackupFileName = () => `splitpass-backup-${new Date().toISOString()}.json`;
+const formatBackupTimestamp = (value = new Date()) =>
+  value
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}Z$/, 'Z');
+const getBackupSuffix = () => Math.random().toString(36).slice(2, 8).padEnd(6, '0').slice(0, 6);
+const getBackupFileName = () => `archive-${formatBackupTimestamp()}-${getBackupSuffix()}.dat`;
 
 export const BackupService = {
   export: async ({ store } = {}) =>
@@ -22,7 +28,7 @@ export const BackupService = {
         const fileUri = FileSystem.documentDirectory + fileName;
         await FileSystem.writeAsStringAsync(fileUri, data);
         await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/json',
+          mimeType: 'application/octet-stream',
           dialogTitle: fileName,
         });
         await FileSystem.deleteAsync(fileUri, { idempotent: true });
@@ -42,7 +48,7 @@ export const BackupService = {
         const { canceled, assets = [] } = await DocumentPicker.getDocumentAsync({
           copyToCacheDirectory: true,
           multiple: false,
-          type: 'application/json',
+          type: '*/*',
         });
         const file = assets && assets[0] ? assets[0] : {};
 
@@ -70,3 +76,5 @@ export const BackupService = {
       }
     }),
 };
+
+export { getBackupFileName };

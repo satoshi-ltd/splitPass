@@ -1,6 +1,12 @@
 jest.mock('expo-crypto');
+jest.mock('react-native-argon2');
 
-import { createEncryptedEnvelope, decryptEncryptedEnvelope, isEncryptedEnvelope } from '../persistenceCrypto';
+import {
+  createEncryptedEnvelope,
+  decryptEncryptedEnvelope,
+  isCurrentEncryptedEnvelope,
+  isEncryptedEnvelope,
+} from '../persistenceCrypto';
 
 describe('persistenceCrypto', () => {
   const PASSPHRASE = 'correct horse battery staple';
@@ -13,7 +19,9 @@ describe('persistenceCrypto', () => {
     const envelope = await createEncryptedEnvelope(PAYLOAD, PASSPHRASE);
 
     expect(isEncryptedEnvelope(envelope)).toBe(true);
+    expect(isCurrentEncryptedEnvelope(envelope)).toBe(true);
     expect(JSON.stringify(envelope)).not.toContain('Email');
+    expect(JSON.stringify(envelope)).not.toContain('splitpass');
 
     await expect(decryptEncryptedEnvelope(envelope, PASSPHRASE)).resolves.toEqual(PAYLOAD);
   });

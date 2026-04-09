@@ -1,4 +1,4 @@
-/* global Uint8Array */
+/* global ArrayBuffer, Uint8Array */
 import {
   AESEncryptionKey,
   AESSealedData,
@@ -8,14 +8,25 @@ import {
   digest,
   getRandomBytes,
 } from 'expo-crypto';
+import argon2 from 'react-native-argon2';
 
+const STORE_VERSION = 3;
 const STORE_FORMAT = 'splitpass.encrypted.v2';
 const LEGACY_STORE_FORMAT = 'splitpass.encrypted.v1';
-const KDF_ROUNDS = 10000;
 const KEY_LENGTH = 32;
+const NONCE_LENGTH = 12;
+const TAG_LENGTH = 16;
 const TEXT_ENCODER = new TextEncoder();
 const TEXT_DECODER = new TextDecoder();
 const BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const KDF_CONFIG = {
+  algorithm: 'argon2id',
+  memory: 64 * 1024,
+  parallelism: 1,
+  rounds: 3,
+  saltLength: 16,
+};
+const LEGACY_KDF_ROUNDS = 10000;
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const isObject = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
@@ -31,6 +42,14 @@ const concatBytes = (...parts) => {
   });
 
   return joined;
+};
+
+const normalizeBytes = (value = new Uint8Array()) => {
+  if (value instanceof Uint8Array) return value;
+  if (value instanceof ArrayBuffer) return new Uint8Array(value);
+  if (typeof value === 'string') return fromBase64(value);
+
+  return new Uint8Array(value);
 };
 
 const toHex = (bytes = new Uint8Array()) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -85,17 +104,40 @@ const fromBase64 = (value = '') => {
   return new Uint8Array(bytes);
 };
 
+const toBase64Url = (bytes = new Uint8Array()) =>
+  toBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+
+const fromBase64Url = (value = '') => {
+  const normalized = `${value}`.replace(/-/g, '+').replace(/_/g, '/');
+  const padding = normalized.length % 4 === 0 ? '' : '='.repeat(4 - (normalized.length % 4));
+
+  return fromBase64(`${normalized}${padding}`);
+};
+
 const encodeJson = (value = {}) => TEXT_ENCODER.encode(JSON.stringify(value));
 const decodeJson = (bytes = new Uint8Array()) => JSON.parse(TEXT_DECODER.decode(bytes));
-const encodePassphrase = (passphrase = '') => TEXT_ENCODER.encode(`${passphrase}`);
 
-const deriveWrappingKeyBytes = async (passphrase = '', salt = getRandomBytes(16)) => {
+const deriveWrappingKeyBytes = async (passphrase = '', salt = getRandomBytes(KDF_CONFIG.saltLength)) => {
   if (`${passphrase}`.length < 8) throw new Error('Master passphrase is too short.');
 
-  let output = concatBytes(salt, encodePassphrase(passphrase));
+  const result = await argon2(`${passphrase}`, toHex(salt), {
+    hashLength: KEY_LENGTH,
+    iterations: KDF_CONFIG.rounds,
+    memory: KDF_CONFIG.memory,
+    mode: KDF_CONFIG.algorithm,
+    parallelism: KDF_CONFIG.parallelism,
+    saltEncoding: 'hex',
+  });
 
-  for (let round = 0; round < KDF_ROUNDS; round += 1) {
-    // Expo exposes native digests, but not PBKDF2/Argon2 in this SDK.
+  return { keyBytes: fromHex(result?.rawHash || ''), salt };
+};
+
+const deriveLegacyWrappingKeyBytes = async (passphrase = '', salt = getRandomBytes(16)) => {
+  if (`${passphrase}`.length < 8) throw new Error('Master passphrase is too short.');
+
+  let output = concatBytes(salt, TEXT_ENCODER.encode(`${passphrase}`));
+
+  for (let round = 0; round < LEGACY_KDF_ROUNDS; round += 1) {
     output = new Uint8Array(await digest(CryptoDigestAlgorithm.SHA256, concatBytes(output, salt)));
   }
 
@@ -104,25 +146,13 @@ const deriveWrappingKeyBytes = async (passphrase = '', salt = getRandomBytes(16)
 
 const importKey = async (keyBytes = new Uint8Array()) => AESEncryptionKey.import(keyBytes);
 
-const normalizeBinaryOutput = (value = new Uint8Array()) => (typeof value === 'string' ? value : toBase64(value));
 const isSealedPayload = (value = {}) =>
   isObject(value) &&
   typeof value.iv === 'string' &&
   typeof value.ciphertext === 'string' &&
   Number.isInteger(value.tagLength);
 
-const sealBytes = async (bytes = new Uint8Array(), keyBytes = new Uint8Array()) => {
-  const key = await importKey(keyBytes);
-  const sealed = await aesEncryptAsync(toBase64(bytes), key);
-
-  return {
-    ciphertext: normalizeBinaryOutput(await sealed.ciphertext({ includeTag: true })),
-    iv: normalizeBinaryOutput(await sealed.iv()),
-    tagLength: sealed.tagSize,
-  };
-};
-
-const openBytes = async (input = '', keyBytes = new Uint8Array()) => {
+const openLegacyBytes = async (input = '', keyBytes = new Uint8Array()) => {
   const key = await importKey(keyBytes);
   const sealed = isSealedPayload(input)
     ? AESSealedData.fromParts(fromBase64(input.iv), fromBase64(input.ciphertext), input.tagLength)
@@ -132,41 +162,105 @@ const openBytes = async (input = '', keyBytes = new Uint8Array()) => {
   return fromBase64(plaintextBase64);
 };
 
-const createEncryptedEnvelope = async (payload = {}, passphrase = '') => {
-  const { keyBytes, salt } = await deriveWrappingKeyBytes(passphrase);
+const sealCurrentBytes = async (
+  bytes = new Uint8Array(),
+  keyBytes = new Uint8Array(),
+  nonce = getRandomBytes(NONCE_LENGTH),
+) => {
+  const key = await importKey(keyBytes);
+  const sealed = await aesEncryptAsync(toBase64(bytes), key, { nonce: { bytes: nonce } });
 
   return {
-    ciphertext: await sealBytes(encodeJson(clone(payload)), keyBytes),
-    kdf: {
-      algorithm: 'sha256-iterative',
-      rounds: KDF_ROUNDS,
-      salt: toHex(salt),
+    combined: toBase64Url(normalizeBytes(await sealed.ciphertext({ includeTag: true }))),
+    nonce: normalizeBytes(await sealed.iv()),
+  };
+};
+
+const openCurrentBytes = async (combined = '', keyBytes = new Uint8Array(), nonce = new Uint8Array()) => {
+  const key = await importKey(keyBytes);
+  const sealed = AESSealedData.fromParts(nonce, fromBase64Url(combined), TAG_LENGTH);
+  const plaintextBase64 = await aesDecryptAsync(sealed, key, { output: 'base64' });
+
+  return fromBase64(plaintextBase64);
+};
+
+const createEncryptedEnvelope = async (payload = {}, passphrase = '') => {
+  const { keyBytes, salt } = await deriveWrappingKeyBytes(passphrase);
+  const dataKey = getRandomBytes(KEY_LENGTH);
+  const sharedNonce = getRandomBytes(NONCE_LENGTH);
+  const wrappedKey = await sealCurrentBytes(dataKey, keyBytes, sharedNonce);
+  const ciphertext = await sealCurrentBytes(encodeJson(clone(payload)), dataKey, sharedNonce);
+
+  return {
+    c: ciphertext.combined,
+    k: {
+      a: KDF_CONFIG.algorithm,
+      m: KDF_CONFIG.memory,
+      p: KDF_CONFIG.parallelism,
+      s: toBase64Url(salt),
+      t: KDF_CONFIG.rounds,
     },
-    type: STORE_FORMAT,
+    n: toBase64Url(wrappedKey.nonce),
+    v: STORE_VERSION,
+    w: wrappedKey.combined,
   };
 };
 
 const decryptLegacyEnvelope = async (envelope = {}, passphrase = '') => {
   const salt = fromHex(envelope?.kdf?.salt || '');
-  const { keyBytes: wrappingKeyBytes } = await deriveWrappingKeyBytes(passphrase, salt);
-  const dataKeyBytes = await openBytes(envelope.wrappedKey, wrappingKeyBytes);
-  const payloadBytes = await openBytes(envelope.ciphertext, dataKeyBytes);
+  const { keyBytes: wrappingKeyBytes } = await deriveLegacyWrappingKeyBytes(passphrase, salt);
+  const dataKeyBytes = await openLegacyBytes(envelope.wrappedKey, wrappingKeyBytes);
+  const payloadBytes = await openLegacyBytes(envelope.ciphertext, dataKeyBytes);
 
   return decodeJson(payloadBytes);
 };
 
-const decryptCurrentEnvelope = async (envelope = {}, passphrase = '') => {
+const decryptV2Envelope = async (envelope = {}, passphrase = '') => {
   const salt = fromHex(envelope?.kdf?.salt || '');
   if (!isSealedPayload(envelope?.ciphertext)) {
     const error = new Error('Unsupported encrypted payload.');
     error.code = 'ERR_PERSISTENCE_FORMAT';
     throw error;
   }
-  const { keyBytes } = await deriveWrappingKeyBytes(passphrase, salt);
-  const payloadBytes = await openBytes(envelope.ciphertext, keyBytes);
+
+  const { keyBytes } = await deriveLegacyWrappingKeyBytes(passphrase, salt);
+  const payloadBytes = await openLegacyBytes(envelope.ciphertext, keyBytes);
 
   return decodeJson(payloadBytes);
 };
+
+const decryptV3Envelope = async (envelope = {}, passphrase = '') => {
+  const salt = fromBase64Url(envelope?.k?.s || '');
+  const nonce = fromBase64Url(envelope?.n || '');
+
+  if (!salt.length || !nonce.length || typeof envelope?.w !== 'string' || typeof envelope?.c !== 'string') {
+    const error = new Error('Unsupported encrypted payload.');
+    error.code = 'ERR_PERSISTENCE_FORMAT';
+    throw error;
+  }
+
+  const { keyBytes } = await deriveWrappingKeyBytes(passphrase, salt);
+  const dataKeyBytes = await openCurrentBytes(envelope.w, keyBytes, nonce);
+  const payloadBytes = await openCurrentBytes(envelope.c, dataKeyBytes, nonce);
+
+  return decodeJson(payloadBytes);
+};
+
+const isCurrentEncryptedEnvelope = (value = {}) =>
+  isObject(value) &&
+  value.v === STORE_VERSION &&
+  isObject(value.k) &&
+  value.k.a === KDF_CONFIG.algorithm &&
+  typeof value.k.m === 'number' &&
+  typeof value.k.p === 'number' &&
+  typeof value.k.s === 'string' &&
+  typeof value.k.t === 'number' &&
+  typeof value.n === 'string' &&
+  typeof value.w === 'string' &&
+  typeof value.c === 'string';
+
+const isLegacyEncryptedEnvelope = (value = {}) =>
+  isObject(value) && [STORE_FORMAT, LEGACY_STORE_FORMAT].includes(value.type);
 
 const decryptEncryptedEnvelope = async (envelope = {}, passphrase = '') => {
   if (!isEncryptedEnvelope(envelope)) {
@@ -176,9 +270,10 @@ const decryptEncryptedEnvelope = async (envelope = {}, passphrase = '') => {
   }
 
   try {
+    if (isCurrentEncryptedEnvelope(envelope)) return await decryptV3Envelope(envelope, passphrase);
     if (envelope.type === LEGACY_STORE_FORMAT) return await decryptLegacyEnvelope(envelope, passphrase);
 
-    return await decryptCurrentEnvelope(envelope, passphrase);
+    return await decryptV2Envelope(envelope, passphrase);
   } catch (cause) {
     if (cause?.code === 'ERR_PERSISTENCE_FORMAT') throw cause;
 
@@ -188,10 +283,14 @@ const decryptEncryptedEnvelope = async (envelope = {}, passphrase = '') => {
   }
 };
 
-const isEncryptedEnvelope = (value = {}) =>
-  !!value &&
-  typeof value === 'object' &&
-  !Array.isArray(value) &&
-  [STORE_FORMAT, LEGACY_STORE_FORMAT].includes(value.type);
+const isEncryptedEnvelope = (value = {}) => isCurrentEncryptedEnvelope(value) || isLegacyEncryptedEnvelope(value);
 
-export { createEncryptedEnvelope, decryptEncryptedEnvelope, isEncryptedEnvelope, STORE_FORMAT };
+export {
+  createEncryptedEnvelope,
+  decryptEncryptedEnvelope,
+  isCurrentEncryptedEnvelope,
+  isEncryptedEnvelope,
+  LEGACY_STORE_FORMAT,
+  STORE_FORMAT,
+  STORE_VERSION,
+};

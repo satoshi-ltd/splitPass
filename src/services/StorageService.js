@@ -1,5 +1,10 @@
 /* eslint-disable no-async-promise-executor */
-import { createEncryptedEnvelope, decryptEncryptedEnvelope, isEncryptedEnvelope } from '../modules';
+import {
+  createEncryptedEnvelope,
+  decryptEncryptedEnvelope,
+  isCurrentEncryptedEnvelope,
+  isEncryptedEnvelope,
+} from '../modules';
 import { AsyncStorageAdapter } from './modules/asyncStorage';
 
 // eslint-disable-next-line no-undef
@@ -41,6 +46,7 @@ export class StorageService {
         defaults: clone(defaults),
         filename,
         key: 'default',
+        lastUnlockMigrated: false,
         legacyData,
         rawData,
         sessionPassphrase: undefined,
@@ -70,6 +76,10 @@ export class StorageService {
     return state.get(this).sessionPassphrase;
   }
 
+  get lastUnlockMigrated() {
+    return !!state.get(this).lastUnlockMigrated;
+  }
+
   async initializeSecurity(passphrase, seedData) {
     const snapshot = state.get(this);
     const nextData = normalizeData(
@@ -84,6 +94,7 @@ export class StorageService {
       ...snapshot,
       data: nextData,
       legacyData: undefined,
+      lastUnlockMigrated: false,
       rawData: persisted,
       sessionPassphrase: passphrase,
     });
@@ -101,7 +112,23 @@ export class StorageService {
     }
 
     const data = normalizeData(await decryptEncryptedEnvelope(snapshot.rawData, passphrase), snapshot.defaults);
-    state.set(this, { ...snapshot, data, sessionPassphrase: passphrase });
+    let rawData = snapshot.rawData;
+    let migrated = false;
+
+    if (!isCurrentEncryptedEnvelope(snapshot.rawData)) {
+      rawData = await createEncryptedEnvelope(data, passphrase);
+      await snapshot.adapter.write(rawData);
+      rawData = await verifyPersistedEnvelope(snapshot.adapter, passphrase);
+      migrated = true;
+    }
+
+    state.set(this, {
+      ...snapshot,
+      data,
+      lastUnlockMigrated: migrated,
+      rawData,
+      sessionPassphrase: passphrase,
+    });
 
     return clone(data);
   }
@@ -109,7 +136,13 @@ export class StorageService {
   lock() {
     const snapshot = state.get(this);
 
-    state.set(this, { ...snapshot, data: undefined, key: 'default', sessionPassphrase: undefined });
+    state.set(this, {
+      ...snapshot,
+      data: undefined,
+      key: 'default',
+      lastUnlockMigrated: false,
+      sessionPassphrase: undefined,
+    });
   }
 
   async replaceAll(nextData, passphrase = this.sessionPassphrase) {
@@ -121,7 +154,14 @@ export class StorageService {
     const rawData = await createEncryptedEnvelope(data, passphrase);
     await snapshot.adapter.write(rawData);
     const persisted = await verifyPersistedEnvelope(snapshot.adapter, passphrase);
-    state.set(this, { ...snapshot, data, legacyData: undefined, rawData: persisted, sessionPassphrase: passphrase });
+    state.set(this, {
+      ...snapshot,
+      data,
+      lastUnlockMigrated: false,
+      legacyData: undefined,
+      rawData: persisted,
+      sessionPassphrase: passphrase,
+    });
 
     return clone(data);
   }
@@ -129,7 +169,18 @@ export class StorageService {
   async exportBackup() {
     const { defaults, rawData } = state.get(this);
 
-    if (isEncryptedEnvelope(rawData)) return clone(rawData);
+    if (isEncryptedEnvelope(rawData)) {
+      if (isCurrentEncryptedEnvelope(rawData)) return clone(rawData);
+
+      if (this.sessionPassphrase) {
+        return createEncryptedEnvelope(
+          await decryptEncryptedEnvelope(rawData, this.sessionPassphrase),
+          this.sessionPassphrase,
+        );
+      }
+
+      return clone(rawData);
+    }
 
     return normalizeData(this.previewData || defaults, defaults);
   }
@@ -150,7 +201,7 @@ export class StorageService {
     const rawData = await createEncryptedEnvelope(snapshot.data, snapshot.sessionPassphrase);
     await snapshot.adapter.write(rawData);
     const persisted = await verifyPersistedEnvelope(snapshot.adapter, snapshot.sessionPassphrase);
-    state.set(this, { ...snapshot, rawData: persisted });
+    state.set(this, { ...snapshot, lastUnlockMigrated: false, rawData: persisted });
   }
 
   findOne(query) {
@@ -274,6 +325,7 @@ export class StorageService {
       ...snapshot,
       data: clone(snapshot.defaults),
       key: 'default',
+      lastUnlockMigrated: false,
       legacyData: clone(snapshot.defaults),
       rawData: clone(snapshot.defaults),
       sessionPassphrase: undefined,
