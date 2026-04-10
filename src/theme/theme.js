@@ -17,14 +17,14 @@ const lightColors = {
 
 const darkColors = {
   text: '#F7EFE8',
-  textSecondary: '#C2B6AC',
+  textSecondary: '#D0C4BA',
   accent: '#F46A3A',
   onAccent: '#FFFFFF',
-  background: '#13100E',
-  surface: '#1D1815',
+  background: '#12100E',
+  surface: '#231D18',
   qrBackground: '#FBF4ED',
   qrForeground: '#181310',
-  border: '#40352F',
+  border: '#4A3F38',
   danger: '#FF7262',
   warning: '#E2A53B',
   overlay: 'rgba(0, 0, 0, 0.6)',
