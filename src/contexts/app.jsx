@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 
 import { DEFAULT_THEME } from '../App.constants';
 import { detectDeviceLanguage, formatDateTime, setLanguage, translate } from '../modules';
@@ -63,7 +63,6 @@ const AppProvider = ({ children }) => {
       clearTimeout(autoLockTimerRef.current);
       autoLockTimerRef.current = undefined;
     };
-
     const scheduleAutoLock = () => {
       clearAutoLock();
 
@@ -99,22 +98,16 @@ const AppProvider = ({ children }) => {
         return;
       }
 
-      if (nextState === 'background' || nextState === 'inactive') {
+      if (nextState === 'background') {
         if (autoLockStateRef.current.immediate) lockImmediately();
         else scheduleAutoLock();
       }
     });
-    const blurSubscription =
-      Platform.OS === 'android'
-        ? AppState.addEventListener('blur', () => {
-            if (autoLockStateRef.current.immediate) lockImmediately();
-          })
-        : undefined;
 
     return () => {
       clearAutoLock();
+      clearImmediateLock();
       subscription.remove();
-      blurSubscription?.remove?.();
     };
   }, []);
 
