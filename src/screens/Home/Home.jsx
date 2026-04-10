@@ -253,6 +253,7 @@ const Home = ({ navigation }) => {
                 {...secret}
                 isMediocre={!!secretRiskMap?.[secret.hash]?.isMediocre}
                 isRepeated={!!secretRiskMap?.[secret.hash]?.isRepeated}
+                highlightFavorite
                 onMenu={(anchor) => handleMenuOpen(secret, anchor)}
                 onPress={() =>
                   navigation.navigate('secret', {
@@ -283,6 +284,7 @@ const Home = ({ navigation }) => {
                 {...secret}
                 isMediocre={!!secretRiskMap?.[secret.hash]?.isMediocre}
                 isRepeated={!!secretRiskMap?.[secret.hash]?.isRepeated}
+                highlightFavorite={false}
                 onMenu={(anchor) => handleMenuOpen(secret, anchor)}
                 onPress={() =>
                   navigation.navigate('secret', {

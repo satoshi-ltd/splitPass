@@ -104,6 +104,7 @@ const resolveIconFallback = (type) => {
 const SecretItem = ({
   brand,
   favorite = false,
+  highlightFavorite = true,
   isMediocre = false,
   isRepeated = false,
   kind,
@@ -162,7 +163,7 @@ const SecretItem = ({
   return (
     <Pressable onPress={onPress}>
       <View row style={style.item}>
-        <View style={[style.thumbnail, favorite && style.favorite]}>
+        <View style={[style.thumbnail, favorite && highlightFavorite && style.favorite]}>
           {websiteFaviconsEnabled && faviconUri && !faviconFailed ? (
             <Image
               source={{ uri: faviconUri }}
@@ -217,6 +218,7 @@ const SecretItem = ({
 SecretItem.propTypes = {
   brand: PropTypes.string,
   favorite: PropTypes.bool,
+  highlightFavorite: PropTypes.bool,
   isMediocre: PropTypes.bool,
   isRepeated: PropTypes.bool,
   kind: PropTypes.string,
