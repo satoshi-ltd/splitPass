@@ -48,4 +48,25 @@ export const style = StyleSheet.create({
     marginBottom: '$spaceXS',
     paddingLeft: '$spaceXXS',
   },
+  menuOverlay: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 30,
+  },
+  menuBackdrop: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  menuWrap: {
+    position: 'absolute',
+    right: '$spaceM',
+    width: 210,
+    zIndex: 31,
+  },
 });

@@ -61,4 +61,10 @@ export const style = StyleSheet.create({
     justifyContent: 'flex-end',
     width: '$spaceL + $spaceM',
   },
+  actionButton: {
+    alignItems: 'center',
+    height: '$spaceL',
+    justifyContent: 'center',
+    width: '$spaceL',
+  },
 });

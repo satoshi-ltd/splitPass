@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'react-native';
 
 import { style } from './SecretItem.style';
@@ -108,12 +108,14 @@ const SecretItem = ({
   isRepeated = false,
   kind,
   name,
+  onMenu,
   username,
   value = '',
   website,
   onPress,
 }) => {
   const { settings } = useStore();
+  const menuRef = useRef(null);
   const [type] = value;
   const [faviconFailed, setFaviconFailed] = useState(false);
   const [faviconUri, setFaviconUri] = useState('');
@@ -144,6 +146,18 @@ const SecretItem = ({
       cancelled = true;
     };
   }, [faviconDomain, websiteFaviconsEnabled]);
+
+  const handleMenuPress = (event) => {
+    event?.stopPropagation?.();
+    if (!onMenu) return;
+    if (menuRef.current?.measureInWindow) {
+      menuRef.current.measureInWindow((x, y, width, height) => {
+        onMenu({ x, y, width, height });
+      });
+      return;
+    }
+    onMenu();
+  };
 
   return (
     <Pressable onPress={onPress}>
@@ -186,7 +200,14 @@ const SecretItem = ({
 
         <View row style={style.action}>
           {isMediocre || isRepeated ? <Icon name={ICON.WARNING} size="s" tone="warning" /> : null}
-          <Icon name={ICON.DOTS} size="s" tone="secondary" />
+          <Pressable
+            ref={menuRef}
+            onPress={handleMenuPress}
+            onPressIn={(event) => event?.stopPropagation?.()}
+            style={style.actionButton}
+          >
+            <Icon name={ICON.DOTS} size="s" tone="secondary" />
+          </Pressable>
         </View>
       </View>
     </Pressable>
@@ -200,6 +221,7 @@ SecretItem.propTypes = {
   isRepeated: PropTypes.bool,
   kind: PropTypes.string,
   name: PropTypes.string,
+  onMenu: PropTypes.func,
   username: PropTypes.string,
   value: PropTypes.string,
   website: PropTypes.string,
