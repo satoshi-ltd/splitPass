@@ -127,6 +127,7 @@ const SecretFooterContent = ({
     : useTitleSize
     ? styles.valueTextHero
     : null;
+  const useSeedTopRow = isSeed && mode === 'value' && !isCard && !isCompactValue;
 
   if (mode === 'passcode') {
     return (
@@ -197,6 +198,63 @@ const SecretFooterContent = ({
     );
   }
 
+  const controls = showTotpCountdown || showReveal || showCopy || showMenu ? (
+    <View style={[styles.controlsWrap, useSeedTopRow ? styles.controlsWrapSeed : null]}>
+      {showTotpCountdown ? (
+        <TotpCountdownRing
+          colors={colors}
+          contrast={contrast}
+          expiresIn={totpExpiresIn}
+          period={totpPeriod}
+          styles={styles}
+        />
+      ) : null}
+      {showReveal || showCopy || showMenu ? (
+        <View style={styles.actionsWrap}>
+          {showReveal ? (
+            <Button
+              disabled={disableReveal}
+              icon={revealIcon}
+              onPress={onToggleReveal}
+              size="m"
+              tone={contrastTone}
+              variant="outlined"
+            />
+          ) : null}
+          {showCopy ? (
+            <Button
+              disabled={disableCopy}
+              icon={ICON.COPY}
+              onPress={onCopy}
+              size="m"
+              tone={contrastTone}
+              variant="outlined"
+            />
+          ) : null}
+          {showMenu ? <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" /> : null}
+        </View>
+      ) : null}
+    </View>
+  ) : null;
+
+  if (useSeedTopRow) {
+    return (
+      <View style={styles.seedRow}>
+        <View style={styles.seedTextWrap}>
+          <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
+            {value}
+          </Text>
+          {valueCaption ? (
+            <Text size="s" style={styles.valueCaption} tone={textTone}>
+              {valueCaption}
+            </Text>
+          ) : null}
+        </View>
+        {controls}
+      </View>
+    );
+  }
+
   return (
     <View style={styles.valueRow}>
       <View style={styles.valueMain}>
@@ -237,11 +295,7 @@ const SecretFooterContent = ({
           </View>
         ) : (
           <View style={styles.valueBlock}>
-            {isSeed ? (
-              <Text bold size={valueSize} style={[styles.seedValueText, valueTextStyle]} tone={textTone}>
-                {value}
-              </Text>
-            ) : isSingleTokenValue ? (
+            {isSingleTokenValue ? (
               <View style={[styles.valueWrap, styles.singleValueWrap]}>
                 {value.split('').map((character, charIndex) => (
                   <Text
@@ -293,46 +347,7 @@ const SecretFooterContent = ({
         )}
       </View>
 
-      {showTotpCountdown || showReveal || showCopy || showMenu ? (
-        <View style={styles.controlsWrap}>
-          {showTotpCountdown ? (
-            <TotpCountdownRing
-              colors={colors}
-              contrast={contrast}
-              expiresIn={totpExpiresIn}
-              period={totpPeriod}
-              styles={styles}
-            />
-          ) : null}
-          {showReveal || showCopy || showMenu ? (
-            <View style={styles.actionsWrap}>
-              {showReveal ? (
-                <Button
-                  disabled={disableReveal}
-                  icon={revealIcon}
-                  onPress={onToggleReveal}
-                  size="m"
-                  tone={contrastTone}
-                  variant="outlined"
-                />
-              ) : null}
-              {showCopy ? (
-                <Button
-                  disabled={disableCopy}
-                  icon={ICON.COPY}
-                  onPress={onCopy}
-                  size="m"
-                  tone={contrastTone}
-                  variant="outlined"
-                />
-              ) : null}
-              {showMenu ? (
-                <Button icon={ICON.DOTS} onPress={onMenu} size="m" tone={contrastTone} variant="outlined" />
-              ) : null}
-            </View>
-          ) : null}
-        </View>
-      ) : null}
+      {controls}
     </View>
   );
 };

@@ -153,6 +153,8 @@ export const style = StyleSheet.create({
 
   footer: {
     flexShrink: 0,
+    zIndex: 2,
+    elevation: 2,
   },
 
   footerDark: {

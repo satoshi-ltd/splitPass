@@ -10,11 +10,11 @@ const MOCK_PASSCODE = '123456';
 const SEED_12_A = 'ability access accident account accuse achieve acid acoustic acquire across act action';
 const SEED_12_B = 'banner bar barely bargain barrel base basic basket battle beach bean beauty';
 const SEED_24_A =
-  'damage dance danger daring dash daughter dawn day deal debate debris decade decide decline decorate decrease deer defense define degree delay deliver demand';
+  'damage dance danger daring dash daughter dawn day deal debate debris decade decide decline decorate decrease deer defense define degree delay deliver demand zoo';
 const SEED_24_B =
-  'eager eagle early earn earth easily east easy echo ecology economy edge edit educate effort egg eight either elbow elder electric elegant element';
+  'eager eagle early earn earth easily east easy echo ecology economy edge edit educate effort egg eight either elbow elder electric elegant element zoo';
 const SEED_24_C =
-  'fabric face faculty fade faint faith fall false fame family famous fancy fantasy farm fashion fatal father fatigue fault favorite feature february federal fee';
+  'fabric face faculty fade faint faith fall false fame family famous fancy fantasy farm fashion fatal father fatigue fault favorite feature february federal fee zoo';
 
 const encodeSecret = (secret, passcode, options = {}) => {
   const qr = QRParser.encode(secret, options.type ? { type: options.type } : !!passcode);

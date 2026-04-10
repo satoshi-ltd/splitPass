@@ -50,11 +50,41 @@ const getStyles = (colors, contrast) => {
       minHeight: theme.spacing.xxl + theme.spacing.md,
       width: '100%',
     },
+    seedRow: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: theme.spacing.md,
+      minHeight: 0,
+      width: '100%',
+    },
+    valueRowTall: {
+      alignItems: 'stretch',
+      flexDirection: 'column',
+      gap: theme.spacing.sm,
+      minHeight: 0,
+    },
+    valueRowTop: {
+      alignItems: 'flex-start',
+      minHeight: 0,
+    },
     valueMain: {
       flex: 1,
       justifyContent: 'center',
       minHeight: theme.spacing.xl + theme.spacing.sm,
       minWidth: 0,
+    },
+    seedTextWrap: {
+      flex: 1,
+      minWidth: 0,
+    },
+    valueMainTall: {
+      justifyContent: 'flex-start',
+      minHeight: 0,
+      width: '100%',
+    },
+    valueMainTop: {
+      justifyContent: 'flex-start',
+      minHeight: 0,
     },
     valueWrap: {
       alignItems: 'flex-start',
@@ -82,10 +112,12 @@ const getStyles = (colors, contrast) => {
       gap: theme.spacing.xxs,
       justifyContent: 'center',
       minWidth: 0,
+      width: '100%',
     },
     seedValueText: {
       flexShrink: 1,
       minWidth: 0,
+      width: '100%',
     },
     singleValueWrap: {
       flexShrink: 1,
@@ -156,6 +188,19 @@ const getStyles = (colors, contrast) => {
       gap: theme.spacing.sm,
       marginLeft: theme.spacing.md,
       minHeight: theme.spacing.xl + theme.spacing.sm,
+    },
+    controlsWrapTop: {
+      alignSelf: 'flex-start',
+    },
+    controlsWrapSeed: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      minHeight: 0,
+    },
+    controlsWrapTall: {
+      alignSelf: 'flex-end',
+      marginLeft: 0,
+      minHeight: 0,
     },
     valueGroup: {
       alignItems: 'center',

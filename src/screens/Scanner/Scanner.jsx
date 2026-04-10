@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getScannerInstructions, resolveScannerPayload } from './Scanner.helpers';
 import { ScannerNFC } from './Scanner.nfc';
-import { ScannerQR } from './Scanner.qr';
+import { ScannerFrame, ScannerQR } from './Scanner.qr';
 import { style } from './Scanner.style';
 import { READER_TYPE, SECURE_TYPES, SHARD_TYPES, SECRET_TYPE } from '../../App.constants';
 import { EVENT } from '../../App.constants';
@@ -386,7 +386,7 @@ const Scanner = ({
             {is.modeNFC ? (
               <ScannerNFC onRead={handleScanned} verticalOffset={verticalOffset} writeMode={writeMode} />
             ) : (
-              <ScannerQR frame stageHeight={stageHeight} verticalOffset={verticalOffset} />
+              <ScannerFrame stageHeight={stageHeight} verticalOffset={verticalOffset} />
             )}
           </View>
 
@@ -413,7 +413,9 @@ const Scanner = ({
                     shardLabel={shardLabel}
                     showMenu={!showPasscodePrompt && !is.empty}
                     showReveal={is.complete && !showPasscodePrompt && !is.empty}
-                    valueCaption={!showPasscodePrompt && is.complete ? L10N.SCANNER_SECRET_READY_CAPTION : undefined}
+                    valueCaption={
+                      !showPasscodePrompt && is.complete && !is.shard ? L10N.SCANNER_SECRET_READY_CAPTION : undefined
+                    }
                     value={footerValue}
                   />
 
