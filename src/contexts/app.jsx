@@ -106,7 +106,6 @@ const AppProvider = ({ children }) => {
 
     return () => {
       clearAutoLock();
-      clearImmediateLock();
       subscription.remove();
     };
   }, []);
