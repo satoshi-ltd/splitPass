@@ -23,8 +23,7 @@ const scheduleClear = (value = '', ttlMs = DEFAULT_TTL_MS) => {
 };
 
 const copyWithAutoClear = async (value = '', options = {}) => {
-  const ttlMs =
-    options?.ttlMs === 0 ? 0 : Number(options?.ttlMs) > 0 ? Number(options.ttlMs) : DEFAULT_TTL_MS;
+  const ttlMs = options?.ttlMs === 0 ? 0 : Number(options?.ttlMs) > 0 ? Number(options.ttlMs) : DEFAULT_TTL_MS;
   const nextValue = `${value}`;
 
   lastCopiedValue = nextValue;

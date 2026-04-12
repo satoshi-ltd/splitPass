@@ -36,9 +36,7 @@ const getClipboardNotificationText = (baseText, clipboardAutoClearEnabled) =>
 const Passwords = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { colors, theme } = useApp();
-  const {
-    settings: { clipboardAutoClearEnabled = true } = {},
-  } = useStore();
+  const { settings: { clipboardAutoClearEnabled = true } = {} } = useStore();
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [password, setPassword] = useState('');
   const isPicker = !!route?.params?.picker;
