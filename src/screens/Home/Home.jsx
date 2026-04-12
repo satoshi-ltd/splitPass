@@ -3,18 +3,11 @@ import React, { useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 
 import { style } from './Home.style';
+import { EVENT, READER_TYPE, SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
 import { SecretItem } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Icon, Input, Menu, Pressable, Text, View } from '../../design-system';
-import { EVENT, READER_TYPE, SECRET_TYPE, SECURE_TYPES, SHARD_TYPES } from '../../App.constants';
-import {
-  eventEmitter,
-  getSecretRiskMap,
-  getSecretStrength,
-  ICON,
-  L10N,
-  QRParser,
-} from '../../modules';
+import { eventEmitter, getSecretRiskMap, getSecretStrength, ICON, L10N, QRParser } from '../../modules';
 import { theme } from '../../theme';
 
 const getSecretSortTime = ({ createdAt, readAt } = {}) => {
@@ -265,7 +258,6 @@ const Home = ({ navigation }) => {
                     readAt: serializeRouteDate(secret.readAt),
                     readMode: true,
                     username: secret.username,
-                    values: [secret.value],
                   })
                 }
               />
@@ -296,7 +288,6 @@ const Home = ({ navigation }) => {
                     readAt: serializeRouteDate(secret.readAt),
                     readMode: true,
                     username: secret.username,
-                    values: [secret.value],
                   })
                 }
               />

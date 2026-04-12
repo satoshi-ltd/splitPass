@@ -258,7 +258,6 @@ const Create = ({ navigation = {}, onComplete, route }) => {
         notes: persistedSecret.notes,
         returnToMain: true,
         username: persistedSecret.username,
-        values: [persistedSecret.value],
       });
     }
 

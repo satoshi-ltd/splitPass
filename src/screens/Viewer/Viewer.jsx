@@ -1,4 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -97,6 +98,10 @@ const Viewer = ({ route, navigation = {} }) => {
   const [totpState, setTotpState] = useState();
 
   const persistedSecret = hash ? (secrets || []).find((secret) => secret.hash === hash) : undefined;
+  const resolvedValues = useMemo(
+    () => (values.length ? values : persistedSecret?.value ? [persistedSecret.value] : []),
+    [persistedSecret?.value, values],
+  );
   const riskMap = useMemo(() => getSecretRiskMap(secrets), [secrets]);
   const secretRisk = useMemo(() => getSecretRisk(persistedSecret, riskMap), [persistedSecret, riskMap]);
   const hasRisk = secretRisk.isMediocre || secretRisk.isRepeated;
@@ -108,7 +113,7 @@ const Viewer = ({ route, navigation = {} }) => {
       : secretRisk.isMediocre
       ? L10N.RISK_MESSAGE_MEDIOCRE
       : '';
-  const currentValue = values[currentIndex] || values[0] || '';
+  const currentValue = resolvedValues[currentIndex] || resolvedValues[0] || '';
   const resolvedName = persistedSecret?.name ?? name;
   const resolvedNotes = persistedSecret?.notes ?? notes;
   const resolvedUsername = persistedSecret?.username ?? username;
@@ -159,7 +164,8 @@ const Viewer = ({ route, navigation = {} }) => {
   const footerTotpCaption = totpState?.expiresIn ? L10N.TOTP_COUNTDOWN({ seconds: totpState.expiresIn }) : '';
   const createFlowShard = returnToMain && readMode && is.shard;
   const canEditSecretValue = hash && !createFlowShard && !is.shard && !isCard && !isTotp && !is.secure && !locked;
-  const shardLabel = values.length > 1 ? `${L10N.SECRET_TYPE_SHARD} ${currentIndex + 1}` : L10N.SECRET_TYPE_SHARD;
+  const shardLabel =
+    resolvedValues.length > 1 ? `${L10N.SECRET_TYPE_SHARD} ${currentIndex + 1}` : L10N.SECRET_TYPE_SHARD;
   const lockedQrPreviewColors = useMemo(
     () => ({ background: colors.qrBackground, foreground: colors.qrForeground }),
     [colors.qrBackground, colors.qrForeground],
@@ -229,7 +235,7 @@ const Viewer = ({ route, navigation = {} }) => {
     if (!secret) return;
 
     eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_DEVICE, title: L10N.SUCCESS });
-    if (values.length > 1 && currentIndex < values.length - 1) {
+    if (resolvedValues.length > 1 && currentIndex < resolvedValues.length - 1) {
       scrollViewRef.current?.scrollTo({ animated: true, x: width * (currentIndex + 1) });
       return;
     }
@@ -258,7 +264,11 @@ const Viewer = ({ route, navigation = {} }) => {
     if (locked) return;
     const uri = await qrRef.current?.capture();
     if (!uri) return;
-    await Sharing.shareAsync(uri);
+    try {
+      await Sharing.shareAsync(uri);
+    } finally {
+      await FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => undefined);
+    }
   };
 
   const handleFavorite = async () => {
@@ -286,7 +296,7 @@ const Viewer = ({ route, navigation = {} }) => {
   };
 
   const handleGoToScanner = () => {
-    navigation.navigate('scanner', { readMode: true, values });
+    navigation.navigate('scanner', { readMode: true, values: resolvedValues });
   };
 
   const handleGoToNFCCard = () => {
@@ -517,11 +527,11 @@ const Viewer = ({ route, navigation = {} }) => {
               horizontal
               onScroll={handleScroll}
               ref={scrollViewRef}
-              scrollEnabled={values.length > 1}
+              scrollEnabled={resolvedValues.length > 1}
               snapTo={width}
               style={style.scrollView}
             >
-              {values.map((value, index) => (
+              {resolvedValues.map((value, index) => (
                 <View align="center" key={`${value}-${index}`} style={[style.qrSlide, { width }]}>
                   <QR
                     ref={index === currentIndex ? qrRef : undefined}
@@ -533,9 +543,9 @@ const Viewer = ({ route, navigation = {} }) => {
                 </View>
               ))}
             </ScrollView>
-            {values.length > 1 ? (
+            {resolvedValues.length > 1 ? (
               <View align="center" style={style.pagination}>
-                <Pagination currentIndex={currentIndex} length={values.length} />
+                <Pagination currentIndex={currentIndex} length={resolvedValues.length} />
               </View>
             ) : null}
           </>

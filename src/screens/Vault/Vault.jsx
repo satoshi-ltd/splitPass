@@ -58,7 +58,6 @@ const Vault = ({ navigation, route: { params: { type } = {} } }) => {
                   readAt: serializeRouteDate(secret.readAt),
                   readMode: true,
                   username: secret.username,
-                  values: [secret.value],
                 })
               }
             />
