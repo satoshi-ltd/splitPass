@@ -12,11 +12,14 @@ const formatBackupTimestamp = (value = new Date()) =>
     .replace(/\.\d{3}Z$/, 'Z');
 const getBackupSuffix = () => Math.random().toString(36).slice(2, 8).padEnd(6, '0').slice(0, 6);
 const getBackupFileName = () => `archive-${formatBackupTimestamp()}-${getBackupSuffix()}.dat`;
+const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
 
 export const BackupService = {
   export: async ({ store } = {}) =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
+      let fileUri;
+
       try {
         const fileName = getBackupFileName();
         const payload = await store.exportBackup();
@@ -25,25 +28,28 @@ export const BackupService = {
         const isSharingAvailable = await Sharing.isAvailableAsync();
         if (!isSharingAvailable) return reject(L10N.ERROR_EXPORT);
 
-        const fileUri = FileSystem.documentDirectory + fileName;
+        fileUri = `${FileSystem.cacheDirectory || FileSystem.documentDirectory}${fileName}`;
         await FileSystem.writeAsStringAsync(fileUri, data);
         await Sharing.shareAsync(fileUri, {
           mimeType: 'application/octet-stream',
           dialogTitle: fileName,
         });
-        await FileSystem.deleteAsync(fileUri, { idempotent: true });
 
         resolve(true);
 
         // BackupService.scheduleNotification();
       } catch (error) {
         reject(`${L10N.ERROR}: ${getErrorMessage(error)}`);
+      } finally {
+        if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true });
       }
     }),
 
   import: async () =>
     // eslint-disable-next-line no-undef, no-async-promise-executor
     new Promise(async (resolve, reject) => {
+      let fileUri;
+
       try {
         const { canceled, assets = [] } = await DocumentPicker.getDocumentAsync({
           copyToCacheDirectory: true,
@@ -51,9 +57,12 @@ export const BackupService = {
           type: '*/*',
         });
         const file = assets && assets[0] ? assets[0] : {};
+        fileUri = file.uri;
 
-        if (!canceled && file.uri) {
-          const fileData = await FileSystem.readAsStringAsync(file.uri);
+        if (!canceled && fileUri) {
+          if (Number(file.size) > MAX_BACKUP_BYTES) return reject(L10N.ERROR_IMPORT);
+
+          const fileData = await FileSystem.readAsStringAsync(fileUri);
           const jsonData = JSON.parse(fileData);
 
           if (isEncryptedEnvelope(jsonData)) {
@@ -73,6 +82,8 @@ export const BackupService = {
         }
       } catch (error) {
         reject(`${L10N.ERROR}: ${getErrorMessage(error)}`);
+      } finally {
+        if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true });
       }
     }),
 };
