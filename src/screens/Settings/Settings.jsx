@@ -37,8 +37,12 @@ const Settings = ({ navigation = {} }) => {
     websiteFaviconsEnabled = false,
   } = settings || {};
   const reminderEnabled = (reminders[0] ?? 1) === 1;
-  const appearanceSubtitle = theme === 'dark' ? L10N.DARK_MODE : L10N.LIGHT_MODE;
   const reminderSubtitle = reminderEnabled ? L10N.REMINDER_BACKUP_SCHEDULE : undefined;
+  const appearanceOptions = [
+    { id: 'light', label: L10N.LIGHT_MODE, value: 'light' },
+    { id: 'dark', label: L10N.DARK_MODE, value: 'dark' },
+    { id: 'system', label: L10N.SYSTEM_MODE, value: 'system' },
+  ];
 
   useEffect(() => {
     let active = true;
@@ -123,8 +127,8 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ reminders: [value] });
   };
 
-  const handleAppearance = (value) => {
-    updateSettings({ theme: value ? 'dark' : 'light' });
+  const handleAppearance = (option) => {
+    updateSettings({ theme: option?.value || 'light' });
   };
 
   const handleAutoLockImmediately = (value) => {
@@ -345,11 +349,10 @@ const Settings = ({ navigation = {} }) => {
         />
         <Setting
           icon={ICON.INVERT_COLORS}
-          subtitle={appearanceSubtitle}
-          type="toggle"
           title={L10N.APPEARANCE}
-          value={theme === 'dark'}
-          onValueChange={handleAppearance}
+          options={appearanceOptions}
+          selected={theme}
+          onChange={handleAppearance}
         />
       </View>
 

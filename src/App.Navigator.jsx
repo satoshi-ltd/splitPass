@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
+import { useColorScheme } from 'react-native';
 
 import { style } from './App.style';
 import { Logo, Menu } from './components';
@@ -49,6 +50,7 @@ const commonScreenOptions = () => ({
 export const Navigator = () => {
   const { security: { configured, unlocked } = {}, settings: { onboarded, theme } = {} } = useStore();
   const [routeName, setRouteName] = useState('');
+  const colorScheme = useColorScheme();
 
   const screenOptions = {
     headerBackTitleVisible: false,
@@ -99,7 +101,7 @@ export const Navigator = () => {
       key={navigationKey}
       ref={navigationRef}
       onStateChange={(state) => setRouteName(state.routes[state.index].name)}
-      theme={getNavigationTheme(theme)}
+      theme={getNavigationTheme(theme, colorScheme)}
     >
       <StatusBar style={routeName === 'scanner' ? 'light' : 'dark'} translucent />
 

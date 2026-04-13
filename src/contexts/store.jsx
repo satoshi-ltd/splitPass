@@ -5,7 +5,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { DEFAULT_THEME } from '../App.constants';
 import { detectDeviceLanguage, setLanguage } from '../modules';
 import { PublicSettingsService, StorageService } from '../services';
-import { resolveAppTheme } from '../theme';
+import { normalizeThemePreference, resolveAppTheme } from '../theme';
 import { consolidate } from './modules';
 import {
   createSecret,
@@ -34,16 +34,16 @@ const StoreProvider = ({ children }) => {
       const preview = store.previewData;
       const storedSettings = preview?.settings || publicSettings || DEFAULTS.settings;
       const resolvedLanguage = storedSettings.language || detectDeviceLanguage();
-      const resolvedTheme = storedSettings.theme || DEFAULT_THEME;
+      const resolvedThemePreference = normalizeThemePreference(storedSettings.theme || DEFAULT_THEME);
 
       await setLanguage(resolvedLanguage);
-      StyleSheet.build(resolveAppTheme(resolvedTheme));
+      StyleSheet.build(resolveAppTheme(resolvedThemePreference));
 
       setState({
         ...DEFAULTS,
         store,
         secrets: preview?.secrets || DEFAULTS.secrets,
-        settings: { ...DEFAULTS.settings, ...storedSettings, language: resolvedLanguage, theme: resolvedTheme },
+        settings: { ...DEFAULTS.settings, ...storedSettings, language: resolvedLanguage, theme: resolvedThemePreference },
         security: store.security,
       });
     })();

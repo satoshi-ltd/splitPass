@@ -2,12 +2,13 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { detectDeviceLanguage, setLanguage } from '../../modules';
 import { BiometricAuthService, NotificationsService, PublicSettingsService } from '../../services';
-import { resolveAppTheme } from '../../theme';
+import { normalizeThemePreference, resolveAppTheme } from '../../theme';
 import { DEFAULTS } from '../store.constants';
 
 export const resetAppData = async ([state, setState]) => {
   const nextSettings = {
     ...DEFAULTS.settings,
+    theme: normalizeThemePreference(DEFAULTS.settings?.theme),
     language: detectDeviceLanguage(),
   };
 

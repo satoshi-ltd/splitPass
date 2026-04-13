@@ -1,18 +1,19 @@
 import PropTypes from 'prop-types';
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
-import { AppState } from 'react-native';
+import { AppState, useColorScheme } from 'react-native';
+import StyleSheet from 'react-native-extended-stylesheet';
 
 import { DEFAULT_THEME } from '../App.constants';
 import { detectDeviceLanguage, formatDateTime, setLanguage, translate } from '../modules';
 import { NotificationsService } from '../services';
-import { getAppColors, theme as uiTheme } from '../theme';
+import { getAppColors, resolveAppTheme, resolveThemeMode, theme as uiTheme } from '../theme';
 import { useStore } from './store';
 
 const AppContext = createContext({
   colors: getAppColors(DEFAULT_THEME),
   formatDate: (date) => formatDateTime(date, detectDeviceLanguage()),
   language: detectDeviceLanguage(),
-  theme: DEFAULT_THEME,
+  theme: resolveThemeMode(DEFAULT_THEME),
   translate,
 });
 
@@ -23,7 +24,9 @@ const AppProvider = ({ children }) => {
     settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 30, language, onboarded, reminders, theme } = {},
   } = useStore();
   const resolvedLanguage = language || detectDeviceLanguage();
-  const resolvedTheme = theme || DEFAULT_THEME;
+  const themePreference = theme || DEFAULT_THEME;
+  const colorScheme = useColorScheme();
+  const resolvedTheme = resolveThemeMode(themePreference, colorScheme);
   const autoLockTimerRef = useRef();
   const autoLockStateRef = useRef({
     configured,
@@ -55,6 +58,12 @@ const AppProvider = ({ children }) => {
     notificationsReadyRef.current = true;
     NotificationsService.init(reminders);
   }, [onboarded, reminders]);
+
+  useEffect(() => {
+    if (themePreference !== 'system') return;
+
+    StyleSheet.build(resolveAppTheme(themePreference, colorScheme));
+  }, [colorScheme, themePreference]);
 
   useEffect(() => {
     const clearAutoLock = () => {
@@ -119,14 +128,14 @@ const AppProvider = ({ children }) => {
 
   const value = useMemo(
     () => ({
-      colors: getAppColors(resolvedTheme),
+      colors: getAppColors(themePreference, colorScheme),
       formatDate,
       language: resolvedLanguage,
       theme: resolvedTheme,
       translate,
       uiTheme,
     }),
-    [formatDate, resolvedLanguage, resolvedTheme],
+    [colorScheme, formatDate, resolvedLanguage, resolvedTheme, themePreference],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-const DEFAULT_THEME = 'light';
+const DEFAULT_THEME = 'system';
 
 const EVENT = {
   NOTIFICATION: 'notification',

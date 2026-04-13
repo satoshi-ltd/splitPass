@@ -12,11 +12,12 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Navigator } from './App.Navigator';
+import { DEFAULT_THEME } from './App.constants';
 import { AppProvider, StoreProvider } from './contexts';
 import { Notification } from './design-system';
 import { resolveAppTheme } from './theme';
 
-StyleSheet.build(resolveAppTheme('light'));
+StyleSheet.build(resolveAppTheme(DEFAULT_THEME));
 
 const logScreenCaptureError = (error) => {
   if (process.env.NODE_ENV === 'production') return;

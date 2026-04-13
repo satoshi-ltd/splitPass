@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { DEFAULT_THEME, STORAGE_DOMAIN } from '../App.constants';
 import { detectDeviceLanguage } from '../modules';
+import { normalizeThemePreference } from '../theme';
 
 const PUBLIC_SETTINGS_KEY = `${STORAGE_DOMAIN}.public-settings`;
 
@@ -30,7 +31,7 @@ const normalizePublicSettings = (value = {}) => ({
   externalSharingEnabled: value?.externalSharingEnabled === true,
   language: value?.language || detectDeviceLanguage(),
   reminders: Array.isArray(value?.reminders) ? value.reminders : DEFAULT_PUBLIC_SETTINGS.reminders,
-  theme: value?.theme || DEFAULT_THEME,
+  theme: normalizeThemePreference(value?.theme || DEFAULT_THEME),
   websiteFaviconsEnabled: value?.websiteFaviconsEnabled === true,
 });
 

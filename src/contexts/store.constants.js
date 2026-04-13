@@ -14,7 +14,7 @@ const DEFAULTS = {
     language: undefined,
     onboarded: false,
     reminders: [1],
-    theme: 'light',
+    theme: 'system',
     websiteFaviconsEnabled: false,
   },
 };

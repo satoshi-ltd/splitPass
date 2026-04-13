@@ -1,10 +1,11 @@
 import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 
-import { getAppColors } from '../theme';
+import { getAppColors, resolveThemeMode } from '../theme';
 
-export const getNavigationTheme = (mode = 'light') => {
-  const colors = getAppColors(mode);
-  const baseTheme = mode === 'dark' ? DarkTheme : DefaultTheme;
+export const getNavigationTheme = (preference = 'light', scheme) => {
+  const resolvedMode = resolveThemeMode(preference, scheme);
+  const colors = getAppColors(resolvedMode);
+  const baseTheme = resolvedMode === 'dark' ? DarkTheme : DefaultTheme;
 
   return {
     ...baseTheme,

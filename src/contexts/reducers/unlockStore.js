@@ -3,14 +3,14 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { DEFAULT_THEME } from '../../App.constants';
 import { detectDeviceLanguage, setLanguage } from '../../modules';
 import { BiometricAuthService, PublicSettingsService } from '../../services';
-import { resolveAppTheme } from '../../theme';
+import { normalizeThemePreference, resolveAppTheme } from '../../theme';
 
 export const unlockStore = async (passphrase = '', [state, setState]) => {
   const nextData = await state.store.unlock(passphrase);
   let nextSettings = {
     ...nextData.settings,
     language: nextData.settings?.language || detectDeviceLanguage(),
-    theme: nextData.settings?.theme || DEFAULT_THEME,
+    theme: normalizeThemePreference(nextData.settings?.theme || DEFAULT_THEME),
   };
 
   if (state.store.lastUnlockMigrated && nextSettings.biometricUnlockEnabled) {

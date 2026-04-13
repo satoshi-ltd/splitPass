@@ -3,7 +3,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 import { DEFAULT_THEME } from '../../App.constants';
 import { detectDeviceLanguage, setLanguage } from '../../modules';
 import { NotificationsService, PublicSettingsService } from '../../services';
-import { resolveAppTheme } from '../../theme';
+import { normalizeThemePreference, resolveAppTheme } from '../../theme';
 import { DEFAULTS } from '../store.constants';
 
 export const importBackup = async ({ format = 'legacy', payload = {} } = {}, options = {}, [state, setState]) =>
@@ -19,7 +19,7 @@ export const importBackup = async ({ format = 'legacy', payload = {} } = {}, opt
         ...DEFAULTS.settings,
         ...(incomingSettings || {}),
         language: incomingSettings?.language || state.settings?.language || detectDeviceLanguage(),
-        theme: incomingSettings?.theme || state.settings?.theme || DEFAULT_THEME,
+        theme: normalizeThemePreference(incomingSettings?.theme || state.settings?.theme || DEFAULT_THEME),
       };
 
       await store.replaceAll(

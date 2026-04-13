@@ -2,14 +2,13 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { style } from './CardAction.style';
-import { DEFAULT_THEME } from '../../../App.constants';
-import { useStore } from '../../../contexts';
+import { useApp } from '../../../contexts';
 import { Card, Icon, Pressable, Text, View } from '../../../design-system';
 
 const CardAction = ({ caption, color, icon, text, tiny, onPress }) => {
-  const { settings: { theme } = {} } = useStore();
+  const { theme } = useApp();
 
-  const commonTone = color === 'accent' && theme !== DEFAULT_THEME ? 'onAccent' : 'primary';
+  const commonTone = color === 'accent' && theme === 'dark' ? 'onAccent' : 'primary';
 
   return (
     <Pressable onPress={onPress} style={style.container}>

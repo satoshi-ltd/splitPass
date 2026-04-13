@@ -1,3 +1,5 @@
+import { Appearance } from 'react-native';
+
 const lightColors = {
   text: '#181310',
   textSecondary: '#6F635A',
@@ -96,4 +98,22 @@ export const theme = {
   },
 };
 
-export const getAppColors = (mode = 'light') => theme.colors[mode] || theme.colors.light;
+const THEME_PREFERENCES = ['light', 'dark', 'system'];
+
+export const normalizeThemePreference = (value = 'light') => {
+  if (!value) return 'light';
+  const normalized = `${value}`.toLowerCase();
+
+  return THEME_PREFERENCES.includes(normalized) ? normalized : 'light';
+};
+
+export const resolveThemeMode = (preference = 'light', scheme) => {
+  const normalized = normalizeThemePreference(preference);
+  if (normalized !== 'system') return normalized;
+
+  const systemScheme = scheme || Appearance.getColorScheme();
+  return systemScheme === 'dark' ? 'dark' : 'light';
+};
+
+export const getAppColors = (preference = 'light', scheme) =>
+  theme.colors[resolveThemeMode(preference, scheme)] || theme.colors.light;
