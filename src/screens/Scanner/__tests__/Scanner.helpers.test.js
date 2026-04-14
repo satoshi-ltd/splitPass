@@ -1,10 +1,32 @@
 import { READER_TYPE } from '../../../App.constants';
-import { getScannerInstructions, resolveScannerPayload } from '../Scanner.helpers';
+import { getScannedValue, getScannerInstructions, resolveScannerPayload } from '../Scanner.helpers';
 
 describe('Scanner helpers', () => {
+  describe('getScannedValue', () => {
+    it('returns the string as-is', () => {
+      expect(getScannedValue('1password')).toBe('1password');
+    });
+
+    it('extracts the value property from an object payload', () => {
+      expect(getScannedValue({ value: '1password' })).toBe('1password');
+    });
+
+    it('returns an empty string for an empty call', () => {
+      expect(getScannedValue()).toBe('');
+    });
+  });
+
   describe('resolveScannerPayload', () => {
     it('resolves SplitPass payloads as secrets', () => {
       expect(resolveScannerPayload('1password')).toEqual({
+        kind: 'secret',
+        scannedValue: '1password',
+        type: '1',
+      });
+    });
+
+    it('resolves object payloads by extracting the value field', () => {
+      expect(resolveScannerPayload({ value: '1password' })).toEqual({
         kind: 'secret',
         scannedValue: '1password',
         type: '1',
@@ -30,6 +52,14 @@ describe('Scanner helpers', () => {
         kind: 'unsupported',
         scannedValue: 'https://example.com',
         type: 'h',
+      });
+    });
+
+    it('flags an empty payload as unsupported', () => {
+      expect(resolveScannerPayload('')).toEqual({
+        kind: 'unsupported',
+        scannedValue: '',
+        type: undefined,
       });
     });
   });
@@ -79,9 +109,38 @@ describe('Scanner helpers', () => {
           values: ['1decoded-secret'],
         }),
       ).toEqual({
-        caption: 'Reveal it to verify the value, then save it to this device if needed.',
+        caption: '',
         title: 'Recovered secret ready',
       });
+    });
+
+    it('shows recovered state for two or more shards', () => {
+      expect(
+        getScannerInstructions({
+          readerType: READER_TYPE.QR,
+          values: ['3first-shard', '3second-shard'],
+        }),
+      ).toEqual({
+        caption: '',
+        title: 'Recovered secret ready',
+      });
+    });
+
+    it('shows NFC guidance by default when reader type is NFC and no values', () => {
+      expect(
+        getScannerInstructions({
+          readerType: READER_TYPE.NFC,
+          values: [],
+        }),
+      ).toEqual({
+        caption: 'Hold your split|Card near your phone to read the secret.',
+        title: 'Bring Your Card Close',
+      });
+    });
+
+    it('uses QR guidance as the default when called with no arguments', () => {
+      const result = getScannerInstructions();
+      expect(result.title).toBe('Scan Your QR Code');
     });
   });
 });
