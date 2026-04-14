@@ -1,6 +1,6 @@
 import { StorageService } from './StorageService';
 
-const store = new StorageService({ defaults: { records: [] }, filename: 'com.satoshi-ltd.splitpass:nfc' });
+const storePromise = new StorageService({ defaults: { records: [] }, filename: 'com.satoshi-ltd.splitpass:nfc' });
 const INFO = { id: '19801992202022', totalMemory: 492 };
 const DELAY_RESPONSE = 500;
 const parseRecord = (record = '') => {
@@ -18,36 +18,38 @@ const parseResponse = (records = []) => ({
   records: records.map(parseRecord),
 });
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const NFCService = {
-  read: async () =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve) => {
-      const records = await store.get('records').value;
+  read: async () => {
+    const store = await storePromise;
+    const records = store.get('records').value;
 
-      setTimeout(() => resolve(parseResponse(records)), DELAY_RESPONSE);
-    }),
+    await delay(DELAY_RESPONSE);
+    return parseResponse(records);
+  },
 
-  write: (value, name, username, notes) =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve) => {
-      const newRecord = stringifyRecord({ name, notes, value, username });
-      let records = await store.get('records').value;
+  write: async (value, name, username, notes) => {
+    const store = await storePromise;
+    const newRecord = stringifyRecord({ name, notes, value, username });
+    let records = store.get('records').value;
 
-      if (!records.includes(newRecord)) await store.save(newRecord);
-      records = await store.get('records').value;
+    if (!records.includes(newRecord)) await store.save(newRecord);
+    records = store.get('records').value;
 
-      setTimeout(() => resolve(parseResponse(records)), DELAY_RESPONSE);
-    }),
+    await delay(DELAY_RESPONSE);
+    return parseResponse(records);
+  },
 
-  remove: (value, name, targetTagId, username, notes) =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve) => {
-      let records = await store.get('records').value;
+  remove: async (value, name, targetTagId, username, notes) => {
+    const store = await storePromise;
+    let records = store.get('records').value;
 
-      const targetRecord = stringifyRecord({ name, notes, value, username });
-      records = records.filter((record) => record !== targetRecord);
-      await store.save();
+    const targetRecord = stringifyRecord({ name, notes, value, username });
+    records = records.filter((record) => record !== targetRecord);
+    await store.save();
 
-      setTimeout(() => resolve(parseResponse(records)), DELAY_RESPONSE);
-    }),
+    await delay(DELAY_RESPONSE);
+    return parseResponse(records);
+  },
 };

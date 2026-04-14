@@ -1,4 +1,3 @@
-/* eslint-disable no-async-promise-executor */
 import {
   createEncryptedEnvelope,
   decryptEncryptedEnvelope,
@@ -7,7 +6,6 @@ import {
 } from '../modules';
 import { AsyncStorageAdapter } from './modules/asyncStorage';
 
-// eslint-disable-next-line no-undef
 const state = new WeakMap();
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -33,8 +31,7 @@ const verifyPersistedEnvelope = async (adapter, passphrase) => {
 
 export class StorageService {
   constructor({ adapter: Adapter = AsyncStorageAdapter, defaults = {}, filename = 'store' } = {}) {
-    // eslint-disable-next-line no-undef
-    return new Promise(async (resolve) => {
+    return (async () => {
       const adapter = await new Adapter({ defaults, filename });
       const rawData = await adapter.read();
       const legacyData = isLegacyStore(rawData) ? normalizeData(rawData, defaults) : undefined;
@@ -52,8 +49,8 @@ export class StorageService {
         sessionPassphrase: undefined,
       });
 
-      resolve(this);
-    });
+      return this;
+    })();
   }
 
   get security() {

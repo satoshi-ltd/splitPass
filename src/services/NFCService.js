@@ -62,118 +62,104 @@ export const NFCService = {
   },
 
   // -- public
-  read: async () =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve, reject) => {
-      let instance;
+  read: async () => {
+    const instance = await NFCService.instance().catch((error) => {
+      throw error?.message || error || L10N.NFC_NOT_SUPPORTED;
+    });
+
+    const { Ndef, NfcManager, NfcTech } = instance;
+
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+      const tag = await NfcManager.getTag();
+
+      const nTag = await NFCService.getNtag(NfcManager);
+      if (!nTag) throw L10N.NFC_NOT_SUPPORTED;
+
+      const records = NFCService.filterRecords(tag, Ndef);
+      const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
+
+      return NFCService.response(records, tag, bytes, nTag);
+    } catch (error) {
+      throw error === L10N.NFC_NOT_SUPPORTED ? error : L10N.NFC_ACCESS_ERROR;
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+    }
+  },
+
+  write: async (value, name, username, notes) => {
+    let backupBytes;
+
+    const instance = await NFCService.instance().catch((error) => {
+      throw error?.message || error || L10N.NFC_NOT_SUPPORTED;
+    });
+
+    const { Ndef, NfcManager, NfcTech } = instance;
+
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+      const tag = await NfcManager.getTag();
+      backupBytes = tag.ndefMessage;
+
+      const nTag = await NFCService.getNtag(NfcManager);
+      if (!nTag) throw L10N.NFC_NOT_SUPPORTED;
+
+      const newRecord = stringifyRecord({ name, notes, value, username });
+      const records = NFCService.filterRecords(tag, Ndef);
+
+      if (!records.includes(newRecord)) records.push(newRecord);
+      const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
+
+      if (bytes.length > nTag.totalMemory) throw { error: L10N.NFC_CARD_IS_FULL };
+      await NfcManager.ndefHandler.writeNdefMessage(bytes);
+
+      return NFCService.response(records, tag, bytes, nTag);
+    } catch (error) {
+      const isKnownRejection = error === L10N.NFC_NOT_SUPPORTED || error?.error === L10N.NFC_CARD_IS_FULL;
+      if (!isKnownRejection && backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+      throw isKnownRejection ? error : L10N.NFC_ACCESS_ERROR;
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+    }
+  },
+
+  remove: async (value, name, targetTagId, username, notes) => {
+    let backupBytes;
+
+    const instance = await NFCService.instance().catch((error) => {
+      throw error?.message || error || L10N.NFC_NOT_SUPPORTED;
+    });
+
+    const { Ndef, NfcManager, NfcTech } = instance;
+
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+
+      const tag = await NfcManager.getTag();
+      if (tag.id !== targetTagId) throw L10N.NFC_INVALID_ORIGIN_CARD;
+
+      const nTag = await NFCService.getNtag(NfcManager);
+      if (!nTag) throw L10N.NFC_NOT_SUPPORTED;
 
       try {
-        instance = await NFCService.instance();
-      } catch (error) {
-        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
-      }
-
-      const { Ndef, NfcManager, NfcTech } = instance;
-
-      try {
-        await NfcManager.requestTechnology(NfcTech.Ndef);
-        const tag = await NfcManager.getTag();
-
-        const nTag = await NFCService.getNtag(NfcManager);
-        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
-
-        const records = NFCService.filterRecords(tag, Ndef);
-        const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
-
-        resolve(NFCService.response(records, tag, bytes, nTag));
-      } catch (error) {
-        reject(L10N.NFC_ACCESS_ERROR);
-      } finally {
-        NfcManager.cancelTechnologyRequest();
-      }
-    }),
-
-  write: (value, name, username, notes) =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve, reject) => {
-      let instance;
-      let backupBytes;
-
-      try {
-        instance = await NFCService.instance();
-      } catch (error) {
-        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
-      }
-
-      const { Ndef, NfcManager, NfcTech } = instance;
-
-      try {
-        await NfcManager.requestTechnology(NfcTech.Ndef);
-        const tag = await NfcManager.getTag();
-        backupBytes = tag.ndefMessage;
-
-        const nTag = await NFCService.getNtag(NfcManager);
-        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
-
-        const newRecord = stringifyRecord({ name, notes, value, username });
-        const records = NFCService.filterRecords(tag, Ndef);
-
-        if (!records.includes(newRecord)) records.push(newRecord);
-        const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
-
-        if (bytes.length > nTag.totalMemory) return reject({ error: L10N.NFC_CARD_IS_FULL });
-        await NfcManager.ndefHandler.writeNdefMessage(bytes);
-
-        resolve(NFCService.response(records, tag, bytes, nTag));
-      } catch (error) {
-        if (backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
-        reject(L10N.NFC_ACCESS_ERROR);
-      } finally {
-        NfcManager.cancelTechnologyRequest();
-      }
-    }),
-
-  remove: (value, name, targetTagId, username, notes) =>
-    // eslint-disable-next-line no-undef, no-async-promise-executor
-    new Promise(async (resolve, reject) => {
-      let instance;
-      let backupBytes;
-
-      try {
-        instance = await NFCService.instance();
-      } catch (error) {
-        return reject(error?.message || error || L10N.NFC_NOT_SUPPORTED);
-      }
-
-      const { Ndef, NfcManager, NfcTech } = instance;
-
-      try {
-        await NfcManager.requestTechnology(NfcTech.Ndef);
-
-        const tag = await NfcManager.getTag();
-        if (tag.id !== targetTagId) return reject(L10N.NFC_INVALID_ORIGIN_CARD);
-
-        const nTag = await NFCService.getNtag(NfcManager);
-        if (!nTag) return reject(L10N.NFC_NOT_SUPPORTED);
-
-        try {
-          backupBytes = await NfcManager.ndefHandler.getNdefMessage();
-        } catch {
-          // ! TODO: Seems card is empty
-        }
-
-        const targetRecord = stringifyRecord({ name, notes, value, username });
-        const records = NFCService.filterRecords(tag, Ndef).filter((record) => record !== targetRecord);
-        const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
-
-        await NfcManager.ndefHandler.writeNdefMessage(bytes);
-
-        resolve(NFCService.response(records, tag, bytes, nTag));
+        backupBytes = await NfcManager.ndefHandler.getNdefMessage();
       } catch {
-        if (backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
-        reject(L10N.NFC_ACCESS_ERROR);
-      } finally {
-        NfcManager.cancelTechnologyRequest();
+        // Card may be empty; proceed without backup
       }
-    }),
+
+      const targetRecord = stringifyRecord({ name, notes, value, username });
+      const records = NFCService.filterRecords(tag, Ndef).filter((record) => record !== targetRecord);
+      const bytes = Ndef.encodeMessage(records.map((record) => Ndef.textRecord(record)));
+
+      await NfcManager.ndefHandler.writeNdefMessage(bytes);
+
+      return NFCService.response(records, tag, bytes, nTag);
+    } catch (error) {
+      const isKnownRejection = error === L10N.NFC_INVALID_ORIGIN_CARD || error === L10N.NFC_NOT_SUPPORTED;
+      if (!isKnownRejection && backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+      throw isKnownRejection ? error : L10N.NFC_ACCESS_ERROR;
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+    }
+  },
 };
