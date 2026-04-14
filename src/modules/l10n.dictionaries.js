@@ -126,6 +126,7 @@ const EN = {
   OTP_ACCOUNT: 'Account',
   OTP_CODE: 'Code',
   OTP_CODE_COPIED: 'Code copied.',
+  USERNAME_COPIED: 'Username copied.',
   OTP_ISSUER: 'Issuer',
   OTP_KEY: '2FA key',
   OTP_KEY_PLACEHOLDER: 'JBSWY3DPEHPK3PXP',
@@ -389,6 +390,7 @@ const ES = {
         } antes del borrado local.`
       : 'Master passphrase incorrecta.',
   OTP_CODE_COPIED: 'Codigo copiado.',
+  USERNAME_COPIED: 'Usuario copiado.',
   MASTER_PASSPHRASE_MISMATCH: 'Las passphrases no coinciden.',
   MASTER_PASSPHRASE_PLACEHOLDER: 'master passphrase...',
   MASTER_PASSPHRASE_REQUIRED: 'Usa al menos 8 caracteres.',
@@ -647,6 +649,7 @@ const PT = {
         } antes da limpeza local.`
       : 'Master passphrase incorreta.',
   OTP_CODE_COPIED: 'Codigo copiado.',
+  USERNAME_COPIED: 'Usuario copiado.',
   MASTER_PASSPHRASE_MISMATCH: 'As passphrases nao coincidem.',
   MASTER_PASSPHRASE_PLACEHOLDER: 'master passphrase...',
   MASTER_PASSPHRASE_REQUIRED: 'Use pelo menos 8 caracteres.',
@@ -896,6 +899,7 @@ const FR = {
         } avant l effacement local.`
       : 'Master passphrase incorrecte.',
   OTP_CODE_COPIED: 'Code copie.',
+  USERNAME_COPIED: 'Identifiant copie.',
   MASTER_PASSPHRASE_MISMATCH: 'Les passphrases ne correspondent pas.',
   MASTER_PASSPHRASE_PLACEHOLDER: 'master passphrase...',
   MASTER_PASSPHRASE_REQUIRED: 'Utilisez au moins 8 caracteres.',
@@ -1148,6 +1152,7 @@ const DE = {
         } bis zum lokalen Loeschen.`
       : 'Master-Passphrase falsch.',
   OTP_CODE_COPIED: 'Code kopiert.',
+  USERNAME_COPIED: 'Benutzername kopiert.',
   MASTER_PASSPHRASE_MISMATCH: 'Die Passphrases stimmen nicht ueberein.',
   MASTER_PASSPHRASE_PLACEHOLDER: 'Master-Passphrase...',
   MASTER_PASSPHRASE_REQUIRED: 'Verwenden Sie mindestens 8 Zeichen.',

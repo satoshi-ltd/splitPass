@@ -35,6 +35,10 @@ export const style = StyleSheet.create({
     gap: '$spaceXXS',
   },
 
+  subtitlePressable: {
+    alignSelf: 'stretch',
+  },
+
   subtitle: {
     color: '$colorContent',
     maxWidth: '95%',

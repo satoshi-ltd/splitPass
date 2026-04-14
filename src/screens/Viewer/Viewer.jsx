@@ -386,6 +386,16 @@ const Viewer = ({ route, navigation = {} }) => {
     });
   };
 
+  const handleCopyUsername = async () => {
+    if (!resolvedUsername) return;
+
+    await ClipboardService.copyWithAutoClear(resolvedUsername, { ttlMs: clipboardAutoClearEnabled ? undefined : 0 });
+    eventEmitter.emit(EVENT.NOTIFICATION, {
+      text: getClipboardNotificationText(L10N.USERNAME_COPIED, clipboardAutoClearEnabled),
+      title: L10N.SUCCESS,
+    });
+  };
+
   const handleToggleReveal = () => {
     if (is.shard) return;
 
@@ -421,9 +431,15 @@ const Viewer = ({ route, navigation = {} }) => {
           {resolvedName}
         </Text>
         {resolvedUsername || (isTotp && parsedTOTP?.account) ? (
-          <Text semibold numberOfLines={1} ellipsizeMode="tail" tone="primary" style={style.subtitle}>
-            {resolvedUsername || parsedTOTP?.account}
-          </Text>
+          <Pressable
+            disabled={!resolvedUsername}
+            style={style.subtitlePressable}
+            onPress={resolvedUsername ? handleCopyUsername : undefined}
+          >
+            <Text semibold numberOfLines={1} ellipsizeMode="tail" tone="primary" style={style.subtitle}>
+              {resolvedUsername || parsedTOTP?.account}
+            </Text>
+          </Pressable>
         ) : null}
         {hash ? (
           <Text numberOfLines={1} ellipsizeMode="tail" size="s" tone="secondary" style={style.caption}>
