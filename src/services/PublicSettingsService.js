@@ -8,7 +8,7 @@ const PUBLIC_SETTINGS_KEY = `${STORAGE_DOMAIN}.public-settings`;
 
 const DEFAULT_PUBLIC_SETTINGS = {
   autoLockImmediatelyEnabled: false,
-  autoLockSeconds: 30,
+  autoLockSeconds: 300,
   biometricUnlockEnabled: false,
   clipboardAutoClearEnabled: true,
   externalSharingEnabled: false,

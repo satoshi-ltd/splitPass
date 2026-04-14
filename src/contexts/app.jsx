@@ -21,7 +21,7 @@ const AppProvider = ({ children }) => {
   const {
     lockStore,
     security: { configured, unlocked } = {},
-    settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 30, language, onboarded, reminders, theme } = {},
+    settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 300, language, onboarded, reminders, theme } = {},
   } = useStore();
   const resolvedLanguage = language || detectDeviceLanguage();
   const themePreference = theme || DEFAULT_THEME;
