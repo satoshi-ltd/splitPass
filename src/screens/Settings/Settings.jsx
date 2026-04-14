@@ -10,6 +10,7 @@ import { useStore } from '../../contexts';
 import { AppScreen, Icon, Setting, Text, View } from '../../design-system';
 import { eventEmitter, getLanguageLabel, ICON, L10N, openConfirm } from '../../modules';
 import { BackupService, BiometricAuthService, getDemoSecrets, NotificationsService } from '../../services';
+import { useApp } from '../../contexts';
 
 const Settings = ({ navigation = {} }) => {
   const {
@@ -22,6 +23,7 @@ const Settings = ({ navigation = {} }) => {
     resetAppData = () => {},
     updateSettings,
   } = useStore();
+  const { theme: resolvedTheme } = useApp();
 
   const [activity, setActivity] = useState({});
   const [biometricAvailability, setBiometricAvailability] = useState({ available: false, ready: false });
@@ -38,11 +40,7 @@ const Settings = ({ navigation = {} }) => {
   } = settings || {};
   const reminderEnabled = (reminders[0] ?? 1) === 1;
   const reminderSubtitle = reminderEnabled ? L10N.REMINDER_BACKUP_SCHEDULE : undefined;
-  const appearanceOptions = [
-    { id: 'light', label: L10N.LIGHT_MODE, value: 'light' },
-    { id: 'dark', label: L10N.DARK_MODE, value: 'dark' },
-    { id: 'system', label: L10N.SYSTEM_MODE, value: 'system' },
-  ];
+  const systemThemeEnabled = theme === 'system';
 
   useEffect(() => {
     let active = true;
@@ -127,8 +125,17 @@ const Settings = ({ navigation = {} }) => {
     updateSettings({ reminders: [value] });
   };
 
-  const handleAppearance = (option) => {
-    updateSettings({ theme: option?.value || 'light' });
+  const handleSystemTheme = (value) => {
+    if (value) {
+      updateSettings({ theme: 'system' });
+      return;
+    }
+
+    updateSettings({ theme: resolvedTheme === 'dark' ? 'dark' : 'light' });
+  };
+
+  const handleAppearance = (value) => {
+    updateSettings({ theme: value ? 'dark' : 'light' });
   };
 
   const handleAutoLockImmediately = (value) => {
@@ -349,10 +356,18 @@ const Settings = ({ navigation = {} }) => {
         />
         <Setting
           icon={ICON.INVERT_COLORS}
-          title={L10N.APPEARANCE}
-          options={appearanceOptions}
-          selected={theme}
-          onChange={handleAppearance}
+          type="toggle"
+          title={L10N.SYSTEM_THEME}
+          value={systemThemeEnabled}
+          onValueChange={handleSystemTheme}
+        />
+        <Setting
+          icon="weather-night"
+          type="toggle"
+          title={L10N.LIGHTS_OUT}
+          value={resolvedTheme === 'dark'}
+          disabled={systemThemeEnabled}
+          onValueChange={handleAppearance}
         />
       </View>
 
