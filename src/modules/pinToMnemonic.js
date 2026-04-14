@@ -1,4 +1,4 @@
-import { bip39 } from './bip39';
+import { bip39 } from './repositories/bip39';
 
 export const pinToMnemonic = (pin) => {
   if (!/^\d{6}$/.test(pin.toString())) return;
