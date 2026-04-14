@@ -48,7 +48,10 @@ const normalizeNameInput = (value = '') => {
   return normalized;
 };
 
-const normalizeUsernameInput = (value = '') => collapseIdentifierSpacing(value).replace(/\s+/g, '');
+const normalizeUsernameInput = (value = '') => {
+  const normalized = collapseIdentifierSpacing(value);
+  return normalized.replace(/\s{2,}/g, ' ').trim();
+};
 const normalizeNotesInput = (value = '') => `${value}`.replace(/\|/g, '');
 
 const Create = ({ navigation = {}, onComplete, route }) => {
