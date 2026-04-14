@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 import { Footer } from '../../components';
 import { useStore } from '../../contexts';
@@ -12,19 +12,12 @@ const Tab = createBottomTabNavigator();
 
 const Main = ({ navigation, route }) => {
   const { secrets = [] } = useStore();
-  const redirectedToFirstSecret = useRef(false);
   const fromOnboarding = !!route?.params?.onboarding;
-
-  useEffect(() => {
-    if (!fromOnboarding || redirectedToFirstSecret.current || secrets.length) return;
-
-    redirectedToFirstSecret.current = true;
-    navigation.navigate('create', { onboarding: true });
-  }, [fromOnboarding, navigation, secrets.length]);
+  const shouldOpenCreateFirst = fromOnboarding && !secrets.length;
 
   return (
     <Tab.Navigator
-      initialRouteName="secrets"
+      initialRouteName={shouldOpenCreateFirst ? 'create' : 'secrets'}
       sceneContainerStyle={{ backgroundColor: 'transparent' }}
       screenOptions={{ headerShown: false }}
       tabBar={(props) => <Footer {...props} onActionPress={() => navigation.navigate('scanner')} />}
@@ -33,6 +26,7 @@ const Main = ({ navigation, route }) => {
       <Tab.Screen
         name="create"
         component={Create}
+        initialParams={shouldOpenCreateFirst ? { onboarding: true } : undefined}
         options={{
           unmountOnBlur: true,
         }}
