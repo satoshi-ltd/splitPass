@@ -28,16 +28,18 @@ const encodeSecret = (secret, passcode, options = {}) => {
   return `${type}${Cypher.encrypt(digits.join(''), passcode)}`;
 };
 
-const createWebsiteSecret = (name, website, secret) => ({
+const createWebsiteSecret = (name, website, secret, username) => ({
   name,
   value: QRParser.encode(secret),
   website,
+  username,
 });
 
-const createLegacySecureSecret = (name, website, secret, passcode = MOCK_PASSCODE) => ({
+const createLegacySecureSecret = (name, website, secret, passcode = MOCK_PASSCODE, username) => ({
   name,
   value: encodeSecret(secret, passcode),
   website,
+  username,
 });
 
 const createShardSecrets = (baseName, website, secret) =>
