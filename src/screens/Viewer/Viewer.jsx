@@ -176,7 +176,6 @@ const Viewer = ({ route, navigation = {} }) => {
       if (hash) readSecret({ hash });
       // readSecret comes from context and is recreated on rerenders.
       // Depending on it here can retrigger this focus effect in a loop.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hash]),
   );
 

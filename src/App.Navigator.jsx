@@ -60,7 +60,7 @@ export const Navigator = () => {
   const screen = {
     ...commonScreenOptions(),
     headerLeft: ({ canGoBack = false }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      // headerLeft is a React component — useNavigation is valid here
       const navigation = useNavigation();
 
       return canGoBack ? (

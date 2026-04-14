@@ -96,7 +96,6 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
       }
       setBusy(false);
     }, ANIMATION.duration);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, readMode, writeMode]);
 
   useEffect(() => {
@@ -106,7 +105,6 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
     if (readMode && records.length === 1) handleRecord(records[0]);
     if (writeMode)
       eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SECRET_SAVED_IN_NFC, title: L10N.SUCCESS, variant: 'accent' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tag]);
 
   const handleError = (error) => {

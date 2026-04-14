@@ -57,7 +57,7 @@ export const UUID = (input = '') => {
     parts[0],
     parts[1].substr(0, 4),
     `4${parts[1].substr(4, 3)}`,
-    ((parseInt(parts[1][7], 16) & 0x3) | 0x8).toString(16) + parts[1].substr(8, 3), // eslint-disable-line
+    ((parseInt(parts[1][7], 16) & 0x3) | 0x8).toString(16) + parts[1].substr(8, 3),
     parts[2],
   ].join('-');
 

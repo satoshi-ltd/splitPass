@@ -13,7 +13,6 @@ const CreateTotpScanner = ({ onRead }) => {
 
   useEffect(() => {
     if (!permission?.granted) requestPermission();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRead = ({ data = '' } = {}) => {

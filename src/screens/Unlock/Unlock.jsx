@@ -127,7 +127,6 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [biometricAutoTriggered, biometricEnabled, mode]);
 
   const title =

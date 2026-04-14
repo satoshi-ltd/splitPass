@@ -65,12 +65,10 @@ const Scanner = ({
 
   useEffect(() => {
     handleReaderType(propReaderType);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propReaderType]);
 
   useEffect(() => {
     if (readMode && propValues.length) handleScanned(propValues[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propValues, readMode]);
 
   const handleReaderType = (next) => {
