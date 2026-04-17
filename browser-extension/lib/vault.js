@@ -77,6 +77,22 @@
     return Uint8Array.from(binary, (char) => char.charCodeAt(0));
   }
 
+  // Extracts the registrable domain (domain + TLD), stripping any subdomains.
+  // Handles compound TLDs like co.th, co.uk, com.au by treating the second-to-last
+  // segment as part of the TLD when it is a short code (≤ 3 chars).
+  function extractRegistrableDomain(hostname) {
+    const segments = hostname.split('.');
+    if (segments.length < 2) return hostname;
+
+    const secondFromRight = segments[segments.length - 2];
+    const is2PartTld = secondFromRight.length <= 3;
+    const domainIdx = is2PartTld
+      ? Math.max(0, segments.length - 3)
+      : segments.length - 2;
+
+    return segments.slice(domainIdx).join('.');
+  }
+
   function normalizeDomain(value = '') {
     const rawValue = String(value || '').trim();
 
@@ -84,7 +100,8 @@
 
     try {
       const url = rawValue.includes('://') ? new URL(rawValue) : new URL(`https://${rawValue}`);
-      return url.hostname.replace(/\.$/, '').toLowerCase();
+      const hostname = url.hostname.replace(/\.$/, '').toLowerCase();
+      return extractRegistrableDomain(hostname);
     } catch {
       return '';
     }
@@ -98,12 +115,16 @@
     return String(secret || '');
   }
 
+  function sanitizeUsername(username = '') {
+    return String(username || '');
+  }
+
   function now() {
     return Date.now();
   }
 
-  function buildEntryFingerprint(domain = '', secret = '') {
-    return `${normalizeDomain(domain)}\u0000${sanitizeSecret(secret)}`;
+  function buildEntryFingerprint(domain = '', secret = '', username = '') {
+    return `${normalizeDomain(domain)}\u0000${sanitizeSecret(secret)}\u0000${sanitizeUsername(username)}`;
   }
 
   function pruneEntries(entries = [], timestamp = now()) {
@@ -121,13 +142,15 @@
       .forEach((entry) => {
         const domain = normalizeDomain(entry.domain);
         const secret = sanitizeSecret(entry.secret);
-        const fingerprint = buildEntryFingerprint(domain, secret);
+        const username = sanitizeUsername(entry.username);
+        const fingerprint = buildEntryFingerprint(domain, secret, username);
         if (!domain || !secret || newestByFingerprint.has(fingerprint)) return;
 
         newestByFingerprint.set(fingerprint, {
           id: String(entry.id || createEntryId()),
           domain,
           secret,
+          username,
           createdAt: Number(entry.createdAt || timestamp),
           lastUsedAt: Number(entry.lastUsedAt || entry.createdAt || timestamp),
           expiresAt: Number(entry.expiresAt || timestamp + ENTRY_TTL_MS),
@@ -371,23 +394,25 @@
     return cleanedEntries.filter((entry) => entry.domain === normalizedDomain);
   }
 
-  async function saveRecentSecret(domain = '', secret = '', source = 'popup_scan') {
+  async function saveRecentSecret(domain = '', secret = '', source = 'popup_scan', username = '') {
     const normalizedDomain = normalizeDomain(domain);
     const normalizedSecret = sanitizeSecret(secret);
+    const normalizedUsername = sanitizeUsername(username);
     if (!normalizedDomain || !normalizedSecret) return null;
 
     const key = await requireUnlockedKey();
     const { document, entries } = await decryptVaultEntries(key);
     const timestamp = now();
-    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret);
+    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret, normalizedUsername);
     const nextEntries = pruneEntries(entries, timestamp).filter(
-      (entry) => buildEntryFingerprint(entry.domain, entry.secret) !== fingerprint
+      (entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) !== fingerprint
     );
 
     nextEntries.unshift({
       id: createEntryId(),
       domain: normalizedDomain,
       secret: normalizedSecret,
+      username: normalizedUsername,
       createdAt: timestamp,
       lastUsedAt: timestamp,
       expiresAt: timestamp + ENTRY_TTL_MS,
@@ -395,19 +420,20 @@
     });
 
     const persistedEntries = await persistEntries(document, nextEntries, key);
-    return persistedEntries.find((entry) => buildEntryFingerprint(entry.domain, entry.secret) === fingerprint) || null;
+    return persistedEntries.find((entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) === fingerprint) || null;
   }
 
-  async function removeRecentSecret(domain = '', secret = '') {
+  async function removeRecentSecret(domain = '', secret = '', username = '') {
     const normalizedDomain = normalizeDomain(domain);
     const normalizedSecret = sanitizeSecret(secret);
+    const normalizedUsername = sanitizeUsername(username);
     if (!normalizedDomain || !normalizedSecret) return false;
 
     const key = await requireUnlockedKey();
     const { document, entries } = await decryptVaultEntries(key);
-    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret);
+    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret, normalizedUsername);
     const nextEntries = pruneEntries(entries).filter(
-      (entry) => buildEntryFingerprint(entry.domain, entry.secret) !== fingerprint
+      (entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) !== fingerprint
     );
 
     if (nextEntries.length === entries.length) {

@@ -26,8 +26,13 @@
 - `src/services/*`: device and platform integrations.
 - `src/theme/*`: shared visual tokens and themes.
 
+## Browser Extension Notes
+- Source lives in `browser-extension/`. Tests are in `browser-extension/tests/` (not `__tests__`) because Chrome refuses to load an extension that contains a directory whose name starts with `_`.
+- `browser-extension/lib/vault.js` `normalizeDomain` strips every subdomain down to the registrable domain before saving or looking up entries (e.g. `member.lazada.co.th` → `lazada.co.th`). Compound TLDs such as `co.th`, `co.uk`, and `com.au` are detected by checking whether the second-to-last segment is ≤ 3 characters. Do not revert this to a plain `url.hostname` return — it would cause the same secret to appear as a different entry on different subdomains.
+- `browser-extension/lib/secret-item.js` `resolveSiteLabel` capitalises the first dot-segment of whatever domain it receives. It intentionally stays simple because `normalizeDomain` has already done the subdomain stripping.
+
 ## Critical Modules
-- `src/modules/QRParser.js`: public encoding and decoding boundary. Keep backward compatibility.
+- `src/modules/QRParser.js`: public encoding and decoding boundary. Keep backward compatibility. `USERNAME_TYPE = 'B'` is the display-time envelope (`encodeWithUsername` / `decodeWithUsername`); the stored `value` field is never written in `B` format — the wrapping happens only when rendering QR codes in the Viewer and is unwrapped transparently in the Scanner.
 - `src/modules/secretValueDisplay.js`: card parsing, normalization, masking, and canonical card value handling.
 - `src/modules/cypher.js`: PIN-based numeric transform. PIN is never persisted.
 - `src/modules/persistenceCrypto.js`: encrypted envelope format for local storage and backup payloads.
@@ -40,6 +45,7 @@
 ## Security Invariants
 - One shard must not expose usable secret content.
 - Existing QR payload formats must continue to decode after changes.
+- The `B` username envelope (`USERNAME_TYPE`) is a display/transport wrapper only. Never persist a `value` field that starts with `B`; the stored secret value must always be the raw typed payload (`1`–`9`, `A`).
 - Existing stored secrets and backups must remain readable.
 - The master passphrase is the primary local security control. Never log it, persist it outside the current session, or downgrade the vault back to plaintext storage.
 - Backup export must stay encrypted once secure setup is enabled.

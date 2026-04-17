@@ -1,4 +1,6 @@
 (function attachSplitPassDecoder(globalScope) {
+  const USERNAME_TYPE = 'B';
+
   const SECRET_TYPE = {
     PASSWORD: '1',
     PASSWORD_SECURE: '2',
@@ -192,6 +194,21 @@
     if (!qr) return { ok: false, code: 'empty' };
 
     const [type, ...rawDigits] = qr;
+
+    if (type === USERNAME_TYPE) {
+      const colonIdx = qr.indexOf(':');
+      if (colonIdx < 2) return { ok: false, code: 'unsupported_type', type };
+      let username;
+      try {
+        username = decodeURIComponent(qr.slice(1, colonIdx));
+      } catch {
+        return { ok: false, code: 'unsupported_type', type };
+      }
+      const innerResult = decodeKnownQr(qr.slice(colonIdx + 1), passcode);
+      if (!innerResult.ok) return innerResult;
+      return { ...innerResult, username };
+    }
+
     if (!isKnownType(type)) return { ok: false, code: 'unsupported_type', type };
 
     if (type === SECRET_TYPE.PASSWORD_SHARD || type === SECRET_TYPE.SEED_PHRASE || type === SECRET_TYPE.SEED_PHRASE_SECURE || type === SECRET_TYPE.SEED_PHRASE_SHARD || type === SECRET_TYPE.CARD_SHARD) {
@@ -243,6 +260,7 @@
 
   globalScope.SplitPassDecoder = {
     SECRET_TYPE,
+    USERNAME_TYPE,
     decode: decodeKnownQr,
   };
 })(globalThis);

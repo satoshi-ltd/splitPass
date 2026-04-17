@@ -33,6 +33,7 @@
         "https://*/*"
       ],
       "js": [
+        "lib/browser-api.js",
         "lib/secret-item.js",
         "content.js"
       ],
@@ -43,6 +44,7 @@
     {
       "resources": [
         "theme.css",
+        "item.css",
         "content.css",
         "assets/icon-extension.svg",
         "assets/icon-extension-32.png",

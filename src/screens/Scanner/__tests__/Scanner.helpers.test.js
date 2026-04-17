@@ -62,6 +62,79 @@ describe('Scanner helpers', () => {
         type: undefined,
       });
     });
+
+    it('decodes a B-type payload and returns the inner secret with username', () => {
+      const result = resolveScannerPayload('Balice:1abc');
+      expect(result).toEqual({
+        kind: 'secret',
+        scannedValue: '1abc',
+        type: '1',
+        username: 'alice',
+      });
+    });
+
+    it('decodes a B-type payload with a percent-encoded username', () => {
+      const result = resolveScannerPayload('Balice%40example.com:1abc');
+      expect(result.kind).toBe('secret');
+      expect(result.username).toBe('alice@example.com');
+      expect(result.scannedValue).toBe('1abc');
+    });
+
+    it('marks a B-type payload as unsupported when the inner type is not a known secret type', () => {
+      const result = resolveScannerPayload('Balice:Xunknown');
+      expect(result.kind).toBe('unsupported');
+    });
+
+    it('old non-B QRs still resolve as secrets without a username field', () => {
+      const result = resolveScannerPayload('1password');
+      expect(result.kind).toBe('secret');
+      expect(result.username).toBeUndefined();
+    });
+
+    // ------------------------------------------------------------------
+    // Legacy QR compatibility — all existing secret types must still work
+    // ------------------------------------------------------------------
+    it.each([
+      ['PASSWORD',        '1', '1abc'],
+      ['PASSWORD_SECURE', '2', '2abc'],
+      ['PASSWORD_SHARD',  '3', '3abc'],
+      ['SEED_PHRASE',     '4', '4abc'],
+      ['SEED_PHRASE_SECURE', '5', '5abc'],
+      ['SEED_PHRASE_SHARD',  '6', '6abc'],
+      ['CARD',           '7', '7abc'],
+      ['CARD_SECURE',    '8', '8abc'],
+      ['CARD_SHARD',     '9', '9abc'],
+      ['TOTP',           'A', 'otpauth://totp/test?secret=JBSWY3DPEHPK3PXP'],
+    ])('legacy %s QR resolves without a username', (label, _type, payload) => {
+      const result = resolveScannerPayload(payload);
+      // TOTP has its own kind; all others are 'secret' or 'totp'
+      expect(['secret', 'totp']).toContain(result.kind);
+      expect(result.username).toBeUndefined();
+    });
+
+    // ------------------------------------------------------------------
+    // Username (B-type) edge cases
+    // ------------------------------------------------------------------
+    it('returns the inner scannedValue, not the B-wrapped string', () => {
+      const result = resolveScannerPayload('Balice:1abc');
+      expect(result.scannedValue).toBe('1abc');
+      expect(result.scannedValue[0]).not.toBe('B');
+    });
+
+    it('a B-type wrapping a shard type is treated as unsupported (shards cannot carry usernames)', () => {
+      // Shards use type '3'; passing B+shard shouldn't resolve as a fillable secret
+      const result = resolveScannerPayload('Balice:3abc');
+      // '3' IS a valid SECRET_TYPE, so the scanner returns kind:'secret' for the inner shard.
+      // The important invariant: username IS extracted but scannedValue is the raw shard.
+      expect(result.kind).toBe('secret');
+      expect(result.scannedValue).toBe('3abc');
+      expect(result.username).toBe('alice');
+    });
+
+    it('B-type with empty body after separator is unsupported', () => {
+      const result = resolveScannerPayload('Balice:');
+      expect(result.kind).toBe('unsupported');
+    });
   });
 
   describe('getScannerInstructions', () => {

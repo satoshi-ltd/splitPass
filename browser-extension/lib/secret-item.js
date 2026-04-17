@@ -23,32 +23,56 @@
   }
 
   function resolveSiteLabel(domain = '') {
-    const normalizedDomain = String(domain || '').trim().replace(/^www\./, '');
-    const [firstSegment = 'Site'] = normalizedDomain.split('.');
+    const normalizedDomain = String(domain || '').trim();
+    if (!normalizedDomain) return 'Site';
+
+    const segments = normalizedDomain.split('.');
+    if (segments.length >= 2) {
+      const secondFromRight = segments[segments.length - 2];
+      const is2PartTld = secondFromRight.length <= 3;
+      const domainIdx = is2PartTld ? Math.max(0, segments.length - 3) : segments.length - 2;
+      const brandSegment = segments[domainIdx];
+      if (brandSegment) return brandSegment.charAt(0).toUpperCase() + brandSegment.slice(1);
+    }
+
+    const [firstSegment = ''] = segments;
     if (!firstSegment) return 'Site';
     return firstSegment.charAt(0).toUpperCase() + firstSegment.slice(1);
   }
 
-  function buildMarkup({ classPrefix, faviconUrl = '', index = 0, lastUsedAt = 0, name = 'Site' }) {
+  function buildMarkup({ classPrefix, deletable = false, faviconUrl = '', index = 0, lastUsedAt = 0, name = 'Site', username = '' }) {
     const safePrefix = escapeHtml(classPrefix);
     const safeName = escapeHtml(name);
     const safeFaviconUrl = escapeHtml(faviconUrl);
     const fallbackLetter = escapeHtml(String(name || 'S').slice(0, 1).toUpperCase());
-    const lastUsedLabel = escapeHtml(formatLastUsedDate(lastUsedAt));
+    const safeUsername = escapeHtml(username);
+    const lastUsedLabel = `Last used ${escapeHtml(formatLastUsedDate(lastUsedAt))}`;
     const iconMarkup = safeFaviconUrl
       ? `<img src="${safeFaviconUrl}" alt="" referrerpolicy="no-referrer" />`
       : `<span class="${safePrefix}-item-fallback">${fallbackLetter}</span>`;
+    const nameMarkup = safeUsername
+      ? `${safeName}<span class="${safePrefix}-item-username">/${safeUsername}</span>`
+      : safeName;
+    const itemClass = deletable
+      ? `${safePrefix}-item ${safePrefix}-item--deletable`
+      : `${safePrefix}-item`;
+    const deleteButton = deletable
+      ? `<button class="${safePrefix}-item-delete" type="button" data-entry-delete="${index}" aria-label="Remove">X</button>`
+      : '';
 
     return `
-      <button class="${safePrefix}-item" type="button" data-entry-primary="${index}">
-        <span class="${safePrefix}-item-icon">
-          ${iconMarkup}
-        </span>
-        <span class="${safePrefix}-item-body">
-          <span class="${safePrefix}-item-name">${safeName}</span>
-          <span class="${safePrefix}-item-meta">Last used ${lastUsedLabel}</span>
-        </span>
-      </button>
+      <div class="${safePrefix}-item-wrap">
+        <button class="${itemClass}" type="button" data-entry-primary="${index}">
+          <span class="${safePrefix}-item-icon">
+            ${iconMarkup}
+          </span>
+          <span class="${safePrefix}-item-body">
+            <span class="${safePrefix}-item-name">${nameMarkup}</span>
+            <span class="${safePrefix}-item-meta">${lastUsedLabel}</span>
+          </span>
+        </button>
+        ${deleteButton}
+      </div>
     `;
   }
 
@@ -58,6 +82,7 @@
     entries = [],
     faviconUrl = '',
     name = 'Site',
+    onDelete,
     onPrimary = async () => undefined,
   } = {}) {
     if (!root) return;
@@ -66,10 +91,12 @@
       .map((entry, index) =>
         buildMarkup({
           classPrefix,
+          deletable: !!onDelete,
           faviconUrl,
           index,
           lastUsedAt: entry?.lastUsedAt,
           name,
+          username: entry?.username || '',
         })
       )
       .join('');
@@ -81,6 +108,17 @@
         await onPrimary(entry);
       });
     });
+
+    if (onDelete) {
+      root.querySelectorAll('[data-entry-delete]').forEach((button) => {
+        button.addEventListener('click', async (event) => {
+          event.stopPropagation();
+          const entry = entries[Number(button.getAttribute('data-entry-delete'))];
+          if (!entry) return;
+          await onDelete(entry);
+        });
+      });
+    }
   }
 
   globalScope.SplitPassSecretItem = {

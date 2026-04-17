@@ -4,11 +4,19 @@
     root.className = 'splitpass-scanner-shell';
     root.innerHTML = `
       <div class="splitpass-panel-header">
-        <div class="splitpass-panel-header-top">
+        <div class="splitpass-panel-branding">
           <p class="splitpass-title">split/Pass</p>
+          <p class="splitpass-subtitle">Scanner</p>
+        </div>
+        <div class="splitpass-panel-actions">
+          <button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
           <button aria-label="Close scanner" class="splitpass-close" type="button">X</button>
         </div>
-        <p class="splitpass-subtitle">Scanner</p>
       </div>
       <div class="splitpass-stage">
         <video autoplay class="splitpass-video" muted playsinline></video>
@@ -47,6 +55,7 @@
         caption: root.querySelector('.splitpass-caption'),
         closeButton: root.querySelector('.splitpass-close'),
         headerSubtitle: root.querySelector('.splitpass-subtitle'),
+        lockButton: root.querySelector('.splitpass-lock'),
         message: root.querySelector('.splitpass-message'),
         passcodeInput: root.querySelector('.splitpass-passcode-input'),
         passcodePanel: root.querySelector('.splitpass-passcode'),

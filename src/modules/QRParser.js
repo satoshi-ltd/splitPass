@@ -118,7 +118,28 @@ const combineCardShards = (...qrs) => {
   return cardValue ? buildCardQr(cardValue) : '';
 };
 
+export const USERNAME_TYPE = 'B';
+
 export const QRParser = {
+  encodeWithUsername: (value = '', username = '') => {
+    if (!username || !value) return value;
+    return `${USERNAME_TYPE}${encodeURIComponent(username)}:${value}`;
+  },
+
+  decodeWithUsername: (qr = '') => {
+    if (!qr || qr[0] !== USERNAME_TYPE) return { value: qr, username: undefined };
+    const colonIdx = qr.indexOf(':');
+    if (colonIdx < 2) return { value: qr, username: undefined };
+    try {
+      return {
+        username: decodeURIComponent(qr.slice(1, colonIdx)),
+        value: qr.slice(colonIdx + 1),
+      };
+    } catch {
+      return { value: qr, username: undefined };
+    }
+  },
+
   encode: (secret = '', optionsOrSecure = false) => {
     const { secure = false, type: requestedType } = resolveEncodeOptions(optionsOrSecure);
     let digits = Array.isArray(secret) ? secret.join(' ') : `${secret}`.trim();

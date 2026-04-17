@@ -1,0 +1,124 @@
+.splitpass-item-name,
+.splitpass-item-username,
+.splitpass-item-meta {
+  margin: 0;
+}
+
+.splitpass-item-wrap {
+  position: relative;
+}
+
+.splitpass-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-xxs) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Icon — squared, consistent with app */
+.splitpass-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.splitpass-item-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.splitpass-item-fallback {
+  color: var(--color-text);
+  font-size: var(--font-size-input);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Body */
+.splitpass-item-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.splitpass-item-name {
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  line-height: var(--line-height-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splitpass-item-username {
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+.splitpass-item-meta {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Delete button */
+.splitpass-item--deletable {
+  padding-right: 20px;
+}
+
+.splitpass-item-delete {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%) translateX(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.splitpass-item-wrap:hover .splitpass-item-delete {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+  transition: opacity 0.15s ease 0.4s, transform 0.15s ease 0.4s;
+}
+
+.splitpass-item-delete:hover {
+  color: var(--color-danger);
+}

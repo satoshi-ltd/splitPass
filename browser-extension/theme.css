@@ -1,3 +1,14 @@
+/* ============================================================
+   split/Pass — Design Tokens
+   Single source of truth for all design decisions.
+
+   Loaded in two contexts:
+     • Popup      → <link> in popup.html        → :root applies
+     • Content UI → injected into shadow DOM    → :host applies
+
+   Do NOT add component styles here. Only tokens + base resets.
+   ============================================================ */
+
 @font-face {
   font-family: 'Doto';
   src: url('./assets/fonts/Doto_500Medium.ttf') format('truetype');
@@ -22,6 +33,8 @@
 :root,
 :host {
   color-scheme: light;
+
+  /* Colors */
   --color-text: #181310;
   --color-text-secondary: #6F635A;
   --color-accent: #F46A3A;
@@ -42,6 +55,7 @@
   --color-overlay-strong: rgba(0, 0, 0, 0.58);
   --color-overlay-soft: rgba(255, 252, 248, 0.84);
 
+  /* Typography — mirrors src/theme/theme.js */
   --font-primary: 'Doto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-size-tiny: 11px;
   --font-size-caption: 13px;
@@ -57,6 +71,7 @@
   --line-height-subtitle: 24px;
   --line-height-title: 30px;
 
+  /* Spacing — mirrors src/theme/theme.js */
   --space-xxs: 4px;
   --space-xs: 8px;
   --space-sm: 12px;
@@ -65,18 +80,43 @@
   --space-xl: 32px;
   --space-xxl: 48px;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  /* Border Radius — mirrors src/theme/theme.js */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
   --radius-full: 9999px;
 
+  /* Shadows */
   --shadow-soft: 0 18px 48px rgba(24, 19, 16, 0.08);
   --shadow-modal: 0 24px 64px rgba(24, 19, 16, 0.18);
+
+  /* Focus */
   --focus-ring-color: rgba(244, 106, 58, 0.28);
 }
 
-* {
+@media (prefers-color-scheme: dark) {
+  :root,
+  :host {
+    --color-text: #F7EFE8;
+    --color-text-secondary: #D0C4BA;
+    --color-background: #12100E;
+    --color-surface: #231D18;
+    --color-border: #4A3F38;
+    --color-danger: #FF7262;
+    --color-warning: #E2A53B;
+    --color-overlay: rgba(0, 0, 0, 0.6);
+    --color-placeholder: #6B5F57;
+    --color-overlay-strong: rgba(0, 0, 0, 0.72);
+    /* --color-on-inverse and --color-overlay-soft are intentionally not
+       overridden: the scanner stage is always dark, so text on it must
+       always be light regardless of the OS theme. */
+  }
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -96,81 +136,7 @@ input {
   font: inherit;
 }
 
-.brand {
-  margin: 0 0 2px;
-  color: var(--color-accent);
-  font-size: var(--font-size-caption);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  line-height: var(--line-height-caption);
-  text-transform: uppercase;
-}
-
-.title {
-  margin: 0;
-  font-size: var(--font-size-title);
-  font-weight: 900;
-  line-height: var(--line-height-title);
-}
-
-.subtitle {
-  margin: var(--space-xs) 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-}
-
-.button-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-sm);
-}
-
-.button {
-  min-height: 48px;
-  padding: 0 var(--space-md);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.button-primary {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.button-secondary {
-  background: var(--color-qr-background);
-  border-color: var(--color-border);
-  color: var(--color-text);
-}
-
-.message {
-  min-height: var(--line-height-body);
-  margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-}
-
-.message-warning {
-  color: var(--color-warning);
-}
-
-.message-error {
-  color: var(--color-danger);
-}
-
-.message-success {
-  color: var(--color-accent);
-}
-
+/* Shared visibility utility used across popup and component CSS */
 .hidden {
   display: none !important;
 }

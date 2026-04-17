@@ -56,16 +56,16 @@
 }
 
 .splitpass-panel-header {
-  display: grid;
-  gap: var(--space-xxs);
-  margin-bottom: var(--space-sm);
-}
-
-.splitpass-panel-header-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.splitpass-panel-branding {
+  display: grid;
+  gap: 0;
 }
 
 .splitpass-title {
@@ -84,15 +84,45 @@
   line-height: var(--line-height-subtitle);
 }
 
-.splitpass-close {
+.splitpass-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.splitpass-close,
+.splitpass-lock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.splitpass-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   font-size: var(--font-size-input);
   font-weight: 900;
   line-height: 1;
-  padding: 0;
+}
+
+.splitpass-lock {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.splitpass-close:hover,
+.splitpass-lock:hover {
+  color: var(--color-text);
 }
 
 .splitpass-stage {
@@ -261,9 +291,14 @@
 }
 
 .splitpass-button-secondary {
-  background: var(--color-qr-background);
+  background: var(--color-surface);
   border-color: var(--color-border);
   color: var(--color-text);
+}
+
+.splitpass-button-danger {
+  background: var(--color-danger);
+  color: #fff;
 }
 
 .splitpass-message {

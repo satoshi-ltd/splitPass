@@ -1,5 +1,6 @@
 import { READER_TYPE, SECRET_TYPE, SHARD_TYPES } from '../../App.constants';
 import { L10N } from '../../modules/l10n';
+import { QRParser, USERNAME_TYPE } from '../../modules/QRParser';
 import { isTOTPURI, parseTOTPURI } from '../../modules/totp';
 
 const getScannedValue = (payload = '') => (typeof payload === 'string' ? payload : payload?.value || '');
@@ -13,6 +14,15 @@ const resolveScannerPayload = (payload = '') => {
   }
 
   const type = scannedValue[0];
+
+  if (type === USERNAME_TYPE) {
+    const { value: innerValue, username } = QRParser.decodeWithUsername(scannedValue);
+    const innerType = innerValue?.[0];
+    if (innerType && Object.values(SECRET_TYPE).includes(innerType)) {
+      return { kind: 'secret', scannedValue: innerValue, type: innerType, username };
+    }
+    return { kind: 'unsupported', scannedValue, type };
+  }
 
   if (!Object.values(SECRET_TYPE).includes(type)) {
     return { kind: 'unsupported', scannedValue, type };

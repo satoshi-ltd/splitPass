@@ -33,6 +33,7 @@ import {
   parseTOTPURI,
   QRParser,
 } from '../../modules';
+import { USERNAME_TYPE } from '../../modules/QRParser';
 import {
   formatCardNumber,
   getMaskedCardValue,
@@ -117,6 +118,15 @@ const Viewer = ({ route, navigation = {} }) => {
   const resolvedName = persistedSecret?.name ?? name;
   const resolvedNotes = persistedSecret?.notes ?? notes;
   const resolvedUsername = persistedSecret?.username ?? username;
+  const qrValues = useMemo(
+    () =>
+      resolvedValues.map((v) =>
+        resolvedUsername && !SHARD_TYPES.includes(v[0]) && v[0] !== SECRET_TYPE.TOTP
+          ? QRParser.encodeWithUsername(v, resolvedUsername)
+          : v,
+      ),
+    [resolvedValues, resolvedUsername],
+  );
   const [type] = currentValue;
   const isCardType = [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type);
 
@@ -546,7 +556,7 @@ const Viewer = ({ route, navigation = {} }) => {
               snapTo={width}
               style={style.scrollView}
             >
-              {resolvedValues.map((value, index) => (
+              {qrValues.map((value, index) => (
                 <View align="center" key={`${value}-${index}`} style={[style.qrSlide, { width }]}>
                   <QR
                     ref={index === currentIndex ? qrRef : undefined}

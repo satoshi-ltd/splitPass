@@ -32,7 +32,7 @@ importScripts('lib/vault.js');
     if (message.type === 'splitpass.saveRecentSecret') {
       (async () => {
         try {
-          const entry = await vault.saveRecentSecret(message.domain, message.secret, message.source || 'inline_fill');
+          const entry = await vault.saveRecentSecret(message.domain, message.secret, message.source || 'inline_fill', message.username || '');
           sendResponse({ ok: true, entry });
         } catch (error) {
           sendResponse({
@@ -66,7 +66,7 @@ importScripts('lib/vault.js');
     if (message.type === 'splitpass.removeRecentSecret') {
       (async () => {
         try {
-          const removed = await vault.removeRecentSecret(message.domain, message.secret);
+          const removed = await vault.removeRecentSecret(message.domain, message.secret, message.username || '');
           sendResponse({ ok: true, removed });
         } catch (error) {
           sendResponse({

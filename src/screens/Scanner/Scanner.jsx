@@ -62,6 +62,7 @@ const Scanner = ({
   const [stageHeight, setStageHeight] = useState(0);
   const [unsupportedNoticeAt, setUnsupportedNoticeAt] = useState(0);
   const [values, setValues] = useState([]);
+  const [scannedUsername, setScannedUsername] = useState();
 
   useEffect(() => {
     handleReaderType(propReaderType);
@@ -132,6 +133,7 @@ const Scanner = ({
     }
 
     setValues([scannedValue]);
+    setScannedUsername(resolvedPayload.username || undefined);
   };
 
   const handleReset = () => {
@@ -144,6 +146,7 @@ const Scanner = ({
     setPasscodeDraft('');
     setUnsupportedNoticeAt(0);
     setValues([]);
+    setScannedUsername(undefined);
   };
 
   const [type] = values[0] || [];
@@ -257,7 +260,7 @@ const Scanner = ({
       period: parsedTOTP?.period,
       name: selectedItem?.name || (parsedTOTP ? getTOTPDisplayName(parsedTOTP) : resolveFallbackName(type)),
       notes: selectedItem?.notes,
-      username: selectedItem?.username,
+      username: selectedItem?.username || scannedUsername,
       value: persistedValue,
     });
     if (!savedSecret) return;

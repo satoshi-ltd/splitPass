@@ -2,6 +2,7 @@
   const runtime = (globalThis.browser && globalThis.browser.runtime) || chrome.runtime;
   const browserApi = globalThis.browser || globalThis.chrome || {};
   const secretItem = globalThis.SplitPassSecretItem;
+  const { callStorage } = globalThis.SplitPassBrowserApi;
   const VAULT_STORAGE_KEY = 'splitpass.browser.vault.v1';
   const UI_STATE_STORAGE_KEY = 'splitpass.browser.ui.v1';
   const POPUP_OPEN_TTL_MS = 3000;
@@ -62,32 +63,7 @@
     });
   }
 
-  async function callStorage(area, method, payload) {
-    if (!area || typeof area[method] !== 'function') return undefined;
 
-    try {
-      const maybePromise = area[method](payload);
-      if (maybePromise && typeof maybePromise.then === 'function') {
-        return await maybePromise;
-      }
-    } catch (error) {
-      if (!String(error?.message || '').includes('No matching signature')) {
-        throw error;
-      }
-    }
-
-    return await new Promise((resolve, reject) => {
-      area[method](payload, (result) => {
-        const runtimeError = browserApi?.runtime?.lastError;
-        if (runtimeError) {
-          reject(new Error(runtimeError.message));
-          return;
-        }
-
-        resolve(result);
-      });
-    });
-  }
 
   function createStylesheetLink(path) {
     const stylesheet = document.createElement('link');
@@ -136,7 +112,7 @@
     const shadowRoot = host.attachShadow({ mode: 'open' });
     const panelLayer = document.createElement('div');
 
-    shadowRoot.append(createStylesheetLink('theme.css'), createStylesheetLink('content.css'), panelLayer);
+    shadowRoot.append(createStylesheetLink('theme.css'), createStylesheetLink('item.css'), createStylesheetLink('content.css'), panelLayer);
     (document.body || document.documentElement).appendChild(host);
 
     state.shadowHost = host;
@@ -196,6 +172,26 @@
     element.focus();
     setFormFieldValue(element, value);
     dispatchValueEvents(element);
+  }
+
+  function findUsernameInput() {
+    const candidates = Array.from(document.querySelectorAll('input')).filter(
+      (input) =>
+        !isOwnedElement(input) &&
+        !input.disabled &&
+        !input.readOnly &&
+        String(input.type || 'text').toLowerCase() !== 'password' &&
+        String(input.type || 'text').toLowerCase() !== 'hidden' &&
+        isVisible(input)
+    );
+
+    return (
+      candidates.find((i) => ['username', 'email'].includes(String(i.autocomplete || '').toLowerCase())) ||
+      candidates.find((i) => String(i.type || '').toLowerCase() === 'email') ||
+      candidates.find((i) => /user|email|login/i.test(i.name || i.id || '')) ||
+      candidates.find((i) => /user|email/i.test(i.placeholder || '')) ||
+      null
+    );
   }
 
   function fillVisiblePasswordInputs(value, preferredInput) {
@@ -376,12 +372,13 @@
     return fallbackEntries.sort((left, right) => Number(right.lastUsedAt || 0) - Number(left.lastUsedAt || 0));
   }
 
-  async function touchSecret(domain, secret, source) {
+  async function touchSecret(domain, secret, source, username) {
     await sendRuntimeMessage({
       type: 'splitpass.saveRecentSecret',
       domain,
       secret,
       source,
+      username: username || '',
     }).catch(() => undefined);
   }
 
@@ -398,7 +395,7 @@
         <div class="splitpass-site-header">
           <div class="splitpass-site-branding">
             <p class="splitpass-site-brand">split/Pass</p>
-            <p class="splitpass-site-title">Passwords</p>
+            <p class="splitpass-site-title">Secrets</p>
           </div>
           <button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button>
         </div>
@@ -447,12 +444,18 @@
 
     secretItem.renderList({
       root: state.panel.list,
-      classPrefix: 'splitpass-site',
+      classPrefix: 'splitpass',
       entries: state.panel.entries,
       faviconUrl,
       name: siteLabel,
       onPrimary: async (entry) => {
         if (!entry?.secret) return;
+
+        if (entry.username) {
+          const usernameInput = findUsernameInput();
+          if (usernameInput) fillTarget(usernameInput, entry.username);
+        }
+
         const filledInputs = await fillVisiblePasswordInputsStable(entry.secret, preferredInput);
         if (!filledInputs.length) {
           await showMessage('No visible password field found.');
@@ -463,7 +466,22 @@
         state.dismissed = true;
         state.suppressVaultRefreshUntil = now() + 2000;
         hideSitePanel();
-        await touchSecret(entry.domain || globalThis.location.hostname, entry.secret, 'site_panel_fill');
+        await touchSecret(entry.domain || globalThis.location.hostname, entry.secret, 'site_panel_fill', entry.username);
+      },
+      onDelete: async (entry) => {
+        if (!entry?.secret) return;
+        await sendRuntimeMessage({
+          type: 'splitpass.removeRecentSecret',
+          domain: entry.domain || globalThis.location.hostname,
+          secret: entry.secret,
+          username: entry.username || '',
+        }).catch(() => undefined);
+        state.panel.entries = state.panel.entries.filter((e) => e !== entry);
+        if (!state.panel.entries.length) {
+          hideSitePanel();
+          return;
+        }
+        await renderEntries(state.panel.entries, preferredInput);
       },
     });
 
@@ -673,6 +691,10 @@
       if (message.type !== 'splitpass.fillPassword') return undefined;
 
       (async () => {
+        if (message.username) {
+          const usernameInput = findUsernameInput();
+          if (usernameInput) fillTarget(usernameInput, message.username);
+        }
         const filledInputs = await fillVisiblePasswordInputsStable(String(message.secret || ''), state.lastFocusedPasswordInput);
         sendResponse({
           ok: true,

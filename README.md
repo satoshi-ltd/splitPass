@@ -10,6 +10,7 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 - Encrypts the on-device vault with a master passphrase requested during setup and on app unlock.
 - Exports encrypted local backups as opaque archive files and requires the same master passphrase to import them.
 - Keeps legacy PIN-based `secure` QR/NFC payloads readable for compatibility.
+- Optionally embeds the username in the displayed QR code (`B`-type envelope) so a scanner can recover both the secret and its associated username in a single scan; the stored value is never affected.
 - Includes reminder scheduling, a password generator flow, and a marketplace webview entry.
 - Exposes a password generator flow and a marketplace webview entry.
 
@@ -71,6 +72,7 @@ src/
   services/     device integrations
   theme/        design tokens and themes
 browser-extension/ browser extension source for QR scan and password fill
+  tests/          Jest tests (named `tests/` not `__tests__/` — Chrome rejects extension directories starting with `_`)
 ```
 
 ## Local setup
@@ -109,6 +111,7 @@ npx expo-doctor
 - legacy PIN encryption and decryption compatibility
 - card encode / decode compatibility
 - scanner and viewer flows
+- `B`-type username envelope: encode → display in Viewer → scan in Scanner → recover username + inner secret
 
 ## Subagents
 - Codex should actively delegate bounded work into `.codex/subagents/` instead of staying single-threaded on multi-area tasks.

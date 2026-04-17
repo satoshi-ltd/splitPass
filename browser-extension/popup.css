@@ -31,14 +31,6 @@ body {
   box-shadow: none;
 }
 
-.splitpass-panel-header {
-  gap: 0;
-  margin-bottom: var(--space-sm);
-}
-
-.splitpass-panel-header-top {
-  align-items: flex-start;
-}
 
 .splitpass-title {
   margin: 0;
@@ -61,7 +53,7 @@ body {
 }
 
 .splitpass-stage {
-  border-radius: 0;
+  border-radius: var(--radius-xl);
 }
 
 .splitpass-caption {
@@ -86,22 +78,9 @@ body {
 }
 
 .splitpass-auth-label,
-.splitpass-recent-title,
-.splitpass-recent-item-name,
-.splitpass-recent-item-meta,
 .splitpass-recent-empty,
 .splitpass-recent-note {
   margin: 0;
-}
-
-.splitpass-recent-title {
-  color: var(--color-text);
-}
-
-.splitpass-recent-title {
-  font-size: var(--font-size-input);
-  font-weight: 700;
-  line-height: var(--line-height-input);
 }
 
 .splitpass-recent-empty,
@@ -147,84 +126,87 @@ body {
   margin-top: var(--space-xs);
 }
 
-.splitpass-recent-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 0;
-}
-
 .splitpass-recent-list {
   display: grid;
   gap: var(--space-xs);
 }
 
-.splitpass-recent-item {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  align-items: center;
-  gap: var(--space-sm);
-  width: 100%;
-  padding: var(--space-xxs) 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  text-align: left;
-}
-
-.splitpass-recent-item-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 0;
-  background: var(--color-on-accent);
-  overflow: hidden;
-}
-
-.splitpass-recent-item-icon img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.splitpass-recent-item-fallback {
-  color: var(--color-text);
-  font-size: var(--font-size-input);
-  font-weight: 700;
-  line-height: 1;
-}
-
-.splitpass-recent-item-body {
-  display: grid;
-  gap: var(--space-xxs);
-  min-width: 0;
-}
-
-.splitpass-recent-item-name {
-  color: var(--color-text);
-  font-size: var(--font-size-input);
-  font-weight: 700;
-  line-height: var(--line-height-input);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.splitpass-recent-item-meta {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-tiny);
-  line-height: var(--line-height-tiny);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 .splitpass-passcode,
 .splitpass-message {
   margin-top: var(--space-md);
+}
+
+.splitpass-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+}
+
+.splitpass-footer-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.splitpass-footer-link:hover {
+  color: var(--color-text);
+}
+
+
+.splitpass-auth-reset {
+  display: grid;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.splitpass-auth-reset-trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: var(--space-xxs) 0;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+  text-align: center;
+  transition: color 0.15s ease;
+}
+
+.splitpass-auth-reset-trigger:hover {
+  color: var(--color-danger);
+}
+
+.splitpass-auth-reset-confirm {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.splitpass-auth-reset-warning {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+}
+
+.splitpass-auth-reset-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.splitpass-auth-reset-actions .splitpass-button {
+  margin-top: 0;
+  min-height: 40px;
+  font-size: var(--font-size-caption);
+  border-radius: var(--radius-md);
 }

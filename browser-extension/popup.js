@@ -2,6 +2,7 @@ const popupRoot = document.getElementById('popupRoot');
 const scannerUi = globalThis.SplitPassScannerUi.createShell();
 const secretItem = globalThis.SplitPassSecretItem;
 const vault = globalThis.SplitPassVault;
+const { callStorage } = globalThis.SplitPassBrowserApi;
 const browserApi = globalThis.browser || globalThis.chrome || {};
 const UI_STATE_STORAGE_KEY = 'splitpass.browser.ui.v1';
 const POPUP_OPEN_HEARTBEAT_MS = 1000;
@@ -32,24 +33,45 @@ authPanel.innerHTML = `
     <input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" />
   </label>
   <button class="splitpass-button splitpass-button-primary splitpass-auth-submit" data-role="auth-submit" type="button"></button>
+  <div class="splitpass-auth-reset hidden" data-role="reset-wrap">
+    <button class="splitpass-auth-reset-trigger" data-role="reset-trigger" type="button">Forgot password? Reset vault</button>
+    <div class="splitpass-auth-reset-confirm hidden" data-role="reset-confirm">
+      <p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p>
+      <div class="splitpass-auth-reset-actions">
+        <button class="splitpass-button splitpass-button-secondary" data-role="reset-cancel" type="button">Cancel</button>
+        <button class="splitpass-button splitpass-button-danger" data-role="reset-do" type="button">Reset vault</button>
+      </div>
+    </div>
+  </div>
 `;
 
 const recentPanel = document.createElement('section');
 recentPanel.className = 'splitpass-recent-panel';
 recentPanel.innerHTML = `
-  <div class="splitpass-recent-header">
-    <p class="splitpass-recent-title">Secrets on this site</p>
-  </div>
   <div class="splitpass-recent-list" data-role="recent-list"></div>
+`;
+
+const lockButton = scannerUi.elements.lockButton;
+
+const footerEl = document.createElement('footer');
+footerEl.className = 'splitpass-footer';
+footerEl.innerHTML = `
+  <span>© ${new Date().getFullYear()} <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span>
 `;
 
 scannerUi.root.appendChild(authPanel);
 scannerUi.root.appendChild(recentPanel);
+scannerUi.root.appendChild(footerEl);
 
 const authSubmit = authPanel.querySelector('[data-role="auth-submit"]');
 const confirmWrap = authPanel.querySelector('[data-role="confirm-wrap"]');
 const masterPasswordInput = authPanel.querySelector('[data-role="master-password"]');
 const masterPasswordConfirmInput = authPanel.querySelector('[data-role="master-password-confirm"]');
+const resetWrap = authPanel.querySelector('[data-role="reset-wrap"]');
+const resetTrigger = authPanel.querySelector('[data-role="reset-trigger"]');
+const resetConfirm = authPanel.querySelector('[data-role="reset-confirm"]');
+const resetCancel = authPanel.querySelector('[data-role="reset-cancel"]');
+const resetDo = authPanel.querySelector('[data-role="reset-do"]');
 const recentList = recentPanel.querySelector('[data-role="recent-list"]');
 
 const defaultEmptyState = {
@@ -76,33 +98,6 @@ const state = {
   vaultInitialized: false,
   unlocked: false,
 };
-
-async function callStorage(area, method, payload) {
-  if (!area || typeof area[method] !== 'function') return undefined;
-
-  try {
-    const maybePromise = area[method](payload);
-    if (maybePromise && typeof maybePromise.then === 'function') {
-      return await maybePromise;
-    }
-  } catch (error) {
-    if (!String(error?.message || '').includes('No matching signature')) {
-      throw error;
-    }
-  }
-
-  return await new Promise((resolve, reject) => {
-    area[method](payload, (result) => {
-      const runtimeError = browserApi?.runtime?.lastError;
-      if (runtimeError) {
-        reject(new Error(runtimeError.message));
-        return;
-      }
-
-      resolve(result);
-    });
-  });
-}
 
 async function setPopupOpenState(popupOpen) {
   const storageArea = browserApi?.storage?.local;
@@ -160,8 +155,8 @@ function showCameraEmpty(show) {
 }
 
 function showRetry(show) {
-  retryButton.classList.add('splitpass-hidden');
-  retryButton.classList.add('hidden');
+  retryButton.classList.toggle('splitpass-hidden', !show);
+  retryButton.classList.toggle('hidden', !show);
 }
 
 function togglePasscodePanel(show) {
@@ -232,24 +227,29 @@ function renderRecentPanel() {
 
   secretItem.renderList({
     root: recentList,
-    classPrefix: 'splitpass-recent',
+    classPrefix: 'splitpass',
     entries: state.recentEntries,
     faviconUrl: state.currentFaviconUrl,
     name: siteLabel,
     onPrimary: async (entry) => {
       if (!entry?.secret) return;
-      const filled = await fillActiveTabPassword(entry.secret);
+      const filled = await fillActiveTabPassword(entry.secret, entry.username || '');
       if (filled) {
-        await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill');
+        await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill', entry.username || '');
         window.close();
         return;
       }
 
       const copied = await copySecretToClipboard(entry.secret);
       if (!copied) return;
-      await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_copy');
+      await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_copy', entry.username || '');
       globalThis.alert('No password field was found. The secret is now in your clipboard.');
       window.close();
+    },
+    onDelete: async (entry) => {
+      if (!entry?.secret) return;
+      await vault.removeRecentSecret(entry.domain || state.currentDomain, entry.secret, entry.username || '');
+      await refreshRecentSecret();
     },
   });
 }
@@ -265,6 +265,9 @@ function renderAuthPanel() {
   masterPasswordInput.placeholder = isSetup ? 'Create password' : 'Enter password';
   masterPasswordConfirmInput.placeholder = 'Repeat password';
   authSubmit.textContent = isSetup ? 'Create vault' : 'Unlock';
+  resetWrap.classList.toggle('hidden', isSetup);
+  resetConfirm.classList.add('hidden');
+  lockButton.classList.toggle('hidden', !state.unlocked);
 }
 
 function renderScannerState() {
@@ -300,14 +303,33 @@ function renderScannerState() {
 }
 
 async function copySecretToClipboard(secret) {
+  const text = String(secret || '');
+
+  // Modern Clipboard API — requires document focus (may fail in extension popups).
   try {
-    await navigator.clipboard.writeText(String(secret || ''));
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // fall through to execCommand fallback
+  }
+
+  // Fallback: execCommand('copy') via a temporary off-screen textarea.
+  // Works even when the popup document has lost focus during QR processing.
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(textarea);
+    if (!ok) throw new Error('execCommand copy returned false');
+    return true;
   } catch (error) {
     setMessage(error instanceof Error ? error.message : 'Unable to copy the secret.', 'error');
     return false;
   }
-
-  return true;
 }
 
 async function sendMessageToTab(tabId, payload) {
@@ -338,7 +360,7 @@ async function sendMessageToTab(tabId, payload) {
   });
 }
 
-async function fillActiveTabPassword(secret) {
+async function fillActiveTabPassword(secret, username = '') {
   const tabsApi = browserApi?.tabs;
   if (!tabsApi?.query) return false;
 
@@ -369,6 +391,7 @@ async function fillActiveTabPassword(secret) {
     const response = await sendMessageToTab(activeTab.id, {
       type: 'splitpass.fillPassword',
       secret,
+      username,
     });
 
     return !!response?.filled;
@@ -485,11 +508,11 @@ function handleUnsupportedResult(result) {
   setMessage('This QR is not a valid SplitPass password value.', 'error');
 }
 
-async function persistRecentSecret(secret) {
+async function persistRecentSecret(secret, username = '') {
   if (!state.unlocked || !state.currentDomain) return;
 
   try {
-    await vault.saveRecentSecret(state.currentDomain, secret, 'popup_scan');
+    await vault.saveRecentSecret(state.currentDomain, secret, 'popup_scan', username);
     state.recentEntries = await vault.getRecentSecretsForDomain(state.currentDomain);
   } catch (error) {
     if (error?.code === 'ERR_VAULT_LOCKED') {
@@ -541,10 +564,18 @@ async function processRawValue(rawValue, passcode = '') {
 
   togglePasscodePanel(false);
 
+  const username = result.username || '';
+  const filled = await fillActiveTabPassword(result.secret, username);
+  if (filled) {
+    await persistRecentSecret(result.secret, username);
+    window.close();
+    return;
+  }
+
   const copied = await copySecretToClipboard(result.secret);
   if (!copied) return;
 
-  await persistRecentSecret(result.secret);
+  await persistRecentSecret(result.secret, username);
   setCopiedState();
 }
 
@@ -670,6 +701,20 @@ async function handleUnlock() {
   await processRawValue(state.detectedValue, passcode);
 }
 
+async function performVaultReset(msg = 'Vault reset. Create a new password.') {
+  await vault.resetVault();
+  state.failedUnlockAttempts = 0;
+  state.vaultInitialized = false;
+  state.unlocked = false;
+  state.recentEntries = [];
+  masterPasswordInput.value = '';
+  masterPasswordConfirmInput.value = '';
+  renderAuthPanel();
+  renderScannerState();
+  renderRecentPanel();
+  setMessage(msg, 'warning');
+}
+
 async function handleAuthSubmit() {
   const masterPassword = String(masterPasswordInput.value || '');
   const confirmation = String(masterPasswordConfirmInput.value || '');
@@ -707,17 +752,7 @@ async function handleAuthSubmit() {
       state.failedUnlockAttempts += 1;
 
       if (state.failedUnlockAttempts >= 3) {
-        await vault.resetVault();
-        state.failedUnlockAttempts = 0;
-        state.vaultInitialized = false;
-        state.unlocked = false;
-        state.recentEntries = [];
-        masterPasswordInput.value = '';
-        masterPasswordConfirmInput.value = '';
-        renderAuthPanel();
-        renderScannerState();
-        renderRecentPanel();
-        setMessage('Vault reset. Create a new password.', 'warning');
+        await performVaultReset('Vault reset after too many failed attempts. Create a new password.');
         return;
       }
 
@@ -738,8 +773,29 @@ async function handleAuthSubmit() {
   }
 }
 
+resetTrigger.addEventListener('click', () => {
+  resetConfirm.classList.toggle('hidden');
+});
+resetCancel.addEventListener('click', () => {
+  resetConfirm.classList.add('hidden');
+});
+resetDo.addEventListener('click', async () => {
+  await performVaultReset('Vault reset. Create a new password.');
+});
+
 retryButton.addEventListener('click', handleRetry);
 closeButton.addEventListener('click', () => window.close());
+lockButton.addEventListener('click', async () => {
+  stopCamera();
+  await vault.lockVault();
+  state.unlocked = false;
+  state.cameraStartedByUser = false;
+  state.recentEntries = [];
+  renderAuthPanel();
+  renderRecentPanel();
+  renderScannerState();
+  masterPasswordInput.focus();
+});
 passcodeInput.addEventListener('input', handlePasscodeInput);
 passcodeInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') {
