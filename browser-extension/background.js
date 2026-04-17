@@ -6,8 +6,9 @@ importScripts('lib/vault.js');
 
   if (!runtime?.onMessage || !vault) return;
 
-  runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (!message || typeof message !== 'object') return undefined;
+    if (sender?.id !== runtime.id) return undefined;
 
     if (message.type === 'splitpass.getVaultStatus') {
       (async () => {
