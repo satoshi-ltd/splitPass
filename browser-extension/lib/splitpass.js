@@ -241,8 +241,9 @@
     }
 
     if (type === SECRET_TYPE.TOTP) {
-      return parseTOTPURI(secret)
-        ? { ok: false, code: 'unsupported_type', type, secret }
+      const totpUri = parseTOTPURI(secret);
+      return totpUri
+        ? { ok: true, totpUri, type }
         : { ok: false, code: 'invalid_qr', type };
     }
 

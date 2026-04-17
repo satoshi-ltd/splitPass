@@ -40,16 +40,22 @@
     return firstSegment.charAt(0).toUpperCase() + firstSegment.slice(1);
   }
 
-  function buildMarkup({ classPrefix, deletable = false, faviconUrl = '', index = 0, lastUsedAt = 0, name = 'Site', username = '' }) {
+  function isTotpEntry(entry) {
+    return /^otpauth:\/\/totp\//i.test(String(entry?.secret || ''));
+  }
+
+  function buildMarkup({ badge = '', classPrefix, deletable = false, faviconUrl = '', index = 0, lastUsedAt = 0, name = 'Site', username = '' }) {
     const safePrefix = escapeHtml(classPrefix);
     const safeName = escapeHtml(name);
     const safeFaviconUrl = escapeHtml(faviconUrl);
     const fallbackLetter = escapeHtml(String(name || 'S').slice(0, 1).toUpperCase());
     const safeUsername = escapeHtml(username);
     const lastUsedLabel = `Last used ${escapeHtml(formatLastUsedDate(lastUsedAt))}`;
-    const iconMarkup = safeFaviconUrl
+    const imageMarkup = safeFaviconUrl
       ? `<img src="${safeFaviconUrl}" alt="" referrerpolicy="no-referrer" />`
       : `<span class="${safePrefix}-item-fallback">${fallbackLetter}</span>`;
+    const typeMarkup = badge ? `<span class="${safePrefix}-item-type" aria-label="${escapeHtml(badge)}">${escapeHtml(badge)}</span>` : '';
+    const iconMarkup = `${imageMarkup}${typeMarkup}`;
     const nameMarkup = safeUsername
       ? `${safeName}<span class="${safePrefix}-item-username">/${safeUsername}</span>`
       : safeName;
@@ -90,6 +96,7 @@
     root.innerHTML = entries
       .map((entry, index) =>
         buildMarkup({
+          badge: isTotpEntry(entry) ? '2FA' : '',
           classPrefix,
           deletable: !!onDelete,
           faviconUrl,

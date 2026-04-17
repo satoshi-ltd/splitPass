@@ -34,6 +34,7 @@
       ],
       "js": [
         "lib/browser-api.js",
+        "lib/totp.js",
         "lib/secret-item.js",
         "content.js"
       ],

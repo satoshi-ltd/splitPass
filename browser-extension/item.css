@@ -25,6 +25,7 @@
 
 /* Icon — squared, consistent with app */
 .splitpass-item-icon {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -33,7 +34,7 @@
   height: 40px;
   border-radius: 0;
   background: transparent;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .splitpass-item-icon img {
@@ -69,8 +70,47 @@
 
 .splitpass-item-username {
   color: var(--color-accent);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-body);
   font-weight: 500;
+}
+
+/* Type indicator — overlaid on the icon corner */
+.splitpass-item-type {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 2px 1px 3px;
+  border-radius: var(--radius-sm);
+  /* dark-tinted base = elapsed portion */
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 99px rgba(0, 0, 0, 0.50);
+  color: var(--color-on-accent);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 9px;
+  letter-spacing: 0.03em;
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* TOTP countdown — bright accent fill shrinks left→right, dark base = elapsed */
+.splitpass-item-type::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-accent);
+  transform-origin: left center;
+  animation: splitpass-totp-progress 30s linear infinite;
+}
+
+@keyframes splitpass-totp-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
 }
 
 .splitpass-item-meta {

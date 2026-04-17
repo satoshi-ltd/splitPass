@@ -233,6 +233,30 @@ function renderRecentPanel() {
     name: siteLabel,
     onPrimary: async (entry) => {
       if (!entry?.secret) return;
+
+      const totp = globalThis.SplitPassTotp;
+      if (totp?.isTotpUri(entry.secret)) {
+        let code;
+        try {
+          code = await totp.generateTOTP(entry.secret);
+        } catch (error) {
+          setMessage(error instanceof Error ? error.message : 'Unable to generate 2FA code.', 'error');
+          return;
+        }
+        const filled = await fillActiveTotpCode(code);
+        if (filled) {
+          await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill', entry.username || '');
+          window.close();
+          return;
+        }
+        const copied = await copySecretToClipboard(code);
+        if (!copied) return;
+        await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_copy', entry.username || '');
+        globalThis.alert('No 2FA field was found. The code is now in your clipboard.');
+        window.close();
+        return;
+      }
+
       const filled = await fillActiveTabPassword(entry.secret, entry.username || '');
       if (filled) {
         await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill', entry.username || '');
@@ -252,6 +276,8 @@ function renderRecentPanel() {
       await refreshRecentSecret();
     },
   });
+
+  globalThis.SplitPassTotp?.syncTotpBadges(recentList);
 }
 
 function renderAuthPanel() {
@@ -358,6 +384,44 @@ async function sendMessageToTab(tabId, payload) {
       resolve(response);
     });
   });
+}
+
+async function fillActiveTotpCode(code) {
+  const tabsApi = browserApi?.tabs;
+  if (!tabsApi?.query) return false;
+
+  let tabs = [];
+
+  try {
+    const maybePromise = tabsApi.query({ active: true, currentWindow: true });
+    tabs = maybePromise && typeof maybePromise.then === 'function'
+      ? await maybePromise
+      : await new Promise((resolve, reject) => {
+          tabsApi.query({ active: true, currentWindow: true }, (result) => {
+            const runtimeError = browserApi?.runtime?.lastError;
+            if (runtimeError) {
+              reject(new Error(runtimeError.message));
+              return;
+            }
+            resolve(result || []);
+          });
+        });
+  } catch {
+    tabs = [];
+  }
+
+  const activeTab = Array.isArray(tabs) ? tabs[0] : null;
+  if (typeof activeTab?.id !== 'number') return false;
+
+  try {
+    const response = await sendMessageToTab(activeTab.id, {
+      type: 'splitpass.fillTotp',
+      code,
+    });
+    return !!response?.filled;
+  } catch {
+    return false;
+  }
 }
 
 async function fillActiveTabPassword(secret, username = '') {
@@ -540,6 +604,37 @@ function setCopiedState() {
   clearMessage();
 }
 
+async function processTotpResult(result) {
+  const totp = globalThis.SplitPassTotp;
+  if (!totp) {
+    setMessage('TOTP module not available.', 'error');
+    return;
+  }
+
+  let code;
+  try {
+    code = await totp.generateTOTP(result.totpUri);
+  } catch (error) {
+    setMessage(error instanceof Error ? error.message : 'Unable to generate 2FA code.', 'error');
+    return;
+  }
+
+  const username = result.username || totp.getTotpLabel(result.totpUri);
+
+  const filled = await fillActiveTotpCode(code);
+  if (filled) {
+    await persistRecentSecret(result.totpUri, username);
+    window.close();
+    return;
+  }
+
+  const copied = await copySecretToClipboard(code);
+  if (!copied) return;
+
+  await persistRecentSecret(result.totpUri, username);
+  setCopiedState();
+}
+
 async function processRawValue(rawValue, passcode = '') {
   const result = globalThis.SplitPassDecoder.decode(rawValue, passcode);
 
@@ -563,6 +658,11 @@ async function processRawValue(rawValue, passcode = '') {
   }
 
   togglePasscodePanel(false);
+
+  if (result.totpUri) {
+    await processTotpResult(result);
+    return;
+  }
 
   const username = result.username || '';
   const filled = await fillActiveTabPassword(result.secret, username);

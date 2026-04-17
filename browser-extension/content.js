@@ -138,6 +138,30 @@
     );
   }
 
+  function isOtpInput(element) {
+    if (!(element instanceof HTMLInputElement)) return false;
+    if (isOwnedElement(element) || element.disabled || element.readOnly) return false;
+    const type = String(element.type || 'text').toLowerCase();
+    const autocomplete = String(element.autocomplete || '').toLowerCase();
+    const inputmode = String(element.inputmode || '').toLowerCase();
+    const maxLen = parseInt(String(element.maxLength || '0'), 10);
+    return (
+      autocomplete === 'one-time-code' ||
+      (inputmode === 'numeric' && maxLen === 6 && ['text', 'tel', 'number'].includes(type))
+    );
+  }
+
+  function findOtpInput() {
+    const inputs = Array.from(document.querySelectorAll('input')).filter(
+      (input) => isOtpInput(input) && isVisible(input)
+    );
+    return (
+      inputs.find((i) => String(i.autocomplete || '').toLowerCase() === 'one-time-code') ||
+      inputs[0] ||
+      null
+    );
+  }
+
   function isVisible(element) {
     if (!(element instanceof Element)) return false;
 
@@ -155,7 +179,7 @@
   }
 
   function pageHasVisiblePasswordInput() {
-    return getVisiblePasswordInputs().length > 0;
+    return getVisiblePasswordInputs().length > 0 || findOtpInput() !== null;
   }
 
   function setFormFieldValue(element, value) {
@@ -451,6 +475,28 @@
       onPrimary: async (entry) => {
         if (!entry?.secret) return;
 
+        const totp = globalThis.SplitPassTotp;
+        if (totp?.isTotpUri(entry.secret)) {
+          let code;
+          try {
+            code = await totp.generateTOTP(entry.secret);
+          } catch {
+            await showMessage('Unable to generate 2FA code.');
+            return;
+          }
+          const otpInput = findOtpInput();
+          if (!otpInput) {
+            await showMessage('No 2FA field found on this page.');
+            return;
+          }
+          fillTarget(otpInput, code);
+          state.dismissed = true;
+          state.suppressVaultRefreshUntil = now() + 2000;
+          hideSitePanel();
+          await touchSecret(entry.domain || globalThis.location.hostname, entry.secret, 'site_panel_fill', entry.username);
+          return;
+        }
+
         if (entry.username) {
           const usernameInput = findUsernameInput();
           if (usernameInput) fillTarget(usernameInput, entry.username);
@@ -484,6 +530,8 @@
         await renderEntries(state.panel.entries, preferredInput);
       },
     });
+
+    globalThis.SplitPassTotp?.syncTotpBadges(state.panel.list);
 
     state.panel.visible = true;
     state.panel.root.classList.remove('splitpass-hidden');
@@ -593,9 +641,11 @@
   function handleFocusIn(event) {
     if (isOwnedElement(event.target) || eventInsideUi(event)) return;
 
-    if (isPasswordInput(event.target) && isVisible(event.target)) {
+    if ((isPasswordInput(event.target) || isOtpInput(event.target)) && isVisible(event.target)) {
       resetDismissedState();
-      state.lastFocusedPasswordInput = event.target;
+      if (isPasswordInput(event.target)) {
+        state.lastFocusedPasswordInput = event.target;
+      }
       scheduleRefreshBurst();
       return;
     }
@@ -685,6 +735,17 @@
         resetDismissedState();
         scheduleRefreshBurst({ storageChange: true });
         sendResponse({ ok: true });
+        return true;
+      }
+
+      if (message.type === 'splitpass.fillTotp') {
+        const otpInput = findOtpInput();
+        if (otpInput) {
+          fillTarget(otpInput, String(message.code || ''));
+          sendResponse({ ok: true, filled: true });
+        } else {
+          sendResponse({ ok: true, filled: false });
+        }
         return true;
       }
 
