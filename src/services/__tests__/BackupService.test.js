@@ -69,6 +69,16 @@ describe('BackupService', () => {
     expect(JSON.stringify(FileSystem.writeAsStringAsync.mock.calls[0][1])).not.toContain('splitpass');
   });
 
+  it('forwards a custom passphrase to the store when exporting', async () => {
+    const store = {
+      exportBackup: jest.fn(async () => ({ c: 'cipher', k: { a: 'argon2id' }, n: 'nonce', v: 3, w: 'wrapped' })),
+    };
+
+    await BackupService.export({ store, passphrase: 'export-only-key' });
+
+    expect(store.exportBackup).toHaveBeenCalledWith('export-only-key');
+  });
+
   it('accepts any file type and recognizes opaque encrypted archives', async () => {
     DocumentPicker.getDocumentAsync.mockResolvedValue({
       assets: [{ uri: 'file:///vault/archive.dat' }],

@@ -72,16 +72,8 @@ const Settings = ({ navigation = {} }) => {
     else if (callback === 'handleResetData') handleResetData();
   };
 
-  const handleExport = async () => {
-    try {
-      setActivity((prev) => ({ ...(prev || {}), handleExport: true }));
-      const exported = await BackupService.export({ store });
-      if (exported) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_EXPORT_SUCCESS, title: L10N.SUCCESS });
-    } catch (error) {
-      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: error });
-    } finally {
-      setActivity((prev) => ({ ...(prev || {}), handleExport: false }));
-    }
+  const handleExport = () => {
+    navigation.navigate('unlock', { mode: 'export' });
   };
 
   const handleImport = async () => {

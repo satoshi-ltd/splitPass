@@ -163,8 +163,19 @@ export class StorageService {
     return clone(data);
   }
 
-  async exportBackup() {
-    const { defaults, rawData } = state.get(this);
+  async exportBackup(passphrase) {
+    const { data, defaults, rawData } = state.get(this);
+    const customPassphrase = typeof passphrase === 'string' && passphrase.length > 0 ? passphrase : undefined;
+
+    if (customPassphrase) {
+      const plainData = isEncryptedEnvelope(rawData)
+        ? data || (this.sessionPassphrase ? await decryptEncryptedEnvelope(rawData, this.sessionPassphrase) : undefined)
+        : this.previewData || defaults;
+
+      if (!plainData) throw new Error('Master passphrase required.');
+
+      return createEncryptedEnvelope(normalizeData(plainData, defaults), customPassphrase);
+    }
 
     if (isEncryptedEnvelope(rawData)) {
       if (isCurrentEncryptedEnvelope(rawData)) return clone(rawData);

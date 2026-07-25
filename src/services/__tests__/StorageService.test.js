@@ -245,6 +245,46 @@ describe('StorageService secure lifecycle', () => {
     },
   );
 
+  it('exports a backup encrypted with a custom key distinct from the master passphrase', async () => {
+    const masterPassphrase = 'master-pass-2026';
+    const exportPassphrase = 'export-only-key-2026';
+    const filename = 'export-custom-key';
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+
+    await store.initializeSecurity(masterPassphrase, {
+      secrets: [],
+      settings: { ...DEFAULTS.settings, onboarded: true },
+    });
+    await store.get('secrets').save({ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' });
+
+    const backup = await store.exportBackup(exportPassphrase);
+
+    expect(backup.v).toBe(3);
+    expect(JSON.stringify(backup)).not.toContain('wallet-2026!');
+    await expect(store.decryptBackup(backup, masterPassphrase)).rejects.toThrow('Unable to unlock encrypted payload.');
+
+    const decrypted = await store.decryptBackup(backup, exportPassphrase);
+
+    expect(decrypted.secrets).toEqual([{ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' }]);
+  });
+
+  it('exports with the master passphrase when no custom key is provided', async () => {
+    const passphrase = 'master-pass-2026';
+    const filename = 'export-default-key';
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+
+    await store.initializeSecurity(passphrase, {
+      secrets: [],
+      settings: { ...DEFAULTS.settings, onboarded: true },
+    });
+    await store.get('secrets').save({ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' });
+
+    const backup = await store.exportBackup();
+    const decrypted = await store.decryptBackup(backup, passphrase);
+
+    expect(decrypted.secrets).toEqual([{ hash: 'secret:1', name: 'Wallet', value: 'wallet-2026!' }]);
+  });
+
   it('unlocks a v2 vault and rewrites it to the current encrypted envelope', async () => {
     const filename = 'legacy-v2-store';
     const payload = {

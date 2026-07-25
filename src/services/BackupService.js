@@ -15,12 +15,12 @@ const getBackupFileName = () => `archive-${formatBackupTimestamp()}-${getBackupS
 const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
 
 export const BackupService = {
-  export: async ({ store } = {}) => {
+  export: async ({ store, passphrase } = {}) => {
     let fileUri;
 
     try {
       const fileName = getBackupFileName();
-      const payload = await store.exportBackup();
+      const payload = await store.exportBackup(passphrase);
       const data = JSON.stringify(payload);
 
       const isSharingAvailable = await Sharing.isAvailableAsync();

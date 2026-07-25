@@ -1,14 +1,16 @@
 export const getUnlockModeFlags = (mode = 'unlock', settings = {}) => {
+  const isExport = mode === 'export';
   const isImport = mode === 'import';
   const isSignIn = mode === 'unlock';
   const isSetup = mode === 'setup';
 
   return {
     biometricEnabled: isSignIn && !!settings?.biometricUnlockEnabled,
+    isExport,
     isImport,
     isSetup,
     isSignIn,
-    showImportCancel: isImport,
+    showImportCancel: isImport || isExport,
   };
 };
 

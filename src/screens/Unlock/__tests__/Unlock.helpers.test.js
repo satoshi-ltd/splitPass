@@ -2,10 +2,17 @@ import { getUnlockModeFlags, resolveUnlockFailure } from '../Unlock.helpers';
 
 describe('Unlock helpers', () => {
   describe('getUnlockModeFlags', () => {
-    it('enables cancel button only in import mode', () => {
+    it('enables cancel button in import and export modes', () => {
       expect(getUnlockModeFlags('import').showImportCancel).toBe(true);
+      expect(getUnlockModeFlags('export').showImportCancel).toBe(true);
       expect(getUnlockModeFlags('unlock').showImportCancel).toBe(false);
       expect(getUnlockModeFlags('setup').showImportCancel).toBe(false);
+    });
+
+    it('flags export mode', () => {
+      expect(getUnlockModeFlags('export').isExport).toBe(true);
+      expect(getUnlockModeFlags('import').isExport).toBe(false);
+      expect(getUnlockModeFlags('unlock').isExport).toBe(false);
     });
 
     it('enables biometric unlock only for sign in mode', () => {

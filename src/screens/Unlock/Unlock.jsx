@@ -11,19 +11,22 @@ import { InputMask } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Button, Text, View } from '../../design-system';
 import { eventEmitter, L10N } from '../../modules';
-import { BiometricAuthService } from '../../services';
+import { BackupService, BiometricAuthService } from '../../services';
 
 const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } = {} } = {} }) => {
-  const { importBackup, resetAppData, settings, setupSecurity, unlockStore, updateSettings } = useStore();
+  const { importBackup, resetAppData, settings, setupSecurity, store, unlockStore, updateSettings } = useStore();
   const [biometricAutoTriggered, setBiometricAutoTriggered] = useState(false);
   const [biometricInvalidated, setBiometricInvalidated] = useState(false);
   const [biometricSubmitting, setBiometricSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [form, setForm] = useState({ confirmPassphrase: '', passphrase: '' });
   const [submitting, setSubmitting] = useState(false);
-  const { biometricEnabled, isImport, isSignIn, isSetup, showImportCancel } = getUnlockModeFlags(mode, settings);
+  const { biometricEnabled, isExport, isImport, isSignIn, isSetup, showImportCancel } = getUnlockModeFlags(
+    mode,
+    settings,
+  );
   const setupPassphraseValid = form.passphrase.length >= 8;
   const setupConfirmValid = form.confirmPassphrase.length > 0 && form.passphrase === form.confirmPassphrase;
   const setupSubmitDisabled = isSetup && (!setupPassphraseValid || !setupConfirmValid);
@@ -134,12 +137,16 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       ? L10N.ONBOARDING_MASTER_PASSPHRASE_TITLE
       : mode === 'import'
       ? L10N.CONFIRM_IMPORT_ENCRYPTED
+      : mode === 'export'
+      ? L10N.EXPORT_BACKUP_TITLE
       : L10N.SIGNIN_TITLE;
   const caption =
     mode === 'setup'
       ? L10N.ONBOARDING_MASTER_PASSPHRASE_MESSAGE
       : mode === 'import'
       ? L10N.UNLOCK_BACKUP_CAPTION
+      : mode === 'export'
+      ? L10N.EXPORT_BACKUP_KEY_CAPTION
       : L10N.SIGNIN_SUBTITLE;
 
   const submitSetup = async () => {
@@ -160,14 +167,34 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     await handleUnlocked(form.passphrase);
   };
 
+  const submitExport = async () => {
+    const exported = await BackupService.export({ store, passphrase: form.passphrase || undefined });
+
+    if (typeof navigation?.canGoBack === 'function' && navigation.canGoBack()) navigation.goBack();
+    else navigation.reset({ index: 0, routes: [{ name: 'main' }] });
+
+    if (exported) eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.CONFIRM_EXPORT_SUCCESS, title: L10N.SUCCESS });
+  };
+
   const handleSubmit = async () => {
-    if (form.passphrase.length < 8) {
-      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
-      return;
-    }
-    if (mode === 'setup' && form.passphrase !== form.confirmPassphrase) {
-      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
-      return;
+    if (isExport) {
+      if (form.passphrase.length > 0 && form.passphrase.length < 8) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
+        return;
+      }
+      if (form.passphrase.length > 0 && form.passphrase !== form.confirmPassphrase) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
+        return;
+      }
+    } else {
+      if (form.passphrase.length < 8) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
+        return;
+      }
+      if (mode === 'setup' && form.passphrase !== form.confirmPassphrase) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
+        return;
+      }
     }
 
     try {
@@ -175,6 +202,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
 
       if (mode === 'setup') await submitSetup();
       else if (mode === 'import') await submitImport();
+      else if (mode === 'export') await submitExport();
       else await submitUnlock();
     } catch (error) {
       if (mode === 'unlock') {
@@ -189,7 +217,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   };
 
   const handleCancelImport = () => {
-    if (!isImport) return;
+    if (!isImport && !isExport) return;
 
     if (typeof navigation?.canGoBack === 'function' && navigation.canGoBack()) {
       navigation.goBack();
@@ -228,7 +256,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
           ) : null}
           <View style={[style.form, isSignIn ? style.signInForm : null, isSetup ? style.setupForm : null]}>
             <View style={[style.fieldBox, isSignIn ? style.signInFieldBox : null]}>
-              {!isSignIn && !isSetup && !isImport ? (
+              {!isSignIn && !isSetup && !isImport && !isExport ? (
                 <Text semibold size="s" style={style.fieldLabel}>
                   {L10N.MASTER_PASSPHRASE}
                 </Text>
@@ -236,7 +264,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
               <InputMask
                 autoFocus
                 containerStyle={style.inputShell}
-                placeholder={L10N.MASTER_PASSPHRASE_PLACEHOLDER}
+                placeholder={isExport ? L10N.EXPORT_BACKUP_KEY_PLACEHOLDER : L10N.MASTER_PASSPHRASE_PLACEHOLDER}
                 showToggle
                 style={style.inputField}
                 value={form.passphrase}
@@ -244,7 +272,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
               />
             </View>
 
-            {mode === 'setup' ? (
+            {isSetup || isExport ? (
               <View style={style.fieldBox}>
                 <InputMask
                   containerStyle={style.inputShell}
@@ -255,7 +283,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
                   onChange={(confirmPassphrase) => setForm((current) => ({ ...current, confirmPassphrase }))}
                 />
                 <Text size="xs" tone="secondary" style={style.setupHint}>
-                  {L10N.MASTER_PASSPHRASE_HINT}
+                  {isExport ? L10N.EXPORT_BACKUP_KEY_HINT : L10N.MASTER_PASSPHRASE_HINT}
                 </Text>
               </View>
             ) : null}
@@ -272,11 +300,18 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
               isSignIn ? style.signInButton : null,
               isSetup ? style.setupButton : null,
               isImport ? style.importButton : null,
+              isExport ? style.importButton : null,
             ]}
             variant="primary"
             onPress={handleSubmit}
           >
-            {mode === 'setup' ? L10N.START : mode === 'import' ? L10N.IMPORT : L10N.UNLOCK}
+            {mode === 'setup'
+              ? L10N.START
+              : mode === 'import'
+              ? L10N.IMPORT
+              : mode === 'export'
+              ? L10N.EXPORT
+              : L10N.UNLOCK}
           </Button>
           {showImportCancel ? (
             <Button size="l" style={style.importCancelButton} variant="outlined" onPress={handleCancelImport}>
