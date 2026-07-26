@@ -46,7 +46,7 @@ const Onboarding = ({ navigation }) => {
         snapToInterval={width}
         onScroll={handleScroll}
       >
-        {slides.map(({ image, subtitle, title }, index) => (
+        {slides.map(({ detail, image, subtitle, title }, index) => (
           <View key={index} style={[style.slide, { width }]}>
             <Image
               resizeMode="contain"
@@ -59,6 +59,11 @@ const Onboarding = ({ navigation }) => {
             <Text bold size="l" tone="secondary" style={style.subtitle}>
               {subtitle}
             </Text>
+            {detail ? (
+              <Text size="s" tone="secondary" style={style.detail}>
+                {detail}
+              </Text>
+            ) : null}
           </View>
         ))}
       </ScrollView>

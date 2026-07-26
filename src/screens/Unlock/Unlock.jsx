@@ -188,10 +188,6 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   const handleSubmit = async () => {
     if (isExport) {
       if (form.passphrase.length > 0) {
-        if (form.passphrase.length < 8) {
-          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
-          return;
-        }
         if (getPassphraseStrength(form.passphrase) === 'weak') {
           eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.EXPORT_BACKUP_KEY_WEAK });
           return;
@@ -201,21 +197,18 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
           return;
         }
       }
-    } else {
-      if (form.passphrase.length < 8) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
+    } else if (mode === 'setup') {
+      if (getPassphraseStrength(form.passphrase) === 'weak') {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_WEAK });
         return;
       }
-      if (mode === 'setup') {
-        if (getPassphraseStrength(form.passphrase) === 'weak') {
-          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_WEAK });
-          return;
-        }
-        if (form.passphrase !== form.confirmPassphrase) {
-          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
-          return;
-        }
+      if (form.passphrase !== form.confirmPassphrase) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
+        return;
       }
+    } else if (form.passphrase.length < 8) {
+      eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
+      return;
     }
 
     try {

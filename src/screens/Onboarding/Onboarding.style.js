@@ -26,6 +26,10 @@ export const style = StyleSheet.create({
   subtitle: {
     maxWidth: '90%',
   },
+  detail: {
+    maxWidth: '90%',
+    opacity: 0.7,
+  },
 
   footer: {
     alignItems: 'center',
