@@ -34,7 +34,7 @@ const getStyles = (colors) =>
       alignItems: 'center',
       alignContent: 'center',
       backgroundColor: colors.surface,
-      borderRadius: 0,
+      borderRadius: theme.radius,
       height: theme.spacing.xxl,
       justifyContent: 'center',
       width: theme.spacing.xxl,

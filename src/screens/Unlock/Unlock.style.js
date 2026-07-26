@@ -86,13 +86,13 @@ export const style = StyleSheet.create({
     color: '$colorContent',
   },
   inputField: {
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     fontSize: 16,
     paddingHorizontal: '$spaceS',
   },
   inputShell: {
     backgroundColor: '$colorSurface',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     minHeight: '$spaceXL',
   },
 });

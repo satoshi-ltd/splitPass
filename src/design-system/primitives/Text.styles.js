@@ -57,6 +57,9 @@ export const getStyles = (colors) =>
     toneOnInverse: {
       color: colors.onInverse,
     },
+    toneOnScrim: {
+      color: colors.onScrim,
+    },
     alignLeft: {
       textAlign: 'left',
     },

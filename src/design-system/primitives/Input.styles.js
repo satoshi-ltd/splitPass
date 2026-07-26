@@ -7,7 +7,7 @@ export const getStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
       alignItems: 'center',
-      borderColor: 'transparent',
+      borderColor: colors.border,
       borderWidth: 1,
       flexDirection: 'row',
     },

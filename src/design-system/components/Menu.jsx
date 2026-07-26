@@ -16,11 +16,6 @@ const getStyles = (colors) =>
       borderRadius: theme.borderRadius.sm,
       borderWidth: 1,
       overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
-      elevation: 3,
     },
     item: {
       alignItems: 'center',

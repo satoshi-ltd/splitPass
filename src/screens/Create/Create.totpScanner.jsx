@@ -47,10 +47,10 @@ const CreateTotpScanner = ({ onRead }) => {
         ) : (
           <View style={style.cameraOverlay}>
             <View style={style.overlayCard}>
-              <Text bold size="l" tone="onAccent">
+              <Text bold size="l" tone="onScrim">
                 {L10N.OTP_QR_SCAN}
               </Text>
-              <Text size="s" tone="onAccent">
+              <Text size="s" tone="onScrim">
                 {L10N.SCANNER_QR_CAPTION}
               </Text>
               <Button onPress={() => requestPermission()} size="l" style={style.button} variant="primary">

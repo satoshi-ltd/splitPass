@@ -74,7 +74,7 @@ export const style = StyleSheet.create({
 
   inputShell: {
     backgroundColor: '$colorSurface',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     minHeight: '$spaceXL',
   },
 
@@ -84,7 +84,7 @@ export const style = StyleSheet.create({
   },
 
   inputField: {
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     fontSize: 16,
     paddingHorizontal: '$spaceS',
   },
@@ -98,7 +98,7 @@ export const style = StyleSheet.create({
 
   inputActionButton: {
     alignItems: 'center',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     backgroundColor: '$colorSurface',
     height: '$spaceXL',
     justifyContent: 'center',

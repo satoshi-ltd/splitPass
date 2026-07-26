@@ -101,12 +101,12 @@ export const style = StyleSheet.create({
   },
 
   qrShell: {
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
   },
 
   lockedQrShell: {
     backgroundColor: '$qrBackgroundColor',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     padding: 0,
     position: 'relative',
   },
@@ -158,7 +158,6 @@ export const style = StyleSheet.create({
   footer: {
     flexShrink: 0,
     zIndex: 2,
-    elevation: 2,
   },
 
   footerDark: {

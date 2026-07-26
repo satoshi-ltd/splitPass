@@ -14,7 +14,7 @@ export const style = StyleSheet.create({
 
   thumbnail: {
     backgroundColor: '$colorSurface',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     height: '$spaceXXL',
     width: '$spaceXXL',
     alignItems: 'center',
@@ -23,7 +23,7 @@ export const style = StyleSheet.create({
     position: 'relative',
   },
   thumbnailImage: {
-    borderRadius: '$spaceXXS',
+    borderRadius: '$borderRadius',
     height: '$spaceM + $spaceXXS',
     width: '$spaceM + $spaceXXS',
   },

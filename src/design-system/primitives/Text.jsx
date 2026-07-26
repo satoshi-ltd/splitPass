@@ -31,6 +31,8 @@ const Text = ({ align, bold, flex, semibold, size, style, tone, ...props }) => {
       ? styles.toneOnAccent
       : tone === 'onInverse'
       ? styles.toneOnInverse
+      : tone === 'onScrim'
+      ? styles.toneOnScrim
       : styles.tonePrimary;
 
   const alignStyle =

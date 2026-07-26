@@ -4,7 +4,7 @@ export const style = StyleSheet.create({
   actionButton: {
     alignItems: 'center',
     backgroundColor: '$colorSurface',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     height: '$spaceXL',
     justifyContent: 'center',
     width: '$spaceXL',

@@ -21,7 +21,7 @@ const getStyles = (colors, contrast) => {
     passcodeInputWrap: {
       alignItems: 'center',
       backgroundColor: passcodeBackgroundColor,
-      borderRadius: 0,
+      borderRadius: theme.radius,
       flex: 1,
       minHeight: theme.spacing.xl,
       paddingHorizontal: theme.spacing.sm,

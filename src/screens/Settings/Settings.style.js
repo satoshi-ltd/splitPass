@@ -19,7 +19,10 @@ export const style = StyleSheet.create({
   },
 
   groupTitle: {
+    color: '$colorContentLight',
+    letterSpacing: 1,
     marginBottom: '$spaceXS',
+    textTransform: 'uppercase',
   },
 
   hint: {

@@ -100,7 +100,6 @@ export const style = StyleSheet.create({
     flexShrink: 0,
     width: '100%',
     zIndex: 2,
-    elevation: 2,
   },
 
   footerAccent: {

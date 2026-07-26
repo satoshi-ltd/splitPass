@@ -21,13 +21,13 @@ export const style = StyleSheet.create({
 
   searchInputShell: {
     backgroundColor: '$colorSurface',
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     minHeight: '$spaceXL',
     width: '100%',
   },
 
   searchInput: {
-    borderRadius: 0,
+    borderRadius: '$borderRadius',
     fontSize: 16,
     paddingHorizontal: '$spaceS',
     paddingVertical: 0,
@@ -45,8 +45,11 @@ export const style = StyleSheet.create({
   },
 
   sectionLabel: {
+    color: '$colorContentLight',
+    letterSpacing: 1,
     marginBottom: '$spaceXS',
     paddingLeft: '$spaceXXS',
+    textTransform: 'uppercase',
   },
   menuOverlay: {
     bottom: 0,

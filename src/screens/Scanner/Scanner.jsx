@@ -213,7 +213,7 @@ const Scanner = ({
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
-        <Text bold size="xl" tone="onAccent">
+        <Text bold size="xl" tone="onScrim">
           Scanner
         </Text>
       ),
@@ -369,10 +369,10 @@ const Scanner = ({
               setInstructionsHeight((current) => (current === nextHeight ? current : nextHeight));
             }}
           >
-            <Text align="center" bold size="l" tone="onInverse" style={style.instructionsContent}>
+            <Text align="center" bold size="l" tone="onScrim" style={style.instructionsContent}>
               {instructionTitle}
             </Text>
-            <Text align="center" size="s" tone="onInverse" style={style.instructionsContent}>
+            <Text align="center" size="s" tone="onScrim" style={style.instructionsContent}>
               {instructionCaption}
             </Text>
           </View>

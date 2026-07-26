@@ -11,7 +11,7 @@ export const style = StyleSheet.create({
   },
 
   card: {
-    borderRadius: 12,
+    borderRadius: '$borderRadius',
     height: '$splitCardHeight',
     justifyContent: 'space-between',
     paddingHorizontal: '$spaceL',

@@ -39,6 +39,8 @@ const Icon = ({ size, style, tone, ...props }) => {
       ? colors.onAccent || colors.text
       : tone === 'onInverse'
       ? colors.onInverse
+      : tone === 'onScrim'
+      ? colors.onScrim
       : colors.text;
   const resolvedColor = flattenedStyle.color || toneColor;
 

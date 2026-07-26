@@ -43,10 +43,10 @@ const ScannerQR = ({ camera = false, onRead, scanning }) => {
       {camera && !permission?.granted ? (
         <View align="center" style={style.permissionCard}>
           <View align="center" style={style.permissionContent}>
-            <Text align="center" bold size="l" tone="onInverse">
+            <Text align="center" bold size="l" tone="onScrim">
               {permissionBlocked ? L10N.SCANNER_QR_PERMISSION_DENIED : L10N.SCANNER_QR_PERMISSION}
             </Text>
-            <Text align="center" size="s" tone="onInverse" style={style.permissionCaption}>
+            <Text align="center" size="s" tone="onScrim" style={style.permissionCaption}>
               {permissionBlocked ? L10N.SCANNER_QR_PERMISSION_DENIED : L10N.SCANNER_QR_PERMISSION_CAPTION}
             </Text>
             <Button size="s" variant="outlined" onPress={handlePermissionPress}>

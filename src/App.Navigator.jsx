@@ -67,7 +67,7 @@ export const Navigator = () => {
         <HeaderBackButton
           onPress={navigation.goBack}
           style={style.buttonBack}
-          tone={routeName === 'scanner' ? 'onAccent' : 'primary'}
+          tone={routeName === 'scanner' ? 'onScrim' : 'primary'}
         />
       ) : null;
     },
