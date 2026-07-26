@@ -1,17 +1,18 @@
 import { CommonTheme } from './common.theme';
+import { paletteDark } from './palette';
 
 export const DarkTheme = {
   $theme: 'dark',
 
   ...CommonTheme,
-  $colorBase: '#12100E',
-  $colorSurface: '#231D18',
-  $colorBorder: '#4A3F38',
-  $colorContent: '#F7EFE8',
-  $colorContentLight: '#D0C4BA',
-  $colorLight: '#FBF4ED',
-  $colorDark: '#000',
-  $modalOverflowBackgroundColor: 'rgba(0, 0, 0, 0.6)',
+  $colorBase: paletteDark.background,
+  $colorSurface: paletteDark.surface,
+  $colorBorder: paletteDark.border,
+  $colorContent: paletteDark.content,
+  $colorContentLight: paletteDark.contentMuted,
+  $colorLight: paletteDark.light,
+  $colorDark: paletteDark.dark,
+  $modalOverflowBackgroundColor: paletteDark.overlay,
   $qrBackgroundColor: '$colorLight',
-  $qrColor: '#181310',
+  $qrColor: paletteDark.qrForeground,
 };

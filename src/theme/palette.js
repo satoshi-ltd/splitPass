@@ -1,0 +1,61 @@
+const light = {
+  accent: '#F46A3A',
+  onAccent: '#181310',
+  background: '#FFFBF7',
+  surface: '#F3ECE5',
+  surfaceRaised: '#FFFCF8',
+  border: '#E8DDD3',
+  content: '#181310',
+  contentMuted: '#6F635A',
+  disabled: '#999999',
+  light: '#FFFCF8',
+  dark: '#000000',
+  danger: '#C62828',
+  onDanger: '#FFFFFF',
+  warning: '#9A6200',
+  onWarning: '#FFFFFF',
+  success: '#2F7A53',
+  onSuccess: '#FFFFFF',
+  info: '#2563A6',
+  onInfo: '#FFFFFF',
+  overlay: 'rgba(0, 0, 0, 0.45)',
+  inverse: '#181310',
+  onInverse: '#FFFCF8',
+  onScrim: '#FFFCF8',
+  qrForeground: '#181310',
+  qrBackground: '#FFFCF8',
+};
+
+const dark = {
+  accent: '#F46A3A',
+  onAccent: '#181310',
+  background: '#12100E',
+  surface: '#231D18',
+  surfaceRaised: '#2B241E',
+  border: '#4A3F38',
+  content: '#F7EFE8',
+  contentMuted: '#D0C4BA',
+  disabled: '#999999',
+  light: '#FBF4ED',
+  dark: '#000000',
+  danger: '#FF7262',
+  onDanger: '#181310',
+  warning: '#E2A53B',
+  onWarning: '#181310',
+  success: '#6FC79A',
+  onSuccess: '#10130F',
+  info: '#8FBEF5',
+  onInfo: '#10130F',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+  inverse: '#FBF4ED',
+  onInverse: '#181310',
+  onScrim: '#FFFCF8',
+  qrForeground: '#181310',
+  qrBackground: '#FBF4ED',
+};
+
+const radius = 0;
+const radiusFull = 9999;
+
+export const palette = { light, dark };
+export { light as paletteLight, dark as paletteDark, radius, radiusFull };

@@ -1,15 +1,17 @@
-export const CommonTheme = {
-  $colorAccent: '#F46A3A',
-  $colorDark: '#000',
-  $colorLight: '#FFFCF8',
-  $colorBase: '#FFFBF7',
-  $colorSurface: '#F3ECE5',
-  $colorBorder: '#E8DDD3',
-  $colorContent: '#181310',
-  $colorContentLight: '#6F635A',
-  $colorDisabled: '#999999',
+import { paletteLight, radius } from './palette';
 
-  $borderRadius: 4,
+export const CommonTheme = {
+  $colorAccent: paletteLight.accent,
+  $colorDark: paletteLight.dark,
+  $colorLight: paletteLight.light,
+  $colorBase: paletteLight.background,
+  $colorSurface: paletteLight.surface,
+  $colorBorder: paletteLight.border,
+  $colorContent: paletteLight.content,
+  $colorContentLight: paletteLight.contentMuted,
+  $colorDisabled: paletteLight.disabled,
+
+  $borderRadius: radius,
   $borderStyle: 'solid',
   $borderWidth: 1,
 
@@ -25,14 +27,14 @@ export const CommonTheme = {
   $spaceXXL: 48,
   $viewOffset: '$spaceL',
 
-  $buttonRadius: 4,
+  $buttonRadius: radius,
   $buttonSmallHeight: '$spaceXL',
   $buttonChildrenColorSecondary: '$colorDark',
 
   $inputBackgroundColor: '$colorSurface',
   $inputBorderWidth: 0,
   $inputBackgroundColorFocus: '$colorSurface',
-  $modalOverflowBackgroundColor: 'rgba(0, 0, 0, 0.45)',
+  $modalOverflowBackgroundColor: paletteLight.overlay,
 
   $qrBackgroundColor: '$colorLight',
   $qrColor: '$colorDark',

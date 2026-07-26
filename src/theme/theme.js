@@ -1,43 +1,37 @@
 import { Appearance } from 'react-native';
 
-const lightColors = {
-  text: '#181310',
-  textSecondary: '#6F635A',
-  accent: '#F46A3A',
-  onAccent: '#FFFFFF',
-  background: '#FFFBF7',
-  surface: '#F3ECE5',
-  qrBackground: '#FFFCF8',
-  qrForeground: '#181310',
-  border: '#E8DDD3',
-  danger: '#C62828',
-  warning: '#C27C00',
-  overlay: 'rgba(0, 0, 0, 0.45)',
-  inverse: '#181310',
-  onInverse: '#FFFCF8',
-};
+import { palette, radius, radiusFull } from './palette';
 
-const darkColors = {
-  text: '#F7EFE8',
-  textSecondary: '#D0C4BA',
-  accent: '#F46A3A',
-  onAccent: '#FFFFFF',
-  background: '#12100E',
-  surface: '#231D18',
-  qrBackground: '#FBF4ED',
-  qrForeground: '#181310',
-  border: '#4A3F38',
-  danger: '#FF7262',
-  warning: '#E2A53B',
-  overlay: 'rgba(0, 0, 0, 0.6)',
-  inverse: '#FBF4ED',
-  onInverse: '#181310',
-};
+const toAppColors = (p) => ({
+  text: p.content,
+  textSecondary: p.contentMuted,
+  accent: p.accent,
+  onAccent: p.onAccent,
+  background: p.background,
+  surface: p.surface,
+  surfaceRaised: p.surfaceRaised,
+  border: p.border,
+  disabled: p.disabled,
+  qrBackground: p.qrBackground,
+  qrForeground: p.qrForeground,
+  danger: p.danger,
+  onDanger: p.onDanger,
+  warning: p.warning,
+  onWarning: p.onWarning,
+  success: p.success,
+  onSuccess: p.onSuccess,
+  info: p.info,
+  onInfo: p.onInfo,
+  overlay: p.overlay,
+  inverse: p.inverse,
+  onInverse: p.onInverse,
+  onScrim: p.onScrim,
+});
 
 export const theme = {
   colors: {
-    dark: darkColors,
-    light: lightColors,
+    dark: toAppColors(palette.dark),
+    light: toAppColors(palette.light),
   },
   typography: {
     fontFaces: {
@@ -83,13 +77,9 @@ export const theme = {
     xl: 32,
     xxl: 48,
   },
-  borderRadius: {
-    sm: 2,
-    md: 4,
-    lg: 6,
-    xl: 8,
-    full: 9999,
-  },
+  radius,
+  radiusFull,
+  borderRadius: { sm: radius, md: radius, lg: radius, xl: radius, full: radiusFull },
   animations: {
     duration: {
       quick: 220,
