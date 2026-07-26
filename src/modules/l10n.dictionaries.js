@@ -47,6 +47,11 @@ const EN = {
   EXPORT_BACKUP_KEY_CAPTION: 'Choose a passphrase to encrypt this backup. Leave empty to use your master passphrase.',
   EXPORT_BACKUP_KEY_PLACEHOLDER: 'backup passphrase (optional)...',
   EXPORT_BACKUP_KEY_HINT: 'Leave empty to use your master passphrase, or use 8+ characters.',
+  EXPORT_BACKUP_KEY_WEAK:
+    'That key is too weak for a backup. Use a longer passphrase — 3-4 random words is ideal.',
+  PASSPHRASE_STRENGTH_WEAK: 'Weak key',
+  PASSPHRASE_STRENGTH_MEDIUM: 'Acceptable key',
+  PASSPHRASE_STRENGTH_STRONG: 'Strong key',
   LOAD_DEMO_SECRETS: 'Load demo secrets',
   CONTINUE: 'Continue',
   CLIPBOARD_AUTO_CLEAR_NOTICE: 'Clipboard will clear in 10 seconds.',
@@ -111,7 +116,8 @@ const EN = {
   LOGOUT_SUBTITLE: 'Lock this device and return to the unlock screen.',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirm passphrase',
-  MASTER_PASSPHRASE_HINT: 'Use 8+ characters. Better: 3-4 random words.',
+  MASTER_PASSPHRASE_HINT: 'Use 12+ characters or 3-4 random words.',
+  MASTER_PASSPHRASE_WEAK: 'That passphrase is too weak. Use 12+ characters or 3-4 random words.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Incorrect master passphrase. ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining.`
@@ -245,6 +251,8 @@ const EN = {
   SHARD_EXPLANATION_NUMBER: '2 of 3',
   SHARD_SCAN_CAPTION: 'Scan another shard to continue.',
   SHARDS_COMBINED: 'Shards combined. Secret ready.',
+  SCANNER_LEGACY_SHARD_WARNING:
+    'Old shard format: a single shard can leak most of the secret. Re-split to update them.',
   SHARE: 'Share...',
   START: 'Start',
   SUCCESS: 'Success',
@@ -326,6 +334,11 @@ const ES = {
   EXPORT_BACKUP_KEY_CAPTION: 'Elige una passphrase para cifrar esta copia. Dejalo vacio para usar tu master passphrase.',
   EXPORT_BACKUP_KEY_PLACEHOLDER: 'passphrase de la copia (opcional)...',
   EXPORT_BACKUP_KEY_HINT: 'Dejalo vacio para usar tu master passphrase, o usa 8+ caracteres.',
+  EXPORT_BACKUP_KEY_WEAK:
+    'Esa clave es demasiado debil para un backup. Usa una passphrase mas larga — 3-4 palabras aleatorias es lo ideal.',
+  PASSPHRASE_STRENGTH_WEAK: 'Clave debil',
+  PASSPHRASE_STRENGTH_MEDIUM: 'Clave aceptable',
+  PASSPHRASE_STRENGTH_STRONG: 'Clave fuerte',
   FIRST_SECRET: 'Tu primer secreto',
   ERROR_IMPORT: 'Formato de archivo no compatible. Selecciona un archivo valido.',
   ENABLED: 'Activado',
@@ -386,7 +399,8 @@ const ES = {
   LOGOUT_SUBTITLE: 'Bloquea este dispositivo y vuelve a la pantalla de acceso.',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirma la passphrase',
-  MASTER_PASSPHRASE_HINT: 'Usa 8+ caracteres. Mejor: 3-4 palabras aleatorias.',
+  MASTER_PASSPHRASE_HINT: 'Usa 12+ caracteres o 3-4 palabras aleatorias.',
+  MASTER_PASSPHRASE_WEAK: 'Esa passphrase es demasiado debil. Usa 12+ caracteres o 3-4 palabras aleatorias.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorrecta. Quedan ${remaining} ${remaining === 1 ? 'intento' : 'intentos'}.`
@@ -515,6 +529,8 @@ const ES = {
   SHARD_EXPLANATION_NUMBER: '2 de 3',
   SHARD_SCAN_CAPTION: 'Escanea otro shard para continuar.',
   SHARDS_COMBINED: 'Shards combinados. Secreto listo.',
+  SCANNER_LEGACY_SHARD_WARNING:
+    'Formato de shard antiguo: un solo shard puede filtrar casi todo el secreto. Vuelve a dividirlo.',
   SHARE: 'Compartir...',
   START: 'Empezar',
   SUCCESS: 'Exito',
@@ -605,6 +621,11 @@ const PT = {
     'Escolha uma chave para criptografar este backup. Deixe vazio para usar sua master passphrase.',
   EXPORT_BACKUP_KEY_PLACEHOLDER: 'chave de criptografia (opcional)...',
   EXPORT_BACKUP_KEY_HINT: 'Deixe vazio para usar sua master passphrase, ou use 8+ caracteres.',
+  EXPORT_BACKUP_KEY_WEAK:
+    'Essa chave e fraca demais para um backup. Use uma passphrase mais longa — 3-4 palavras aleatorias e o ideal.',
+  PASSPHRASE_STRENGTH_WEAK: 'Chave fraca',
+  PASSPHRASE_STRENGTH_MEDIUM: 'Chave aceitavel',
+  PASSPHRASE_STRENGTH_STRONG: 'Chave forte',
   EXPORT: 'Exportar',
   EXPIRE: 'Validade',
   EXPIRE_PLACEHOLDER: 'MM/AA',
@@ -650,7 +671,8 @@ const PT = {
   LOGOUT_SUBTITLE: 'Bloqueie este dispositivo e volte para a tela de acesso.',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirmar passphrase',
-  MASTER_PASSPHRASE_HINT: 'Use 8+ caracteres. Melhor: 3-4 palavras aleatorias.',
+  MASTER_PASSPHRASE_HINT: 'Use 12+ caracteres ou 3-4 palavras aleatorias.',
+  MASTER_PASSPHRASE_WEAK: 'Essa passphrase e fraca demais. Use 12+ caracteres ou 3-4 palavras aleatorias.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorreta. Restam ${remaining} ${remaining === 1 ? 'tentativa' : 'tentativas'}.`
@@ -772,6 +794,8 @@ const PT = {
   SHARD_EXPLANATION_NUMBER: '2 de 3',
   SHARD_SCAN_CAPTION: 'Escaneie outro shard para continuar.',
   SHARDS_COMBINED: 'Shards combinados. Segredo pronto.',
+  SCANNER_LEGACY_SHARD_WARNING:
+    'Formato de shard antigo: um unico shard pode vazar quase todo o segredo. Divida novamente.',
   SHARE: 'Compartilhar...',
   START: 'Comecar',
   SUCCESS: 'Sucesso',
@@ -860,6 +884,11 @@ const FR = {
     'Choisissez une cle pour chiffrer cette sauvegarde. Laissez vide pour utiliser votre master passphrase.',
   EXPORT_BACKUP_KEY_PLACEHOLDER: 'cle de chiffrement (optionnel)...',
   EXPORT_BACKUP_KEY_HINT: 'Laissez vide pour utiliser votre master passphrase, ou utilisez 8+ caracteres.',
+  EXPORT_BACKUP_KEY_WEAK:
+    'Cette cle est trop faible pour une sauvegarde. Utilisez une passphrase plus longue — 3-4 mots aleatoires est ideal.',
+  PASSPHRASE_STRENGTH_WEAK: 'Cle faible',
+  PASSPHRASE_STRENGTH_MEDIUM: 'Cle acceptable',
+  PASSPHRASE_STRENGTH_STRONG: 'Cle forte',
   EXPORT: 'Exporter',
   EXPIRE: 'Expiration',
   EXPIRE_PLACEHOLDER: 'MM/AA',
@@ -905,7 +934,8 @@ const FR = {
   LOGOUT_SUBTITLE: 'Verrouillez cet appareil et revenez a l ecran de connexion.',
   MASTER_PASSPHRASE: 'Master passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Confirmer la passphrase',
-  MASTER_PASSPHRASE_HINT: 'Utilisez 8+ caracteres. Mieux: 3-4 mots aleatoires.',
+  MASTER_PASSPHRASE_HINT: 'Utilisez 12+ caracteres ou 3-4 mots aleatoires.',
+  MASTER_PASSPHRASE_WEAK: 'Cette passphrase est trop faible. Utilisez 12+ caracteres ou 3-4 mots aleatoires.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master passphrase incorrecte. Il reste ${remaining} ${remaining === 1 ? 'tentative' : 'tentatives'}.`
@@ -1028,6 +1058,8 @@ const FR = {
   SHARD_EXPLANATION_NUMBER: '2 sur 3',
   SHARD_SCAN_CAPTION: 'Scannez un autre shard pour continuer.',
   SHARDS_COMBINED: 'Shards combines. Secret pret.',
+  SCANNER_LEGACY_SHARD_WARNING:
+    'Ancien format de shard : un seul shard peut divulguer presque tout le secret. Redivisez-le.',
   SHARE: 'Partager...',
   START: 'Commencer',
   SUCCESS: 'Succes',
@@ -1118,6 +1150,11 @@ const DE = {
     'Waehlen Sie einen Schluessel, um dieses Backup zu verschluesseln. Leer lassen, um Ihre Master-Passphrase zu verwenden.',
   EXPORT_BACKUP_KEY_PLACEHOLDER: 'Verschluesselungsschluessel (optional)...',
   EXPORT_BACKUP_KEY_HINT: 'Leer lassen, um Ihre Master-Passphrase zu verwenden, oder 8+ Zeichen verwenden.',
+  EXPORT_BACKUP_KEY_WEAK:
+    'Dieser Schluessel ist zu schwach fuer ein Backup. Verwenden Sie eine laengere Passphrase — 3-4 zufaellige Woerter sind ideal.',
+  PASSPHRASE_STRENGTH_WEAK: 'Schwacher Schluessel',
+  PASSPHRASE_STRENGTH_MEDIUM: 'Akzeptabler Schluessel',
+  PASSPHRASE_STRENGTH_STRONG: 'Starker Schluessel',
   EXPORT: 'Exportieren',
   EXPIRE: 'Gueltig bis',
   EXPIRE_PLACEHOLDER: 'MM/JJ',
@@ -1163,7 +1200,8 @@ const DE = {
   LOGOUT_SUBTITLE: 'Sperren Sie dieses Geraet und kehren Sie zum Anmeldebildschirm zurueck.',
   MASTER_PASSPHRASE: 'Master-Passphrase',
   MASTER_PASSPHRASE_CONFIRM: 'Passphrase bestaetigen',
-  MASTER_PASSPHRASE_HINT: 'Verwenden Sie 8+ Zeichen. Besser: 3-4 zufaellige Woerter.',
+  MASTER_PASSPHRASE_HINT: 'Verwenden Sie 12+ Zeichen oder 3-4 zufaellige Woerter.',
+  MASTER_PASSPHRASE_WEAK: 'Diese Passphrase ist zu schwach. Verwenden Sie 12+ Zeichen oder 3-4 zufaellige Woerter.',
   MASTER_PASSPHRASE_INVALID: ({ remaining = 0 } = {}) =>
     remaining > 0
       ? `Master-Passphrase falsch. Noch ${remaining} ${remaining === 1 ? 'Versuch' : 'Versuche'}.`
@@ -1291,6 +1329,8 @@ const DE = {
   SHARD_EXPLANATION_NUMBER: '2 von 3',
   SHARD_SCAN_CAPTION: 'Scannen Sie einen weiteren Shard, um fortzufahren.',
   SHARDS_COMBINED: 'Shards kombiniert. Geheimnis bereit.',
+  SCANNER_LEGACY_SHARD_WARNING:
+    'Altes Shard-Format: ein einzelner Shard kann fast das ganze Geheimnis preisgeben. Neu aufteilen.',
   SHARE: 'Teilen...',
   START: 'Starten',
   SUCCESS: 'Erfolg',

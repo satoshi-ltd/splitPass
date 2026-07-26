@@ -3,7 +3,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getScannerInstructions, resolveScannerPayload } from './Scanner.helpers';
+import { getScannerInstructions, isLegacyShard, resolveScannerPayload } from './Scanner.helpers';
 import { ScannerNFC } from './Scanner.nfc';
 import { ScannerFrame, ScannerQR } from './Scanner.qr';
 import { style } from './Scanner.style';
@@ -122,6 +122,8 @@ const Scanner = ({
 
       if (!values.length) {
         eventEmitter.emit(EVENT.NOTIFICATION, { title: L10N.FIRST_SHARD_SCANNED, variant: 'accent' });
+      } else if (isLegacyShard(scannedValue)) {
+        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.SCANNER_LEGACY_SHARD_WARNING });
       } else {
         eventEmitter.emit(EVENT.NOTIFICATION, { text: L10N.SHARDS_COMBINED, title: L10N.SUCCESS, variant: 'accent' });
       }
@@ -156,6 +158,7 @@ const Scanner = ({
     modeNFC: readerType === READER_TYPE.NFC,
     secure: SECURE_TYPES.includes(type),
     shard: SHARD_TYPES.includes(type),
+    legacyShard: isLegacyShard(values[0] || ''),
     complete: values.length > 0 && (!SHARD_TYPES.includes(type) || values.length > 1),
   };
 
@@ -415,7 +418,13 @@ const Scanner = ({
                     showMenu={!showPasscodePrompt && !is.empty}
                     showReveal={is.complete && !showPasscodePrompt && !is.empty}
                     valueCaption={
-                      !showPasscodePrompt && is.complete && !is.shard ? L10N.SCANNER_SECRET_READY_CAPTION : undefined
+                      showPasscodePrompt || !is.complete
+                        ? undefined
+                        : is.legacyShard
+                        ? L10N.SCANNER_LEGACY_SHARD_WARNING
+                        : !is.shard
+                        ? L10N.SCANNER_SECRET_READY_CAPTION
+                        : undefined
                     }
                     value={footerValue}
                   />

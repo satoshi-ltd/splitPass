@@ -43,6 +43,22 @@ const getTextStrength = (value = '') => {
   return score >= 6 ? 'strong' : 'weak';
 };
 
+const getPassphraseStrength = (value = '') => {
+  const normalized = `${value}`;
+  const length = normalized.length;
+
+  if (length < 8) return 'weak';
+
+  const words = normalized.trim().split(/\s+/).filter(Boolean).length;
+  const categories = countCharacterCategories(normalized);
+
+  if (words >= 4 || length >= 20) return 'strong';
+  if ((words >= 3 && length >= 12) || (length >= 16 && categories >= 2)) return 'strong';
+  if (length >= 12 || (length >= 10 && categories >= 3)) return 'medium';
+
+  return 'weak';
+};
+
 const getSecretStrength = ({ value = '' } = {}) => {
   const [type, ...digits] = `${value}`;
   const encodedLength = digits.join('').length;
@@ -141,4 +157,11 @@ const getPasswordStrength = (input = {}) => {
   return 'weak';
 };
 
-export { clampConfig, generatePassword, getPasswordStrength, getSecretStrength, getTextStrength };
+export {
+  clampConfig,
+  generatePassword,
+  getPassphraseStrength,
+  getPasswordStrength,
+  getSecretStrength,
+  getTextStrength,
+};

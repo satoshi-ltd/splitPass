@@ -1,74 +1,67 @@
+/* global Uint8Array */
 import { shamir } from '../shamir';
 
-const SECRET = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse', 'access', 'accident'];
+const SECRET = Uint8Array.from('4000101300010203000102030001', (char) => char.charCodeAt(0));
+const fixedRandom = (length) => Uint8Array.from({ length }, (_, index) => ((index * 37 + 13) % 255) + 1);
+const bytes = (value) => Uint8Array.from(`${value}`, (char) => char.charCodeAt(0));
+const toStr = (buffer) => String.fromCharCode(...buffer);
 
-describe('shamir', () => {
+describe('shamir (GF256)', () => {
   describe('split', () => {
     it('produces the requested number of shares', () => {
-      expect(shamir.split(SECRET, 3, 2)).toHaveLength(3);
+      expect(shamir.split(SECRET, 3, 2, fixedRandom)).toHaveLength(3);
     });
 
-    it('each share has the same length as the original secret', () => {
-      shamir.split(SECRET, 3, 2).forEach((share) => expect(share).toHaveLength(SECRET.length));
+    it('each share carries a distinct x and a y of the secret length', () => {
+      const shares = shamir.split(SECRET, 3, 2, fixedRandom);
+      expect(shares.map((s) => s.x)).toEqual([1, 2, 3]);
+      shares.forEach((share) => expect(share.y).toHaveLength(SECRET.length));
     });
 
-    it('with threshold=1 every share is a full copy of the secret', () => {
-      shamir.split(SECRET, 3, 1).forEach((share) => expect(share).toEqual(SECRET));
-    });
-
-    it('with threshold=2 each share has undefined slots (words are hidden)', () => {
-      shamir.split(SECRET, 2, 2).forEach((share) => expect(share).toContain(undefined));
-    });
-
-    it('no single share contains the complete secret when threshold > 1', () => {
-      shamir.split(SECRET, 3, 2).forEach((share) => {
-        const defined = share.filter((w) => w !== undefined);
-        expect(defined.length).toBeLessThan(SECRET.length);
+    it('no single share reveals the secret bytes (threshold 2)', () => {
+      shamir.split(SECRET, 3, 2, fixedRandom).forEach((share) => {
+        expect(toStr(share.y)).not.toEqual(toStr(SECRET));
       });
-    });
-
-    it('works with 2-of-2 split', () => {
-      const shares = shamir.split(SECRET, 2, 2);
-      expect(shares).toHaveLength(2);
-      shares.forEach((s) => expect(s).toHaveLength(SECRET.length));
     });
   });
 
   describe('combine', () => {
-    it('recovers the secret combining all shares (2-of-2)', () => {
-      const [s0, s1] = shamir.split(SECRET, 2, 2);
-      expect(shamir.combine(s0, s1)).toEqual(SECRET);
+    it('recovers the secret from any pair of a 2-of-3 split', () => {
+      const [s0, s1, s2] = shamir.split(SECRET, 3, 2, fixedRandom);
+      expect(toStr(shamir.combine([s0, s1]))).toEqual(toStr(SECRET));
+      expect(toStr(shamir.combine([s0, s2]))).toEqual(toStr(SECRET));
+      expect(toStr(shamir.combine([s1, s2]))).toEqual(toStr(SECRET));
     });
 
-    it('recovers the secret from any pair among 3 shares (2-of-3)', () => {
-      const [s0, s1, s2] = shamir.split(SECRET, 3, 2);
-      expect(shamir.combine(s0, s1)).toEqual(SECRET);
-      expect(shamir.combine(s0, s2)).toEqual(SECRET);
-      expect(shamir.combine(s1, s2)).toEqual(SECRET);
+    it('recovers the secret from a 2-of-2 split', () => {
+      const [s0, s1] = shamir.split(bytes('secret-payload-123'), 2, 2, fixedRandom);
+      expect(toStr(shamir.combine([s0, s1]))).toEqual('secret-payload-123');
     });
 
-    it('a single share alone does not reconstruct the full secret', () => {
-      const [s0] = shamir.split(SECRET, 2, 2);
-      const combined = shamir.combine(s0);
-      expect(combined).toContain(undefined);
-      expect(combined).not.toEqual(SECRET);
+    it('a single share alone does not reconstruct the secret', () => {
+      const [s0] = shamir.split(SECRET, 3, 2, fixedRandom);
+      expect(toStr(shamir.combine([s0]))).not.toEqual(toStr(SECRET));
     });
 
-    it('round-trips correctly for a 24-word split', () => {
-      const words = Array.from({ length: 24 }, (_, i) => `word${i}`);
-      const [s0, s1, s2] = shamir.split(words, 3, 2);
-      expect(shamir.combine(s0, s1)).toEqual(words);
-      expect(shamir.combine(s1, s2)).toEqual(words);
-      expect(shamir.combine(s0, s2)).toEqual(words);
+    it('round-trips arbitrary byte values including 0 and 255', () => {
+      const secret = Uint8Array.from([0, 1, 127, 128, 254, 255, 0, 42]);
+      const [s0, s1, s2] = shamir.split(secret, 3, 2, fixedRandom);
+      expect(Array.from(shamir.combine([s2, s0]))).toEqual(Array.from(secret));
+      expect(Array.from(shamir.combine([s1, s2]))).toEqual(Array.from(secret));
     });
 
-    it('each share is a strict subset of the secret (no new content)', () => {
-      const [s0, s1] = shamir.split(SECRET, 2, 2);
-      [s0, s1].forEach((share) => {
-        share.forEach((word) => {
-          if (word !== undefined) expect(SECRET).toContain(word);
-        });
-      });
+    it('works with a 3-of-5 split requiring any three shares', () => {
+      const secret = bytes('threshold-three-of-five');
+      const shares = shamir.split(secret, 5, 3, fixedRandom);
+      expect(shares).toHaveLength(5);
+      expect(toStr(shamir.combine([shares[0], shares[2], shares[4]]))).toEqual('threshold-three-of-five');
+      expect(toStr(shamir.combine([shares[1], shares[3], shares[4]]))).toEqual('threshold-three-of-five');
+    });
+
+    it('uses real randomness by default (secret still recovers)', () => {
+      const secret = bytes('default-random-source');
+      const [s0, s1] = shamir.split(secret, 2, 2);
+      expect(toStr(shamir.combine([s0, s1]))).toEqual('default-random-source');
     });
   });
 });

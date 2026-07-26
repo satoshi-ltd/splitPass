@@ -1,7 +1,27 @@
-import { READER_TYPE } from '../../../App.constants';
-import { getScannedValue, getScannerInstructions, resolveScannerPayload } from '../Scanner.helpers';
+import { READER_TYPE, SECRET_TYPE } from '../../../App.constants';
+import { getScannedValue, getScannerInstructions, isLegacyShard, resolveScannerPayload } from '../Scanner.helpers';
 
 describe('Scanner helpers', () => {
+  describe('isLegacyShard', () => {
+    it('flags legacy masked shard types', () => {
+      expect(isLegacyShard(`${SECRET_TYPE.PASSWORD_SHARD}0102`)).toBe(true);
+      expect(isLegacyShard(`${SECRET_TYPE.SEED_PHRASE_SHARD}0001`)).toBe(true);
+      expect(isLegacyShard(`${SECRET_TYPE.CARD_SHARD}0102`)).toBe(true);
+    });
+
+    it('does not flag new Shamir shard types', () => {
+      expect(isLegacyShard(`${SECRET_TYPE.PASSWORD_SHARD_V2}abc`)).toBe(false);
+      expect(isLegacyShard(`${SECRET_TYPE.SEED_PHRASE_SHARD_V2}abc`)).toBe(false);
+      expect(isLegacyShard(`${SECRET_TYPE.CARD_SHARD_V2}abc`)).toBe(false);
+    });
+
+    it('does not flag non-shard values or empty input', () => {
+      expect(isLegacyShard(`${SECRET_TYPE.PASSWORD}0102`)).toBe(false);
+      expect(isLegacyShard('')).toBe(false);
+      expect(isLegacyShard()).toBe(false);
+    });
+  });
+
   describe('getScannedValue', () => {
     it('returns the string as-is', () => {
       expect(getScannedValue('1password')).toBe('1password');

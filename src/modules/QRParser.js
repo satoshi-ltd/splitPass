@@ -1,6 +1,7 @@
 import { Cypher } from './cypher';
 import { isSeedPhrase } from './isSeedPhrase';
-import { SECRET_TYPE } from '../App.constants';
+import { shamir } from './shamir';
+import { SECRET_TYPE, SHARD_TYPES_V2 } from '../App.constants';
 import { bip39 } from './repositories/bip39';
 import { chars } from './repositories/chars';
 import { buildCardValue, parseCardValue } from './secretValueDisplay';
@@ -11,13 +12,73 @@ const {
   PASSWORD_SECURE,
   SEED_PHRASE,
   SEED_PHRASE_SECURE,
-  PASSWORD_SHARD,
   SEED_PHRASE_SHARD,
   CARD,
   CARD_SECURE,
   CARD_SHARD,
   TOTP,
+  PASSWORD_SHARD_V2,
+  SEED_PHRASE_SHARD_V2,
+  CARD_SHARD_V2,
 } = SECRET_TYPE;
+
+const TEXT_ENCODER = new TextEncoder();
+const TEXT_DECODER = new TextDecoder();
+const SHARD_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+const bytesToShardText = (bytes = new Uint8Array()) => {
+  let output = '';
+
+  for (let index = 0; index < bytes.length; index += 3) {
+    const hasSecond = index + 1 < bytes.length;
+    const hasThird = index + 2 < bytes.length;
+    const chunk =
+      ((bytes[index] || 0) << 16) | ((hasSecond ? bytes[index + 1] : 0) << 8) | (hasThird ? bytes[index + 2] : 0);
+
+    output += SHARD_ALPHABET[(chunk >> 18) & 63] + SHARD_ALPHABET[(chunk >> 12) & 63];
+    if (hasSecond) output += SHARD_ALPHABET[(chunk >> 6) & 63];
+    if (hasThird) output += SHARD_ALPHABET[chunk & 63];
+  }
+
+  return output;
+};
+
+const shardTextToBytes = (text = '') => {
+  const bytes = [];
+
+  for (let index = 0; index < text.length; index += 4) {
+    const c2 = text[index + 2] !== undefined ? SHARD_ALPHABET.indexOf(text[index + 2]) : -1;
+    const c3 = text[index + 3] !== undefined ? SHARD_ALPHABET.indexOf(text[index + 3]) : -1;
+    const chunk =
+      (SHARD_ALPHABET.indexOf(text[index]) << 18) |
+      (SHARD_ALPHABET.indexOf(text[index + 1]) << 12) |
+      ((c2 < 0 ? 0 : c2) << 6) |
+      (c3 < 0 ? 0 : c3);
+
+    bytes.push((chunk >> 16) & 255);
+    if (c2 >= 0) bytes.push((chunk >> 8) & 255);
+    if (c3 >= 0) bytes.push(chunk & 255);
+  }
+
+  return new Uint8Array(bytes);
+};
+
+const shardMarker = (type) =>
+  isTypeSeedPhrase(type) ? SEED_PHRASE_SHARD_V2 : isTypeCard(type) ? CARD_SHARD_V2 : PASSWORD_SHARD_V2;
+
+const encodeShard = (marker, x, y = new Uint8Array()) => {
+  const buffer = new Uint8Array(1 + y.length);
+  buffer[0] = x;
+  buffer.set(y, 1);
+
+  return `${marker}${bytesToShardText(buffer)}`;
+};
+
+const decodeShard = (shard = '') => {
+  const buffer = shardTextToBytes(`${shard}`.slice(1));
+
+  return { x: buffer[0], y: buffer.slice(1) };
+};
 
 const CONFIG = {
   password: { regexp: /.{1,2}/g, set: chars, join: '', mask: '00' },
@@ -44,30 +105,7 @@ const encodeWithConfig = (value = '', { set } = PASSWORD_CONFIG) =>
 const decodeWithConfig = (digits = '', { regexp, set, join } = PASSWORD_CONFIG) =>
   (digits.match(regexp || []) || []).map((index) => set[parseInt(index - 1)]).join(join);
 
-const splitCardNumber = (number = '') => {
-  const base = Math.floor(number.length / 4);
-  const remainder = number.length % 4;
-  let cursor = 0;
-
-  return Array.from({ length: 4 }, (_, index) => {
-    const size = base + (index < remainder ? 1 : 0);
-    const segment = number.slice(cursor, cursor + size);
-
-    cursor += size;
-    return segment;
-  });
-};
-
-const splitCardCvv = (cvv = '') => {
-  const pivot = Math.ceil(cvv.length / 2);
-
-  return [cvv.slice(0, pivot), cvv.slice(pivot)];
-};
-
-const maskSegment = (segment = '') => CARD_SHARD_MASK_CHAR.repeat(segment.length || 1);
 const isMaskedSegment = (segment = '') => !!segment && new RegExp(`^${CARD_SHARD_MASK_CHAR}+$`).test(segment);
-
-const encodeCardShard = (segments = []) => `${CARD_SHARD}${encodeWithConfig(segments.join('|'), PASSWORD_CONFIG)}`;
 
 const decodeCardShard = (value = '') => {
   const [, ...rawDigits] = `${value}`;
@@ -76,29 +114,8 @@ const decodeCardShard = (value = '') => {
   return segments.length === CARD_SHARD_SEGMENTS ? segments : undefined;
 };
 
-const buildCardShardSegments = (card = {}) => [
-  ...splitCardNumber(card.number),
-  card.expire.slice(0, 2),
-  card.expire.slice(3, 5),
-  ...splitCardCvv(card.cvv),
-];
-
 const buildCardQr = (value = '', secure = false) =>
   `${secure ? CARD_SECURE : CARD}${encodeWithConfig(value, PASSWORD_CONFIG)}`;
-
-const splitCardQr = (qr = '', shares = 3) => {
-  const [, ...rawDigits] = qr;
-  const card = parseCardValue(decodeWithConfig(rawDigits.join(''), PASSWORD_CONFIG));
-  if (!card?.expire || !card?.cvv) return [];
-
-  const segments = buildCardShardSegments(card);
-
-  return Array.from({ length: shares }, (_, shareIndex) =>
-    encodeCardShard(
-      segments.map((segment, index) => ((shareIndex + index) % shares === 0 ? maskSegment(segment) : segment)),
-    ),
-  );
-};
 
 const combineCardShards = (...qrs) => {
   const decodedShards = qrs.map(decodeCardShard);
@@ -184,35 +201,28 @@ export const QRParser = {
   },
 
   split: (qr = '', shares = 3) => {
-    let [type, ...digits] = qr;
-    if (type === CARD) return splitCardQr(qr, shares);
-    if (type === TOTP) return [];
+    const type = qr[0];
+    if (!type || type === TOTP) return [];
 
-    const { regexp, mask } = getConfig(type);
-    type = isTypeSeedPhrase(type) ? SEED_PHRASE_SHARD : PASSWORD_SHARD;
+    const points = shamir.split(TEXT_ENCODER.encode(qr), shares, 2);
 
-    const shards = digits.join('').match(regexp);
-
-    return Array.from({ length: shares }, (_, shareIndex) =>
-      Array.from({ length: shards.length }, (_, index) =>
-        (shareIndex + index) % shares !== 0 ? shards[index] : mask,
-      ).join(''),
-    ).map((qr) => `${type}${qr}`);
+    return points.map(({ x, y }) => encodeShard(shardMarker(type), x, y));
   },
 
   combine: (...qrs) => {
     if (!qrs.length) return '';
 
+    if (SHARD_TYPES_V2.includes(qrs[0]?.[0])) {
+      return TEXT_DECODER.decode(shamir.combine(qrs.map(decodeShard)));
+    }
+
     if (qrs.every((qr = '') => isTypeCard(qr[0])) && qrs[0]?.[0] === CARD_SHARD) {
       return combineCardShards(...qrs);
     }
 
-    return (
-      qrs[0]
-        .split('')
-        // .map((_, index) => qrs.map((qr) => qr[index]).find((digit) => digit !== '0') || '0')
-        .map((_, index) => qrs.map((qr) => qr[index]).find((digit) => digit !== '0') || '0')
-        .join('')
-    );
+    return qrs[0]
+      .split('')
+      .map((_, index) => qrs.map((qr) => qr[index]).find((digit) => digit !== '0') || '0')
+      .join('');
   },
 };

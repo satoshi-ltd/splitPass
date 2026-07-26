@@ -1,7 +1,13 @@
-import { READER_TYPE, SECRET_TYPE, SHARD_TYPES } from '../../App.constants';
+import { READER_TYPE, SECRET_TYPE, SHARD_TYPES, SHARD_TYPES_V2 } from '../../App.constants';
 import { L10N } from '../../modules/l10n';
 import { QRParser, USERNAME_TYPE } from '../../modules/QRParser';
 import { isTOTPURI, parseTOTPURI } from '../../modules/totp';
+
+const isLegacyShard = (value = '') => {
+  const type = `${value}`[0];
+
+  return SHARD_TYPES.includes(type) && !SHARD_TYPES_V2.includes(type);
+};
 
 const getScannedValue = (payload = '') => (typeof payload === 'string' ? payload : payload?.value || '');
 
@@ -62,4 +68,4 @@ const getScannerInstructions = ({ readerType = READER_TYPE.QR, showPasscodePromp
     : { caption: L10N.SCANNER_QR_CAPTION, title: L10N.SCANNER_QR };
 };
 
-export { getScannedValue, getScannerInstructions, resolveScannerPayload };
+export { getScannedValue, getScannerInstructions, isLegacyShard, resolveScannerPayload };

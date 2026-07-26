@@ -26,12 +26,12 @@ describe('QRParser card support', () => {
     expect(QRParser.decode(secureQr, '000000')).toBeUndefined();
   });
 
-  it('creates 3 card shards that reconstruct from any pair', () => {
+  it('creates 3 secure card shards that reconstruct from any pair', () => {
     const qr = QRParser.encode(CARD_VALUE, { type: 'card' });
     const shards = QRParser.split(qr);
 
     expect(shards).toHaveLength(3);
-    shards.forEach((shard) => expect(shard[0]).toBe(SECRET_TYPE.CARD_SHARD));
+    shards.forEach((shard) => expect(shard[0]).toBe(SECRET_TYPE.CARD_SHARD_V2));
 
     const pairs = [
       [shards[0], shards[1]],
@@ -44,6 +44,15 @@ describe('QRParser card support', () => {
       expect(combined[0]).toBe(SECRET_TYPE.CARD);
       expect(QRParser.decode(combined)).toBe(CARD_VALUE);
     });
+  });
+
+  it('never exposes card details in a single shard', () => {
+    const qr = QRParser.encode(CARD_VALUE, { type: 'card' });
+    const [firstShard] = QRParser.split(qr);
+
+    expect(firstShard.slice(1)).not.toContain(CARD_NUMBER);
+    expect(QRParser.decode(firstShard.slice(1))).not.toBe(CARD_VALUE);
+    expect(QRParser.combine(firstShard)).not.toBe(qr);
   });
 });
 

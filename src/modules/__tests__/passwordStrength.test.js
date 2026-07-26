@@ -1,6 +1,26 @@
 import { SECRET_TYPE } from '../../App.constants';
-import { getSecretStrength, getTextStrength } from '../passwordGenerator';
+import { getPassphraseStrength, getSecretStrength, getTextStrength } from '../passwordGenerator';
 import { QRParser } from '../QRParser';
+
+describe('getPassphraseStrength', () => {
+  it('rates a multi-word passphrase as strong even with one character category', () => {
+    expect(getPassphraseStrength('correct horse battery staple')).toBe('strong');
+  });
+
+  it('rates a long random string as strong', () => {
+    expect(getPassphraseStrength('dChz3@t6Nd3G#8K$xy')).toBe('strong');
+  });
+
+  it('rates borderline 12-char single words as medium', () => {
+    expect(getPassphraseStrength('correcthorse')).toBe('medium');
+  });
+
+  it('rates short or trivial keys as weak', () => {
+    expect(getPassphraseStrength('password')).toBe('weak');
+    expect(getPassphraseStrength('short')).toBe('weak');
+    expect(getPassphraseStrength('')).toBe('weak');
+  });
+});
 
 describe('getTextStrength', () => {
   it('marks long mixed passwords as strong', () => {

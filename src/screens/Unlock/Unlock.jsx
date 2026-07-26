@@ -10,7 +10,7 @@ import { EVENT } from '../../App.constants';
 import { InputMask } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Button, Text, View } from '../../design-system';
-import { eventEmitter, L10N } from '../../modules';
+import { eventEmitter, getPassphraseStrength, L10N } from '../../modules';
 import { BackupService, BiometricAuthService } from '../../services';
 
 const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
@@ -27,7 +27,16 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
     mode,
     settings,
   );
-  const setupPassphraseValid = form.passphrase.length >= 8;
+  const passphraseStrength =
+    (isExport || isSetup) && form.passphrase.length > 0 ? getPassphraseStrength(form.passphrase) : undefined;
+  const passphraseStrengthLabel = {
+    medium: L10N.PASSPHRASE_STRENGTH_MEDIUM,
+    strong: L10N.PASSPHRASE_STRENGTH_STRONG,
+    weak: L10N.PASSPHRASE_STRENGTH_WEAK,
+  }[passphraseStrength];
+  const passphraseStrengthTone =
+    passphraseStrength === 'weak' ? 'warning' : passphraseStrength === 'strong' ? 'accent' : 'secondary';
+  const setupPassphraseValid = form.passphrase.length >= 8 && passphraseStrength !== 'weak';
   const setupConfirmValid = form.confirmPassphrase.length > 0 && form.passphrase === form.confirmPassphrase;
   const setupSubmitDisabled = isSetup && (!setupPassphraseValid || !setupConfirmValid);
   const remainingAttempts = Math.max(0, 3 - failedAttempts);
@@ -178,22 +187,34 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
 
   const handleSubmit = async () => {
     if (isExport) {
-      if (form.passphrase.length > 0 && form.passphrase.length < 8) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
-        return;
-      }
-      if (form.passphrase.length > 0 && form.passphrase !== form.confirmPassphrase) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
-        return;
+      if (form.passphrase.length > 0) {
+        if (form.passphrase.length < 8) {
+          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
+          return;
+        }
+        if (getPassphraseStrength(form.passphrase) === 'weak') {
+          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.EXPORT_BACKUP_KEY_WEAK });
+          return;
+        }
+        if (form.passphrase !== form.confirmPassphrase) {
+          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
+          return;
+        }
       }
     } else {
       if (form.passphrase.length < 8) {
         eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_REQUIRED });
         return;
       }
-      if (mode === 'setup' && form.passphrase !== form.confirmPassphrase) {
-        eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
-        return;
+      if (mode === 'setup') {
+        if (getPassphraseStrength(form.passphrase) === 'weak') {
+          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_WEAK });
+          return;
+        }
+        if (form.passphrase !== form.confirmPassphrase) {
+          eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.MASTER_PASSPHRASE_MISMATCH });
+          return;
+        }
       }
     }
 
@@ -285,6 +306,11 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
                 <Text size="xs" tone="secondary" style={style.setupHint}>
                   {isExport ? L10N.EXPORT_BACKUP_KEY_HINT : L10N.MASTER_PASSPHRASE_HINT}
                 </Text>
+                {passphraseStrengthLabel ? (
+                  <Text semibold size="xs" tone={passphraseStrengthTone} style={style.setupHint}>
+                    {passphraseStrengthLabel}
+                  </Text>
+                ) : null}
               </View>
             ) : null}
           </View>
