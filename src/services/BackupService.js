@@ -2,7 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
-import { isEncryptedEnvelope, L10N } from '../modules';
+import { isEncryptedEnvelope, L10N, resumeAutoLock, suspendAutoLock } from '../modules';
 
 const getErrorMessage = (error) => error?.message || String(error) || 'Unknown error';
 const formatBackupTimestamp = (value = new Date()) =>
@@ -17,6 +17,7 @@ const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
 export const BackupService = {
   export: async ({ store, passphrase } = {}) => {
     let fileUri;
+    suspendAutoLock();
 
     try {
       const fileName = getBackupFileName();
@@ -40,12 +41,14 @@ export const BackupService = {
       if (error === L10N.ERROR_EXPORT) throw error;
       throw `${L10N.ERROR}: ${getErrorMessage(error)}`;
     } finally {
+      resumeAutoLock();
       if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true });
     }
   },
 
   import: async () => {
     let fileUri;
+    suspendAutoLock();
 
     try {
       const { canceled, assets = [] } = await DocumentPicker.getDocumentAsync({
@@ -80,6 +83,7 @@ export const BackupService = {
       if (error === L10N.ERROR_IMPORT) throw error;
       throw `${L10N.ERROR}: ${getErrorMessage(error)}`;
     } finally {
+      resumeAutoLock();
       if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true });
     }
   },

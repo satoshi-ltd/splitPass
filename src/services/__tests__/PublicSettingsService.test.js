@@ -28,7 +28,7 @@ describe('PublicSettingsService', () => {
       AsyncStorage.getItem.mockResolvedValue(null);
       const settings = await PublicSettingsService.load();
       expect(settings).toMatchObject({
-        autoLockImmediatelyEnabled: true,
+        autoLockImmediatelyEnabled: false,
         autoLockSeconds: 300,
         biometricUnlockEnabled: false,
         clipboardAutoClearEnabled: true,
@@ -72,10 +72,12 @@ describe('PublicSettingsService', () => {
       expect(settings.clipboardAutoClearEnabled).toBe(false);
     });
 
-    it('keeps autoLockImmediatelyEnabled off only when a returning user explicitly disabled it', async () => {
-      AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ autoLockImmediatelyEnabled: false }));
-      const settings = await PublicSettingsService.load();
-      expect(settings.autoLockImmediatelyEnabled).toBe(false);
+    it('enables autoLockImmediatelyEnabled only when explicitly set to true', async () => {
+      AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ autoLockImmediatelyEnabled: true }));
+      expect((await PublicSettingsService.load()).autoLockImmediatelyEnabled).toBe(true);
+
+      AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ autoLockImmediatelyEnabled: 'yes' }));
+      expect((await PublicSettingsService.load()).autoLockImmediatelyEnabled).toBe(false);
     });
 
     it('drops unknown/injected fields instead of persisting them to the plaintext store', async () => {

@@ -6,7 +6,7 @@ const DEFAULTS = {
   },
   secrets: [],
   settings: {
-    autoLockImmediatelyEnabled: true,
+    autoLockImmediatelyEnabled: false,
     autoLockSeconds: 300,
     biometricUnlockEnabled: false,
     clipboardAutoClearEnabled: true,

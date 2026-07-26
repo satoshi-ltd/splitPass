@@ -12,6 +12,8 @@ jest.mock('expo-sharing', () => ({
   shareAsync: jest.fn(async () => true),
 }));
 jest.mock('../../modules', () => ({
+  suspendAutoLock: jest.fn(),
+  resumeAutoLock: jest.fn(),
   L10N: {
     ERROR: 'Error',
     ERROR_EXPORT: 'Could not export your data.',

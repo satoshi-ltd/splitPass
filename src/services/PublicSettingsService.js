@@ -7,7 +7,7 @@ import { normalizeThemePreference } from '../theme';
 const PUBLIC_SETTINGS_KEY = `${STORAGE_DOMAIN}.public-settings`;
 
 const DEFAULT_PUBLIC_SETTINGS = {
-  autoLockImmediatelyEnabled: true,
+  autoLockImmediatelyEnabled: false,
   autoLockSeconds: 300,
   biometricUnlockEnabled: false,
   clipboardAutoClearEnabled: true,
@@ -23,7 +23,7 @@ const normalizePublicSettings = (value = {}) => {
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 
   return {
-    autoLockImmediatelyEnabled: source.autoLockImmediatelyEnabled !== false,
+    autoLockImmediatelyEnabled: source.autoLockImmediatelyEnabled === true,
     autoLockSeconds:
       Number.isFinite(Number(source.autoLockSeconds)) && Number(source.autoLockSeconds) > 0
         ? Number(source.autoLockSeconds)

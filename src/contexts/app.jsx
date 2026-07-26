@@ -4,7 +4,7 @@ import { AppState, useColorScheme } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { DEFAULT_THEME } from '../App.constants';
-import { detectDeviceLanguage, formatDateTime, setLanguage, translate } from '../modules';
+import { detectDeviceLanguage, formatDateTime, isAutoLockSuspended, setLanguage, translate } from '../modules';
 import { ClipboardService, NotificationsService } from '../services';
 import { getAppColors, resolveAppTheme, resolveThemeMode, theme as uiTheme } from '../theme';
 import { useStore } from './store';
@@ -21,7 +21,7 @@ const AppProvider = ({ children }) => {
   const {
     lockStore,
     security: { configured, unlocked } = {},
-    settings: { autoLockImmediatelyEnabled = true, autoLockSeconds = 300, language, onboarded, reminders, theme } = {},
+    settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 300, language, onboarded, reminders, theme } = {},
   } = useStore();
   const resolvedLanguage = language || detectDeviceLanguage();
   const themePreference = theme || DEFAULT_THEME;
@@ -125,6 +125,7 @@ const AppProvider = ({ children }) => {
       }
 
       if (nextState === 'background' || nextState === 'inactive') {
+        if (isAutoLockSuspended()) return;
         if (!backgroundedAtRef.current) backgroundedAtRef.current = Date.now();
 
         if (nextState === 'background' && autoLockStateRef.current.immediate) lockImmediately();

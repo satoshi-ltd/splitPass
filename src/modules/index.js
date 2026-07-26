@@ -1,3 +1,4 @@
+export * from './autoLockGuard';
 export * from './cypher';
 export * from './confirmNavigation';
 export * from './eventEmitter';
