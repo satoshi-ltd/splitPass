@@ -109,7 +109,7 @@
     const host = document.createElement('splitpass-hydrator-root');
     host.dataset.splitpassOwned = 'true';
 
-    const shadowRoot = host.attachShadow({ mode: 'open' });
+    const shadowRoot = host.attachShadow({ mode: 'closed' });
     const panelLayer = document.createElement('div');
 
     shadowRoot.append(createStylesheetLink('theme.css'), createStylesheetLink('item.css'), createStylesheetLink('content.css'), panelLayer);
@@ -729,8 +729,9 @@
   }
 
   if (runtime?.onMessage?.addListener) {
-    runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (!message || typeof message !== 'object') return undefined;
+      if (sender?.id !== runtime.id) return undefined;
       if (message.type === 'splitpass.refreshSitePanel') {
         resetDismissedState();
         scheduleRefreshBurst({ storageChange: true });

@@ -850,19 +850,7 @@ async function handleAuthSubmit() {
   } catch (error) {
     if (!isSetup && error?.code === 'ERR_VAULT_UNLOCK_FAILED') {
       state.failedUnlockAttempts += 1;
-
-      if (state.failedUnlockAttempts >= 3) {
-        await performVaultReset('Vault reset after too many failed attempts. Create a new password.');
-        return;
-      }
-
-      const remainingAttempts = 3 - state.failedUnlockAttempts;
-      setMessage(
-        remainingAttempts === 1
-          ? 'Wrong password. 1 attempt left. One more failed attempt will reset this vault on this device.'
-          : `Wrong password. ${remainingAttempts} attempts left.`,
-        'error'
-      );
+      setMessage('Wrong password. Your vault stays safe — try again.', 'error');
       return;
     }
 

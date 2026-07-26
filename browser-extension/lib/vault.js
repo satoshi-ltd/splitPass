@@ -5,8 +5,10 @@
   const SESSION_TYPE = 'splitpass.browser.session.v1';
   const ENTRY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
   const SESSION_TTL_MS = 60 * 60 * 1000;
+  const MAX_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
   const MIN_MASTER_PASSWORD_LENGTH = 8;
-  const PBKDF2_ITERATIONS = 250000;
+  const PBKDF2_ITERATIONS = 600000;
+  const PBKDF2_ITERATIONS_LEGACY = 250000;
   const textEncoder = new TextEncoder();
   const textDecoder = new TextDecoder();
   const browserApi = globalScope.browser || globalScope.chrome || {};
@@ -77,20 +79,45 @@
     return Uint8Array.from(binary, (char) => char.charCodeAt(0));
   }
 
-  // Extracts the registrable domain (domain + TLD), stripping any subdomains.
-  // Handles compound TLDs like co.th, co.uk, com.au by treating the second-to-last
-  // segment as part of the TLD when it is a short code (≤ 3 chars).
+  const PUBLIC_SUFFIXES = new Set([
+    'co.uk', 'org.uk', 'gov.uk', 'ac.uk', 'me.uk', 'ltd.uk', 'plc.uk', 'net.uk', 'sch.uk',
+    'com.au', 'net.au', 'org.au', 'edu.au', 'gov.au', 'id.au',
+    'co.nz', 'net.nz', 'org.nz', 'govt.nz',
+    'co.za', 'org.za', 'net.za',
+    'co.jp', 'or.jp', 'ne.jp', 'ac.jp', 'go.jp', 'ad.jp',
+    'co.kr', 'or.kr', 'ne.kr', 'go.kr',
+    'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in',
+    'co.th', 'or.th', 'ac.th', 'go.th', 'in.th',
+    'com.br', 'net.br', 'org.br', 'gov.br',
+    'com.mx', 'com.ar', 'com.co', 'com.pe', 'com.uy', 'com.ec', 'com.bo',
+    'com.cn', 'net.cn', 'org.cn', 'gov.cn',
+    'com.tr', 'com.sg', 'com.hk', 'com.tw', 'com.my', 'com.ph', 'com.vn', 'com.pk', 'com.sa',
+    'co.il', 'co.id', 'com.ua', 'com.ru', 'com.pl', 'com.es', 'com.gr',
+    'github.io', 'gitlab.io', 'bitbucket.io', 'github.dev',
+    'herokuapp.com', 'herokussl.com',
+    'vercel.app', 'now.sh', 'netlify.app', 'netlify.com',
+    'pages.dev', 'workers.dev', 'r2.dev',
+    'web.app', 'firebaseapp.com', 'appspot.com',
+    'azurewebsites.net', 'cloudapp.net', 'trafficmanager.net',
+    'cloudfront.net', 's3.amazonaws.com', 'elasticbeanstalk.com', 'amazonaws.com',
+    'glitch.me', 'repl.co', 'replit.dev', 'surge.sh', 'onrender.com', 'fly.dev',
+    'ngrok.io', 'ngrok-free.app', 'pythonanywhere.com', 'wordpress.com', 'blogspot.com',
+    'translate.goog', 'freshdesk.com', 'myshopify.com', 'zendesk.com',
+  ]);
+
   function extractRegistrableDomain(hostname) {
-    const segments = hostname.split('.');
-    if (segments.length < 2) return hostname;
+    const labels = hostname.split('.').filter(Boolean);
+    if (labels.length <= 2) return labels.join('.');
 
-    const secondFromRight = segments[segments.length - 2];
-    const is2PartTld = secondFromRight.length <= 3;
-    const domainIdx = is2PartTld
-      ? Math.max(0, segments.length - 3)
-      : segments.length - 2;
+    let suffixLabels = 1;
+    for (let count = labels.length - 1; count >= 2; count -= 1) {
+      if (PUBLIC_SUFFIXES.has(labels.slice(labels.length - count).join('.'))) {
+        suffixLabels = count;
+        break;
+      }
+    }
 
-    return segments.slice(domainIdx).join('.');
+    return labels.slice(Math.max(0, labels.length - suffixLabels - 1)).join('.');
   }
 
   function normalizeDomain(value = '') {
@@ -161,7 +188,7 @@
     return Array.from(newestByFingerprint.values()).sort((left, right) => right.lastUsedAt - left.lastUsedAt);
   }
 
-  async function deriveVaultKey(masterPassword = '', saltBytes = new Uint8Array()) {
+  async function deriveVaultKey(masterPassword = '', saltBytes = new Uint8Array(), iterations = PBKDF2_ITERATIONS) {
     ensureCrypto();
 
     const normalizedPassword = String(masterPassword || '');
@@ -182,7 +209,7 @@
         name: 'PBKDF2',
         hash: 'SHA-256',
         salt: saltBytes,
-        iterations: PBKDF2_ITERATIONS,
+        iterations: Number(iterations) || PBKDF2_ITERATIONS,
       },
       importedKey,
       {
@@ -245,7 +272,8 @@
     const document = await storageGet('session', SESSION_STORAGE_KEY);
     if (!document || document.type !== SESSION_TYPE) return null;
 
-    if (Number(document.expiresAt || 0) <= now()) {
+    const hardExpiresAt = Number(document.hardExpiresAt || 0);
+    if (Number(document.expiresAt || 0) <= now() || (hardExpiresAt && hardExpiresAt <= now())) {
       await storageRemove('session', SESSION_STORAGE_KEY);
       return null;
     }
@@ -253,16 +281,15 @@
     return document;
   }
 
-  async function writeSessionKey(key, expiresAt = now() + SESSION_TTL_MS) {
+  async function writeSessionKey(key, { hardExpiresAt } = {}) {
+    const hardExpiry = Number(hardExpiresAt) || now() + MAX_SESSION_TTL_MS;
+
     await storageSet('session', SESSION_STORAGE_KEY, {
       type: SESSION_TYPE,
       key: await exportKey(key),
-      expiresAt,
+      expiresAt: Math.min(now() + SESSION_TTL_MS, hardExpiry),
+      hardExpiresAt: hardExpiry,
     });
-  }
-
-  async function touchSession(key) {
-    await writeSessionKey(key, now() + SESSION_TTL_MS);
   }
 
   async function getUnlockedKey() {
@@ -270,7 +297,7 @@
     if (!sessionDocument?.key) return null;
 
     const key = await importSessionKey(sessionDocument.key);
-    await touchSession(key);
+    await writeSessionKey(key, { hardExpiresAt: sessionDocument.hardExpiresAt });
     return key;
   }
 
@@ -313,7 +340,7 @@
       kdf: {
         algorithm: 'PBKDF2',
         hash: 'SHA-256',
-        iterations: PBKDF2_ITERATIONS,
+        iterations: Number(document?.kdf?.iterations) || PBKDF2_ITERATIONS,
         salt: String(document?.kdf?.salt || ''),
       },
       ciphertext,
@@ -354,8 +381,23 @@
       throw error;
     }
 
-    const key = await deriveVaultKey(masterPassword, decodeBase64(document.kdf.salt));
-    await decryptVaultEntries(key);
+    const storedIterations = Number(document.kdf.iterations) || PBKDF2_ITERATIONS_LEGACY;
+    const key = await deriveVaultKey(masterPassword, decodeBase64(document.kdf.salt), storedIterations);
+    const { entries } = await decryptVaultEntries(key);
+
+    if (storedIterations < PBKDF2_ITERATIONS) {
+      const saltBytes = globalScope.crypto.getRandomValues(new Uint8Array(16));
+      const upgradedKey = await deriveVaultKey(masterPassword, saltBytes, PBKDF2_ITERATIONS);
+
+      await persistEntries(
+        { createdAt: document.createdAt, kdf: { salt: encodeBase64(saltBytes), iterations: PBKDF2_ITERATIONS } },
+        entries,
+        upgradedKey
+      );
+      await writeSessionKey(upgradedKey);
+      return true;
+    }
+
     await writeSessionKey(key);
     return true;
   }
