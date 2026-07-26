@@ -7,7 +7,7 @@ import { normalizeThemePreference } from '../theme';
 const PUBLIC_SETTINGS_KEY = `${STORAGE_DOMAIN}.public-settings`;
 
 const DEFAULT_PUBLIC_SETTINGS = {
-  autoLockImmediatelyEnabled: false,
+  autoLockImmediatelyEnabled: true,
   autoLockSeconds: 300,
   biometricUnlockEnabled: false,
   clipboardAutoClearEnabled: true,
@@ -19,21 +19,25 @@ const DEFAULT_PUBLIC_SETTINGS = {
   websiteFaviconsEnabled: false,
 };
 
-const normalizePublicSettings = (value = {}) => ({
-  ...DEFAULT_PUBLIC_SETTINGS,
-  ...(value && typeof value === 'object' && !Array.isArray(value) ? value : {}),
-  autoLockImmediatelyEnabled: value?.autoLockImmediatelyEnabled === true,
-  autoLockSeconds:
-    Number.isFinite(Number(value?.autoLockSeconds)) && Number(value?.autoLockSeconds) > 0
-      ? Number(value.autoLockSeconds)
-      : DEFAULT_PUBLIC_SETTINGS.autoLockSeconds,
-  clipboardAutoClearEnabled: value?.clipboardAutoClearEnabled !== false,
-  externalSharingEnabled: value?.externalSharingEnabled === true,
-  language: value?.language || detectDeviceLanguage(),
-  reminders: Array.isArray(value?.reminders) ? value.reminders : DEFAULT_PUBLIC_SETTINGS.reminders,
-  theme: normalizeThemePreference(value?.theme || DEFAULT_THEME),
-  websiteFaviconsEnabled: value?.websiteFaviconsEnabled === true,
-});
+const normalizePublicSettings = (value = {}) => {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+
+  return {
+    autoLockImmediatelyEnabled: source.autoLockImmediatelyEnabled !== false,
+    autoLockSeconds:
+      Number.isFinite(Number(source.autoLockSeconds)) && Number(source.autoLockSeconds) > 0
+        ? Number(source.autoLockSeconds)
+        : DEFAULT_PUBLIC_SETTINGS.autoLockSeconds,
+    biometricUnlockEnabled: source.biometricUnlockEnabled === true,
+    clipboardAutoClearEnabled: source.clipboardAutoClearEnabled !== false,
+    externalSharingEnabled: source.externalSharingEnabled === true,
+    language: source.language || detectDeviceLanguage(),
+    onboarded: source.onboarded === true,
+    reminders: Array.isArray(source.reminders) ? source.reminders : DEFAULT_PUBLIC_SETTINGS.reminders,
+    theme: normalizeThemePreference(source.theme || DEFAULT_THEME),
+    websiteFaviconsEnabled: source.websiteFaviconsEnabled === true,
+  };
+};
 
 const load = async () => {
   try {

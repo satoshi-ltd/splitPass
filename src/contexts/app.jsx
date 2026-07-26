@@ -5,7 +5,7 @@ import StyleSheet from 'react-native-extended-stylesheet';
 
 import { DEFAULT_THEME } from '../App.constants';
 import { detectDeviceLanguage, formatDateTime, setLanguage, translate } from '../modules';
-import { NotificationsService } from '../services';
+import { ClipboardService, NotificationsService } from '../services';
 import { getAppColors, resolveAppTheme, resolveThemeMode, theme as uiTheme } from '../theme';
 import { useStore } from './store';
 
@@ -21,13 +21,14 @@ const AppProvider = ({ children }) => {
   const {
     lockStore,
     security: { configured, unlocked } = {},
-    settings: { autoLockImmediatelyEnabled = false, autoLockSeconds = 300, language, onboarded, reminders, theme } = {},
+    settings: { autoLockImmediatelyEnabled = true, autoLockSeconds = 300, language, onboarded, reminders, theme } = {},
   } = useStore();
   const resolvedLanguage = language || detectDeviceLanguage();
   const themePreference = theme || DEFAULT_THEME;
   const colorScheme = useColorScheme();
   const resolvedTheme = resolveThemeMode(themePreference, colorScheme);
   const autoLockTimerRef = useRef();
+  const backgroundedAtRef = useRef(0);
   const autoLockStateRef = useRef({
     configured,
     immediate: autoLockImmediatelyEnabled,
@@ -101,14 +102,32 @@ const AppProvider = ({ children }) => {
       if (pendingLock?.catch) pendingLock.catch(() => undefined);
     };
 
+    const lockNow = () => {
+      const { configured: ready, lockStore: latestLock, unlocked: open } = autoLockStateRef.current;
+      if (!ready || !open) return;
+
+      const pendingLock = latestLock();
+      if (pendingLock?.catch) pendingLock.catch(() => undefined);
+    };
+
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         clearAutoLock();
+
+        const { seconds } = autoLockStateRef.current;
+        const backgroundedAt = backgroundedAtRef.current;
+        backgroundedAtRef.current = 0;
+
+        ClipboardService.reconcilePendingClipboard().catch(() => undefined);
+
+        if (backgroundedAt && Number(seconds) > 0 && Date.now() - backgroundedAt >= Number(seconds) * 1000) lockNow();
         return;
       }
 
-      if (nextState === 'background') {
-        if (autoLockStateRef.current.immediate) lockImmediately();
+      if (nextState === 'background' || nextState === 'inactive') {
+        if (!backgroundedAtRef.current) backgroundedAtRef.current = Date.now();
+
+        if (nextState === 'background' && autoLockStateRef.current.immediate) lockImmediately();
         else scheduleAutoLock();
       }
     });

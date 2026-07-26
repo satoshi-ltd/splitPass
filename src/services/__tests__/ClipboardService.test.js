@@ -91,4 +91,43 @@ describe('ClipboardService', () => {
       expect(Clipboard.setStringAsync.mock.calls.length).toBe(callsBefore);
     });
   });
+
+  describe('reconcilePendingClipboard', () => {
+    it('clears once the TTL deadline passed while the timer was suspended', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      Clipboard.getStringAsync.mockResolvedValue('secret');
+      await ClipboardService.copyWithAutoClear('secret');
+
+      nowSpy.mockReturnValue(1_011_000);
+      const cleared = await ClipboardService.reconcilePendingClipboard();
+
+      expect(cleared).toBe(true);
+      expect(Clipboard.setStringAsync).toHaveBeenLastCalledWith('');
+      nowSpy.mockRestore();
+    });
+
+    it('does nothing before the deadline', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      await ClipboardService.copyWithAutoClear('secret');
+
+      nowSpy.mockReturnValue(1_005_000);
+      const cleared = await ClipboardService.reconcilePendingClipboard();
+
+      expect(cleared).toBe(false);
+      nowSpy.mockRestore();
+    });
+
+    it('does not wipe a value the user copied elsewhere after the deadline', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+      Clipboard.getStringAsync.mockResolvedValue('user-copied-something-else');
+      await ClipboardService.copyWithAutoClear('secret');
+
+      nowSpy.mockReturnValue(1_011_000);
+      await ClipboardService.reconcilePendingClipboard();
+
+      const clearedEmpty = Clipboard.setStringAsync.mock.calls.some((call) => call[0] === '');
+      expect(clearedEmpty).toBe(false);
+      nowSpy.mockRestore();
+    });
+  });
 });

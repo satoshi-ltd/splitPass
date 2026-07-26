@@ -28,7 +28,7 @@ describe('PublicSettingsService', () => {
       AsyncStorage.getItem.mockResolvedValue(null);
       const settings = await PublicSettingsService.load();
       expect(settings).toMatchObject({
-        autoLockImmediatelyEnabled: false,
+        autoLockImmediatelyEnabled: true,
         autoLockSeconds: 300,
         biometricUnlockEnabled: false,
         clipboardAutoClearEnabled: true,
@@ -70,6 +70,36 @@ describe('PublicSettingsService', () => {
       AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ clipboardAutoClearEnabled: false }));
       const settings = await PublicSettingsService.load();
       expect(settings.clipboardAutoClearEnabled).toBe(false);
+    });
+
+    it('keeps autoLockImmediatelyEnabled off only when a returning user explicitly disabled it', async () => {
+      AsyncStorage.getItem.mockResolvedValue(JSON.stringify({ autoLockImmediatelyEnabled: false }));
+      const settings = await PublicSettingsService.load();
+      expect(settings.autoLockImmediatelyEnabled).toBe(false);
+    });
+
+    it('drops unknown/injected fields instead of persisting them to the plaintext store', async () => {
+      AsyncStorage.getItem.mockResolvedValue(
+        JSON.stringify({ onboarded: true, secrets: [{ value: 'leak' }], masterPassphrase: 'nope', evil: 1 }),
+      );
+      const settings = await PublicSettingsService.load();
+
+      expect(settings.onboarded).toBe(true);
+      expect(settings).not.toHaveProperty('secrets');
+      expect(settings).not.toHaveProperty('masterPassphrase');
+      expect(settings).not.toHaveProperty('evil');
+      expect(Object.keys(settings).sort()).toEqual([
+        'autoLockImmediatelyEnabled',
+        'autoLockSeconds',
+        'biometricUnlockEnabled',
+        'clipboardAutoClearEnabled',
+        'externalSharingEnabled',
+        'language',
+        'onboarded',
+        'reminders',
+        'theme',
+        'websiteFaviconsEnabled',
+      ]);
     });
 
     it('forces externalSharingEnabled to false unless exactly true', async () => {

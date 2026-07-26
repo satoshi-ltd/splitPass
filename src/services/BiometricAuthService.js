@@ -114,7 +114,7 @@ const savePassphrase = async (passphrase = '') => {
 
   const availability = await ensureAvailability();
 
-  if (availability.mocked) {
+  if (isDevMode && availability.mocked) {
     await AsyncStorage.setItem(BIOMETRIC_DEV_KEY, passphrase);
 
     return true;
@@ -129,7 +129,7 @@ const readPassphrase = async () => {
   const availability = await ensureAvailability();
 
   try {
-    if (availability.mocked) {
+    if (isDevMode && availability.mocked) {
       const passphrase = await AsyncStorage.getItem(BIOMETRIC_DEV_KEY);
 
       if (passphrase) return passphrase;

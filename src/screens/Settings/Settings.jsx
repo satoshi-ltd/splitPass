@@ -9,7 +9,13 @@ import { EVENT } from '../../App.constants';
 import { useStore } from '../../contexts';
 import { AppScreen, Icon, Setting, Text, View } from '../../design-system';
 import { eventEmitter, getLanguageLabel, ICON, L10N, openConfirm } from '../../modules';
-import { BackupService, BiometricAuthService, getDemoSecrets, NotificationsService } from '../../services';
+import {
+  BackupService,
+  BiometricAuthService,
+  ClipboardService,
+  getDemoSecrets,
+  NotificationsService,
+} from '../../services';
 import { useApp } from '../../contexts';
 
 const Settings = ({ navigation = {} }) => {
@@ -217,6 +223,7 @@ const Settings = ({ navigation = {} }) => {
       },
       {
         onAccept: async () => {
+          await ClipboardService.clearPendingClipboard();
           await BiometricAuthService.clearPassphrase();
           if (settings?.biometricUnlockEnabled) await updateSettings({ biometricUnlockEnabled: false });
           await lockStore();
