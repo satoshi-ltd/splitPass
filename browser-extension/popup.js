@@ -2,6 +2,7 @@ const popupRoot = document.getElementById('popupRoot');
 const scannerUi = globalThis.SplitPassScannerUi.createShell();
 const secretItem = globalThis.SplitPassSecretItem;
 const vault = globalThis.SplitPassVault;
+const passphrase = globalThis.SplitPassPassphrase;
 const { callStorage } = globalThis.SplitPassBrowserApi;
 const browserApi = globalThis.browser || globalThis.chrome || {};
 const UI_STATE_STORAGE_KEY = 'splitpass.browser.ui.v1';
@@ -32,6 +33,7 @@ authPanel.innerHTML = `
   <label class="splitpass-auth-label splitpass-auth-confirm" data-role="confirm-wrap">
     <input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" />
   </label>
+  <p class="splitpass-auth-strength hidden" data-role="strength"></p>
   <button class="splitpass-button splitpass-button-primary splitpass-auth-submit" data-role="auth-submit" type="button"></button>
   <div class="splitpass-auth-reset hidden" data-role="reset-wrap">
     <button class="splitpass-auth-reset-trigger" data-role="reset-trigger" type="button">Forgot password? Reset vault</button>
@@ -67,6 +69,25 @@ const authSubmit = authPanel.querySelector('[data-role="auth-submit"]');
 const confirmWrap = authPanel.querySelector('[data-role="confirm-wrap"]');
 const masterPasswordInput = authPanel.querySelector('[data-role="master-password"]');
 const masterPasswordConfirmInput = authPanel.querySelector('[data-role="master-password-confirm"]');
+const strengthEl = authPanel.querySelector('[data-role="strength"]');
+
+const STRENGTH_LABEL = { weak: 'Weak key', medium: 'Acceptable key', strong: 'Strong key' };
+
+function updateStrengthMeter() {
+  const isSetup = !state.vaultInitialized;
+  const value = String(masterPasswordInput.value || '');
+
+  if (!isSetup || !value) {
+    strengthEl.classList.add('hidden');
+    return;
+  }
+
+  const level = passphrase.getPassphraseStrength(value);
+  strengthEl.textContent = STRENGTH_LABEL[level];
+  strengthEl.className = `splitpass-auth-strength is-${level}`;
+}
+
+masterPasswordInput.addEventListener('input', updateStrengthMeter);
 const resetWrap = authPanel.querySelector('[data-role="reset-wrap"]');
 const resetTrigger = authPanel.querySelector('[data-role="reset-trigger"]');
 const resetConfirm = authPanel.querySelector('[data-role="reset-confirm"]');
@@ -294,6 +315,7 @@ function renderAuthPanel() {
   resetWrap.classList.toggle('hidden', isSetup);
   resetConfirm.classList.add('hidden');
   lockButton.classList.toggle('hidden', !state.unlocked);
+  updateStrengthMeter();
 }
 
 function renderScannerState() {
@@ -820,13 +842,17 @@ async function handleAuthSubmit() {
   const confirmation = String(masterPasswordConfirmInput.value || '');
   const isSetup = !state.vaultInitialized;
 
-  if (masterPassword.length < vault.MIN_MASTER_PASSWORD_LENGTH) {
+  if (isSetup) {
+    if (passphrase.getPassphraseStrength(masterPassword) === 'weak') {
+      setMessage('That passphrase is too weak. Use 12+ characters or 3-4 random words.', 'error');
+      return;
+    }
+    if (masterPassword !== confirmation) {
+      setMessage('The confirmation password does not match.', 'error');
+      return;
+    }
+  } else if (masterPassword.length < vault.MIN_MASTER_PASSWORD_LENGTH) {
     setMessage(`The master password must contain at least ${vault.MIN_MASTER_PASSWORD_LENGTH} characters.`, 'error');
-    return;
-  }
-
-  if (isSetup && masterPassword !== confirmation) {
-    setMessage('The confirmation password does not match.', 'error');
     return;
   }
 

@@ -116,6 +116,26 @@ body {
   outline-offset: 2px;
 }
 
+.splitpass-auth-strength {
+  margin: 0;
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.splitpass-auth-strength.is-weak {
+  color: var(--color-warning);
+}
+
+.splitpass-auth-strength.is-medium {
+  color: var(--color-text-secondary);
+}
+
+.splitpass-auth-strength.is-strong {
+  color: var(--color-accent);
+}
+
 .splitpass-auth-submit,
 .splitpass-recent-copy {
   min-height: 44px;
