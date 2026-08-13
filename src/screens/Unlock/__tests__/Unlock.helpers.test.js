@@ -1,4 +1,5 @@
 import {
+  canOfferBiometrics,
   getUnlockModeFlags,
   isReturningToForeground,
   resolveUnlockFailure,
@@ -43,6 +44,25 @@ describe('Unlock helpers', () => {
       expect(isReturningToForeground('background', 'inactive')).toBe(false);
       expect(isReturningToForeground('active', 'background')).toBe(false);
       expect(isReturningToForeground(undefined, 'active')).toBe(false);
+    });
+  });
+
+  describe('canOfferBiometrics', () => {
+    it('offers the button while availability is still unknown', () => {
+      expect(canOfferBiometrics({ biometricEnabled: true, biometricAvailable: undefined })).toBe(true);
+    });
+
+    it('offers the button when the device confirms biometrics', () => {
+      expect(canOfferBiometrics({ biometricEnabled: true, biometricAvailable: true })).toBe(true);
+    });
+
+    it('hides a button that could only fail when the device says no', () => {
+      expect(canOfferBiometrics({ biometricEnabled: true, biometricAvailable: false })).toBe(false);
+    });
+
+    it('hides the button when the setting is off', () => {
+      expect(canOfferBiometrics({ biometricEnabled: false, biometricAvailable: true })).toBe(false);
+      expect(canOfferBiometrics()).toBe(false);
     });
   });
 

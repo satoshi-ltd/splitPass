@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppState, KeyboardAvoidingView, Platform } from 'react-native';
 
 import {
+  canOfferBiometrics,
   getUnlockModeFlags,
   isReturningToForeground,
   resolveUnlockFailure,
@@ -21,6 +22,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   const appStateRef = useRef(AppState.currentState);
   const passphraseInputRef = useRef(null);
   const [biometricAutoTriggered, setBiometricAutoTriggered] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState();
   const [biometricInvalidated, setBiometricInvalidated] = useState(false);
   const [biometricSubmitting, setBiometricSubmitting] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
@@ -43,8 +45,11 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   const setupConfirmValid = form.confirmPassphrase.length > 0 && form.passphrase === form.confirmPassphrase;
   const setupSubmitDisabled = isSetup && (!setupPassphraseValid || !setupConfirmValid);
   const remainingAttempts = Math.max(0, 3 - failedAttempts);
+  const biometricOffered = canOfferBiometrics({ biometricAvailable, biometricEnabled });
   const warningText = biometricInvalidated
     ? L10N.BIOMETRIC_UNLOCK_INVALIDATED
+    : biometricEnabled && !biometricOffered
+    ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
     : failedAttempts > 0
     ? L10N.MASTER_PASSPHRASE_ATTEMPTS_HINT({ remaining: remainingAttempts })
     : undefined;
@@ -153,6 +158,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       if (!active) return;
 
       setBiometricAutoTriggered(true);
+      setBiometricAvailable(!!availability?.available);
 
       if (!shouldAutoPromptBiometrics({ availability, biometricEnabled, biometricInvalidated, mode })) {
         passphraseInputRef.current?.focus();
@@ -381,7 +387,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
               {L10N.CANCEL}
             </Button>
           ) : null}
-          {biometricEnabled ? (
+          {biometricOffered ? (
             <Button
               loading={biometricSubmitting}
               size="l"

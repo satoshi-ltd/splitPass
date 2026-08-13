@@ -18,6 +18,9 @@ export const getUnlockModeFlags = (mode = 'unlock', settings = {}) => {
 export const isReturningToForeground = (previousState, nextState) =>
   previousState === 'background' && nextState === 'active';
 
+export const canOfferBiometrics = ({ biometricAvailable, biometricEnabled = false } = {}) =>
+  !!biometricEnabled && biometricAvailable !== false;
+
 export const shouldAutoPromptBiometrics = ({
   availability,
   biometricEnabled = false,
