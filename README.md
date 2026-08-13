@@ -49,7 +49,7 @@ SplitPass is an Expo / React Native app for handling high-value secrets without 
 - Compatibility matters: QR payloads, shard formats, and stored backups must continue to work across releases.
 - Backup files and local storage must never contain plaintext secrets after secure setup.
 - Backup files should avoid revealing SplitPass branding or vault purpose before decryption.
-- Biometric unlock is an explicit convenience tradeoff and requires re-entering the current master passphrase before enabling it.
+- Biometric unlock is an explicit convenience tradeoff: enabling it stores the master passphrase of the open session in the OS keychain behind a biometric prompt, so it can only be turned on from an unlocked vault.
 - This is still client software. Recovery safety depends on the user storing enough material in separate locations and testing recovery before relying on it.
 
 ## Tech stack

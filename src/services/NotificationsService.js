@@ -78,7 +78,13 @@ export const NotificationsService = {
     if (backup) {
       await Notifications.scheduleNotificationAsync({
         content: { title: L10N.REMINDER_BACKUP, body: L10N.REMINDER_BACKUP_CAPTION, sound: true },
-        trigger: { hour: 8, minute: 0, weekday: 7, type: Notifications.SchedulableTriggerInputTypes.WEEKLY },
+        trigger: {
+          channelId: 'default',
+          hour: 8,
+          minute: 0,
+          weekday: 7,
+          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+        },
       });
     }
   },

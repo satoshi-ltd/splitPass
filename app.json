@@ -4,15 +4,15 @@
     "slug": "satoshi-ltd-splitpass",
     "owner": "satoshi-ltd",
     "scheme": "splitpass",
-    "version": "1.4.6",
+    "version": "1.4.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "userInterfaceStyle": "light",
+      "userInterfaceStyle": "automatic",
       "supportsTablet": true,
       "icon": "./assets/ios-light.png",
       "bundleIdentifier": "com.satoshi-limited.splitpass",
@@ -29,7 +29,7 @@
       }
     },
     "android": {
-      "userInterfaceStyle": "light",
+      "userInterfaceStyle": "automatic",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F1E8"

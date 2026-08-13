@@ -146,7 +146,15 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
             title: L10N.NFC_CARD,
             variant: 'accent',
           });
-          const nextTag = await NFCService.remove(value, name, tag.info.id, username, notes).catch(handleError);
+          let nextTag;
+
+          try {
+            nextTag = await NFCService.remove(value, name, tag.info.id, username, notes);
+          } catch (error) {
+            handleError(error);
+            return;
+          }
+
           read(nextTag);
           eventEmitter.emit(EVENT.NOTIFICATION, {
             text: L10N.SECRET_DELETED,
@@ -263,7 +271,7 @@ const NFCCard = ({ readMode = false, showHeader = true, writeMode = false, onRec
                     tone="onAccent"
                     size="s"
                     onPress={() => {
-                      handleDelete({ name, value, username });
+                      handleDelete({ name, notes, value, username });
                     }}
                     variant="outlined"
                     style={style.recordDelete}

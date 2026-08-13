@@ -88,7 +88,7 @@ export const NFCService = {
   },
 
   write: async (value, name, username, notes) => {
-    let backupBytes;
+    let backupRecords;
 
     const instance = await NFCService.instance().catch((error) => {
       throw error?.message || error || L10N.NFC_NOT_SUPPORTED;
@@ -99,7 +99,7 @@ export const NFCService = {
     try {
       await NfcManager.requestTechnology(NfcTech.Ndef);
       const tag = await NfcManager.getTag();
-      backupBytes = tag.ndefMessage;
+      backupRecords = tag.ndefMessage;
 
       const nTag = await NFCService.getNtag(NfcManager);
       if (!nTag) throw L10N.NFC_NOT_SUPPORTED;
@@ -116,7 +116,11 @@ export const NFCService = {
       return NFCService.response(records, tag, bytes, nTag);
     } catch (error) {
       const isKnownRejection = error === L10N.NFC_NOT_SUPPORTED || error?.error === L10N.NFC_CARD_IS_FULL;
-      if (!isKnownRejection && backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+      if (!isKnownRejection && backupRecords?.length) {
+        try {
+          await NfcManager.ndefHandler.writeNdefMessage(Ndef.encodeMessage(backupRecords));
+        } catch {}
+      }
       throw isKnownRejection ? error : L10N.NFC_ACCESS_ERROR;
     } finally {
       NfcManager.cancelTechnologyRequest();
@@ -124,7 +128,7 @@ export const NFCService = {
   },
 
   remove: async (value, name, targetTagId, username, notes) => {
-    let backupBytes;
+    let backupRecords;
 
     const instance = await NFCService.instance().catch((error) => {
       throw error?.message || error || L10N.NFC_NOT_SUPPORTED;
@@ -142,7 +146,7 @@ export const NFCService = {
       if (!nTag) throw L10N.NFC_NOT_SUPPORTED;
 
       try {
-        backupBytes = await NfcManager.ndefHandler.getNdefMessage();
+        backupRecords = await NfcManager.ndefHandler.getNdefMessage();
       } catch {
         // Card may be empty; proceed without backup
       }
@@ -156,7 +160,11 @@ export const NFCService = {
       return NFCService.response(records, tag, bytes, nTag);
     } catch (error) {
       const isKnownRejection = error === L10N.NFC_INVALID_ORIGIN_CARD || error === L10N.NFC_NOT_SUPPORTED;
-      if (!isKnownRejection && backupBytes) await NfcManager.ndefHandler.writeNdefMessage(backupBytes);
+      if (!isKnownRejection && backupRecords?.length) {
+        try {
+          await NfcManager.ndefHandler.writeNdefMessage(Ndef.encodeMessage(backupRecords));
+        } catch {}
+      }
       throw isKnownRejection ? error : L10N.NFC_ACCESS_ERROR;
     } finally {
       NfcManager.cancelTechnologyRequest();
