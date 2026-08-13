@@ -3,7 +3,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useWindowDimensions } from 'react-native';
+import { KeyboardAvoidingView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { style } from './Viewer.style';
@@ -477,7 +477,10 @@ const Viewer = ({ route, navigation = {} }) => {
   );
 
   const footer = (
-    <View style={[style.footer, theme === 'dark' ? style.footerLight : style.footerDark]}>
+    <KeyboardAvoidingView
+      behavior="padding"
+      style={[style.footer, theme === 'dark' ? style.footerLight : style.footerDark]}
+    >
       <SafeAreaView
         edges={['bottom']}
         style={[style.footerSafeArea, theme === 'dark' ? style.footerLight : style.footerDark]}
@@ -512,7 +515,7 @@ const Viewer = ({ route, navigation = {} }) => {
           />
         </View>
       </SafeAreaView>
-    </View>
+    </KeyboardAvoidingView>
   );
 
   return (

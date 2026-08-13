@@ -7,7 +7,9 @@ const ScrollView = React.forwardRef(({ snapTo, style, decelerationRate, ...props
   return (
     <RNScrollView
       ref={ref}
+      automaticallyAdjustKeyboardInsets
       decelerationRate={resolvedSnapTo ? 'fast' : decelerationRate}
+      keyboardShouldPersistTaps="handled"
       snapToInterval={resolvedSnapTo || undefined}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}

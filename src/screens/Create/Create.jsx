@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView } from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 
 import { DEFAULT_FORM } from './Create.constants';
 import { style } from './Create.style';
@@ -372,7 +372,7 @@ const Create = ({ navigation = {}, onComplete, route }) => {
   );
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={style.keyboardAvoid}>
+    <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'android'} style={style.keyboardAvoid}>
       <AppScreen
         contentContainerStyle={style.content}
         header={header}

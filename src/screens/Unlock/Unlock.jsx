@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
-import { AppState, KeyboardAvoidingView } from 'react-native';
+import { AppState, KeyboardAvoidingView, Platform } from 'react-native';
 
 import {
   getUnlockModeFlags,
@@ -272,7 +272,7 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
   };
 
   return (
-    <KeyboardAvoidingView behavior="padding" style={style.keyboardAvoid}>
+    <KeyboardAvoidingView behavior="padding" enabled={Platform.OS === 'android'} style={style.keyboardAvoid}>
       <AppScreen
         contentContainerStyle={[style.content, isSignIn ? style.signInContent : null]}
         header={
