@@ -10,7 +10,7 @@ import { Logo, Menu } from './components';
 import { useStore } from './contexts';
 import { Confirm, HeaderBackButton, Modal } from './design-system';
 import { consumeConfirmCallbacks, getNavigationTheme, L10N, navigationRef } from './modules';
-import { Language, Main, Marketplace, Onboarding, Passwords, Scanner, Unlock, Vault, Viewer } from './screens';
+import { Language, Main, Marketplace, Onboarding, Passwords, Scanner, Unlock, Viewer } from './screens';
 
 const Stack = createNativeStackNavigator();
 
@@ -130,7 +130,6 @@ export const Navigator = () => {
         />
         <Stack.Screen name="language" component={Language} options={{ headerShown: false }} />
         <Stack.Screen name="marketplace" component={Marketplace} options={{ ...screen, headerRight: undefined }} />
-        <Stack.Screen name="vault" component={Vault} options={screen} />
         <Stack.Screen name="secret" component={Viewer} options={{ headerShown: false }} />
         <Stack.Screen name="confirm" component={ConfirmScreen} options={modal} />
         <Stack.Screen name="menu" component={Menu} options={modal} />

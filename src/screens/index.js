@@ -6,7 +6,6 @@ export * from './Passwords';
 export * from './Marketplace';
 export * from './Scanner';
 export * from './Settings';
-export * from './Vault';
 export * from './Language';
 export * from './Create';
 export * from './Viewer';
