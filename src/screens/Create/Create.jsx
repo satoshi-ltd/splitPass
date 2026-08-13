@@ -15,6 +15,7 @@ import {
   deriveSecretVisual,
   eventEmitter,
   getTOTPDisplayName,
+  getUnsupportedChars,
   ICON,
   isBase32Secret,
   isSeedPhrase,
@@ -168,6 +169,23 @@ const Create = ({ navigation = {}, onComplete, route }) => {
   };
 
   const handlePressContinue = async () => {
+    const secretToEncode = editMode
+      ? editSecretEnabled
+        ? `${form.secret || ''}`
+        : ''
+      : hydrated && !isTotp
+      ? ''
+      : `${(isCard ? cardValue : isTotp ? totpValue : form.secret) || ''}`;
+    const unsupportedChars = getUnsupportedChars(secretToEncode);
+
+    if (unsupportedChars.length) {
+      eventEmitter.emit(EVENT.NOTIFICATION, {
+        error: true,
+        text: L10N.ERROR_SECRET_UNSUPPORTED_CHARS({ chars: unsupportedChars.join(' ') }),
+      });
+      return;
+    }
+
     if (editMode) {
       const nextUpdate = {
         hash: edit.hash,

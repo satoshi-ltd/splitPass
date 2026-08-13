@@ -99,8 +99,13 @@ const CARD_SHARD_SEGMENTS = 8;
 const resolveEncodeOptions = (optionsOrSecure = false) =>
   typeof optionsOrSecure === 'object' && optionsOrSecure !== null ? optionsOrSecure : { secure: !!optionsOrSecure };
 
-const encodeWithConfig = (value = '', { set } = PASSWORD_CONFIG) =>
-  Array.from(`${value}`, (char) => (set.indexOf(char) + 1).toString().padStart(2, '0')).join('');
+const encodeWithConfig = (value = '', { set } = PASSWORD_CONFIG) => {
+  const source = Array.from(`${value}`);
+
+  if (source.some((char) => set.indexOf(char) < 0)) return undefined;
+
+  return source.map((char) => (set.indexOf(char) + 1).toString().padStart(2, '0')).join('');
+};
 
 const decodeWithConfig = (digits = '', { regexp, set, join } = PASSWORD_CONFIG) =>
   (digits.match(regexp || []) || []).map((index) => set[parseInt(index - 1)]).join(join);
@@ -114,8 +119,11 @@ const decodeCardShard = (value = '') => {
   return segments.length === CARD_SHARD_SEGMENTS ? segments : undefined;
 };
 
-const buildCardQr = (value = '', secure = false) =>
-  `${secure ? CARD_SECURE : CARD}${encodeWithConfig(value, PASSWORD_CONFIG)}`;
+const buildCardQr = (value = '', secure = false) => {
+  const digits = encodeWithConfig(value, PASSWORD_CONFIG);
+
+  return digits === undefined ? '' : `${secure ? CARD_SECURE : CARD}${digits}`;
+};
 
 const combineCardShards = (...qrs) => {
   const decodedShards = qrs.map(decodeCardShard);
@@ -136,6 +144,10 @@ const combineCardShards = (...qrs) => {
 };
 
 export const USERNAME_TYPE = 'B';
+
+export const getUnsupportedChars = (value = '') => [
+  ...new Set(Array.from(`${value}`).filter((char) => chars.indexOf(char) < 0)),
+];
 
 export const QRParser = {
   encodeWithUsername: (value = '', username = '') => {
@@ -176,9 +188,9 @@ export const QRParser = {
       digits = encodeWithConfig(digits, PASSWORD_CONFIG);
     }
 
-    const qr = `${type}${digits}`;
+    if (digits === undefined) return undefined;
 
-    return qr;
+    return `${type}${digits}`;
   },
 
   decode: (qr = '', pin) => {

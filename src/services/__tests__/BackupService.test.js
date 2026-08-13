@@ -100,4 +100,32 @@ describe('BackupService', () => {
       payload: { c: 'cipher', k: { a: 'argon2id' }, n: 'nonce', v: 3, w: 'wrapped' },
     });
   });
+
+  it.each([
+    ['an unrelated object', { name: 'invoice', total: 42 }],
+    ['an empty object', {}],
+    ['a bare array', [{ hash: 'secret:1' }]],
+    ['a scalar', 12],
+  ])('rejects %s instead of importing it as an empty vault', async (_label, contents) => {
+    DocumentPicker.getDocumentAsync.mockResolvedValue({
+      assets: [{ uri: 'file:///vault/whatever.json' }],
+      canceled: false,
+    });
+    FileSystem.readAsStringAsync.mockResolvedValue(JSON.stringify(contents));
+
+    await expect(BackupService.import()).rejects.toBe('Unsupported file format. Select a compatible file.');
+  });
+
+  it('still accepts a legacy store that carries secrets or settings', async () => {
+    DocumentPicker.getDocumentAsync.mockResolvedValue({
+      assets: [{ uri: 'file:///vault/legacy.json' }],
+      canceled: false,
+    });
+    FileSystem.readAsStringAsync.mockResolvedValue(JSON.stringify({ secrets: [{ hash: 'secret:1' }] }));
+
+    await expect(BackupService.import()).resolves.toEqual({
+      format: 'legacy',
+      payload: { secrets: [{ hash: 'secret:1' }], settings: {} },
+    });
+  });
 });

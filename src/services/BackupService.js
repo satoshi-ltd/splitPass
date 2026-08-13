@@ -5,6 +5,9 @@ import * as Sharing from 'expo-sharing';
 import { isEncryptedEnvelope, L10N, resumeAutoLock, suspendAutoLock } from '../modules';
 
 const getErrorMessage = (error) => error?.message || String(error) || 'Unknown error';
+const isPlainObject = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
+const isLegacyBackup = (value) =>
+  isPlainObject(value) && (Array.isArray(value.secrets) || isPlainObject(value.settings));
 const formatBackupTimestamp = (value = new Date()) =>
   value
     .toISOString()
@@ -69,11 +72,9 @@ export const BackupService = {
           return { format: 'encrypted', payload: jsonData };
         }
 
-        const { secrets = [], settings = {} } = jsonData;
-        const hasSecrets = Array.isArray(secrets);
-        const hasSettings = settings && typeof settings === 'object' && !Array.isArray(settings);
+        if (!isLegacyBackup(jsonData)) throw L10N.ERROR_IMPORT;
 
-        if (!hasSecrets && !hasSettings) throw L10N.ERROR_IMPORT;
+        const { secrets = [], settings = {} } = jsonData;
 
         return { format: 'legacy', payload: { secrets, settings } };
       }

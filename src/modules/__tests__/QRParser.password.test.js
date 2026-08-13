@@ -1,5 +1,5 @@
 import { SECRET_TYPE } from '../../App.constants';
-import { QRParser } from '../QRParser';
+import { getUnsupportedChars, QRParser } from '../QRParser';
 import { chars } from '../repositories/chars';
 
 describe('QRParser password support', () => {
@@ -60,6 +60,28 @@ describe('QRParser password support', () => {
       const qr = QRParser.encode(secret);
       expect(qr[0]).toBe(SECRET_TYPE.PASSWORD);
       expect(QRParser.decode(qr)).toBe(secret);
+    });
+  });
+
+  describe('characters outside the encoding table', () => {
+    it.each([
+      ['contrasena with a tilde', 'contrase\u00f1a'],
+      ['an accented vowel', 'caf\u00e92026!'],
+      ['a non-latin letter', '\u03a9-secret'],
+      ['an emoji', 'wallet\ud83d\udd11'],
+    ])('refuses to encode %s instead of dropping it', (_label, secret) => {
+      expect(QRParser.encode(secret)).toBeUndefined();
+    });
+
+    it('reports every unsupported character once', () => {
+      expect(getUnsupportedChars('contrase\u00f1a con \u00e1cento y \u00f1')).toEqual(['\u00f1', '\u00e1']);
+      expect(getUnsupportedChars('plain-ascii-2026!')).toEqual([]);
+    });
+
+    it('keeps encoding every character the table does support', () => {
+      const supported = chars.join('');
+
+      expect(QRParser.decode(QRParser.encode(supported))).toEqual(supported);
     });
   });
 });

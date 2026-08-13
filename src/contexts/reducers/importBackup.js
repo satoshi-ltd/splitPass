@@ -11,8 +11,8 @@ export const importBackup = async ({ format = 'legacy', payload = {} } = {}, opt
   const previousPassphrase = store.sessionPassphrase;
   const passphrase = options?.passphrase || previousPassphrase;
   const decrypted = format === 'encrypted' ? await store.decryptBackup(payload, passphrase) : payload;
-  const nextPassphrase = format === 'encrypted' ? passphrase : previousPassphrase || passphrase;
-  const passphraseChanged = !!previousPassphrase && nextPassphrase !== previousPassphrase;
+  const nextPassphrase = previousPassphrase || passphrase;
+  const passphraseChanged = nextPassphrase !== previousPassphrase;
   const nextSecrets = Array.isArray(decrypted?.secrets) ? decrypted.secrets : DEFAULTS.secrets;
   const incomingSettings = decrypted?.settings || {};
   const nextSettings = {
@@ -22,7 +22,9 @@ export const importBackup = async ({ format = 'legacy', payload = {} } = {}, opt
     theme: normalizeThemePreference(incomingSettings?.theme || state.settings?.theme || DEFAULT_THEME),
   };
 
-  if (passphraseChanged && nextSettings.biometricUnlockEnabled) {
+  if (!nextSettings.biometricUnlockEnabled) {
+    await BiometricAuthService.clearPassphrase();
+  } else if (passphraseChanged) {
     try {
       await BiometricAuthService.savePassphrase(nextPassphrase);
     } catch {

@@ -34,17 +34,29 @@ const createStore = ({ sessionPassphrase, settings = {} } = {}) => {
 describe('importBackup reducer', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('re-encrypts the vault with the passphrase that decrypted an encrypted backup', async () => {
+  it('keeps the vault master passphrase when an encrypted archive uses its own key', async () => {
     const store = createStore({ sessionPassphrase: 'old-master-2026' });
     const state = { store, settings: { language: 'en', theme: 'light' } };
 
-    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'new-master-2026' }, [
+    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'archive-key-2026' }, [
       state,
       jest.fn(),
     ]);
 
-    expect(store.decryptBackup).toHaveBeenCalledWith({ v: 3 }, 'new-master-2026');
-    expect(store.replaceAll).toHaveBeenCalledWith(expect.any(Object), 'new-master-2026');
+    expect(store.decryptBackup).toHaveBeenCalledWith({ v: 3 }, 'archive-key-2026');
+    expect(store.replaceAll).toHaveBeenCalledWith(expect.any(Object), 'old-master-2026');
+  });
+
+  it('adopts the archive key only when there is no vault master yet', async () => {
+    const store = createStore({ sessionPassphrase: undefined });
+    const state = { store, settings: { language: 'en', theme: 'light' } };
+
+    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'archive-key-2026' }, [
+      state,
+      jest.fn(),
+    ]);
+
+    expect(store.replaceAll).toHaveBeenCalledWith(expect.any(Object), 'archive-key-2026');
   });
 
   it('keeps the current session passphrase for legacy plaintext imports', async () => {
@@ -57,28 +69,28 @@ describe('importBackup reducer', () => {
     expect(store.replaceAll).toHaveBeenCalledWith(expect.any(Object), 'old-master-2026');
   });
 
-  it('migrates the biometric passphrase when a passphrase change enables biometrics', async () => {
-    const store = createStore({ sessionPassphrase: 'old-master-2026', settings: { biometricUnlockEnabled: true } });
+  it('stores the biometric passphrase when a restore adopts the archive key', async () => {
+    const store = createStore({ sessionPassphrase: undefined, settings: { biometricUnlockEnabled: true } });
     const state = { store, settings: { language: 'en', theme: 'light' } };
 
-    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'new-master-2026' }, [
+    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'archive-key-2026' }, [
       state,
       jest.fn(),
     ]);
 
-    expect(BiometricAuthService.savePassphrase).toHaveBeenCalledWith('new-master-2026');
+    expect(BiometricAuthService.savePassphrase).toHaveBeenCalledWith('archive-key-2026');
     expect(store.replaceAll).toHaveBeenCalledWith(
       expect.objectContaining({ settings: expect.objectContaining({ biometricUnlockEnabled: true }) }),
-      'new-master-2026',
+      'archive-key-2026',
     );
   });
 
-  it('disables biometrics when re-saving the migrated passphrase fails', async () => {
+  it('disables biometrics when storing the adopted passphrase fails', async () => {
     BiometricAuthService.savePassphrase.mockRejectedValueOnce(new Error('cancelled'));
-    const store = createStore({ sessionPassphrase: 'old-master-2026', settings: { biometricUnlockEnabled: true } });
+    const store = createStore({ sessionPassphrase: undefined, settings: { biometricUnlockEnabled: true } });
     const state = { store, settings: { language: 'en', theme: 'light' } };
 
-    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'new-master-2026' }, [
+    await importBackup({ format: 'encrypted', payload: { v: 3 } }, { passphrase: 'archive-key-2026' }, [
       state,
       jest.fn(),
     ]);
@@ -86,8 +98,17 @@ describe('importBackup reducer', () => {
     expect(BiometricAuthService.clearPassphrase).toHaveBeenCalled();
     expect(store.replaceAll).toHaveBeenCalledWith(
       expect.objectContaining({ settings: expect.objectContaining({ biometricUnlockEnabled: false }) }),
-      'new-master-2026',
+      'archive-key-2026',
     );
+  });
+
+  it('clears the keychain when the imported settings disable biometrics', async () => {
+    const store = createStore({ sessionPassphrase: 'old-master-2026', settings: { biometricUnlockEnabled: false } });
+    const state = { store, settings: { language: 'en', theme: 'light' } };
+
+    await importBackup({ format: 'legacy', payload: { secrets: [], settings: {} } }, {}, [state, jest.fn()]);
+
+    expect(BiometricAuthService.clearPassphrase).toHaveBeenCalled();
   });
 
   it('does not touch biometrics when the passphrase does not change', async () => {
