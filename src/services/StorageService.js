@@ -151,13 +151,16 @@ export class StorageService {
     const rawData = await createEncryptedEnvelope(data, passphrase);
     await snapshot.adapter.write(rawData);
     const persisted = await verifyPersistedEnvelope(snapshot.adapter, passphrase);
+    const current = state.get(this);
+    const lockedWhileWriting = !!snapshot.sessionPassphrase && !current.sessionPassphrase;
+
     state.set(this, {
-      ...snapshot,
-      data,
+      ...current,
+      data: lockedWhileWriting ? undefined : data,
       lastUnlockMigrated: false,
       legacyData: undefined,
       rawData: persisted,
-      sessionPassphrase: passphrase,
+      sessionPassphrase: lockedWhileWriting ? undefined : passphrase,
     });
 
     return clone(data);
@@ -209,7 +212,11 @@ export class StorageService {
     const rawData = await createEncryptedEnvelope(snapshot.data, snapshot.sessionPassphrase);
     await snapshot.adapter.write(rawData);
     const persisted = await verifyPersistedEnvelope(snapshot.adapter, snapshot.sessionPassphrase);
-    state.set(this, { ...snapshot, lastUnlockMigrated: false, rawData: persisted });
+    const current = state.get(this);
+
+    if (!current.sessionPassphrase) return;
+
+    state.set(this, { ...current, lastUnlockMigrated: false, rawData: persisted });
   }
 
   findOne(query) {

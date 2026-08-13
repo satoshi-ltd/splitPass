@@ -304,6 +304,38 @@ describe('StorageService secure lifecycle', () => {
     expect(persisted.type).toBeUndefined();
   });
 
+  it('stays locked when the vault is locked while a save is still writing', async () => {
+    const filename = 'lock-during-persist';
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+
+    await store.initializeSecurity(PASSPHRASE_CASES[0][1], { secrets: [], settings: { ...DEFAULTS.settings } });
+
+    const pendingSave = store.get('secrets').save({ hash: 'secret:1', name: 'Email', value: 'demo-passphrase' });
+    store.lock();
+    await pendingSave;
+
+    expect(store.sessionPassphrase).toBeUndefined();
+    expect(store.security.unlocked).toBe(false);
+    expect(store.value).toBeUndefined();
+  });
+
+  it('stays locked when the vault is locked while replaceAll is still writing', async () => {
+    const filename = 'lock-during-replace';
+    const store = await new StorageService({ adapter: MemoryAdapter, defaults: DEFAULTS, filename });
+
+    await store.initializeSecurity(PASSPHRASE_CASES[0][1], { secrets: [], settings: { ...DEFAULTS.settings } });
+
+    const pendingReplace = store.replaceAll(
+      { secrets: [{ hash: 'secret:9', name: 'Imported', value: 'imported-2026!' }], settings: DEFAULTS.settings },
+      PASSPHRASE_CASES[0][1],
+    );
+    store.lock();
+    await pendingReplace;
+
+    expect(store.sessionPassphrase).toBeUndefined();
+    expect(store.security.unlocked).toBe(false);
+  });
+
   it('unlocks a v1 vault and rewrites it to the current encrypted envelope', async () => {
     const filename = 'legacy-v1-store';
     const payload = {

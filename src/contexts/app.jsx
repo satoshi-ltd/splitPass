@@ -4,7 +4,14 @@ import { AppState, useColorScheme } from 'react-native';
 import StyleSheet from 'react-native-extended-stylesheet';
 
 import { DEFAULT_THEME } from '../App.constants';
-import { detectDeviceLanguage, formatDateTime, isAutoLockSuspended, setLanguage, translate } from '../modules';
+import {
+  detectDeviceLanguage,
+  formatDateTime,
+  isAutoLockSuspended,
+  resetAutoLock,
+  setLanguage,
+  translate,
+} from '../modules';
 import { ClipboardService, NotificationsService } from '../services';
 import { getAppColors, resolveAppTheme, resolveThemeMode, theme as uiTheme } from '../theme';
 import { useStore } from './store';
@@ -113,6 +120,7 @@ const AppProvider = ({ children }) => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') {
         clearAutoLock();
+        resetAutoLock();
 
         const { seconds } = autoLockStateRef.current;
         const backgroundedAt = backgroundedAtRef.current;
@@ -125,8 +133,8 @@ const AppProvider = ({ children }) => {
       }
 
       if (nextState === 'background' || nextState === 'inactive') {
-        if (isAutoLockSuspended()) return;
         if (!backgroundedAtRef.current) backgroundedAtRef.current = Date.now();
+        if (isAutoLockSuspended()) return;
 
         if (nextState === 'background' && autoLockStateRef.current.immediate) lockImmediately();
         else scheduleAutoLock();

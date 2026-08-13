@@ -1,4 +1,4 @@
-import { isAutoLockSuspended, resumeAutoLock, suspendAutoLock } from '../autoLockGuard';
+import { isAutoLockSuspended, resetAutoLock, resumeAutoLock, suspendAutoLock } from '../autoLockGuard';
 
 describe('autoLockGuard', () => {
   it('is not suspended by default', () => {
@@ -28,5 +28,12 @@ describe('autoLockGuard', () => {
     suspendAutoLock();
     expect(isAutoLockSuspended()).toBe(true);
     resumeAutoLock();
+  });
+
+  it('resets a suspension that never resumed', () => {
+    suspendAutoLock();
+    suspendAutoLock();
+    resetAutoLock();
+    expect(isAutoLockSuspended()).toBe(false);
   });
 });
