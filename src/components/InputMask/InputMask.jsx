@@ -7,57 +7,62 @@ import { ICON } from '../../modules';
 
 const MASK_CHAR = '*';
 
-const InputMask = ({ actions, onChange, onRevealChange, revealed, showToggle = false, value = '', ...props }) => {
-  const [internalReveal, setInternalReveal] = useState(false);
-  const resolvedValue = `${value}`;
-  const maskedValue = resolvedValue.replace(/[^\s]/g, MASK_CHAR);
-  const isRevealControlled = typeof revealed === 'boolean';
-  const isRevealed = isRevealControlled ? revealed : internalReveal;
+const InputMask = React.forwardRef(
+  ({ actions, onChange, onRevealChange, revealed, showToggle = false, value = '', ...props }, ref) => {
+    const [internalReveal, setInternalReveal] = useState(false);
+    const resolvedValue = `${value}`;
+    const maskedValue = resolvedValue.replace(/[^\s]/g, MASK_CHAR);
+    const isRevealControlled = typeof revealed === 'boolean';
+    const isRevealed = isRevealControlled ? revealed : internalReveal;
 
-  const handleChange = (nextValue = '') => {
-    if (!onChange) return;
-    if (isRevealed) return onChange(nextValue);
-    if (!nextValue.length) return onChange('');
+    const handleChange = (nextValue = '') => {
+      if (!onChange) return;
+      if (isRevealed) return onChange(nextValue);
+      if (!nextValue.length) return onChange('');
 
-    if (nextValue.length >= resolvedValue.length) {
-      return onChange(`${resolvedValue}${nextValue.substring(resolvedValue.length)}`);
-    }
+      if (nextValue.length >= resolvedValue.length) {
+        return onChange(`${resolvedValue}${nextValue.substring(resolvedValue.length)}`);
+      }
 
-    return onChange(resolvedValue.substring(0, nextValue.length));
-  };
+      return onChange(resolvedValue.substring(0, nextValue.length));
+    };
 
-  const handleToggleReveal = () => {
-    const nextReveal = !isRevealed;
-    if (!isRevealControlled) setInternalReveal(nextReveal);
-    if (onRevealChange) onRevealChange(nextReveal);
-  };
+    const handleToggleReveal = () => {
+      const nextReveal = !isRevealed;
+      if (!isRevealControlled) setInternalReveal(nextReveal);
+      if (onRevealChange) onRevealChange(nextReveal);
+    };
 
-  const resolvedActions =
-    showToggle || actions ? (
-      <>
-        {showToggle ? (
-          <Pressable
-            onPress={handleToggleReveal}
-            style={[style.actionButton, !resolvedValue && style.actionButtonDisabled]}
-          >
-            <Icon name={isRevealed ? ICON.EYE_OFF : ICON.EYE} size="s" tone="secondary" />
-          </Pressable>
-        ) : null}
-        {actions}
-      </>
-    ) : undefined;
+    const resolvedActions =
+      showToggle || actions ? (
+        <>
+          {showToggle ? (
+            <Pressable
+              onPress={handleToggleReveal}
+              style={[style.actionButton, !resolvedValue && style.actionButtonDisabled]}
+            >
+              <Icon name={isRevealed ? ICON.EYE_OFF : ICON.EYE} size="s" tone="secondary" />
+            </Pressable>
+          ) : null}
+          {actions}
+        </>
+      ) : undefined;
 
-  return (
-    <Input
-      {...props}
-      autoCapitalize="none"
-      autoCorrect={false}
-      actions={resolvedActions}
-      value={isRevealed ? resolvedValue : maskedValue}
-      onChange={handleChange}
-    />
-  );
-};
+    return (
+      <Input
+        {...props}
+        ref={ref}
+        autoCapitalize="none"
+        autoCorrect={false}
+        actions={resolvedActions}
+        value={isRevealed ? resolvedValue : maskedValue}
+        onChange={handleChange}
+      />
+    );
+  },
+);
+
+InputMask.displayName = 'InputMask';
 
 InputMask.propTypes = {
   actions: PropTypes.node,

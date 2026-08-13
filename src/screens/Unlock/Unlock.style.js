@@ -21,7 +21,18 @@ export const style = StyleSheet.create({
     paddingTop: '$spaceM',
   },
   signInContent: {
+    flexGrow: 1,
     gap: '$spaceS',
+    justifyContent: 'center',
+    paddingBottom: '$spaceXXL',
+    paddingTop: 0,
+  },
+  hero: {
+    gap: '$spaceS',
+    marginBottom: '$spaceL',
+  },
+  heroCaption: {
+    maxWidth: '85%',
   },
   formSection: {
     marginTop: '$spaceS',

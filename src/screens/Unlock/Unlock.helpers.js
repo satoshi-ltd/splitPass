@@ -14,6 +14,17 @@ export const getUnlockModeFlags = (mode = 'unlock', settings = {}) => {
   };
 };
 
+// Never widen to 'inactive': iOS reports it while the biometric sheet is open, which would loop the prompt.
+export const isReturningToForeground = (previousState, nextState) =>
+  previousState === 'background' && nextState === 'active';
+
+export const shouldAutoPromptBiometrics = ({
+  availability,
+  biometricEnabled = false,
+  biometricInvalidated = false,
+  mode = 'unlock',
+} = {}) => !!biometricEnabled && !biometricInvalidated && mode === 'unlock' && !!availability?.available;
+
 export const resolveUnlockFailure = ({ errorCode, failedAttempts = 0 } = {}) => {
   if (errorCode === 'ERR_PERSISTENCE_FORMAT') {
     return { type: 'storageReset' };

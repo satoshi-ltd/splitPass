@@ -1,22 +1,25 @@
-/* global __DEV__ */
-
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { AppState, KeyboardAvoidingView } from 'react-native';
 
-import { getUnlockModeFlags, resolveUnlockFailure } from './Unlock.helpers';
+import {
+  getUnlockModeFlags,
+  isReturningToForeground,
+  resolveUnlockFailure,
+  shouldAutoPromptBiometrics,
+} from './Unlock.helpers';
 import { style } from './Unlock.style';
 import { EVENT } from '../../App.constants';
-import { InputMask } from '../../components';
+import { InputMask, Logo } from '../../components';
 import { useStore } from '../../contexts';
 import { AppScreen, Button, Text, View } from '../../design-system';
 import { eventEmitter, getPassphraseStrength, L10N } from '../../modules';
 import { BackupService, BiometricAuthService } from '../../services';
 
-const isDevMode = typeof __DEV__ !== 'undefined' && __DEV__;
-
 const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } = {} } = {} }) => {
   const { importBackup, resetAppData, settings, setupSecurity, store, unlockStore, updateSettings } = useStore();
+  const appStateRef = useRef(AppState.currentState);
+  const passphraseInputRef = useRef(null);
   const [biometricAutoTriggered, setBiometricAutoTriggered] = useState(false);
   const [biometricInvalidated, setBiometricInvalidated] = useState(false);
   const [biometricSubmitting, setBiometricSubmitting] = useState(false);
@@ -93,14 +96,16 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       setBiometricSubmitting(true);
       const passphrase = await BiometricAuthService.readPassphrase();
       await handleUnlocked(passphrase);
+
+      return true;
     } catch (error) {
       if (error?.code === 'ERR_BIOMETRIC_INVALIDATED') {
         setBiometricInvalidated(true);
         if (!silent) eventEmitter.emit(EVENT.NOTIFICATION, { error: true, text: L10N.BIOMETRIC_UNLOCK_INVALIDATED });
-        return;
+        return false;
       }
 
-      if (silent || error?.code === 'ERR_BIOMETRIC_CANCELED') return;
+      if (silent || error?.code === 'ERR_BIOMETRIC_CANCELED') return false;
 
       eventEmitter.emit(EVENT.NOTIFICATION, {
         error: true,
@@ -111,35 +116,60 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
             ? L10N.BIOMETRIC_UNLOCK_NOT_AVAILABLE
             : error?.message || L10N.ERROR,
       });
+
+      return false;
     } finally {
       setBiometricSubmitting(false);
     }
   };
 
   useEffect(() => {
+    if (!biometricEnabled) return undefined;
+
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      const previousState = appStateRef.current;
+      appStateRef.current = nextState;
+
+      if (isReturningToForeground(previousState, nextState)) setBiometricAutoTriggered(false);
+    });
+
+    return () => subscription.remove();
+  }, [biometricEnabled]);
+
+  useEffect(() => {
+    if (!biometricEnabled || biometricAutoTriggered || biometricSubmitting) return undefined;
+
     let active = true;
 
-    if (!isDevMode || !biometricEnabled || mode !== 'unlock' || biometricAutoTriggered) return undefined;
+    const autoPromptBiometrics = async () => {
+      let availability;
 
-    const autoUnlockInDev = async () => {
       try {
-        const availability = await BiometricAuthService.isAvailable();
-        if (!active || !availability?.mocked) return;
-
-        setBiometricAutoTriggered(true);
-        await handleBiometricUnlock({ silent: false });
+        availability = await BiometricAuthService.isAvailable();
       } catch {
-        if (!active) return;
-        setBiometricAutoTriggered(true);
+        availability = undefined;
       }
+
+      if (!active) return;
+
+      setBiometricAutoTriggered(true);
+
+      if (!shouldAutoPromptBiometrics({ availability, biometricEnabled, biometricInvalidated, mode })) {
+        passphraseInputRef.current?.focus();
+        return;
+      }
+
+      const unlocked = await handleBiometricUnlock({ silent: true });
+
+      if (active && !unlocked) passphraseInputRef.current?.focus();
     };
 
-    autoUnlockInDev();
+    autoPromptBiometrics();
 
     return () => {
       active = false;
     };
-  }, [biometricAutoTriggered, biometricEnabled, mode]);
+  }, [biometricAutoTriggered, biometricEnabled, biometricInvalidated, biometricSubmitting, mode]);
 
   const title =
     mode === 'setup'
@@ -246,20 +276,33 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
       <AppScreen
         contentContainerStyle={[style.content, isSignIn ? style.signInContent : null]}
         header={
-          <View style={style.header}>
-            <Text bold size="xl" tone="accent">
-              {title}
-            </Text>
-            {caption ? (
-              <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
-                {caption}
+          isSignIn ? null : (
+            <View style={style.header}>
+              <Text bold size="xl" tone="accent">
+                {title}
               </Text>
-            ) : null}
-          </View>
+              {caption ? (
+                <Text bold size="l" tone="secondary" style={style.headerSubtitle}>
+                  {caption}
+                </Text>
+              ) : null}
+            </View>
+          )
         }
         headerContainerStyle={style.headerContainer}
         headerSafeAreaStyle={style.headerSafeArea}
       >
+        {isSignIn ? (
+          <View align="center" style={style.hero}>
+            <Logo size="l" />
+            {caption ? (
+              <Text align="center" bold size="l" tone="secondary" style={style.heroCaption}>
+                {caption}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
         <View style={[style.formSection, isSignIn ? style.signInFormSection : null]}>
           {warningText ? (
             <View style={style.warningCard}>
@@ -276,9 +319,10 @@ const Unlock = ({ navigation = {}, route: { params: { backup, mode = 'unlock' } 
                 </Text>
               ) : null}
               <InputMask
-                autoFocus
+                autoFocus={!biometricEnabled}
                 containerStyle={style.inputShell}
                 placeholder={isExport ? L10N.EXPORT_BACKUP_KEY_PLACEHOLDER : L10N.MASTER_PASSPHRASE_PLACEHOLDER}
+                ref={passphraseInputRef}
                 showToggle
                 style={style.inputField}
                 value={form.passphrase}
