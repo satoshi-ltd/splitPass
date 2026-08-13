@@ -1,12 +1,12 @@
 import StyleSheet from 'react-native-extended-stylesheet';
 
 export const style = StyleSheet.create({
-  image: {
-    height: '$fontSizeTitle * 0.8',
-    width: '$fontSizeTitle * 3.7',
+  compact: {
+    fontSize: '$fontSizeTitle * 0.8',
+    lineHeight: '$fontSizeTitle',
   },
-  imageLarge: {
-    height: '$fontSizeTitle * 1.6',
-    width: '$fontSizeTitle * 7.4',
+  large: {
+    fontSize: '$fontSizeTitle * 1.6',
+    lineHeight: '$fontSizeTitle * 2',
   },
 });

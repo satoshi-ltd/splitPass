@@ -1,6 +1,6 @@
 {
   "name": "@satoshi-ltd/splitpass",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "main": "node_modules/expo/AppEntry.js",
   "private": false,
   "packageManager": "yarn@1.22.22",

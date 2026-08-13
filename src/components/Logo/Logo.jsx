@@ -1,24 +1,20 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Image } from 'react-native';
 
 import { style } from './Logo.style';
-import { useApp } from '../../contexts';
-
-const IMAGE = {
-  dark: require('../../../assets/images/logo-dark.png'),
-  light: require('../../../assets/images/logo-light.png'),
-};
+import { Text } from '../../design-system';
 
 const Logo = ({ size }) => {
-  const { theme } = useApp();
+  const textProps = { bold: true, size: 'xl', style: size === 'l' ? style.large : style.compact };
 
   return (
-    <Image
-      resizeMode="contain"
-      source={IMAGE[theme] || IMAGE.light}
-      style={[style.image, size === 'l' ? style.imageLarge : null]}
-    />
+    <Text {...textProps}>
+      split
+      <Text {...textProps} tone="accent">
+        /
+      </Text>
+      Pass
+    </Text>
   );
 };
 
