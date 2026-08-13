@@ -1,13 +1,15 @@
 export const readSecret = async ({ hash } = {}, [state, setState]) => {
   const { store } = state;
 
+  if (!store?.security?.unlocked) return undefined;
+
   store.get('secrets');
-  let secret = await store.findOne({ hash });
+  const secret = await store.findOne({ hash });
   if (!secret) return undefined;
 
-  secret = { ...secret, readAt: new Date().toISOString() };
-  await store.update({ hash }, secret);
-  setState({ ...state, secrets: [...(store.value || [])], security: state.store.security });
+  const stamped = { ...secret, readAt: new Date().toISOString() };
+  await store.update({ hash }, stamped);
+  setState((current) => ({ ...current, secrets: [...(store.value || [])], security: store.security }));
 
-  return secret;
+  return stamped;
 };

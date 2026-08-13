@@ -1,4 +1,3 @@
-import { useFocusEffect } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import PropTypes from 'prop-types';
@@ -181,12 +180,12 @@ const Viewer = ({ route, navigation = {} }) => {
     [colors.qrBackground, colors.qrForeground],
   );
 
-  useFocusEffect(
-    useCallback(() => {
+  useEffect(
+    // Stamping readAt persists the whole vault, so it waits until the screen is left rather than every focus.
+    () => () => {
       if (hash) readSecret({ hash });
-      // readSecret comes from context and is recreated on rerenders.
-      // Depending on it here can retrigger this focus effect in a loop.
-    }, [hash]),
+    },
+    [hash],
   );
 
   useEffect(() => {
