@@ -9,11 +9,11 @@ export const lockStore = async ([state, setState]) => {
 
   state.store.lock();
 
-  setState({
-    ...state,
+  setState((current) => ({
+    ...current,
     secrets: DEFAULTS.secrets,
     security: state.store.security,
-  });
+  }));
   resetToUnlock();
 
   return true;
