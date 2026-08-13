@@ -16,6 +16,7 @@ import {
   deriveSecretVisual,
   eventEmitter,
   getTOTPDisplayName,
+  getUnsupportedChars,
   ICON,
   isTOTPURI,
   L10N,
@@ -235,14 +236,22 @@ const Scanner = ({
 
   const handleSaveToPhone = async () => {
     if (!values.length) return;
-    if (!is.shard && !decodedSecret) return;
+    if (!is.complete && !is.shard) return;
+    if (is.complete && !decodedSecret) return;
 
     const visual =
       is.complete && decodedSecret ? deriveSecretVisual({ name: selectedItem?.name, secret: decodedSecret }) : {};
-    const persistedValue =
-      is.shard || !is.complete
-        ? values[0]
-        : QRParser.encode(decodedSecret, isCard ? { type: 'card' } : isTotp ? { type: 'totp' } : false);
+    const persistedValue = !is.complete
+      ? values[0]
+      : QRParser.encode(decodedSecret, isCard ? { type: 'card' } : isTotp ? { type: 'totp' } : false);
+    if (persistedValue === undefined) {
+      eventEmitter.emit(EVENT.NOTIFICATION, {
+        error: true,
+        text: L10N.ERROR_SECRET_UNSUPPORTED_CHARS({ chars: getUnsupportedChars(decodedSecret).join(' ') }),
+      });
+      return;
+    }
+
     const parsedTOTP = isTotp ? parseTOTPURI(decodedSecret) : undefined;
     const savedSecret = await createSecret({
       brand: visual.brand,
@@ -253,13 +262,14 @@ const Scanner = ({
       digits: parsedTOTP?.digits,
       expire: cardValue?.expire,
       issuer: parsedTOTP?.issuer,
-      kind: is.shard
-        ? 'shard'
-        : [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type)
-        ? 'card'
-        : isTotp
-        ? 'totp'
-        : visual.kind,
+      kind:
+        is.shard && !is.complete
+          ? 'shard'
+          : [SECRET_TYPE.CARD, SECRET_TYPE.CARD_SECURE, SECRET_TYPE.CARD_SHARD].includes(type)
+          ? 'card'
+          : isTotp
+          ? 'totp'
+          : visual.kind,
       period: parsedTOTP?.period,
       name: selectedItem?.name || (parsedTOTP ? getTOTPDisplayName(parsedTOTP) : resolveFallbackName(type)),
       notes: selectedItem?.notes,
@@ -327,7 +337,7 @@ const Scanner = ({
   };
 
   const footerMenuOptions = [
-    !readMode && values.length === 1
+    !readMode && (is.complete || values.length === 1)
       ? {
           icon: ICON.DATABASE_ADD,
           onPress: handleSaveToPhone,
@@ -422,9 +432,7 @@ const Scanner = ({
                         ? undefined
                         : is.legacyShard
                         ? L10N.SCANNER_LEGACY_SHARD_WARNING
-                        : !is.shard
-                        ? L10N.SCANNER_SECRET_READY_CAPTION
-                        : undefined
+                        : L10N.SCANNER_SECRET_READY_CAPTION
                     }
                     value={footerValue}
                   />
