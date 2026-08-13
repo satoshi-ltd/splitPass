@@ -105,11 +105,18 @@
     'translate.goog', 'freshdesk.com', 'myshopify.com', 'zendesk.com',
   ]);
 
+  const GENERIC_SECOND_LEVELS = new Set([
+    'ac', 'co', 'com', 'edu', 'go', 'gob', 'gov', 'id', 'in', 'mil', 'ne', 'net', 'nom', 'or', 'org', 'sch', 'web',
+  ]);
+
   function extractRegistrableDomain(hostname) {
     const labels = hostname.split('.').filter(Boolean);
     if (labels.length <= 2) return labels.join('.');
 
-    let suffixLabels = 1;
+    // Fallback for compound suffixes missing from the list (com.ve, ac.in): generic label + 2-char country TLD.
+    const isCompoundCountrySuffix =
+      labels[labels.length - 1].length === 2 && GENERIC_SECOND_LEVELS.has(labels[labels.length - 2]);
+    let suffixLabels = isCompoundCountrySuffix ? 2 : 1;
     for (let count = labels.length - 1; count >= 2; count -= 1) {
       if (PUBLIC_SUFFIXES.has(labels.slice(labels.length - count).join('.'))) {
         suffixLabels = count;

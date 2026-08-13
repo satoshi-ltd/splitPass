@@ -21,6 +21,8 @@
     return new Uint8Array(bytes);
   }
 
+  const HASH_ALGORITHMS = { SHA1: 'SHA-1', SHA256: 'SHA-256', SHA512: 'SHA-512' };
+
   function parseTotpParams(uri = '') {
     try {
       const match = String(uri || '').match(/^otpauth:\/\/totp\/([^?]+)(?:\?(.*))?$/i);
@@ -37,9 +39,12 @@
           return acc;
         }, {});
 
+      const algorithm = String(params.algorithm || 'SHA1').trim().toUpperCase();
+
       return {
         secret: String(params.secret || '').replace(/\s+/g, '').toUpperCase(),
-        digits: Math.max(6, Math.min(8, parseInt(params.digits || '6', 10) || 6)),
+        algorithm: HASH_ALGORITHMS[algorithm] ? algorithm : 'SHA1',
+        digits: parseInt(params.digits, 10) > 0 ? parseInt(params.digits, 10) : 6,
         period: Math.max(1, parseInt(params.period || '30', 10) || 30),
       };
     } catch {
@@ -66,7 +71,7 @@
     const cryptoKey = await globalScope.crypto.subtle.importKey(
       'raw',
       keyBytes,
-      { name: 'HMAC', hash: 'SHA-1' },
+      { name: 'HMAC', hash: HASH_ALGORITHMS[params.algorithm] || 'SHA-1' },
       false,
       ['sign']
     );

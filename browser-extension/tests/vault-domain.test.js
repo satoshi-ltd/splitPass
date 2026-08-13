@@ -39,6 +39,20 @@ describe('normalizeDomain — registrable domain scoping', () => {
     expect(normalizeDomain('foo.bar.io')).toBe('bar.io');
   });
 
+  it('scopes compound country suffixes that are not in the list', () => {
+    expect(normalizeDomain('banesco.com.ve')).toBe('banesco.com.ve');
+    expect(normalizeDomain('www.banesco.com.ve')).toBe('banesco.com.ve');
+    expect(normalizeDomain('iitb.ac.in')).toBe('iitb.ac.in');
+    expect(normalizeDomain('portal.gov.in')).toBe('portal.gov.in');
+
+    expect(normalizeDomain('banesco.com.ve')).not.toBe(normalizeDomain('otrobanco.com.ve'));
+  });
+
+  it('still collapses subdomains of short registrable domains', () => {
+    expect(normalizeDomain('mail.bbc.com')).toBe('bbc.com');
+    expect(normalizeDomain('www.ibm.com')).toBe('ibm.com');
+  });
+
   it('leaves bare registrable domains and single labels untouched', () => {
     expect(normalizeDomain('google.com')).toBe('google.com');
     expect(normalizeDomain('localhost')).toBe('localhost');
