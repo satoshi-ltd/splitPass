@@ -16,7 +16,7 @@
       "supportsTablet": true,
       "icon": "./assets/ios-light.png",
       "bundleIdentifier": "com.satoshi-limited.splitpass",
-      "buildNumber": "11",
+      "buildNumber": "12",
       "usesIcloudStorage": false,
       "splash": {
         "image": "./assets/splash-icon-light.png",
@@ -35,7 +35,7 @@
         "backgroundColor": "#F5F1E8"
       },
       "package": "com.satoshilimited.splitpass",
-      "versionCode": 11,
+      "versionCode": 12,
       "splash": {
         "image": "./assets/splash-icon-light.png",
         "resizeMode": "contain",
