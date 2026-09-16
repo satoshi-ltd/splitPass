@@ -2,6 +2,7 @@
   const runtime = (globalThis.browser && globalThis.browser.runtime) || chrome.runtime;
   const browserApi = globalThis.browser || globalThis.chrome || {};
   const secretItem = globalThis.SplitPassSecretItem;
+  const formScan = globalThis.SplitPassFormScan;
   const { callStorage } = globalThis.SplitPassBrowserApi;
   const VAULT_STORAGE_KEY = 'splitpass.browser.vault.v1';
   const UI_STATE_STORAGE_KEY = 'splitpass.browser.ui.v1';
@@ -128,38 +129,16 @@
     return !!state.shadowHost && typeof event.composedPath === 'function' && event.composedPath().includes(state.shadowHost);
   }
 
+  function isEditableInput(element) {
+    return element instanceof HTMLInputElement && !isOwnedElement(element) && !element.disabled && !element.readOnly;
+  }
+
   function isPasswordInput(element) {
-    return (
-      element instanceof HTMLInputElement &&
-      !isOwnedElement(element) &&
-      !element.disabled &&
-      !element.readOnly &&
-      String(element.type || '').toLowerCase() === 'password'
-    );
+    return isEditableInput(element) && formScan.isLikelyPasswordField(element);
   }
 
   function isOtpInput(element) {
-    if (!(element instanceof HTMLInputElement)) return false;
-    if (isOwnedElement(element) || element.disabled || element.readOnly) return false;
-    const type = String(element.type || 'text').toLowerCase();
-    const autocomplete = String(element.autocomplete || '').toLowerCase();
-    const inputmode = String(element.inputmode || '').toLowerCase();
-    const maxLen = parseInt(String(element.maxLength || '0'), 10);
-    return (
-      autocomplete === 'one-time-code' ||
-      (inputmode === 'numeric' && maxLen === 6 && ['text', 'tel', 'number'].includes(type))
-    );
-  }
-
-  function findOtpInput() {
-    const inputs = Array.from(document.querySelectorAll('input')).filter(
-      (input) => isOtpInput(input) && isVisible(input)
-    );
-    return (
-      inputs.find((i) => String(i.autocomplete || '').toLowerCase() === 'one-time-code') ||
-      inputs[0] ||
-      null
-    );
+    return isEditableInput(element) && formScan.isOtpField(element);
   }
 
   function isVisible(element) {
@@ -174,12 +153,29 @@
     );
   }
 
-  function getVisiblePasswordInputs() {
-    return Array.from(document.querySelectorAll('input[type="password"]')).filter((input) => isPasswordInput(input) && isVisible(input));
+  function getEditableInputs() {
+    return Array.from(document.querySelectorAll('input')).filter((input) => isEditableInput(input) && isVisible(input));
+  }
+
+  function getVisiblePasswordInputs(editableInputs) {
+    // Fast path first: a real type=password field needs no scoring, and most pages stop here.
+    const declared = Array.from(document.querySelectorAll('input[type="password"]')).filter(
+      (input) => isEditableInput(input) && isVisible(input)
+    );
+    if (declared.length) return declared;
+
+    return (editableInputs || getEditableInputs()).filter((input) => formScan.isLikelyPasswordField(input));
+  }
+
+  function findOtpTargets(editableInputs) {
+    return formScan.selectOtpTargets(editableInputs || getEditableInputs());
   }
 
   function pageHasVisiblePasswordInput() {
-    return getVisiblePasswordInputs().length > 0 || findOtpInput() !== null;
+    if (document.querySelector('input[type="password"]')) return getVisiblePasswordInputs().length > 0;
+
+    const editableInputs = getEditableInputs();
+    return getVisiblePasswordInputs(editableInputs).length > 0 || findOtpTargets(editableInputs) !== null;
   }
 
   function setFormFieldValue(element, value) {
@@ -198,49 +194,40 @@
     dispatchValueEvents(element);
   }
 
-  function findUsernameInput() {
-    const candidates = Array.from(document.querySelectorAll('input')).filter(
-      (input) =>
-        !isOwnedElement(input) &&
-        !input.disabled &&
-        !input.readOnly &&
-        String(input.type || 'text').toLowerCase() !== 'password' &&
-        String(input.type || 'text').toLowerCase() !== 'hidden' &&
-        isVisible(input)
-    );
+  function findUsernameInput(passwordField = null) {
+    return formScan.selectUsernameField(getEditableInputs(), {
+      passwordField: passwordField || getVisiblePasswordInputs()[0] || null,
+    });
+  }
 
-    return (
-      candidates.find((i) => ['username', 'email'].includes(String(i.autocomplete || '').toLowerCase())) ||
-      candidates.find((i) => String(i.type || '').toLowerCase() === 'email') ||
-      candidates.find((i) => /user|email|login/i.test(i.name || i.id || '')) ||
-      candidates.find((i) => /user|email/i.test(i.placeholder || '')) ||
-      null
-    );
+  function fillOtpCode(code) {
+    const targets = findOtpTargets();
+    if (!targets) return false;
+
+    const values = formScan.distributeCode(code, targets.inputs.length);
+    targets.inputs.forEach((input, index) => {
+      fillTarget(input, values[index]);
+    });
+    targets.inputs[targets.inputs.length - 1]?.focus();
+
+    return true;
   }
 
   function fillVisiblePasswordInputs(value, preferredInput) {
-    const visibleInputs = getVisiblePasswordInputs();
-    const uniqueInputs = [];
-    const seenInputs = new Set();
+    const targets = formScan.selectPasswordTargets(getVisiblePasswordInputs(), resolveFillTarget(preferredInput));
 
-    visibleInputs.forEach((input) => {
-      if (seenInputs.has(input)) return;
-      seenInputs.add(input);
-      uniqueInputs.push(input);
-    });
-
-    if (!uniqueInputs.length) {
+    if (!targets.length) {
       const fallbackInput = resolveFillTarget(preferredInput);
       if (!fallbackInput) return [];
       fillTarget(fallbackInput, value);
       return [fallbackInput];
     }
 
-    uniqueInputs.forEach((input) => {
+    targets.forEach((input) => {
       fillTarget(input, value);
     });
 
-    return uniqueInputs;
+    return targets;
   }
 
   function getFilledPasswordInputs(value, preferredInput) {
@@ -286,30 +273,6 @@
       return state.lastFocusedPasswordInput;
     }
     return null;
-  }
-
-  function normalizeDomainCandidate(value = '') {
-    return String(value || '').trim().replace(/\.$/, '').toLowerCase();
-  }
-
-  function buildDomainCandidates(domain = '') {
-    const normalizedDomain = normalizeDomainCandidate(domain);
-    if (!normalizedDomain) return [];
-
-    const candidates = [normalizedDomain];
-    if (!normalizedDomain.includes('.')) return candidates;
-
-    if (normalizedDomain.startsWith('www.')) {
-      candidates.push(normalizedDomain.slice(4));
-    } else {
-      candidates.push(`www.${normalizedDomain}`);
-    }
-
-    return Array.from(new Set(candidates.filter(Boolean)));
-  }
-
-  function buildEntryFingerprint(entry) {
-    return `${String(entry?.domain || '')}\u0000${String(entry?.secret || '')}`;
   }
 
   function resolveFaviconUrl() {
@@ -369,41 +332,8 @@
     }
   }
 
-  async function getRecentSecretsForDomain(domain) {
-    const candidates = buildDomainCandidates(domain);
-    if (!candidates.length) return [];
-
-    const exactEntries = await readRecentSecretsForDomain(candidates[0]);
-    if (exactEntries.length || candidates.length === 1) {
-      return exactEntries;
-    }
-
-    const fallbackEntries = [];
-    const fingerprints = new Set();
-
-    for (const candidate of candidates.slice(1)) {
-      const entries = await readRecentSecretsForDomain(candidate);
-
-      entries.forEach((entry) => {
-        const fingerprint = buildEntryFingerprint(entry);
-        if (fingerprints.has(fingerprint)) return;
-
-        fingerprints.add(fingerprint);
-        fallbackEntries.push(entry);
-      });
-    }
-
-    return fallbackEntries.sort((left, right) => Number(right.lastUsedAt || 0) - Number(left.lastUsedAt || 0));
-  }
-
-  async function touchSecret(domain, secret, source, username) {
-    await sendRuntimeMessage({
-      type: 'splitpass.saveRecentSecret',
-      domain,
-      secret,
-      source,
-      username: username || '',
-    }).catch(() => undefined);
+  async function touchEntry(id) {
+    await sendRuntimeMessage({ type: 'splitpass.touchEntry', id }).catch(() => undefined);
   }
 
   async function ensureSitePanel() {
@@ -473,36 +403,40 @@
       faviconUrl,
       name: siteLabel,
       onPrimary: async (entry) => {
-        if (!entry?.secret) return;
+        if (!entry?.id) return;
 
-        const totp = globalThis.SplitPassTotp;
-        if (totp?.isTotpUri(entry.secret)) {
+        const revealed = await sendRuntimeMessage({ type: 'splitpass.revealSecret', id: entry.id }).catch(() => null);
+        const secret = revealed?.ok ? String(revealed.secret || '') : '';
+        if (!secret) {
+          await showMessage('Unlock the vault from the split/Pass popup to use this secret.');
+          return;
+        }
+
+        if (entry.isTotp) {
           let code;
           try {
-            code = await totp.generateTOTP(entry.secret);
+            code = await globalThis.SplitPassTotp.generateTOTP(secret);
           } catch {
             await showMessage('Unable to generate 2FA code.');
             return;
           }
-          const otpInput = findOtpInput();
-          if (!otpInput) {
+          if (!fillOtpCode(code)) {
             await showMessage('No 2FA field found on this page.');
             return;
           }
-          fillTarget(otpInput, code);
           state.dismissed = true;
           state.suppressVaultRefreshUntil = now() + 2000;
           hideSitePanel();
-          await touchSecret(entry.domain || globalThis.location.hostname, entry.secret, 'site_panel_fill', entry.username);
+          await touchEntry(entry.id);
           return;
         }
 
         if (entry.username) {
-          const usernameInput = findUsernameInput();
+          const usernameInput = findUsernameInput(resolveFillTarget(preferredInput));
           if (usernameInput) fillTarget(usernameInput, entry.username);
         }
 
-        const filledInputs = await fillVisiblePasswordInputsStable(entry.secret, preferredInput);
+        const filledInputs = await fillVisiblePasswordInputsStable(secret, preferredInput);
         if (!filledInputs.length) {
           await showMessage('No visible password field found.');
           return;
@@ -512,21 +446,26 @@
         state.dismissed = true;
         state.suppressVaultRefreshUntil = now() + 2000;
         hideSitePanel();
-        await touchSecret(entry.domain || globalThis.location.hostname, entry.secret, 'site_panel_fill', entry.username);
+        await touchEntry(entry.id);
       },
       onDelete: async (entry) => {
-        if (!entry?.secret) return;
-        await sendRuntimeMessage({
-          type: 'splitpass.removeRecentSecret',
-          domain: entry.domain || globalThis.location.hostname,
-          secret: entry.secret,
-          username: entry.username || '',
-        }).catch(() => undefined);
+        if (!entry?.id) return;
+        await sendRuntimeMessage({ type: 'splitpass.removeEntry', id: entry.id }).catch(() => undefined);
         state.panel.entries = state.panel.entries.filter((e) => e !== entry);
         if (!state.panel.entries.length) {
           hideSitePanel();
           return;
         }
+        await renderEntries(state.panel.entries, preferredInput);
+      },
+      onRetention: async (entry, retention) => {
+        if (!entry?.id) return;
+        state.suppressVaultRefreshUntil = now() + 2000;
+        const response = await sendRuntimeMessage({ type: 'splitpass.setRetention', id: entry.id, retention }).catch(
+          () => null
+        );
+        if (!response?.ok || !response.entry) return;
+        state.panel.entries = state.panel.entries.map((e) => (e === entry ? response.entry : e));
         await renderEntries(state.panel.entries, preferredInput);
       },
     });
@@ -561,7 +500,7 @@
       return;
     }
 
-    const entries = await getRecentSecretsForDomain(globalThis.location.hostname);
+    const entries = await readRecentSecretsForDomain(globalThis.location.hostname);
     if (!entries.length) {
       hideSitePanel();
       return;
@@ -575,15 +514,15 @@
     state.refreshInFlight = true;
 
     try {
-      await refreshUiState();
-
-      if (state.popupOpen) {
+      if (!pageHasVisiblePasswordInput()) {
+        resetDismissedState();
         hideSitePanel();
         return;
       }
 
-      if (!pageHasVisiblePasswordInput()) {
-        resetDismissedState();
+      await refreshUiState();
+
+      if (state.popupOpen) {
         hideSitePanel();
         return;
       }
@@ -714,8 +653,10 @@
   globalThis.addEventListener('resize', () => scheduleRefresh());
   document.addEventListener('visibilitychange', handleVisibilityChange);
 
-  const observer = new MutationObserver(() => {
-    scheduleRefreshBurst();
+  const observer = new MutationObserver((mutations) => {
+    if (state.panel.visible || mutations.some(formScan.mutationTouchesInputs)) {
+      scheduleRefreshBurst();
+    }
   });
   observer.observe(document.documentElement, {
     attributes: true,
@@ -740,13 +681,7 @@
       }
 
       if (message.type === 'splitpass.fillTotp') {
-        const otpInput = findOtpInput();
-        if (otpInput) {
-          fillTarget(otpInput, String(message.code || ''));
-          sendResponse({ ok: true, filled: true });
-        } else {
-          sendResponse({ ok: true, filled: false });
-        }
+        sendResponse({ ok: true, filled: fillOtpCode(String(message.code || '')) });
         return true;
       }
 
@@ -754,7 +689,7 @@
 
       (async () => {
         if (message.username) {
-          const usernameInput = findUsernameInput();
+          const usernameInput = findUsernameInput(resolveFillTarget(state.lastFocusedPasswordInput));
           if (usernameInput) fillTarget(usernameInput, message.username);
         }
         const filledInputs = await fillVisiblePasswordInputsStable(String(message.secret || ''), state.lastFocusedPasswordInput);

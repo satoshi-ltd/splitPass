@@ -28,6 +28,7 @@ beforeEach(() => {
   local = makeArea();
   session = makeArea();
   globalThis.chrome = { storage: { local, session }, runtime: { id: 'test' } };
+  require('../lib/browser-api.js');
   require('../lib/vault.js');
   vault = globalThis.SplitPassVault;
 });
@@ -106,7 +107,7 @@ skipWithoutCrypto('SplitPassVault crypto', () => {
 
   it('keeps saved secrets readable after a lock/unlock cycle', async () => {
     await vault.initializeVault('correct horse battery');
-    await vault.saveRecentSecret('myapp.herokuapp.com', 'super-secret', 'popup_scan', 'alice');
+    await vault.saveRecentSecret('myapp.herokuapp.com', 'super-secret', 'alice');
     await vault.lockVault();
     await vault.unlockVault('correct horse battery');
 

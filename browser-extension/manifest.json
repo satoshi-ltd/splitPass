@@ -10,6 +10,7 @@
     "128": "assets/icon-extension-128.png"
   },
   "permissions": [
+    "alarms",
     "clipboardWrite",
     "storage",
     "activeTab"
@@ -39,6 +40,7 @@
         "lib/browser-api.js",
         "lib/totp.js",
         "lib/secret-item.js",
+        "lib/form-scan.js",
         "content.js"
       ],
       "run_at": "document_idle"

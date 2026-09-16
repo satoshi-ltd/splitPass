@@ -3,6 +3,7 @@ const scannerUi = globalThis.SplitPassScannerUi.createShell();
 const secretItem = globalThis.SplitPassSecretItem;
 const vault = globalThis.SplitPassVault;
 const passphrase = globalThis.SplitPassPassphrase;
+const cameraAccess = globalThis.SplitPassCameraAccess;
 const { callStorage } = globalThis.SplitPassBrowserApi;
 const browserApi = globalThis.browser || globalThis.chrome || {};
 const UI_STATE_STORAGE_KEY = 'splitpass.browser.ui.v1';
@@ -16,7 +17,7 @@ const cameraEmptyCopy = scannerUi.elements.cameraEmptyCopy;
 const cameraEmptyTitle = scannerUi.elements.cameraEmptyTitle;
 const closeButton = scannerUi.elements.closeButton;
 const headerSubtitle = scannerUi.elements.headerSubtitle;
-const retryButton = scannerUi.elements.retryButton;
+const cameraAccessButton = scannerUi.elements.cameraAccessButton;
 const passcodePanel = scannerUi.elements.passcodePanel;
 const passcodeInput = scannerUi.elements.passcodeInput;
 const unlockButton = scannerUi.elements.unlockButton;
@@ -105,7 +106,6 @@ const state = {
   cameraStarting: false,
   detectedValue: '',
   detector: null,
-  failedUnlockAttempts: 0,
   loopHandle: 0,
   scanning: false,
   stream: null,
@@ -148,7 +148,7 @@ function startPopupHeartbeat() {
 function setMainViewVisible(visible) {
   stage.classList.toggle('hidden', !visible);
   caption.classList.toggle('hidden', !visible);
-  retryButton.classList.toggle('hidden', !visible || retryButton.classList.contains('splitpass-hidden'));
+  cameraAccessButton.classList.toggle('hidden', !visible || cameraAccessButton.classList.contains('splitpass-hidden'));
   passcodePanel.classList.toggle('hidden', !visible || passcodePanel.classList.contains('splitpass-hidden'));
 }
 
@@ -175,9 +175,28 @@ function showCameraEmpty(show) {
   cameraEmpty.classList.toggle('splitpass-hidden', !show);
 }
 
-function showRetry(show) {
-  retryButton.classList.toggle('splitpass-hidden', !show);
-  retryButton.classList.toggle('hidden', !show);
+function showCameraAccess(show) {
+  cameraAccessButton.classList.toggle('splitpass-hidden', !show);
+  cameraAccessButton.classList.toggle('hidden', !show);
+}
+
+function showCameraAccessState(permission) {
+  const { title, copy } = cameraAccess.POPUP_COPY[permission] || cameraAccess.POPUP_COPY.prompt;
+  stopCamera();
+  setScanTriggerState(false);
+  setEmptyState(title, copy);
+  showCameraEmpty(true);
+  showCameraAccess(true);
+  clearMessage();
+}
+
+async function openCameraAccessPage() {
+  const tabsApi = browserApi?.tabs;
+  const url = browserApi?.runtime?.getURL?.(cameraAccess.PAGE_PATH);
+  if (!tabsApi?.create || !url) return;
+
+  await Promise.resolve(tabsApi.create({ url })).catch(() => undefined);
+  window.close();
 }
 
 function togglePasscodePanel(show) {
@@ -253,47 +272,47 @@ function renderRecentPanel() {
     faviconUrl: state.currentFaviconUrl,
     name: siteLabel,
     onPrimary: async (entry) => {
-      if (!entry?.secret) return;
+      if (!entry?.id || !entry.secret) return;
 
       const totp = globalThis.SplitPassTotp;
-      if (totp?.isTotpUri(entry.secret)) {
-        let code;
+      const isTotp = !!totp?.isTotpUri(entry.secret);
+      let value = entry.secret;
+
+      if (isTotp) {
         try {
-          code = await totp.generateTOTP(entry.secret);
+          value = await totp.generateTOTP(entry.secret);
         } catch (error) {
           setMessage(error instanceof Error ? error.message : 'Unable to generate 2FA code.', 'error');
           return;
         }
-        const filled = await fillActiveTotpCode(code);
-        if (filled) {
-          await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill', entry.username || '');
-          window.close();
-          return;
-        }
-        const copied = await copySecretToClipboard(code);
-        if (!copied) return;
-        await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_copy', entry.username || '');
-        globalThis.alert('No 2FA field was found. The code is now in your clipboard.');
-        window.close();
-        return;
       }
 
-      const filled = await fillActiveTabPassword(entry.secret, entry.username || '');
+      const filled = isTotp ? await fillActiveTotpCode(value) : await fillActiveTabPassword(value, entry.username || '');
       if (filled) {
-        await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_fill', entry.username || '');
+        await vault.touchEntry(entry.id);
         window.close();
         return;
       }
 
-      const copied = await copySecretToClipboard(entry.secret);
+      const copied = await copySecretToClipboard(value);
       if (!copied) return;
-      await vault.saveRecentSecret(entry.domain || state.currentDomain, entry.secret, 'popup_copy', entry.username || '');
-      globalThis.alert('No password field was found. The secret is now in your clipboard.');
-      window.close();
+      await vault.touchEntry(entry.id);
+      await refreshRecentSecret();
+      setMessage(
+        isTotp
+          ? 'No 2FA field was found. The code is now in your clipboard.'
+          : 'No password field was found. The secret is now in your clipboard.',
+        'warning'
+      );
     },
     onDelete: async (entry) => {
-      if (!entry?.secret) return;
-      await vault.removeRecentSecret(entry.domain || state.currentDomain, entry.secret, entry.username || '');
+      if (!entry?.id) return;
+      await vault.removeEntry(entry.id);
+      await refreshRecentSecret();
+    },
+    onRetention: async (entry, retention) => {
+      if (!entry?.id) return;
+      await vault.setRetention(entry.id, retention);
       await refreshRecentSecret();
     },
   });
@@ -329,7 +348,7 @@ function renderScannerState() {
     if (shouldWaitForUserAction) {
       stopCamera();
       togglePasscodePanel(false);
-      showRetry(false);
+      showCameraAccess(false);
       setEmptyState('Click to scan', 'Scan another QR if you need a new password.');
       showCameraEmpty(true);
       return;
@@ -347,7 +366,7 @@ function renderScannerState() {
   setScanTriggerState(false);
   stopCamera();
   togglePasscodePanel(false);
-  showRetry(false);
+  showCameraAccess(false);
 }
 
 async function copySecretToClipboard(secret) {
@@ -408,15 +427,13 @@ async function sendMessageToTab(tabId, payload) {
   });
 }
 
-async function fillActiveTotpCode(code) {
+async function queryActiveTab() {
   const tabsApi = browserApi?.tabs;
-  if (!tabsApi?.query) return false;
-
-  let tabs = [];
+  if (!tabsApi?.query) return null;
 
   try {
     const maybePromise = tabsApi.query({ active: true, currentWindow: true });
-    tabs = maybePromise && typeof maybePromise.then === 'function'
+    const tabs = maybePromise && typeof maybePromise.then === 'function'
       ? await maybePromise
       : await new Promise((resolve, reject) => {
           tabsApi.query({ active: true, currentWindow: true }, (result) => {
@@ -428,94 +445,35 @@ async function fillActiveTotpCode(code) {
             resolve(result || []);
           });
         });
+    return Array.isArray(tabs) ? tabs[0] || null : null;
   } catch {
-    tabs = [];
+    return null;
   }
+}
 
-  const activeTab = Array.isArray(tabs) ? tabs[0] : null;
-  if (typeof activeTab?.id !== 'number') return false;
+async function sendMessageToActiveTab(payload) {
+  const activeTab = await queryActiveTab();
+  if (typeof activeTab?.id !== 'number') return null;
 
   try {
-    const response = await sendMessageToTab(activeTab.id, {
-      type: 'splitpass.fillTotp',
-      code,
-    });
-    return !!response?.filled;
+    return await sendMessageToTab(activeTab.id, payload);
   } catch {
-    return false;
+    return null;
   }
+}
+
+async function fillActiveTotpCode(code) {
+  const response = await sendMessageToActiveTab({ type: 'splitpass.fillTotp', code });
+  return !!response?.filled;
 }
 
 async function fillActiveTabPassword(secret, username = '') {
-  const tabsApi = browserApi?.tabs;
-  if (!tabsApi?.query) return false;
-
-  let tabs = [];
-
-  try {
-    const maybePromise = tabsApi.query({ active: true, currentWindow: true });
-    tabs = maybePromise && typeof maybePromise.then === 'function'
-      ? await maybePromise
-      : await new Promise((resolve, reject) => {
-          tabsApi.query({ active: true, currentWindow: true }, (result) => {
-            const runtimeError = browserApi?.runtime?.lastError;
-            if (runtimeError) {
-              reject(new Error(runtimeError.message));
-              return;
-            }
-            resolve(result || []);
-          });
-        });
-  } catch {
-    tabs = [];
-  }
-
-  const activeTab = Array.isArray(tabs) ? tabs[0] : null;
-  if (typeof activeTab?.id !== 'number') return false;
-
-  try {
-    const response = await sendMessageToTab(activeTab.id, {
-      type: 'splitpass.fillPassword',
-      secret,
-      username,
-    });
-
-    return !!response?.filled;
-  } catch {
-    return false;
-  }
+  const response = await sendMessageToActiveTab({ type: 'splitpass.fillPassword', secret, username });
+  return !!response?.filled;
 }
 
 async function notifyActiveTabVaultReady() {
-  const tabsApi = browserApi?.tabs;
-  if (!tabsApi?.query) return;
-
-  let tabs = [];
-
-  try {
-    const maybePromise = tabsApi.query({ active: true, currentWindow: true });
-    tabs = maybePromise && typeof maybePromise.then === 'function'
-      ? await maybePromise
-      : await new Promise((resolve, reject) => {
-          tabsApi.query({ active: true, currentWindow: true }, (result) => {
-            const runtimeError = browserApi?.runtime?.lastError;
-            if (runtimeError) {
-              reject(new Error(runtimeError.message));
-              return;
-            }
-            resolve(result || []);
-          });
-        });
-  } catch {
-    tabs = [];
-  }
-
-  const activeTab = Array.isArray(tabs) ? tabs[0] : null;
-  if (typeof activeTab?.id !== 'number') return;
-
-  await sendMessageToTab(activeTab.id, {
-    type: 'splitpass.refreshSitePanel',
-  }).catch(() => undefined);
+  await sendMessageToActiveTab({ type: 'splitpass.refreshSitePanel' });
 }
 
 async function refreshRecentSecret() {
@@ -556,30 +514,7 @@ async function syncVaultState() {
 }
 
 async function setActiveDomain() {
-  const tabsApi = browserApi.tabs;
-  if (!tabsApi?.query) return;
-
-  let tabs = [];
-
-  try {
-    const maybePromise = tabsApi.query({ active: true, currentWindow: true });
-    tabs = maybePromise && typeof maybePromise.then === 'function'
-      ? await maybePromise
-      : await new Promise((resolve, reject) => {
-          tabsApi.query({ active: true, currentWindow: true }, (result) => {
-            const runtimeError = browserApi?.runtime?.lastError;
-            if (runtimeError) {
-              reject(new Error(runtimeError.message));
-              return;
-            }
-            resolve(result || []);
-          });
-        });
-  } catch {
-    tabs = [];
-  }
-
-  const activeTab = Array.isArray(tabs) ? tabs[0] : null;
+  const activeTab = await queryActiveTab();
   state.currentUrl = String(activeTab?.url || '');
   state.currentDomain = vault.normalizeDomain(state.currentUrl);
   state.currentFaviconUrl = String(activeTab?.favIconUrl || '');
@@ -587,7 +522,7 @@ async function setActiveDomain() {
 
 function handleUnsupportedResult(result) {
   if (result.code === 'unsupported_type') {
-    setMessage('Only password QR values are supported right now.', 'warning');
+    setMessage('Only password and 2FA QR values are supported right now.', 'warning');
     return;
   }
 
@@ -598,7 +533,7 @@ async function persistRecentSecret(secret, username = '') {
   if (!state.unlocked || !state.currentDomain) return;
 
   try {
-    await vault.saveRecentSecret(state.currentDomain, secret, 'popup_scan', username);
+    await vault.saveRecentSecret(state.currentDomain, secret, username);
     state.recentEntries = await vault.getRecentSecretsForDomain(state.currentDomain);
   } catch (error) {
     if (error?.code === 'ERR_VAULT_LOCKED') {
@@ -620,7 +555,7 @@ function setCopiedState() {
   stopCamera();
   togglePasscodePanel(false);
   setScanTriggerState(true);
-  showRetry(false);
+  showCameraAccess(false);
   setEmptyState('Saved', 'Click to scan again.');
   showCameraEmpty(true);
   clearMessage();
@@ -722,7 +657,7 @@ async function scanFrame() {
   } catch (error) {
     stopCamera();
     setScanTriggerState(true);
-    showRetry(false);
+    showCameraAccess(false);
     setEmptyState('Scanner paused', 'Tap to try again.');
     setMessage(error instanceof Error ? error.message : 'Unable to scan the QR.', 'error');
     return;
@@ -740,7 +675,7 @@ async function startCamera({ userInitiated = false } = {}) {
   state.cameraStartedByUser = !!userInitiated || state.cameraStartedByUser || !state.recentEntries.length;
   togglePasscodePanel(false);
   setScanTriggerState(false);
-  showRetry(false);
+  showCameraAccess(false);
   clearMessage();
   resetEmptyState();
   state.detectedValue = '';
@@ -751,6 +686,14 @@ async function startCamera({ userInitiated = false } = {}) {
     }
 
     await ensureDetector();
+
+    const permission = await cameraAccess.queryCameraPermission();
+    if (requestId !== state.cameraRequestId) return;
+    if (cameraAccess.needsAccessPage(permission)) {
+      state.cameraStarting = false;
+      showCameraAccessState(permission);
+      return;
+    }
 
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
@@ -779,17 +722,15 @@ async function startCamera({ userInitiated = false } = {}) {
     scanFrame();
   } catch (error) {
     state.cameraStarting = false;
+    if (error?.name === 'NotAllowedError') {
+      showCameraAccessState('prompt');
+      return;
+    }
     stopCamera();
     setScanTriggerState(true);
-    showRetry(false);
+    showCameraAccess(false);
     setEmptyState('Scanner paused', 'Tap to try again.');
     setMessage(error instanceof Error ? error.message : 'Unable to start the camera.', 'error');
-  }
-}
-
-function handleRetry() {
-  if (state.unlocked) {
-    startCamera({ userInitiated: true });
   }
 }
 
@@ -825,7 +766,6 @@ async function handleUnlock() {
 
 async function performVaultReset(msg = 'Vault reset. Create a new password.') {
   await vault.resetVault();
-  state.failedUnlockAttempts = 0;
   state.vaultInitialized = false;
   state.unlocked = false;
   state.recentEntries = [];
@@ -867,7 +807,6 @@ async function handleAuthSubmit() {
       await vault.unlockVault(masterPassword);
     }
 
-    state.failedUnlockAttempts = 0;
     masterPasswordInput.value = '';
     masterPasswordConfirmInput.value = '';
     await syncVaultState();
@@ -875,7 +814,6 @@ async function handleAuthSubmit() {
     clearMessage();
   } catch (error) {
     if (!isSetup && error?.code === 'ERR_VAULT_UNLOCK_FAILED') {
-      state.failedUnlockAttempts += 1;
       setMessage('Wrong password. Your vault stays safe — try again.', 'error');
       return;
     }
@@ -897,7 +835,7 @@ resetDo.addEventListener('click', async () => {
   await performVaultReset('Vault reset. Create a new password.');
 });
 
-retryButton.addEventListener('click', handleRetry);
+cameraAccessButton.addEventListener('click', openCameraAccessPage);
 closeButton.addEventListener('click', () => window.close());
 lockButton.addEventListener('click', async () => {
   stopCamera();

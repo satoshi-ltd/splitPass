@@ -3,7 +3,15 @@
   const SESSION_STORAGE_KEY = 'splitpass.browser.session.v1';
   const VAULT_TYPE = 'splitpass.browser.vault.v1';
   const SESSION_TYPE = 'splitpass.browser.session.v1';
-  const ENTRY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const RETENTION = { AUTO: 'auto', EXTENDED: 'extended', PINNED: 'pinned' };
+  const RETENTION_LEVELS = new Set(Object.values(RETENTION));
+  const AUTO_TTL_TIERS = [
+    { minUses: 10, ttlMs: 90 * DAY_MS },
+    { minUses: 3, ttlMs: 30 * DAY_MS },
+    { minUses: 1, ttlMs: 7 * DAY_MS },
+  ];
+  const EXTENDED_TTL_MS = 365 * DAY_MS;
   const SESSION_TTL_MS = 60 * 60 * 1000;
   const MAX_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
   const MIN_MASTER_PASSWORD_LENGTH = 8;
@@ -12,37 +20,10 @@
   const textEncoder = new TextEncoder();
   const textDecoder = new TextDecoder();
   const browserApi = globalScope.browser || globalScope.chrome || {};
+  const { callStorage } = globalScope.SplitPassBrowserApi;
 
   function getStorageArea(name) {
     return browserApi?.storage?.[name] || null;
-  }
-
-  async function callStorage(area, method, payload) {
-    if (!area || typeof area[method] !== 'function') {
-      throw new Error('Browser storage is not available.');
-    }
-
-    try {
-      const maybePromise = area[method](payload);
-      if (maybePromise && typeof maybePromise.then === 'function') {
-        return await maybePromise;
-      }
-    } catch (error) {
-      if (!String(error?.message || '').includes('No matching signature')) {
-        throw error;
-      }
-    }
-
-    return await new Promise((resolve, reject) => {
-      area[method](payload, (result) => {
-        const runtimeError = browserApi?.runtime?.lastError;
-        if (runtimeError) {
-          reject(new Error(runtimeError.message));
-          return;
-        }
-        resolve(result);
-      });
-    });
   }
 
   async function storageGet(areaName, key) {
@@ -161,12 +142,45 @@
     return `${normalizeDomain(domain)}\u0000${sanitizeSecret(secret)}\u0000${sanitizeUsername(username)}`;
   }
 
+  function normalizeRetention(value) {
+    return RETENTION_LEVELS.has(value) ? value : RETENTION.AUTO;
+  }
+
+  function normalizeUseCount(value) {
+    return Math.max(1, Math.floor(Number(value) || 1));
+  }
+
+  function resolveEntryTtl(retention = RETENTION.AUTO, useCount = 1) {
+    if (retention === RETENTION.PINNED) return null;
+    if (retention === RETENTION.EXTENDED) return EXTENDED_TTL_MS;
+
+    const uses = normalizeUseCount(useCount);
+    return AUTO_TTL_TIERS.find((tier) => uses >= tier.minUses).ttlMs;
+  }
+
+  function resolveExpiresAt(retention, useCount, from) {
+    const ttlMs = resolveEntryTtl(retention, useCount);
+    return ttlMs === null ? null : from + ttlMs;
+  }
+
+  function isEntryAlive(entry, timestamp) {
+    return entry.retention === RETENTION.PINNED || Number(entry.expiresAt) > timestamp;
+  }
+
+  function resolveVaultExpiresAt(entries = []) {
+    if (!entries.length || entries.some((entry) => entry.retention === RETENTION.PINNED)) return null;
+    return Math.max(...entries.map((entry) => Number(entry.expiresAt)));
+  }
+
+  const matchesFingerprint = (fingerprint) => (entry) =>
+    buildEntryFingerprint(entry.domain, entry.secret, entry.username) === fingerprint;
+
   function pruneEntries(entries = [], timestamp = now()) {
     const validEntries = Array.isArray(entries)
       ? entries
           .filter((entry) => entry && typeof entry === 'object')
           .filter((entry) => typeof entry.domain === 'string' && typeof entry.secret === 'string')
-          .filter((entry) => Number(entry.expiresAt) > timestamp)
+          .filter((entry) => isEntryAlive(entry, timestamp))
       : [];
 
     const newestByFingerprint = new Map();
@@ -180,6 +194,7 @@
         const fingerprint = buildEntryFingerprint(domain, secret, username);
         if (!domain || !secret || newestByFingerprint.has(fingerprint)) return;
 
+        const retention = normalizeRetention(entry.retention);
         newestByFingerprint.set(fingerprint, {
           id: String(entry.id || createEntryId()),
           domain,
@@ -187,8 +202,9 @@
           username,
           createdAt: Number(entry.createdAt || timestamp),
           lastUsedAt: Number(entry.lastUsedAt || entry.createdAt || timestamp),
-          expiresAt: Number(entry.expiresAt || timestamp + ENTRY_TTL_MS),
-          source: String(entry.source || 'popup_scan'),
+          expiresAt: retention === RETENTION.PINNED ? null : Number(entry.expiresAt),
+          retention,
+          useCount: normalizeUseCount(entry.useCount),
         });
       });
 
@@ -339,11 +355,14 @@
     const timestamp = now();
     const payload = { entries: pruneEntries(entries, timestamp) };
     const ciphertext = await encryptPayload(payload, key);
+    // emptyCiphertext lets purgeExpiredVault drop expired entries without the key, keeping unlock's password check.
+    const emptyCiphertext = await encryptPayload({ entries: [] }, key);
 
     await writeVaultDocument({
       type: VAULT_TYPE,
       createdAt: Number(document?.createdAt || timestamp),
       updatedAt: timestamp,
+      expiresAt: resolveVaultExpiresAt(payload.entries),
       kdf: {
         algorithm: 'PBKDF2',
         hash: 'SHA-256',
@@ -351,6 +370,7 @@
         salt: String(document?.kdf?.salt || ''),
       },
       ciphertext,
+      emptyCiphertext,
     });
 
     return payload.entries;
@@ -359,23 +379,10 @@
   async function initializeVault(masterPassword = '') {
     ensureCrypto();
 
-    const timestamp = now();
     const saltBytes = globalScope.crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveVaultKey(masterPassword, saltBytes);
-    const document = {
-      type: VAULT_TYPE,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      kdf: {
-        algorithm: 'PBKDF2',
-        hash: 'SHA-256',
-        iterations: PBKDF2_ITERATIONS,
-        salt: encodeBase64(saltBytes),
-      },
-      ciphertext: await encryptPayload({ entries: [] }, key),
-    };
 
-    await writeVaultDocument(document);
+    await persistEntries({ kdf: { salt: encodeBase64(saltBytes), iterations: PBKDF2_ITERATIONS } }, [], key);
     await writeSessionKey(key);
     return true;
   }
@@ -443,53 +450,95 @@
     return cleanedEntries.filter((entry) => entry.domain === normalizedDomain);
   }
 
-  async function saveRecentSecret(domain = '', secret = '', source = 'popup_scan', username = '') {
+  function renewEntry(entry, timestamp) {
+    const useCount = entry.useCount + 1;
+    const expiresAt = resolveExpiresAt(entry.retention, useCount, timestamp);
+    return { ...entry, useCount, lastUsedAt: timestamp, expiresAt };
+  }
+
+  async function loadLiveEntries() {
+    const key = await requireUnlockedKey();
+    const { document, entries } = await decryptVaultEntries(key);
+    const timestamp = now();
+    return { key, document, timestamp, entries: pruneEntries(entries, timestamp) };
+  }
+
+  async function saveRecentSecret(domain = '', secret = '', username = '') {
     const normalizedDomain = normalizeDomain(domain);
     const normalizedSecret = sanitizeSecret(secret);
     const normalizedUsername = sanitizeUsername(username);
     if (!normalizedDomain || !normalizedSecret) return null;
 
-    const key = await requireUnlockedKey();
-    const { document, entries } = await decryptVaultEntries(key);
-    const timestamp = now();
-    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret, normalizedUsername);
-    const nextEntries = pruneEntries(entries, timestamp).filter(
-      (entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) !== fingerprint
-    );
+    const { key, document, timestamp, entries } = await loadLiveEntries();
+    const matches = matchesFingerprint(buildEntryFingerprint(normalizedDomain, normalizedSecret, normalizedUsername));
+    const previous = entries.find(matches);
+    const nextEntry = previous
+      ? renewEntry(previous, timestamp)
+      : {
+          id: createEntryId(),
+          domain: normalizedDomain,
+          secret: normalizedSecret,
+          username: normalizedUsername,
+          createdAt: timestamp,
+          lastUsedAt: timestamp,
+          expiresAt: resolveExpiresAt(RETENTION.AUTO, 1, timestamp),
+          retention: RETENTION.AUTO,
+          useCount: 1,
+        };
 
-    nextEntries.unshift({
-      id: createEntryId(),
-      domain: normalizedDomain,
-      secret: normalizedSecret,
-      username: normalizedUsername,
-      createdAt: timestamp,
-      lastUsedAt: timestamp,
-      expiresAt: timestamp + ENTRY_TTL_MS,
-      source: String(source || 'popup_scan'),
-    });
-
-    const persistedEntries = await persistEntries(document, nextEntries, key);
-    return persistedEntries.find((entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) === fingerprint) || null;
+    const keptEntries = entries.filter((entry) => !matches(entry));
+    const persistedEntries = await persistEntries(document, [nextEntry, ...keptEntries], key);
+    return persistedEntries.find(matches) || null;
   }
 
-  async function removeRecentSecret(domain = '', secret = '', username = '') {
-    const normalizedDomain = normalizeDomain(domain);
-    const normalizedSecret = sanitizeSecret(secret);
-    const normalizedUsername = sanitizeUsername(username);
-    if (!normalizedDomain || !normalizedSecret) return false;
+  async function touchEntry(id = '') {
+    const { key, document, timestamp, entries } = await loadLiveEntries();
+    const previous = entries.find((entry) => entry.id === id);
+    if (!previous) return null;
 
-    const key = await requireUnlockedKey();
-    const { document, entries } = await decryptVaultEntries(key);
-    const fingerprint = buildEntryFingerprint(normalizedDomain, normalizedSecret, normalizedUsername);
-    const nextEntries = pruneEntries(entries).filter(
-      (entry) => buildEntryFingerprint(entry.domain, entry.secret, entry.username) !== fingerprint
+    const persistedEntries = await persistEntries(
+      document,
+      [renewEntry(previous, timestamp), ...entries.filter((entry) => entry.id !== id)],
+      key
     );
+    return persistedEntries.find((entry) => entry.id === id) || null;
+  }
 
-    if (nextEntries.length === entries.length) {
-      return false;
-    }
+  async function revealSecret(id = '') {
+    const { entries } = await loadLiveEntries();
+    return entries.find((entry) => entry.id === id)?.secret || null;
+  }
+
+  async function removeEntry(id = '') {
+    const { key, document, entries } = await loadLiveEntries();
+    const nextEntries = entries.filter((entry) => entry.id !== id);
+    if (nextEntries.length === entries.length) return false;
 
     await persistEntries(document, nextEntries, key);
+    return true;
+  }
+
+  async function setRetention(id = '', retention = RETENTION.AUTO) {
+    if (!RETENTION_LEVELS.has(retention)) return null;
+
+    const { key, document, timestamp, entries } = await loadLiveEntries();
+    if (!entries.some((entry) => entry.id === id)) return null;
+
+    const nextEntries = entries.map((entry) =>
+      entry.id === id
+        ? { ...entry, retention, expiresAt: resolveExpiresAt(retention, entry.useCount, timestamp) }
+        : entry
+    );
+    const persistedEntries = await persistEntries(document, nextEntries, key);
+    return persistedEntries.find((entry) => entry.id === id) || null;
+  }
+
+  async function purgeExpiredVault() {
+    const document = await readVaultDocument();
+    const expiresAt = document?.expiresAt;
+    if (typeof expiresAt !== 'number' || expiresAt > now() || !document.emptyCiphertext) return false;
+
+    await writeVaultDocument({ ...document, ciphertext: document.emptyCiphertext, expiresAt: null, updatedAt: now() });
     return true;
   }
 
@@ -506,18 +555,23 @@
   }
 
   globalScope.SplitPassVault = {
-    ENTRY_TTL_MS,
+    RETENTION,
     SESSION_TTL_MS,
     MIN_MASTER_PASSWORD_LENGTH,
     normalizeDomain,
+    resolveEntryTtl,
     hasVault,
     initializeVault,
     isUnlocked,
     lockVault,
     purgeExpiredSecrets,
-    removeRecentSecret,
+    purgeExpiredVault,
+    removeEntry,
     resetVault,
+    revealSecret,
     saveRecentSecret,
+    setRetention,
+    touchEntry,
     getRecentSecretsForDomain,
     unlockVault,
   };

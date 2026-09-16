@@ -94,6 +94,10 @@
     return /^otpauth:\/\/totp\//i.test(String(value || ''));
   }
 
+  function getTotpPeriod(uri = '') {
+    return parseTotpParams(uri)?.period || 30;
+  }
+
   function getTotpLabel(uri = '') {
     try {
       const match = String(uri || '').match(/^otpauth:\/\/totp\/([^?]+)/i);
@@ -106,20 +110,20 @@
     }
   }
 
-  // Syncs the CSS countdown animation on all .splitpass-item-type badges
-  // within `root` to the actual TOTP clock (30 s period aligned to Unix time).
   function syncTotpBadges(root) {
     if (!root) return;
-    const elapsed = (Date.now() / 1000) % 30;
-    const delay = `-${elapsed.toFixed(3)}s`;
+    const seconds = Date.now() / 1000;
     root.querySelectorAll('.splitpass-item-type').forEach((badge) => {
-      badge.style.animationDelay = delay;
+      const period = Math.max(1, parseInt(badge.dataset.period, 10) || 30);
+      badge.style.setProperty('--totp-period', `${period}s`);
+      badge.style.setProperty('--totp-delay', `-${(seconds % period).toFixed(3)}s`);
     });
   }
 
   globalScope.SplitPassTotp = {
     generateTOTP,
     getTotpLabel,
+    getTotpPeriod,
     isTotpUri,
     syncTotpBadges,
   };

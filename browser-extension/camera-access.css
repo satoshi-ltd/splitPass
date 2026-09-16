@@ -1,0 +1,11 @@
+.splitpass-camera-access-page {
+  display: grid;
+  gap: var(--space-xs);
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.splitpass-camera-access-page .splitpass-button {
+  margin-top: var(--space-md);
+}

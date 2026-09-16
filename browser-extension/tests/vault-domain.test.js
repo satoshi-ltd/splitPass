@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+require('../lib/browser-api.js');
 require('../lib/vault.js');
 
 const { normalizeDomain } = globalThis.SplitPassVault;

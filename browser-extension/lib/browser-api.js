@@ -2,7 +2,9 @@
   const browserApi = globalScope.browser || globalScope.chrome || {};
 
   async function callStorage(area, method, payload) {
-    if (!area || typeof area[method] !== 'function') return undefined;
+    if (!area || typeof area[method] !== 'function') {
+      throw new Error('Browser storage is not available.');
+    }
 
     try {
       const maybePromise = area[method](payload);

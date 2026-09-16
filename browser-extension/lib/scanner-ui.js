@@ -41,7 +41,7 @@
         </label>
         <button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button>
       </div>
-      <button class="splitpass-button splitpass-button-secondary splitpass-retry splitpass-hidden" type="button">Retry camera</button>
+      <button class="splitpass-button splitpass-button-primary splitpass-camera-access splitpass-hidden" type="button">Allow camera access</button>
       <p class="splitpass-message splitpass-hidden"></p>
     `;
 
@@ -49,6 +49,7 @@
       root,
       elements: {
         camera: root.querySelector('.splitpass-video'),
+        cameraAccessButton: root.querySelector('.splitpass-camera-access'),
         cameraEmpty: root.querySelector('.splitpass-empty'),
         cameraEmptyCopy: root.querySelector('.splitpass-empty-copy'),
         cameraEmptyTitle: root.querySelector('.splitpass-empty-title'),
@@ -59,7 +60,6 @@
         message: root.querySelector('.splitpass-message'),
         passcodeInput: root.querySelector('.splitpass-passcode-input'),
         passcodePanel: root.querySelector('.splitpass-passcode'),
-        retryButton: root.querySelector('.splitpass-retry'),
         unlockButton: root.querySelector('.splitpass-unlock'),
       },
     };

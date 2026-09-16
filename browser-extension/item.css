@@ -1,5 +1,5 @@
+.splitpass-item-title,
 .splitpass-item-name,
-.splitpass-item-username,
 .splitpass-item-meta {
   margin: 0;
 }
@@ -23,7 +23,6 @@
   text-align: left;
 }
 
-/* Icon — squared, consistent with app */
 .splitpass-item-icon {
   position: relative;
   display: inline-flex;
@@ -51,14 +50,13 @@
   line-height: 1;
 }
 
-/* Body */
 .splitpass-item-body {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
 
-.splitpass-item-name {
+.splitpass-item-title {
   color: var(--color-text);
   font-size: var(--font-size-body);
   font-weight: 700;
@@ -68,13 +66,43 @@
   white-space: nowrap;
 }
 
-.splitpass-item-username {
-  color: var(--color-accent);
-  font-size: var(--font-size-body);
-  font-weight: 500;
+.splitpass-item-detail {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  min-width: 0;
 }
 
-/* Type indicator — overlaid on the icon corner */
+.splitpass-item-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splitpass-item-meta {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-tiny);
+  line-height: var(--line-height-tiny);
+  white-space: nowrap;
+}
+
+.splitpass-item-retention {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
+.splitpass-item-retention:hover {
+  color: var(--color-accent);
+}
+
 .splitpass-item-type {
   position: absolute;
   right: -3px;
@@ -84,7 +112,6 @@
   justify-content: center;
   padding: 2px 2px 1px 3px;
   border-radius: var(--radius-sm);
-  /* dark-tinted base = elapsed portion */
   background: var(--color-accent);
   box-shadow: inset 0 0 0 99px rgba(0, 0, 0, 0.50);
   color: var(--color-on-accent);
@@ -97,7 +124,6 @@
   isolation: isolate;
 }
 
-/* TOTP countdown — bright accent fill shrinks left→right, dark base = elapsed */
 .splitpass-item-type::before {
   content: '';
   position: absolute;
@@ -105,7 +131,8 @@
   z-index: -1;
   background: var(--color-accent);
   transform-origin: left center;
-  animation: splitpass-totp-progress 30s linear infinite;
+  animation: splitpass-totp-progress var(--totp-period, 30s) linear infinite;
+  animation-delay: var(--totp-delay, 0s);
 }
 
 @keyframes splitpass-totp-progress {
@@ -113,52 +140,97 @@
   to   { transform: scaleX(0); }
 }
 
-.splitpass-item-meta {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-tiny);
-  line-height: var(--line-height-tiny);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Delete button */
-.splitpass-item--deletable {
-  padding-right: 20px;
-}
-
 .splitpass-item-delete {
   position: absolute;
   top: 50%;
   right: 0;
-  transform: translateY(-50%) translateX(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  border: 0;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 10px;
   font-weight: 900;
   line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.splitpass-item-wrap:hover .splitpass-item-delete {
+.splitpass-item-wrap:hover .splitpass-item-delete,
+.splitpass-item-wrap:focus-within .splitpass-item-delete {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(-50%) translateX(0);
-  transition: opacity 0.15s ease 0.4s, transform 0.15s ease 0.4s;
+  transform: translateY(-50%);
 }
 
 .splitpass-item-delete:hover {
+  border-color: var(--color-danger);
   color: var(--color-danger);
+}
+
+.splitpass-item-confirm {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  padding-left: 52px;
+  background: var(--color-background);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(12px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.splitpass-item-wrap.is-confirming .splitpass-item-confirm {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.splitpass-item-wrap.is-confirming .splitpass-item-delete {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splitpass-item-confirm-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  line-height: var(--line-height-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.splitpass-item-confirm-cancel,
+.splitpass-item-confirm-remove {
+  flex: 0 0 auto;
+  height: 28px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: var(--font-size-tiny);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.splitpass-item-confirm-remove {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+  color: #fff;
 }
