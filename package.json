@@ -1,6 +1,6 @@
 {
   "name": "@satoshi-ltd/splitpass",
-  "version": "1.4.15",
+  "version": "1.4.16",
   "main": "node_modules/expo/AppEntry.js",
   "private": false,
   "packageManager": "yarn@1.22.22",
@@ -21,9 +21,11 @@
     "test:coverage": "jest --coverage",
     "eas:login": "npx eas-cli login",
     "eas:whoami": "npx eas-cli whoami",
-    "build:dev": "npx eas-cli build --platform android --profile development",
-    "build:preview": "npx eas-cli build --platform android --profile preview",
-    "build:prod": "npx eas-cli build --platform android --profile production"
+    "build:dev": "node scripts/android-build.mjs dev",
+    "build:prod": "node scripts/android-build.mjs prod",
+    "build:local:dev": "node scripts/android-build.mjs dev --local",
+    "build:local:prod": "node scripts/android-build.mjs prod --local",
+    "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/doto": "^0.4.1",

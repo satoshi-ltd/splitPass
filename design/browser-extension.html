@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>split/Pass design · Browser extension</title>
+<meta name="description" content="Every browser extension view at real size.">
+<link rel="icon" href="../assets/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="../browser-extension/theme.css">
+<link rel="stylesheet" href="../browser-extension/item.css">
+<link rel="stylesheet" href="../browser-extension/scanner-ui.css">
+<link rel="stylesheet" href="../browser-extension/popup.css">
+<link rel="stylesheet" href="../browser-extension/content.css">
+<link rel="stylesheet" href="../browser-extension/camera-access.css">
+<link rel="stylesheet" href="mobile-tokens.css">
+<link rel="stylesheet" href="extension-tokens.css">
+<link rel="stylesheet" href="kit.css">
+<script src="kit.js"></script>
+</head>
+<body class="kit">
+<header class="kit-header">
+<a class="kit-brand" href="index.html"><img src="../assets/icon.png" alt=""><span>split<b>/</b>Pass</span></a>
+<nav class="kit-nav" aria-label="Design kit"><a href="index.html">System</a><a href="browser-extension.html" aria-current="page">Browser extension</a><a href="mobile.html">Mobile</a><a href="open-work.html">Open work</a><a href="proposals.html">Proposals</a></nav>
+<span class="kit-version">v1.4.16 · production</span>
+<div class="kit-theme" role="group" aria-label="Theme"><button type="button" data-kit-theme="light">Light</button><button type="button" data-kit-theme="dark">Dark</button></div>
+</header>
+<main class="kit-main">
+<section class="kit-intro"><h1>Browser extension</h1><p>The browser extension: popup, in-page panel and camera-access page, rendered with the real stylesheets from <code>browser-extension/</code> and the markup its scripts build. The popup is 360 px wide, exactly as Chrome and Brave show it.</p>
+<div class="kit-facts"><span>sources browser-extension/*.css · popup.js · content.js · lib/</span><span>font Doto 500 / 700 / 900</span><span>radius 0 · no shadows</span></div></section>
+<section class="kit-section" id="theme"><h2>Theme</h2><p>The extension picks light or dark only from the operating system (<code>prefers-color-scheme</code> in <code>theme.css</code>); it has no setting of its own. This page mirrors the switch above by re-declaring the same variables under <code>:root[data-theme]</code> in the generated <code>extension-tokens.css</code>, read from <code>theme.css</code>, so the real stylesheets can be shown in both modes. The camera scrim, <code>--color-on-inverse</code> and <code>--color-overlay-soft</code> stay light in both, as in the extension.</p></section>
+<section class="kit-section" id="vault"><h2>Vault</h2><p>First run asks for a master password; afterwards the popup opens on the unlock form. Everything else is hidden until the vault is unlocked.</p>
+<div class="kit-phones">
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength hidden"></p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault</strong><span>First run. The strength label stays hidden until something is typed.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" value="abc12345" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength is-weak">Weak key</p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault · weak key</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" value="summer-garden" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength is-medium">Acceptable key</p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault · acceptable key</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" value="correct-horse-battery" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" value="correct-horse-battery" /></label><p class="splitpass-auth-strength is-strong">Strong key</p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault · strong key</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">That passphrase is too weak. Use 12+ characters or 3-4 random words.</p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" value="abc12345" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" value="abc12345" /></label><p class="splitpass-auth-strength is-weak">Weak key</p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault · refused</strong><span>Weak passphrases are refused; so is a mismatching confirmation.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Create vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Create password" value="correct-horse-battery" disabled /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm"><input class="splitpass-auth-input" data-role="master-password-confirm" type="password" autocomplete="new-password" placeholder="Repeat password" value="correct-horse-battery" disabled /></label><p class="splitpass-auth-strength is-strong">Strong key</p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button" disabled>Create vault</button><div class="splitpass-auth-reset hidden"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Create vault · working</strong><span>Inputs and the button are disabled while the vault is derived.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Unlock vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Enter password" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm hidden"><input class="splitpass-auth-input" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength hidden"></p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Unlock</button><div class="splitpass-auth-reset"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Unlock vault</strong><span>The reset link is the only way back if the password is lost.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Unlock vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">Wrong password. Your vault stays safe — try again.</p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Enter password" value="wrong-pass" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm hidden"><input class="splitpass-auth-input" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength hidden"></p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Unlock</button><div class="splitpass-auth-reset"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Unlock · wrong password</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Unlock vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Enter password" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm hidden"><input class="splitpass-auth-input" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength hidden"></p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Unlock</button><div class="splitpass-auth-reset"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Unlock · reset</strong><span>Reset asks for a second confirmation and erases every saved password.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Unlock vault</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock hidden" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage hidden"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption hidden"></p>
+<div class="splitpass-passcode splitpass-hidden hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">The vault locked before the password could be saved.</p>
+<section class="splitpass-auth-panel">
+<label class="splitpass-auth-label"><input class="splitpass-auth-input" data-role="master-password" type="password" autocomplete="current-password" placeholder="Enter password" /></label>
+<label class="splitpass-auth-label splitpass-auth-confirm hidden"><input class="splitpass-auth-input" type="password" autocomplete="new-password" placeholder="Repeat password" /></label><p class="splitpass-auth-strength hidden"></p>
+<button class="splitpass-button splitpass-button-primary splitpass-auth-submit" type="button">Unlock</button><div class="splitpass-auth-reset"><button class="splitpass-auth-reset-trigger" type="button">Forgot password? Reset vault</button><div class="splitpass-auth-reset-confirm hidden"><p class="splitpass-auth-reset-warning">This will permanently delete the vault and all saved passwords on this device.</p><div class="splitpass-auth-reset-actions">
+<button class="splitpass-button splitpass-button-secondary" type="button">Cancel</button>
+<button class="splitpass-button splitpass-button-danger" type="button">Reset vault</button></div></div></div></section>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Unlock · vault locked meanwhile</strong><span>A lock during a scan drops back here with a warning.</span></figcaption></figure></div></section>
+<section class="kit-section" id="scanner"><h2>Scanner</h2><p>The camera starts by itself when the vault is unlocked and nothing is saved for the site. Live video cannot be drawn here, so the stage shows its resting background.</p>
+<div class="kit-phones">
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Starting camera</strong><span>The browser may show its permission dialog now.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty splitpass-hidden"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Camera live</strong><span>The overlay disappears; the frame is 252 px with 8 px accent corners.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Camera not started</p><p class="splitpass-empty-copy">The permission dialog was closed. Tap to try again.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Camera not started</strong><span>First dismissed dialog: Try again, no automatic retry.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Camera blocked</p><p class="splitpass-empty-copy">Allow the camera for split/Pass, then try again.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Camera blocked</strong><span>Second failure adds Fix camera permission, which opens the camera-access tab.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Scanner paused</p><p class="splitpass-empty-copy">Tap to try again.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">Unable to start the camera.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Scanner paused</strong><span>Any other camera or detector failure.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">Enter the 6-digit passcode.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Secure QR · passcode</strong><span>The stage keeps the previous overlay text while the passcode is asked.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" value="123456" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">Invalid passcode.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Secure QR · wrong passcode</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" value="1234" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">The passcode must contain 6 digits.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Secure QR · short passcode</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty splitpass-hidden"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">Only password and 2FA QR values are supported right now.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Unsupported QR</strong><span>Only password and 2FA values are read.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty splitpass-hidden"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-error">This QR is not a valid SplitPass password value.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Not a SplitPass QR</strong></figcaption></figure></div></section>
+<section class="kit-section" id="saved"><h2>Saved for this site</h2><p>Passwords scanned on a domain are kept encrypted for it. Each row shows when it expires; click the expiry text to cycle Auto, 1 year and No expiry.</p>
+<div class="kit-phones">
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Click to scan</p><p class="splitpass-empty-copy">Scan another QR if you need a new password.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel">
+<div class="splitpass-recent-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">ops@satoshi.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep with no expiry">Expires in 1y</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title">Github</span><span class="splitpass-item-detail"><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep by use">No expiry</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Saved · click to scan</strong><span>With saved passwords the camera waits for a click.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Saved</p><p class="splitpass-empty-copy">Click to scan again.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel">
+<div class="splitpass-recent-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Copied to the clipboard</strong><span>No password field on the page: the secret is copied instead.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Click to scan</p><p class="splitpass-empty-copy">Scan another QR if you need a new password.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">No password field was found. The secret is now in your clipboard.</p>
+<section class="splitpass-recent-panel">
+<div class="splitpass-recent-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Clipboard fallback</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window kit-hover">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Click to scan</p><p class="splitpass-empty-copy">Scan another QR if you need a new password.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel">
+<div class="splitpass-recent-list">
+<div class="splitpass-item-wrap is-confirming">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">ops@satoshi.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep with no expiry">Expires in 1y</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>Row · remove</strong><span>Hovering a row reveals the X; it asks before removing.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-ext-window kit-frozen kit-totp-mid">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage splitpass-stage-actionable"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Click to scan</p><p class="splitpass-empty-copy">Scan another QR if you need a new password.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode splitpass-hidden">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-hidden"></p>
+<section class="splitpass-recent-panel">
+<div class="splitpass-recent-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">deploy@satoshi.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 3mo</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div>
+<figcaption><strong>2FA row</strong><span>The badge fills like a countdown across the 30-second window.</span></figcaption></figure></div></section>
+<section class="kit-section" id="panel"><h2>In-page panel</h2><p>A fixed 360 px panel in the top-right corner of the page, inside a closed shadow root, opened by focusing a password field with an unlocked vault. It never uses the camera.</p>
+<div class="kit-phones">
+<figure class="kit-figure">
+<div class="kit-mock-page">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>https://github.com/login</span></div>
+<div class="kit-mock-form"><h4>Sign in</h4>
+<div class="kit-mock-field">Username<div>satoshi</div></div>
+<div class="kit-mock-field">Password<div class="is-focus">&nbsp;</div></div>
+<div class="kit-mock-button">Sign in</div></div>
+<section class="splitpass-site-panel">
+<div class="splitpass-site-shell">
+<div class="splitpass-site-header">
+<div class="splitpass-site-branding">
+<p class="splitpass-site-brand">split/Pass</p>
+<p class="splitpass-site-title">Secrets</p></div><button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button></div>
+<p class="splitpass-site-message splitpass-hidden"></p>
+<div class="splitpass-site-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">ops@satoshi.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep with no expiry">Expires in 1y</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div>
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></div></section></div>
+<figcaption><strong>Panel · saved passwords</strong><span>Clicking a row fills the username and password fields and closes the panel.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-mock-page">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>https://github.com/login</span></div>
+<div class="kit-mock-form"><h4>Sign in</h4>
+<div class="kit-mock-field">Username<div>satoshi</div></div>
+<div class="kit-mock-field">Password<div class="is-focus">&nbsp;</div></div>
+<div class="kit-mock-button">Sign in</div></div>
+<section class="splitpass-site-panel">
+<div class="splitpass-site-shell">
+<div class="splitpass-site-header">
+<div class="splitpass-site-branding">
+<p class="splitpass-site-brand">split/Pass</p>
+<p class="splitpass-site-title">Secrets</p></div><button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button></div>
+<p class="splitpass-site-message">Unlock the vault from the split/Pass popup to use this secret.</p>
+<div class="splitpass-site-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></div></section></div>
+<figcaption><strong>Panel · vault locked</strong><span>Shown when a row is clicked while the vault has locked.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-mock-page">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>https://github.com/login</span></div>
+<div class="kit-mock-form"><h4>Sign in</h4>
+<div class="kit-mock-field">Username<div>satoshi</div></div>
+<div class="kit-mock-field">Password<div>&nbsp;</div></div>
+<div class="kit-mock-button">Sign in</div></div>
+<section class="splitpass-site-panel">
+<div class="splitpass-site-shell">
+<div class="splitpass-site-header">
+<div class="splitpass-site-branding">
+<p class="splitpass-site-brand">split/Pass</p>
+<p class="splitpass-site-title">Secrets</p></div><button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button></div>
+<p class="splitpass-site-message">No visible password field found.</p>
+<div class="splitpass-site-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 7d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></div></section></div>
+<figcaption><strong>Panel · no field</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-mock-page">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>https://github.com/login</span></div>
+<div class="kit-mock-form"><h4>Sign in</h4>
+<div class="kit-mock-field">Username<div>satoshi</div></div>
+<div class="kit-mock-field">Password<div>&nbsp;</div></div>
+<div class="kit-mock-button">Sign in</div></div>
+<section class="splitpass-site-panel">
+<div class="splitpass-site-shell">
+<div class="splitpass-site-header">
+<div class="splitpass-site-branding">
+<p class="splitpass-site-brand">split/Pass</p>
+<p class="splitpass-site-title">Secrets</p></div><button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button></div>
+<p class="splitpass-site-message">No 2FA field found on this page.</p>
+<div class="splitpass-site-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></div></section></div>
+<figcaption><strong>Panel · 2FA</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-mock-page">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>https://github.com/login</span></div>
+<div class="kit-mock-form"><h4>Sign in</h4>
+<div class="kit-mock-field">Username<div>satoshi</div></div>
+<div class="kit-mock-field">Password<div>&nbsp;</div></div>
+<div class="kit-mock-button">Sign in</div></div>
+<section class="splitpass-site-panel">
+<div class="splitpass-site-shell">
+<div class="splitpass-site-header">
+<div class="splitpass-site-branding">
+<p class="splitpass-site-brand">split/Pass</p>
+<p class="splitpass-site-title">Secrets</p></div><button class="splitpass-site-close" type="button" aria-label="Close SplitPass">X</button></div>
+<p class="splitpass-site-message">Unable to generate 2FA code.</p>
+<div class="splitpass-site-list">
+<div class="splitpass-item-wrap">
+<button class="splitpass-item" type="button"><span class="splitpass-item-icon" title="Last used Sep 28, 2026, 9:12 AM"><span class="splitpass-item-fallback">G</span><span class="splitpass-item-type" aria-label="2FA" data-period="30">2FA</span></span><span class="splitpass-item-body"><span class="splitpass-item-title splitpass-item-username">satoshi@gmail.com</span><span class="splitpass-item-detail"><span class="splitpass-item-name">Github</span><span class="splitpass-item-meta splitpass-item-retention" title="Click to keep for 1 year">Expires in 30d</span></span></span></button>
+<button class="splitpass-item-delete" type="button" aria-label="Remove">X</button><div class="splitpass-item-confirm"><span class="splitpass-item-confirm-copy">Remove this secret?</span><button class="splitpass-item-confirm-cancel" type="button">Cancel</button><button class="splitpass-item-confirm-remove" type="button">Remove</button></div></div></div></div></section></div>
+<figcaption><strong>Panel · code failure</strong></figcaption></figure></div></section>
+<section class="kit-section" id="camera"><h2>Camera access page</h2><p>A normal browser tab, opened by Fix camera permission so the address bar can unblock a denied camera. It closes itself once access is granted.</p>
+<div class="kit-phones">
+<figure class="kit-figure">
+<div class="kit-browser">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>chrome-extension://…/camera-access.html</span></div>
+<div class="kit-browser-body">
+<main class="splitpass-camera-access-page">
+<p class="splitpass-title">split/Pass</p><h1 class="splitpass-subtitle">Camera access</h1>
+<p class="splitpass-message" data-role="status">Asking the browser for camera access.</p>
+<button class="splitpass-button splitpass-button-primary hidden" data-role="retry" type="button">Try again</button></main></div></div>
+<figcaption><strong>Asking</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-browser">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>chrome-extension://…/camera-access.html</span></div>
+<div class="kit-browser-body">
+<main class="splitpass-camera-access-page">
+<p class="splitpass-title">split/Pass</p><h1 class="splitpass-subtitle">Camera access</h1>
+<p class="splitpass-message splitpass-message-success" data-role="status">Camera allowed. Closing this tab.</p>
+<button class="splitpass-button splitpass-button-primary hidden" data-role="retry" type="button">Try again</button></main></div></div>
+<figcaption><strong>Allowed</strong><span>Closes the tab after 0.9 s.</span></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-browser">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>chrome-extension://…/camera-access.html</span></div>
+<div class="kit-browser-body">
+<main class="splitpass-camera-access-page">
+<p class="splitpass-title">split/Pass</p><h1 class="splitpass-subtitle">Camera access</h1>
+<p class="splitpass-message splitpass-message-error" data-role="status">Camera access is blocked. Click the camera icon in the address bar, allow it, then try again.</p>
+<button class="splitpass-button splitpass-button-primary" data-role="retry" type="button">Try again</button></main></div></div>
+<figcaption><strong>Blocked</strong></figcaption></figure>
+<figure class="kit-figure">
+<div class="kit-browser">
+<div class="kit-mock-bar"><span>&lt; &gt;</span><span>chrome-extension://…/camera-access.html</span></div>
+<div class="kit-browser-body">
+<main class="splitpass-camera-access-page">
+<p class="splitpass-title">split/Pass</p><h1 class="splitpass-subtitle">Camera access</h1>
+<p class="splitpass-message splitpass-message-error" data-role="status">No camera is available in this browser.</p>
+<button class="splitpass-button splitpass-button-primary" data-role="retry" type="button">Try again</button></main></div></div>
+<figcaption><strong>No camera</strong></figcaption></figure></div></section>
+</main>
+</body>
+</html>
