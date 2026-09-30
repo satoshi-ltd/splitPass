@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import Svg, { Circle } from 'react-native-svg';
 
 import { getStyles } from './SecretFooterContent.style';
+import { passcodeConfirm } from './passcodeConfirm';
 import { useApp } from '../../contexts';
 import { Button, Input, Text, View } from '../../design-system';
 import { ICON } from '../../modules';
@@ -95,20 +96,13 @@ const SecretFooterContent = ({
   valueCaption = '',
   valueVariant = 'default',
 }) => {
-  const { colors, theme } = useApp();
+  const { colors } = useApp();
   const styles = useMemo(() => getStyles(colors, contrast), [colors, contrast]);
   const textTone = contrast === 'accent' ? 'onAccent' : 'onInverse';
   const contrastTone = contrast === 'accent' ? 'onAccent' : 'onInverse';
   const digitTone = contrast === 'accent' ? 'primary' : 'accent';
   const totpTone = textTone;
-  const confirmButtonTone =
-    contrast === 'accent'
-      ? theme === 'dark'
-        ? 'onInverse'
-        : 'primary'
-      : contrast === 'light'
-      ? 'onAccent'
-      : 'primary';
+  const { tone: confirmButtonTone } = passcodeConfirm(colors, contrast);
   const actionCount = [showReveal, showCopy, showMenu].filter(Boolean).length;
   const normalizedValue = `${value}`.trim();
   const contentLength = normalizedValue.replace(/\s+/g, ' ').length;

@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 import { theme } from '../../theme';
+import { passcodeConfirm } from './passcodeConfirm';
 
 const getStyles = (colors, contrast) => {
   const passcodeBackgroundColor =
@@ -9,7 +10,7 @@ const getStyles = (colors, contrast) => {
       : contrast === 'dark'
       ? 'rgba(255, 252, 248, 0.08)'
       : 'rgba(24, 19, 16, 0.06)';
-  const passcodeConfirmBackgroundColor = contrast === 'accent' ? colors.onAccent : colors.onInverse;
+  const { backgroundColor: passcodeConfirmBackgroundColor } = passcodeConfirm(colors, contrast);
 
   return StyleSheet.create({
     passcodeRow: {

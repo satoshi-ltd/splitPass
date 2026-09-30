@@ -144,10 +144,6 @@ _None._
   `chore · agent · low`
   accept: `store-assets/app-store/1.4.14/README.md` states the version it applies to and the 1.4.15 decision from
   DEPLOY-STORE-1.4.15 is recorded.
-- **UI-PASSCODE-CONFIRM-DARK** — The passcode confirm button is invisible in the dark theme
-  `bug · agent · normal`
-  accept: with a secure payload in dark, the confirm icon in `SecretFooterContent` contrasts with its ground (AA), in
-  both `accent` and `light` footers; a test on the tone and background pairing.
 - **UI-SCANNER-PERMISSION** — The scanner permission card repeats itself and hides its button
   `bug · agent · normal`
   accept: when the camera is blocked, `Scanner.qr.js` shows a title and a distinct caption, and the outlined button

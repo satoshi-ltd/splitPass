@@ -28,7 +28,7 @@
   --m-foot-fg: var(--m-on-inverse);
   --m-foot-ghost: color-mix(in srgb, var(--m-on-inverse) 6%, transparent);
   --m-foot-track: color-mix(in srgb, var(--m-on-inverse) 18%, transparent);
-  --m-foot-confirm-fg: var(--m-on-accent);
+  --m-foot-confirm-fg: var(--m-on-scrim);
 }
 :root .m-phone[data-phone-theme="light"] {
   --m-foot-bg: var(--m-dark);
@@ -409,9 +409,9 @@
 
 .m-foot { flex: none; padding-bottom: var(--m-safe-bottom); background: var(--m-foot-bg); color: var(--m-foot-fg); }
 .m-foot-inner { position: relative; padding: var(--m-space-md) var(--m-view-offset) var(--m-space-xs); }
-.m-foot-accent { --m-foot-bg: var(--m-accent); --m-foot-fg: var(--m-on-accent); --m-foot-ghost: color-mix(in srgb, white 14%, transparent); --m-foot-track: color-mix(in srgb, white 26%, transparent); --m-foot-digit: var(--m-content); --m-foot-confirm-fg: var(--m-content); }
+.m-foot-accent { --m-foot-bg: var(--m-accent); --m-foot-fg: var(--m-on-accent); --m-foot-ghost: color-mix(in srgb, white 14%, transparent); --m-foot-track: color-mix(in srgb, white 26%, transparent); --m-foot-digit: var(--m-content); --m-foot-confirm-fg: var(--m-on-scrim); }
 :root[data-theme="dark"] .m-foot-accent,
-.m-phone[data-phone-theme="dark"] .m-foot-accent { --m-foot-bg: var(--m-accent); --m-foot-fg: var(--m-on-accent); --m-foot-ghost: color-mix(in srgb, white 14%, transparent); --m-foot-track: color-mix(in srgb, white 26%, transparent); --m-foot-digit: var(--m-content); --m-foot-confirm-fg: var(--m-content); }
+.m-phone[data-phone-theme="dark"] .m-foot-accent { --m-foot-bg: var(--m-accent); --m-foot-fg: var(--m-on-accent); --m-foot-ghost: color-mix(in srgb, white 14%, transparent); --m-foot-track: color-mix(in srgb, white 26%, transparent); --m-foot-digit: var(--m-content); --m-foot-confirm-fg: var(--m-on-scrim); }
 .sfc-row { display: flex; align-items: center; justify-content: space-between; gap: var(--m-space-md); width: 100%; min-height: calc(var(--m-space-xxl) + var(--m-space-md)); }
 .sfc-main { display: flex; flex: 1 1 0; flex-direction: column; justify-content: center; gap: var(--m-space-xxs); min-width: 0; min-height: calc(var(--m-space-xl) + var(--m-space-sm)); }
 .sfc-value { display: flex; flex-wrap: wrap; align-items: flex-start; width: 100%; min-width: 0; font-weight: 900; overflow-wrap: anywhere; }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.17 — 2026-09-30
+
+- The confirm button of the passcode prompt is readable again in the dark theme; its icon now picks the colour that contrasts with the button.
+
 ## 1.4.16 — 2026-09-30
 
 - The extension asks for the camera from the popup first and offers `Try again` after a dismissed dialog; `Fix camera permission` appears only after a second failure, and the permission tab closes itself once access is granted.
