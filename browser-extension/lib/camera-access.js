@@ -1,30 +1,16 @@
 (function attachSplitPassCameraAccess(globalScope) {
   const PAGE_PATH = 'camera-access.html';
-  const KNOWN_STATES = new Set(['granted', 'prompt', 'denied']);
-  const POPUP_COPY = {
-    prompt: {
-      title: 'Camera access needed',
-      copy: 'The browser cannot ask from this popup. Allow it once in a new tab.',
-    },
-    denied: {
-      title: 'Camera blocked',
-      copy: 'Camera access was blocked for split/Pass. Unblock it from the new tab.',
-    },
+
+  // Escalation is driven by what actually happened, not by navigator.permissions: Brave's
+  // fingerprinting defences report `prompt` for an extension origin even after a grant.
+  const FAILURE_COPY = {
+    first: { title: 'Camera not started', copy: 'The permission dialog was closed. Tap to try again.' },
+    repeated: { title: 'Camera blocked', copy: 'Allow the camera for split/Pass, then try again.' },
   };
 
-  async function queryCameraPermission(permissions = globalScope.navigator?.permissions) {
-    if (typeof permissions?.query !== 'function') return 'unknown';
-
-    try {
-      const status = await permissions.query({ name: 'camera' });
-      return KNOWN_STATES.has(status?.state) ? status.state : 'unknown';
-    } catch {
-      return 'unknown';
-    }
-  }
-
-  function needsAccessPage(permission) {
-    return permission === 'prompt' || permission === 'denied';
+  function describeFailure(denials = 1) {
+    const repeated = Number(denials) >= 2;
+    return { ...(repeated ? FAILURE_COPY.repeated : FAILURE_COPY.first), showHelp: repeated };
   }
 
   async function requestCameraOnce(mediaDevices = globalScope.navigator?.mediaDevices) {
@@ -43,9 +29,7 @@
 
   globalScope.SplitPassCameraAccess = {
     PAGE_PATH,
-    POPUP_COPY,
-    needsAccessPage,
-    queryCameraPermission,
+    describeFailure,
     requestCameraOnce,
   };
 })(globalThis);

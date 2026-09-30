@@ -45,7 +45,7 @@ A background alarm checks hourly whether every saved password has expired. When 
 ## Camera requirement
 
 - The scanner runs only inside the extension popup. The camera permission belongs to the extension origin, so it is granted once and shared by the popup and `camera-access.html`.
-- Browsers do not reliably show the camera prompt from an extension popup, and Brave tends to dismiss it, which surfaces as `Permission dismissed`. While the permission is undecided or blocked, the popup shows an `Allow camera access` button that opens `camera-access.html` in a normal tab, where the prompt works and the address bar lets you unblock a denied camera.
+- The camera is always requested from the popup first, because that dialog usually works. When it is dismissed the popup offers `Try again` rather than retrying by itself, so a closed dialog never turns into a loop of prompts. Only after a retry has also failed does it surface `Fix camera permission`, which opens `camera-access.html` in a normal tab where the address bar can unblock a denied camera; that tab closes itself once access is granted. `navigator.permissions.query` is deliberately not used to gate any of this: Brave reports `prompt` for an extension origin even after a grant, so gating on it sent every scan through the tab.
 - The in-page site panel does not use the camera. It only shows saved passwords for the current domain and fills password fields.
 
 ## Load in Chrome

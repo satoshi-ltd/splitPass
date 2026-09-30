@@ -14,7 +14,8 @@
 
     const result = await access.requestCameraOnce();
     if (result.ok) {
-      setStatus('Camera access granted. Close this tab and open split/Pass again.', 'success');
+      setStatus('Camera allowed. Closing this tab.', 'success');
+      globalThis.setTimeout(() => window.close(), 900);
       return;
     }
 

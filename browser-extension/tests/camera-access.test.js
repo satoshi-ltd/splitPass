@@ -4,41 +4,29 @@
 
 require('../lib/camera-access.js');
 
-const { POPUP_COPY, PAGE_PATH, needsAccessPage, queryCameraPermission, requestCameraOnce } =
-  globalThis.SplitPassCameraAccess;
+const { PAGE_PATH, describeFailure, requestCameraOnce } = globalThis.SplitPassCameraAccess;
 
-describe('queryCameraPermission', () => {
-  it('reports the browser state when the query is supported', async () => {
-    for (const state of ['granted', 'prompt', 'denied']) {
-      expect(await queryCameraPermission({ query: async () => ({ state }) })).toBe(state);
-    }
+describe('describeFailure', () => {
+  it('offers a plain retry after the first dismissal, with no tab detour', () => {
+    const first = describeFailure(1);
+
+    expect(first.showHelp).toBe(false);
+    expect(first.title).toBeTruthy();
+    expect(first.copy).toBeTruthy();
   });
 
-  it('falls back to unknown when the query is missing, throws or answers oddly', async () => {
-    expect(await queryCameraPermission(null)).toBe('unknown');
-    expect(await queryCameraPermission({})).toBe('unknown');
-    expect(
-      await queryCameraPermission({
-        query: async () => {
-          throw new TypeError('camera is not a valid PermissionName');
-        },
-      })
-    ).toBe('unknown');
-    expect(await queryCameraPermission({ query: async () => ({ state: 'weird' }) })).toBe('unknown');
-  });
-});
-
-describe('needsAccessPage', () => {
-  it('routes prompt and denied through the tab page and lets the rest use the popup', () => {
-    expect(needsAccessPage('prompt')).toBe(true);
-    expect(needsAccessPage('denied')).toBe(true);
-    expect(needsAccessPage('granted')).toBe(false);
-    expect(needsAccessPage('unknown')).toBe(false);
+  it('surfaces the permission page only once retrying has already failed', () => {
+    expect(describeFailure(2).showHelp).toBe(true);
+    expect(describeFailure(7).showHelp).toBe(true);
+    expect(describeFailure(2).title).not.toBe(describeFailure(1).title);
   });
 
-  it('ships copy for both routed states and a page path', () => {
-    expect(POPUP_COPY.prompt.title).toBeTruthy();
-    expect(POPUP_COPY.denied.title).toBeTruthy();
+  it('treats a missing or zero count as a first failure', () => {
+    expect(describeFailure().showHelp).toBe(false);
+    expect(describeFailure(0).showHelp).toBe(false);
+  });
+
+  it('keeps a page path for the escalated case', () => {
     expect(PAGE_PATH).toBe('camera-access.html');
   });
 });

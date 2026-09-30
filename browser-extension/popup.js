@@ -18,6 +18,7 @@ const cameraEmptyTitle = scannerUi.elements.cameraEmptyTitle;
 const closeButton = scannerUi.elements.closeButton;
 const headerSubtitle = scannerUi.elements.headerSubtitle;
 const cameraAccessButton = scannerUi.elements.cameraAccessButton;
+const retryButton = scannerUi.elements.retryButton;
 const passcodePanel = scannerUi.elements.passcodePanel;
 const passcodeInput = scannerUi.elements.passcodeInput;
 const unlockButton = scannerUi.elements.unlockButton;
@@ -103,6 +104,8 @@ const defaultEmptyState = {
 
 const state = {
   cameraRequestId: 0,
+  cameraDenials: 0,
+  cameraFailed: false,
   cameraStarting: false,
   detectedValue: '',
   detector: null,
@@ -149,6 +152,7 @@ function setMainViewVisible(visible) {
   stage.classList.toggle('hidden', !visible);
   caption.classList.toggle('hidden', !visible);
   cameraAccessButton.classList.toggle('hidden', !visible || cameraAccessButton.classList.contains('splitpass-hidden'));
+  retryButton.classList.toggle('hidden', !visible || retryButton.classList.contains('splitpass-hidden'));
   passcodePanel.classList.toggle('hidden', !visible || passcodePanel.classList.contains('splitpass-hidden'));
 }
 
@@ -180,13 +184,25 @@ function showCameraAccess(show) {
   cameraAccessButton.classList.toggle('hidden', !show);
 }
 
-function showCameraAccessState(permission) {
-  const { title, copy } = cameraAccess.POPUP_COPY[permission] || cameraAccess.POPUP_COPY.prompt;
+function showCameraRetry(show) {
+  retryButton.classList.toggle('splitpass-hidden', !show);
+  retryButton.classList.toggle('hidden', !show);
+}
+
+function showCameraControls(show) {
+  showCameraAccess(false);
+  showCameraRetry(show);
+}
+
+function showCameraDenied() {
+  const { title, copy, showHelp } = cameraAccess.describeFailure(state.cameraDenials);
   stopCamera();
-  setScanTriggerState(false);
+  // The stage stays clickable so a retry needs no aiming at the button.
+  setScanTriggerState(true);
   setEmptyState(title, copy);
   showCameraEmpty(true);
-  showCameraAccess(true);
+  showCameraRetry(true);
+  showCameraAccess(showHelp);
   clearMessage();
 }
 
@@ -342,13 +358,16 @@ function renderScannerState() {
     headerSubtitle.textContent = 'Scanner';
     setMainViewVisible(true);
     updateCaption();
+    // A failed camera owns the stage until the user retries; re-rendering must not undo that.
+    if (state.cameraFailed) return;
+
     const shouldWaitForUserAction = state.recentEntries.length > 0 && !state.cameraStartedByUser && !state.scanning;
     setScanTriggerState(shouldWaitForUserAction);
 
     if (shouldWaitForUserAction) {
       stopCamera();
       togglePasscodePanel(false);
-      showCameraAccess(false);
+      showCameraControls(false);
       setEmptyState('Click to scan', 'Scan another QR if you need a new password.');
       showCameraEmpty(true);
       return;
@@ -366,7 +385,7 @@ function renderScannerState() {
   setScanTriggerState(false);
   stopCamera();
   togglePasscodePanel(false);
-  showCameraAccess(false);
+  showCameraControls(false);
 }
 
 async function copySecretToClipboard(secret) {
@@ -555,7 +574,7 @@ function setCopiedState() {
   stopCamera();
   togglePasscodePanel(false);
   setScanTriggerState(true);
-  showCameraAccess(false);
+  showCameraControls(false);
   setEmptyState('Saved', 'Click to scan again.');
   showCameraEmpty(true);
   clearMessage();
@@ -656,8 +675,9 @@ async function scanFrame() {
     }
   } catch (error) {
     stopCamera();
+    state.cameraFailed = true;
     setScanTriggerState(true);
-    showCameraAccess(false);
+    showCameraControls(true);
     setEmptyState('Scanner paused', 'Tap to try again.');
     setMessage(error instanceof Error ? error.message : 'Unable to scan the QR.', 'error');
     return;
@@ -673,9 +693,10 @@ async function startCamera({ userInitiated = false } = {}) {
   state.cameraRequestId = requestId;
   state.cameraStarting = true;
   state.cameraStartedByUser = !!userInitiated || state.cameraStartedByUser || !state.recentEntries.length;
+  state.cameraFailed = false;
   togglePasscodePanel(false);
   setScanTriggerState(false);
-  showCameraAccess(false);
+  showCameraControls(false);
   clearMessage();
   resetEmptyState();
   state.detectedValue = '';
@@ -687,14 +708,8 @@ async function startCamera({ userInitiated = false } = {}) {
 
     await ensureDetector();
 
-    const permission = await cameraAccess.queryCameraPermission();
-    if (requestId !== state.cameraRequestId) return;
-    if (cameraAccess.needsAccessPage(permission)) {
-      state.cameraStarting = false;
-      showCameraAccessState(permission);
-      return;
-    }
-
+    // Ask the popup first: the dialog usually works here, and routing every first run through a
+    // tab turned an occasional dismissal into a permission prompt on every single scan.
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
@@ -718,17 +733,22 @@ async function startCamera({ userInitiated = false } = {}) {
     }
     state.cameraStarting = false;
     state.scanning = true;
+    state.cameraDenials = 0;
     showCameraEmpty(false);
     scanFrame();
   } catch (error) {
     state.cameraStarting = false;
+    state.cameraFailed = true;
+
     if (error?.name === 'NotAllowedError') {
-      showCameraAccessState('prompt');
+      state.cameraDenials += 1;
+      showCameraDenied();
       return;
     }
+
     stopCamera();
     setScanTriggerState(true);
-    showCameraAccess(false);
+    showCameraControls(true);
     setEmptyState('Scanner paused', 'Tap to try again.');
     setMessage(error instanceof Error ? error.message : 'Unable to start the camera.', 'error');
   }
@@ -836,6 +856,7 @@ resetDo.addEventListener('click', async () => {
 });
 
 cameraAccessButton.addEventListener('click', openCameraAccessPage);
+retryButton.addEventListener('click', () => startCamera({ userInitiated: true }));
 closeButton.addEventListener('click', () => window.close());
 lockButton.addEventListener('click', async () => {
   stopCamera();
