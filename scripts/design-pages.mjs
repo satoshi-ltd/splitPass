@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { REVIEW } from './design-review.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DESIGN = path.join(ROOT, 'design');
 
@@ -27,8 +29,7 @@ const PRIORITIES = ['high', 'normal', 'low'];
 
 const ID_PATTERN = '[A-Z][A-Z0-9]*(?:-[A-Z0-9][A-Z0-9.]*)+';
 const ENTRY_LINE = new RegExp(`^- \\*\\*(${ID_PATTERN})\\*\\* — (\\S.*)$`);
-const META_LINE = /^ {2}`([a-z]+) · ([a-z]+) · ([a-z]+)`$/;
-const DEPENDS_LINE = new RegExp(`^ {2}depends: (${ID_PATTERN}(?:, ${ID_PATTERN})*)$`);
+const META_LINE = new RegExp(`^ {2}\`([a-z]+) · ([a-z]+) · ([a-z]+)(?: · depends: (${ID_PATTERN}(?:, ${ID_PATTERN})*))?\`$`);
 const ACCEPT_LINE = /^ {2}accept: (\S.*)$/;
 const CONTINUATION_LINE = /^ {2}(\S.*)$/;
 
@@ -113,19 +114,15 @@ export const parseRoadmap = (markdown, file = 'ROADMAP.md') => {
     if (!entry.type) {
       const meta = META_LINE.exec(line);
       if (!meta) fail(number, `${entry.id}: expected \`type · owner · priority\` on the line after the title`);
-      const [, type, owner, priority] = meta;
+      const [, type, owner, priority, depends] = meta;
       if (!TYPES.includes(type)) fail(number, `${entry.id}: type "${type}" is not one of ${TYPES.join(', ')}`);
       if (!OWNERS.includes(owner)) fail(number, `${entry.id}: owner "${owner}" is not one of ${OWNERS.join(', ')}`);
       if (!PRIORITIES.includes(priority)) fail(number, `${entry.id}: priority "${priority}" is not one of ${PRIORITIES.join(', ')}`);
       Object.assign(entry, { type, owner, priority });
-      return;
-    }
-
-    const depends = DEPENDS_LINE.exec(line);
-    if (depends && !entry.accept) {
-      if (entry.depends.length) fail(number, `${entry.id}: depends appears twice`);
-      entry.depends = depends[1].split(', ');
-      entry.depends.forEach((dependency) => dependencies.push({ id: entry.id, dependency, line: number }));
+      if (depends) {
+        entry.depends = depends.split(', ');
+        entry.depends.forEach((dependency) => dependencies.push({ id: entry.id, dependency, line: number }));
+      }
       return;
     }
 
@@ -206,11 +203,25 @@ const renderLane = (meta, lane, roadmap, page, number) => {
 
 const count = (lane) => lane.groups.reduce((sum, { tasks }) => sum + tasks.length, 0);
 
-const HEAD_ASSETS = [
+const sheet = (href) => `<link rel="stylesheet" href="${href}">`;
+
+const BASE_SHEETS = ['mobile-tokens.css'];
+const REVIEW_SHEETS = [
+  '../browser-extension/theme.css',
+  '../browser-extension/item.css',
+  '../browser-extension/scanner-ui.css',
+  '../browser-extension/popup.css',
+  'mobile-tokens.css',
+  'extension-tokens.css',
+  'mobile-icons.css',
+  'mobile.css',
+];
+
+const headAssets = (sheets) => [
   '<link rel="icon" href="../assets/favicon.png">',
-  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@500;700;900&display=swap">',
-  '<link rel="stylesheet" href="mobile-tokens.css">',
-  '<link rel="stylesheet" href="kit.css">',
+  sheet('https://fonts.googleapis.com/css2?family=Doto:wght@500;700;900&display=swap'),
+  ...sheets.map(sheet),
+  sheet('kit.css'),
   '<script src="kit.js"></script>',
 ];
 
@@ -226,7 +237,7 @@ export const renderHeader = (active, version) => {
   ].join('\n');
 };
 
-const shell = ({ file, title, description, intro, facts, sections, version }) =>
+const shell = ({ file, title, description, intro, facts, sections, version, sheets = BASE_SHEETS }) =>
   [
     '<!doctype html>',
     '<html lang="en">',
@@ -235,7 +246,7 @@ const shell = ({ file, title, description, intro, facts, sections, version }) =>
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<title>${esc(title)}</title>`,
     `<meta name="description" content="${esc(description)}">`,
-    ...HEAD_ASSETS,
+    ...headAssets(sheets),
     '</head>',
     '<body class="kit">',
     renderHeader(file, version),
@@ -248,7 +259,23 @@ const shell = ({ file, title, description, intro, facts, sections, version }) =>
     '',
   ].join('\n');
 
-export const renderGenerated = (roadmap, version) => {
+const renderBoard = ({ id, area, title, why, now, proposed, proposedLabel = 'Proposed' }) =>
+  `<article class="kit-board" data-review="${id}"><p class="kit-board-id">${id} · ${esc(area)} · <a href="#task-${id}">task</a></p><p class="kit-board-title">${esc(title)}</p><p class="kit-note">${esc(why)}</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame">${now}</div></div><div class="kit-board-side"><p class="kit-board-label">${esc(proposedLabel)}</p><div class="kit-board-frame">${proposed}</div></div></div></article>`;
+
+const renderReview = (review) =>
+  `<section class="kit-section" id="review"><h2>Design review <span>01 · ${review.length}</span></h2><p>${review.length} findings from reading the screens against the design system, each drawn as it is and as proposed, each filed in ROADMAP with what proves it done.</p>\n<div class="kit-boards">\n${review.map(renderBoard).join('\n')}\n</div>\n</section>`;
+
+export const checkReview = (review, roadmap) => {
+  const seen = new Set();
+  for (const { id } of review) {
+    if (seen.has(id)) throw new Error(`design-review.mjs: board ${id} appears twice`);
+    seen.add(id);
+    if (!roadmap.ids.has(id)) throw new Error(`design-review.mjs: board ${id} is not a task in ROADMAP.md; remove the board or file the task`);
+    if (roadmap.ids.get(id).lane !== roadmap.lanes.proposed) throw new Error(`design-review.mjs: board ${id} is not in the Proposed lane of ROADMAP.md`);
+  }
+};
+
+export const renderGenerated = (roadmap, version, review = []) => {
   const facts = ['source ROADMAP.md', 'regenerate node scripts/design-pages.mjs'];
   if (roadmap.updated) facts.push(`roadmap updated ${roadmap.updated}`);
   const [queue, progress, creator, proposed] = LANES.map(({ key }) => roadmap.lanes[key]);
@@ -281,11 +308,12 @@ export const renderGenerated = (roadmap, version) => {
       description: 'Proposed tasks rendered from ROADMAP.md.',
       intro: {
         title: 'Proposals',
-        text: 'Ideas that are not approved and have never been worked on. The creator moves a proposal to the queue to approve it.',
+        text: 'Visual findings first, each drawn as it is and as proposed, then every idea that is not approved and has never been worked on. The creator moves a proposal to the queue to approve it.',
       },
       facts,
-      sections: [counts([[LANES[3], proposed]]), renderLane(LANES[3], proposed, roadmap, 'proposals.html', 1)].join('\n'),
+      sections: [review.length ? renderReview(review) : '', counts([[LANES[3], proposed]]), renderLane(LANES[3], proposed, roadmap, 'proposals.html', review.length ? 2 : 1)].filter(Boolean).join('\n'),
       version,
+      sheets: review.length ? REVIEW_SHEETS : BASE_SHEETS,
     }),
   };
 };
@@ -295,7 +323,8 @@ const HEADER_BLOCK = /<header class="kit-header">[\s\S]*?<\/header>/;
 export const buildPages = () => {
   const { version } = JSON.parse(read('package.json'));
   const roadmap = parseRoadmap(read('ROADMAP.md'));
-  const pages = renderGenerated(roadmap, version);
+  checkReview(REVIEW, roadmap);
+  const pages = renderGenerated(roadmap, version, REVIEW);
 
   for (const { file } of PAGES) {
     if (GENERATED.includes(file)) continue;

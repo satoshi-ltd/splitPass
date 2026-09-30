@@ -64,6 +64,9 @@ Five documents, each answering one question. Put information in the one that own
 - Code and design kit stay in step: after a visible change to a token, a component, a screen or an extension view,
   update the affected board in `design/`. Tokens: `node scripts/design-tokens.mjs`. `scripts/__tests__/design-kit.test.js`
   fails until the generated files match.
+- A proposal with a visible effect gets a board in `design/proposals.html`: add it to `scripts/design-review.mjs` with the
+  ROADMAP ID, drawn as it is and as proposed with the kit's own classes; remove the board when the task ships. The
+  design-kit test fails on a board without a Proposed task.
 - Do not overwrite changes already present in the worktree; read diffs before editing shared files.
 - Before editing `QRParser`, `cypher`, `persistenceCrypto`, `isSeedPhrase` or `secretValueDisplay`, read their tests in
   `src/modules/__tests__/`. Keep public module signatures stable unless the same change carries the migration.

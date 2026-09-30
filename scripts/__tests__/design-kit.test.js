@@ -54,8 +54,8 @@ const withRoadmap = (markdown) => {
 const LANES = (queue = '_None._', progress = '_None._', creator = '_None._', proposed = '_None._') =>
   `# Roadmap\n\n## Queue\n\n${queue}\n\n## In progress\n\n${progress}\n\n## Needs creator\n\n${creator}\n\n## Proposed\n\n${proposed}\n`;
 
-const TASK = (id = 'TASK-ONE', extra = '') =>
-  `- **${id}** — A title with \`code\`\n  \`chore · agent · normal\`\n${extra}  accept: it works\n  and keeps working\n`;
+const TASK = (id = 'TASK-ONE', depends = '') =>
+  `- **${id}** — A title with \`code\`\n  \`chore · agent · normal${depends ? ` · depends: ${depends}` : ''}\`\n  accept: it works\n  and keeps working\n`;
 
 describe('design kit', () => {
   it('has generated token files that match src/theme and the extension theme', () => {
@@ -177,11 +177,41 @@ describe('design kit', () => {
   });
 });
 
+describe('design review boards', () => {
+  const html = readDesign('proposals.html');
+  const boards = [...html.matchAll(/data-review="([A-Z0-9.-]+)"/g)].map((match) => match[1]);
+  const roadmap = read('ROADMAP.md');
+  const proposed = roadmap.slice(roadmap.indexOf('\n## Proposed'));
+  const proposedIds = [...proposed.matchAll(/^- \*\*([A-Z][A-Z0-9.-]+)\*\* — /gm)].map((match) => match[1]);
+
+  it('draws at least one board and announces the count', () => {
+    expect(boards.length).toBeGreaterThan(0);
+    expect(html).toContain(`${boards.length} findings from reading the screens against the design system, each drawn as it is and as proposed, each filed in ROADMAP with what proves it done.`);
+  });
+
+  it('files every board as a proposed roadmap task rendered on the page', () => {
+    boards.forEach((id) => {
+      expect({ id, proposed: proposedIds.includes(id) }).toEqual({ id, proposed: true });
+      expect({ id, rendered: html.includes(`id="task-${id}"`) }).toEqual({ id, rendered: true });
+    });
+  });
+
+  it('draws each board once, with a Now and a second column', () => {
+    expect(new Set(boards).size).toBe(boards.length);
+    expect(html.match(/<p class="kit-board-label">Now<\/p>/g)).toHaveLength(boards.length);
+  });
+
+  it('places the boards above the roadmap lanes', () => {
+    expect(html.indexOf('id="review"')).toBeGreaterThan(-1);
+    expect(html.indexOf('id="review"')).toBeLessThan(html.indexOf('id="proposed"'));
+  });
+});
+
 describe('design pages roadmap parser', () => {
   const validate = (markdown) => run('design-pages.mjs', '--validate', withRoadmap(markdown));
 
   it('accepts empty lanes, grouped tasks and dependencies', () => {
-    const creator = `### Group\n\n${TASK('TASK-ONE')}\n${TASK('TASK-TWO', '  depends: TASK-ONE\n')}`;
+    const creator = `### Group\n\n${TASK('TASK-ONE')}\n${TASK('TASK-TWO', 'TASK-ONE')}`;
     const result = validate(LANES('_None._', '_None._', creator));
 
     expect(result.status).toBe(0);
@@ -203,8 +233,8 @@ describe('design pages roadmap parser', () => {
     ['an unknown owner', LANES(`- **TASK-ONE** — Title\n  \`chore · robot · low\`\n  accept: x\n`), 'owner "robot"'],
     ['an unknown priority', LANES(`- **TASK-ONE** — Title\n  \`chore · agent · urgent\`\n  accept: x\n`), 'priority "urgent"'],
     ['a duplicate id', LANES(TASK('TASK-ONE'), '_None._', TASK('TASK-ONE')), 'duplicate task id'],
-    ['a dangling dependency', LANES(TASK('TASK-ONE', '  depends: TASK-GONE\n')), 'TASK-GONE'],
-    ['a self dependency', LANES(TASK('TASK-ONE', '  depends: TASK-ONE\n')), 'depends on itself'],
+    ['a dangling dependency', LANES(TASK('TASK-ONE', 'TASK-GONE')), 'TASK-GONE'],
+    ['a self dependency', LANES(TASK('TASK-ONE', 'TASK-ONE')), 'depends on itself'],
     ['two tasks in progress', LANES('_None._', `${TASK('TASK-ONE')}\n${TASK('TASK-TWO')}`), 'at most one'],
     ['an unbalanced backtick', LANES(`- **TASK-ONE** — Title \`x\n  \`chore · agent · low\`\n  accept: x\n`), 'unbalanced backtick'],
     ['a malformed id', LANES(`- **lowercase** — Title\n`), 'unexpected line'],

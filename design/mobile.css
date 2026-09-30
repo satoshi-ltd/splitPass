@@ -198,6 +198,7 @@
 .m-btn-secondary { background: var(--m-inverse); color: var(--m-on-inverse); }
 .m-btn-outlined { border-color: var(--m-border); background: transparent; color: var(--m-content); }
 .m-btn-outlined.m-c-oninv { border-color: var(--m-on-inverse); color: var(--m-on-inverse); }
+.m-btn-outlined.m-c-scrim { border-color: var(--m-on-scrim); color: var(--m-on-scrim); }
 .m-btn-outlined.m-c-onacc { border-color: var(--m-on-accent); color: var(--m-on-accent); }
 .m-btn-s { min-height: 36px; padding: var(--m-space-xs) var(--m-space-sm); font-size: var(--m-font-size-caption); line-height: var(--m-line-height-caption); }
 .m-btn-l { min-height: 52px; padding: var(--m-space-md) var(--m-space-lg); }

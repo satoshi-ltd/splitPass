@@ -22,7 +22,7 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 
 ## Current state
 
-- **1.4.18.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
+- **1.4.19.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
   only. iOS build number and Android version code are 12.
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
@@ -528,7 +528,8 @@ browser extension popup and in-page panel, real extension CSS), `mobile.html` (e
 the Light / Dark switch reach the unmodified extension stylesheets) and `design/mobile-icons.css` (glyph classes of the
 icon font in `node_modules/@expo/vector-icons`, so icons need `yarn install`); `design/kit.css`, `design/kit.js` and
 `design/mobile.css` are the kit's own chrome and phone frames. `node scripts/design-pages.mjs` regenerates the two
-ROADMAP pages and stamps the shared header and version banner into all five; both scripts take `--check`.
+ROADMAP pages, draws the Design review boards of `scripts/design-review.mjs` (each keyed to a Proposed task) at the top
+of the Proposals page, and stamps the shared header and version banner into all five; both scripts take `--check`.
 `scripts/__tests__/design-kit.test.js` fails when tokens drift, a page is stale, or the kit links break.
 
 ## 10. Operations

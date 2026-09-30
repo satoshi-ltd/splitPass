@@ -52,6 +52,11 @@ _None._
   accept: `store-assets/app-store/` holds screenshots for the version being submitted (today only `1.4.14`), or the
   creator confirms `1.4.14` still applies; the build is submitted to both stores.
 
+- **VERIFY-ONBOARDING-CROP** — Onboarding image on short phones
+  `verify · creator · low`
+  accept: on a short Android and iPhone the first three onboarding slides keep the image below the safe area with
+  three-line copy; the image is sized at `slideSize * 1.2` in `Onboarding.jsx`. A failure becomes a `bug` task.
+
 ### Browser extension
 
 - **VERIFY-EXT-CAMERA** — Camera permission flow in each browser
@@ -94,10 +99,18 @@ _None._
   `decision · creator · normal`
   accept: a decision on whether `ERR_PERSISTENCE_FORMAT` (`src/screens/Unlock/Unlock.helpers.js`) keeps wiping all
   data at once or first offers a backup import; the three-wrong-passphrases wipe is recorded in SPEC 4 either way.
+- **COMPAT-GOLDEN-FIXTURES** — Freeze what earlier versions wrote
+  `chore · agent · high`
+  accept: committed fixtures decrypt with a known passphrase in tests: a `v1`, a `v2` and a `v3` store envelope and a
+  backup archive of each kind, plus one QR / NFC payload of every type earlier versions produced (`1`–`9`, `A`, `S`,
+  `T`, `U`, and the `B` username envelope); each decodes to its known secret. The fixtures are never regenerated,
+  and a change that breaks one fails the suite. No production code changes.
 - **CRYPTO-V3-PARAMS** — Read Argon2 parameters from the `v3` envelope
-  `bug · agent · normal`
+  `chore · agent · low · depends: COMPAT-GOLDEN-FIXTURES`
   accept: `decryptV3Envelope` (`src/modules/persistenceCrypto.js`) derives the key from the envelope's stored `k`
-  parameters instead of constants; a test decrypts an envelope written with non-default parameters.
+  parameters instead of constants, so a later change to the defaults cannot lock out existing vaults and backups; the
+  `v3` fixtures still decrypt unchanged, and a test decrypts an envelope written with non-default parameters. QR and
+  NFC payloads are not touched.
 - **STORAGE-SINGLE-DERIVATION** — One key derivation per vault write
   `chore · agent · low`
   accept: `StorageService.persistCurrentData` no longer runs a second Argon2id derivation to verify what it just
@@ -172,3 +185,12 @@ _None._
   `chore · agent · low`
   accept: `radiusFull`, `surfaceRaised`, `disabled`, `success`, `info` and their `on*` pairs are used by a component
   or removed from `src/theme/palette.js`, and `design/index.html` follows after `node scripts/design-tokens.mjs`.
+- **UI-GENERATOR-STRENGTH-CONTRAST** — The password strength label is unreadable in the light theme
+  `bug · agent · normal`
+  accept: the strength label of the generator (`src/screens/Passwords`) meets 4.5:1 against the background in both
+  themes (accent on background is 2.93:1 in light today), and weak and strong differ by more than colour; a test on the
+  tone and the label.
+- **UI-DISABLED-BUTTON-CONTRAST** — Disabled outlined and secondary buttons fall just under AA
+  `chore · agent · low`
+  accept: the label of a disabled outlined or secondary `Button` meets 4.5:1 against its fill in both themes
+  (`textSecondary` on `border` is 4.36:1 in light today); a test over the palette.

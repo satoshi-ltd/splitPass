@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.19 — 2026-09-30
+
+- The design kit's Proposals page draws each visual finding as it is and as proposed; the roadmap accepts dependencies inline, and `COMPAT-GOLDEN-FIXTURES` joins the roadmap to freeze what earlier versions wrote.
+
 ## 1.4.18 — 2026-09-30
 
 - No change for people using the app or the extension: the extension's source drops its code comments.

@@ -7,7 +7,14 @@
 <meta name="description" content="Proposed tasks rendered from ROADMAP.md.">
 <link rel="icon" href="../assets/favicon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@500;700;900&display=swap">
+<link rel="stylesheet" href="../browser-extension/theme.css">
+<link rel="stylesheet" href="../browser-extension/item.css">
+<link rel="stylesheet" href="../browser-extension/scanner-ui.css">
+<link rel="stylesheet" href="../browser-extension/popup.css">
 <link rel="stylesheet" href="mobile-tokens.css">
+<link rel="stylesheet" href="extension-tokens.css">
+<link rel="stylesheet" href="mobile-icons.css">
+<link rel="stylesheet" href="mobile.css">
 <link rel="stylesheet" href="kit.css">
 <script src="kit.js"></script>
 </head>
@@ -15,14 +22,60 @@
 <header class="kit-header">
 <a class="kit-brand" href="index.html"><img src="../assets/icon.png" alt=""><span>split<b>/</b>Pass</span></a>
 <nav class="kit-nav" aria-label="Design kit"><a href="index.html">System</a><a href="browser-extension.html">Browser extension</a><a href="mobile.html">Mobile</a><a href="open-work.html">Open work</a><a href="proposals.html" aria-current="page">Proposals</a></nav>
-<span class="kit-version">v1.4.18 · production</span>
+<span class="kit-version">v1.4.19 · production</span>
 <div class="kit-theme" role="group" aria-label="Theme"><button type="button" data-kit-theme="light">Light</button><button type="button" data-kit-theme="dark">Dark</button></div>
 </header>
 <main class="kit-main">
-<section class="kit-intro"><h1>Proposals</h1><p>Ideas that are not approved and have never been worked on. The creator moves a proposal to the queue to approve it.</p><div class="kit-facts"><span>source ROADMAP.md</span><span>regenerate node scripts/design-pages.mjs</span><span>roadmap updated 2026-09-30</span></div></section>
-<div class="kit-counts"><a class="kit-count" href="#proposed"><strong>27</strong><span>Proposed</span></a></div>
-<section class="kit-section" id="proposed"><h2>Proposed <span>01 · 27</span></h2><p>Ideas that are not approved and have never been worked on.</p>
+<section class="kit-intro"><h1>Proposals</h1><p>Visual findings first, each drawn as it is and as proposed, then every idea that is not approved and has never been worked on. The creator moves a proposal to the queue to approve it.</p><div class="kit-facts"><span>source ROADMAP.md</span><span>regenerate node scripts/design-pages.mjs</span><span>roadmap updated 2026-09-30</span></div></section>
+<section class="kit-section" id="review"><h2>Design review <span>01 · 5</span></h2><p>5 findings from reading the screens against the design system, each drawn as it is and as proposed, each filed in ROADMAP with what proves it done.</p>
+<div class="kit-boards">
+<article class="kit-board" data-review="UI-SCANNER-PERMISSION"><p class="kit-board-id">UI-SCANNER-PERMISSION · Scanner · light theme · <a href="#task-UI-SCANNER-PERMISSION">task</a></p><p class="kit-board-title">A blocked camera says the same sentence twice and hides its button</p><p class="kit-note">When the camera is blocked, Scanner.qr.js prints &quot;Camera access is blocked. Enable it in system settings to scan QR secrets.&quot; as the title and again as the caption, and the outlined button has no tone, so its label takes the content colour: dark text on the 0.85 black scrim in the light theme.</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame"><div class="m-phone kit-spec kit-spec-crop m-scan" data-phone-theme="light"><div class="m-scan-permission"><div class="m-scan-permission-body"><div class="m-t m-b m-l m-c-scrim">Camera access is blocked. Enable it in system settings to scan QR secrets.</div><div class="m-t m-s m-c-scrim">Camera access is blocked. Enable it in system settings to scan QR secrets.</div><div class="m-btn m-btn-outlined m-btn-s">Open settings</div></div></div></div></div></div><div class="kit-board-side"><p class="kit-board-label">Proposed</p><div class="kit-board-frame"><div class="m-phone kit-spec kit-spec-crop m-scan" data-phone-theme="light"><div class="m-scan-permission"><div class="m-scan-permission-body"><div class="m-t m-b m-l m-c-scrim">Camera access is blocked</div><div class="m-t m-s m-c-scrim">Enable it in system settings to scan QR secrets.</div><div class="m-btn m-btn-outlined m-btn-s m-c-scrim">Open settings</div></div></div></div></div></div></div></article>
+<article class="kit-board" data-review="UI-COPY-PLURALS"><p class="kit-board-id">UI-COPY-PLURALS · Home · Settings · NFC card · <a href="#task-UI-COPY-PLURALS">task</a></p><p class="kit-board-title">One secret is plural, and the card has two spellings</p><p class="kit-note">The Home subtitle joins &quot;strong secrets.&quot; to any count, so one secret reads &quot;1 strong secrets.&quot;; the NFC card draws &quot;split/Card&quot; while GET_SPLITCARD and the other card strings write &quot;split|Card&quot;. The board draws the slash; which spelling wins is the creator's call.</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame"><div class="m-phone kit-spec"><div class="m-t m-b m-l m-c-sec">You have <span class="m-t m-b m-l">1</span> strong secrets.</div><div class="m-setting"><div class="m-setting-left"><div class="m-setting-thumb"><span class="i ic-shopping-outline"></span></div><div class="m-setting-body"><div class="m-t m-sb">Get your own split|Card</div></div></div><div class="m-setting-action"><span class="i ic-chevron-right m-c-sec"></span></div></div><div class="m-nfc-card kit-nfc-mini" data-phone-theme="light"><div class="m-nfc-row"><div class="m-t m-b m-l m-c-qrfg">split/Card</div></div><div class="m-nfc-row"><div class="m-t m-xs m-nfc-embossed m-c-qrfg">0000 0000 0000 00</div><div class="m-t m-xs m-nfc-embossed m-c-qrfg">SATOSHI LTD.</div></div></div></div></div></div><div class="kit-board-side"><p class="kit-board-label">Proposed</p><div class="kit-board-frame"><div class="m-phone kit-spec"><div class="m-t m-b m-l m-c-sec">You have <span class="m-t m-b m-l">1</span> strong secret.</div><div class="m-setting"><div class="m-setting-left"><div class="m-setting-thumb"><span class="i ic-shopping-outline"></span></div><div class="m-setting-body"><div class="m-t m-sb">Get your own split/Card</div></div></div><div class="m-setting-action"><span class="i ic-chevron-right m-c-sec"></span></div></div><div class="m-nfc-card kit-nfc-mini" data-phone-theme="light"><div class="m-nfc-row"><div class="m-t m-b m-l m-c-qrfg">split/Card</div></div><div class="m-nfc-row"><div class="m-t m-xs m-nfc-embossed m-c-qrfg">0000 0000 0000 00</div><div class="m-t m-xs m-nfc-embossed m-c-qrfg">SATOSHI LTD.</div></div></div></div></div></div></div></article>
+<article class="kit-board" data-review="EXT-SECURE-QR-OVERLAY"><p class="kit-board-id">EXT-SECURE-QR-OVERLAY · Extension popup · <a href="#task-EXT-SECURE-QR-OVERLAY">task</a></p><p class="kit-board-title">The camera says it is starting while it asks for a passcode</p><p class="kit-note">processRawValue stops the camera, which shows the stage overlay, and never resets its text, so a secure QR leaves &quot;Starting camera&quot; on screen above the passcode prompt.</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame"><div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">Enter the 6-digit passcode.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div></div></div><div class="kit-board-side"><p class="kit-board-label">Proposed</p><div class="kit-board-frame"><div class="kit-ext-window">
+<main class="popup splitpass-surface"><div class="splitpass-scanner-shell">
+<div class="splitpass-panel-header"><div class="splitpass-panel-branding">
+<p class="splitpass-title">split/Pass</p>
+<p class="splitpass-subtitle">Scanner</p></div><div class="splitpass-panel-actions"><button aria-label="Lock vault" class="splitpass-lock" title="Lock vault" type="button"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="6" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 6V4a2.5 2.5 0 0 1 5 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button><button aria-label="Close scanner" class="splitpass-close" type="button">X</button></div></div>
+<div class="splitpass-stage"><video autoplay class="splitpass-video" muted playsinline></video>
+<div class="splitpass-stage-inner"><div class="splitpass-frame"><span class="splitpass-frame-corner splitpass-frame-corner-top-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-top-right"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-left"></span><span class="splitpass-frame-corner splitpass-frame-corner-bottom-right"></span></div><div class="splitpass-empty splitpass-hidden"><p class="splitpass-empty-title">Starting camera</p><p class="splitpass-empty-copy">If this is your first scan, the browser may ask for permission now.</p></div></div></div>
+<p class="splitpass-caption"></p>
+<div class="splitpass-passcode">
+<label class="splitpass-passcode-label"><span>Passcode</span><input class="splitpass-passcode-input" inputmode="numeric" maxlength="6" placeholder="6 digits" type="password" autocomplete="off" /></label>
+<button class="splitpass-button splitpass-button-primary splitpass-unlock" type="button">Unlock</button></div>
+<button class="splitpass-button splitpass-button-primary splitpass-retry splitpass-hidden" type="button">Try again</button>
+<button class="splitpass-button splitpass-button-secondary splitpass-camera-access splitpass-hidden" type="button">Fix camera permission</button>
+<p class="splitpass-message splitpass-message-warning">Enter the 6-digit passcode.</p>
+<section class="splitpass-recent-panel hidden">
+<div class="splitpass-recent-list"></div></section>
+<footer class="splitpass-footer"><span>© 2026 <a class="splitpass-footer-link" href="https://www.satoshi-ltd.com" target="_blank" rel="noopener noreferrer">Satoshi LTD</a></span></footer></div></main></div></div></div></div></article>
+<article class="kit-board" data-review="UNLOCK-FORMAT-WIPE"><p class="kit-board-id">UNLOCK-FORMAT-WIPE · Unlock · decision · <a href="#task-UNLOCK-FORMAT-WIPE">task</a></p><p class="kit-board-title">An unreadable vault is erased before anyone can offer a backup</p><p class="kit-note">On ERR_PERSISTENCE_FORMAT the unlock screen erases all local data, resets to onboarding and shows a notification; the third wrong passphrase does the same. The creator decides whether the format case keeps wiping at once or first offers a backup import; the copy on the right is illustrative, and the three-wrong-passphrases wipe is recorded in SPEC either way.</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame"><div class="m-phone kit-spec"><div class="m-note"><span class="i ic-alert-outline m-c-dng"></span><div class="m-note-text"><span class="m-note-title">Something went wrong.</span><span class="m-xs">Encrypted local data was corrupted. All local data has been erased from this device.</span></div></div><div class="m-t m-b m-xl m-c-acc">Meet Alice and her secret</div><div class="m-t m-b m-l m-c-sec">Alice keeps a password, card, or seed phrase encrypted on her phone.</div><div class="m-onb-foot"><div class="m-pagination"><span class="m-dot is-active"></span><span class="m-dot"></span><span class="m-dot"></span><span class="m-dot"></span></div><div class="m-btn">Next</div></div></div></div></div><div class="kit-board-side"><p class="kit-board-label">Option for the creator</p><div class="kit-board-frame"><div class="m-phone kit-spec"><div class="m-hero"><div class="m-t m-logo">split<span class="m-t m-logo m-c-acc">/</span>Pass</div></div><div class="m-warn"><div class="m-t m-s m-c-wrn">Encrypted local data could not be read. Import a backup, or erase this device.</div></div><div class="m-actions"><div class="m-btn m-btn-l">Import backup</div><div class="m-btn m-btn-outlined m-btn-l">Reset data</div></div></div></div></div></div></article>
+<article class="kit-board" data-review="EXT-TOKEN-PARITY"><p class="kit-board-id">EXT-TOKEN-PARITY · Extension · app · <a href="#task-EXT-TOKEN-PARITY">task</a></p><p class="kit-board-title">The same orange button has white text in the extension and dark text in the app</p><p class="kit-note">theme.css sets --color-on-accent to #FFFFFF while onAccent in palette.js is #181310, so a primary button changes its label colour between the app and the extension. Either the extension follows the app or SPEC records the difference as deliberate.</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame"><div class="kit-ext-scope "><p class="kit-board-label">Extension</p><button class="splitpass-button splitpass-button-primary" type="button">Create vault</button></div><div class="m-phone kit-spec"><div class="m-btn m-btn-l">Start</div></div></div></div><div class="kit-board-side"><p class="kit-board-label">Proposed</p><div class="kit-board-frame"><div class="kit-ext-scope kit-on-accent-app"><p class="kit-board-label">Extension</p><button class="splitpass-button splitpass-button-primary" type="button">Create vault</button></div><div class="m-phone kit-spec"><div class="m-btn m-btn-l">Start</div></div></div></div></div></article>
+</div>
+</section>
+<div class="kit-counts"><a class="kit-count" href="#proposed"><strong>30</strong><span>Proposed</span></a></div>
+<section class="kit-section" id="proposed"><h2>Proposed <span>02 · 30</span></h2><p>Ideas that are not approved and have never been worked on.</p>
 <div class="kit-group"><ul class="kit-tasks">
+<li class="kit-task" id="task-COMPAT-GOLDEN-FIXTURES">
+<div class="kit-task-head"><span class="kit-task-id">COMPAT-GOLDEN-FIXTURES</span><span class="kit-task-title">Freeze what earlier versions wrote</span></div>
+<div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="high">high</span></div>
+<dl><dt>accept</dt><dd>committed fixtures decrypt with a known passphrase in tests: a <code>v1</code>, a <code>v2</code> and a <code>v3</code> store envelope and a backup archive of each kind, plus one QR / NFC payload of every type earlier versions produced (<code>1</code>–<code>9</code>, <code>A</code>, <code>S</code>, <code>T</code>, <code>U</code>, and the <code>B</code> username envelope); each decodes to its known secret. The fixtures are never regenerated, and a change that breaks one fails the suite. No production code changes.</dd></dl>
+</li>
 <li class="kit-task" id="task-EXPO-55-STABILIZE">
 <div class="kit-task-head"><span class="kit-task-id">EXPO-55-STABILIZE</span><span class="kit-task-title">Settle the SDK 55 integrations</span></div>
 <div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="normal">normal</span></div>
@@ -32,11 +85,6 @@
 <div class="kit-task-head"><span class="kit-task-id">UNLOCK-FORMAT-WIPE</span><span class="kit-task-title">An unreadable vault envelope wipes the app without a backup prompt</span></div>
 <div class="kit-task-pills"><span class="kit-pill" data-kind="decision">decision</span><span class="kit-pill" data-owner="creator">creator</span><span class="kit-pill" data-priority="normal">normal</span></div>
 <dl><dt>accept</dt><dd>a decision on whether <code>ERR_PERSISTENCE_FORMAT</code> (<code>src/screens/Unlock/Unlock.helpers.js</code>) keeps wiping all data at once or first offers a backup import; the three-wrong-passphrases wipe is recorded in SPEC 4 either way.</dd></dl>
-</li>
-<li class="kit-task" id="task-CRYPTO-V3-PARAMS">
-<div class="kit-task-head"><span class="kit-task-id">CRYPTO-V3-PARAMS</span><span class="kit-task-title">Read Argon2 parameters from the <code>v3</code> envelope</span></div>
-<div class="kit-task-pills"><span class="kit-pill" data-kind="bug">bug</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="normal">normal</span></div>
-<dl><dt>accept</dt><dd><code>decryptV3Envelope</code> (<code>src/modules/persistenceCrypto.js</code>) derives the key from the envelope's stored <code>k</code> parameters instead of constants; a test decrypts an envelope written with non-default parameters.</dd></dl>
 </li>
 <li class="kit-task" id="task-STATE-STALE-REDUCERS">
 <div class="kit-task-head"><span class="kit-task-id">STATE-STALE-REDUCERS</span><span class="kit-task-title">Reducers overwrite each other with a stale snapshot</span></div>
@@ -73,6 +121,11 @@
 <div class="kit-task-pills"><span class="kit-pill" data-kind="bug">bug</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="normal">normal</span></div>
 <dl><dt>accept</dt><dd>when the camera is blocked, <code>Scanner.qr.js</code> shows a title and a distinct caption, and the outlined button reads on the scrim in the light theme; a test on the copy keys and the button tone.</dd></dl>
 </li>
+<li class="kit-task" id="task-UI-GENERATOR-STRENGTH-CONTRAST">
+<div class="kit-task-head"><span class="kit-task-id">UI-GENERATOR-STRENGTH-CONTRAST</span><span class="kit-task-title">The password strength label is unreadable in the light theme</span></div>
+<div class="kit-task-pills"><span class="kit-pill" data-kind="bug">bug</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="normal">normal</span></div>
+<dl><dt>accept</dt><dd>the strength label of the generator (<code>src/screens/Passwords</code>) meets 4.5:1 against the background in both themes (accent on background is 2.93:1 in light today), and weak and strong differ by more than colour; a test on the tone and the label.</dd></dl>
+</li>
 <li class="kit-task" id="task-STYLE-NO-EXTENDED">
 <div class="kit-task-head"><span class="kit-task-id">STYLE-NO-EXTENDED</span><span class="kit-task-title">Retire <code>react-native-extended-stylesheet</code></span></div>
 <div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="low">low</span></div>
@@ -97,6 +150,11 @@
 <div class="kit-task-head"><span class="kit-task-id">DOCS-SUBAGENTS</span><span class="kit-task-title">Reconcile <code>.codex/subagents/</code> with the document set</span></div>
 <div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="low">low</span></div>
 <dl><dt>accept</dt><dd>each subagent file points to the SPEC section it owns instead of restating contracts, and <code>.codex/subagents/release-checklist.md</code> matches SPEC's operations section.</dd></dl>
+</li>
+<li class="kit-task" id="task-CRYPTO-V3-PARAMS">
+<div class="kit-task-head"><span class="kit-task-id">CRYPTO-V3-PARAMS</span><span class="kit-task-title">Read Argon2 parameters from the <code>v3</code> envelope</span></div>
+<div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="low">low</span></div>
+<dl><dt>depends</dt><dd><a href="#task-COMPAT-GOLDEN-FIXTURES">COMPAT-GOLDEN-FIXTURES</a></dd><dt>accept</dt><dd><code>decryptV3Envelope</code> (<code>src/modules/persistenceCrypto.js</code>) derives the key from the envelope's stored <code>k</code> parameters instead of constants, so a later change to the defaults cannot lock out existing vaults and backups; the <code>v3</code> fixtures still decrypt unchanged, and a test decrypts an envelope written with non-default parameters. QR and NFC payloads are not touched.</dd></dl>
 </li>
 <li class="kit-task" id="task-STORAGE-SINGLE-DERIVATION">
 <div class="kit-task-head"><span class="kit-task-id">STORAGE-SINGLE-DERIVATION</span><span class="kit-task-title">One key derivation per vault write</span></div>
@@ -157,6 +215,11 @@
 <div class="kit-task-head"><span class="kit-task-id">THEME-UNUSED-TOKENS</span><span class="kit-task-title">Tokens no component reads</span></div>
 <div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="low">low</span></div>
 <dl><dt>accept</dt><dd><code>radiusFull</code>, <code>surfaceRaised</code>, <code>disabled</code>, <code>success</code>, <code>info</code> and their <code>on*</code> pairs are used by a component or removed from <code>src/theme/palette.js</code>, and <code>design/index.html</code> follows after <code>node scripts/design-tokens.mjs</code>.</dd></dl>
+</li>
+<li class="kit-task" id="task-UI-DISABLED-BUTTON-CONTRAST">
+<div class="kit-task-head"><span class="kit-task-id">UI-DISABLED-BUTTON-CONTRAST</span><span class="kit-task-title">Disabled outlined and secondary buttons fall just under AA</span></div>
+<div class="kit-task-pills"><span class="kit-pill" data-kind="chore">chore</span><span class="kit-pill" data-owner="agent">agent</span><span class="kit-pill" data-priority="low">low</span></div>
+<dl><dt>accept</dt><dd>the label of a disabled outlined or secondary <code>Button</code> meets 4.5:1 against its fill in both themes (<code>textSecondary</code> on <code>border</code> is 4.36:1 in light today); a test over the palette.</dd></dl>
 </li>
 </ul></div>
 </section>
