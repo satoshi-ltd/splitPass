@@ -1,8 +1,6 @@
 (function attachSplitPassCameraAccess(globalScope) {
   const PAGE_PATH = 'camera-access.html';
 
-  // Escalation is driven by what actually happened, not by navigator.permissions: Brave's
-  // fingerprinting defences report `prompt` for an extension origin even after a grant.
   const FAILURE_COPY = {
     first: { title: 'Camera not started', copy: 'The permission dialog was closed. Tap to try again.' },
     repeated: { title: 'Camera blocked', copy: 'Allow the camera for split/Pass, then try again.' },

@@ -197,7 +197,6 @@ function showCameraControls(show) {
 function showCameraDenied() {
   const { title, copy, showHelp } = cameraAccess.describeFailure(state.cameraDenials);
   stopCamera();
-  // The stage stays clickable so a retry needs no aiming at the button.
   setScanTriggerState(true);
   setEmptyState(title, copy);
   showCameraEmpty(true);
@@ -358,7 +357,6 @@ function renderScannerState() {
     headerSubtitle.textContent = 'Scanner';
     setMainViewVisible(true);
     updateCaption();
-    // A failed camera owns the stage until the user retries; re-rendering must not undo that.
     if (state.cameraFailed) return;
 
     const shouldWaitForUserAction = state.recentEntries.length > 0 && !state.cameraStartedByUser && !state.scanning;
@@ -391,16 +389,11 @@ function renderScannerState() {
 async function copySecretToClipboard(secret) {
   const text = String(secret || '');
 
-  // Modern Clipboard API — requires document focus (may fail in extension popups).
   try {
     await navigator.clipboard.writeText(text);
     return true;
-  } catch {
-    // fall through to execCommand fallback
-  }
+  } catch {}
 
-  // Fallback: execCommand('copy') via a temporary off-screen textarea.
-  // Works even when the popup document has lost focus during QR processing.
   try {
     const textarea = document.createElement('textarea');
     textarea.value = text;
@@ -708,8 +701,6 @@ async function startCamera({ userInitiated = false } = {}) {
 
     await ensureDetector();
 
-    // Ask the popup first: the dialog usually works here, and routing every first run through a
-    // tab turned an occasional dismissal into a permission prompt on every single scan.
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.18 — 2026-09-30
+
+- No change for people using the app or the extension: the extension's source drops its code comments.
+
 ## 1.4.17 — 2026-09-30
 
 - The confirm button of the passcode prompt is readable again in the dark theme; its icon now picks the colour that contrasts with the button.
