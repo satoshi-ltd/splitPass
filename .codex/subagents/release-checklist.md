@@ -8,7 +8,7 @@
 - Confirm no sensitive values were added to docs, logs, fixtures, or screenshots.
 
 ## Before shipping
-- Smoke test onboarding, main, create, scanner, viewer, settings, vault, language, marketplace, and password generator flows.
+- Smoke test onboarding, main, create, scanner, viewer, settings, vault, language, and password generator flows.
 - Verify QR scan and decode still work with existing payloads.
 - Verify shard recombination still works with old data.
 - Verify card encode, decode, split, and recombination still work.

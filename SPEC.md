@@ -22,7 +22,7 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 
 ## Current state
 
-- **1.4.20.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
+- **1.4.21.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
   only. iOS build number and Android version code are 12.
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
@@ -30,8 +30,8 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 - **Distribution:** App Store assets live in `store-assets/app-store/<version>/`; Android builds are signed APKs from
   EAS or a local build, written to `release-assets/` ([10](#10-operations)). Bundle ids: iOS
   `com.satoshi-limited.splitpass`, Android `com.satoshilimited.splitpass`; Expo owner `satoshi-ltd`.
-- **Network:** no backend, no telemetry. The app talks to the network only for opt-in website favicons, the marketplace
-  WebView and the Terms and Privacy links.
+- **Network:** no backend, no telemetry. The app talks to the network only for opt-in website favicons and the Terms and
+  Privacy links.
 - **Repository:** `git@github.com:satoshi-ltd/splitPass.git`. License Apache-2.0.
 
 ## 1. Product and decisions
@@ -307,7 +307,6 @@ Routes (`src/App.Navigator.jsx`, native stack):
 | `secret` | Viewer | Show a secret's QR, value, TOTP; actions menu |
 | `passwordGenerator` | Passwords | Generator modal; picker mode returns to Create |
 | `language` | Language | Choose one of five languages |
-| `marketplace` | Marketplace | WebView of `https://splitpass-marketplace.pages.dev/` |
 | `confirm` | ConfirmScreen | Transparent confirm modal driven by `openConfirm` |
 | `menu` | Menu | Registered transparent modal; nothing navigates to it |
 
@@ -330,7 +329,7 @@ Unlock also serves `export` and `import` modes (pushed from Settings).
   a plain type; a `B` envelope restores the username. Reached with `readMode` and `values` from a shard's Viewer.
   Reached with `writeMode` it writes the secret to an NFC card.
 - **Settings:** security (biometric, lock immediately, backup reminder, export, import), privacy (external sharing,
-  clipboard auto-clear, favicons), preferences (language, system theme, dark mode), about (marketplace, terms, privacy),
+  clipboard auto-clear, favicons), preferences (language, system theme, dark mode), about (terms, privacy),
   account and data (logout, reset), development (demo secrets, `__DEV__` only).
 - **Passwords:** length slider (8 and up), counters for digits, capitals, symbols, strength label, copy (with
   clipboard clearing); picker mode also emits `password-selected`.
@@ -360,8 +359,7 @@ Unlock also serves `export` and `import` modes (pushed from Settings).
 - **Favicons (7.7):** `FaviconService.resolve(domain)`, only when `websiteFaviconsEnabled`, domain from the secret's
   website or name: the site's `favicon.ico`, then DuckDuckGo and Google favicon endpoints; 4.5 s timeout per candidate,
   cache in `<cache>/favicons`, 60 s offline cooldown, 10 min failure cooldown, `invalidate` on image error.
-- **Marketplace (7.8):** a `react-native-webview` of the split|Card store; Terms and Privacy open `satoshi-ltd.com` in
-  the system browser.
+- **Terms and Privacy (7.8):** Settings opens `satoshi-ltd.com` in the system browser.
 
 ## 8. Browser extension
 
@@ -641,7 +639,7 @@ Manual smoke flows worth keeping (device or emulator):
 5. Viewer QR with a username, scanned back with the username restored.
 6. Export with and without a custom passphrase, import both, opaque file name.
 7. Background past the delay, and with lock immediately; unlock again.
-8. Settings, language, marketplace, password generator (also as picker from Create).
+8. Settings, language, password generator (also as picker from Create).
 9. Extension: create vault, scan a password QR, fill a login form, cycle retention, lock, alarm purge.
 
 ## 12. Code map
@@ -658,8 +656,7 @@ src/modules/                QRParser, cypher, shamir, persistenceCrypto, secretV
 src/services/               StorageService, BackupService, BiometricAuthService, ClipboardService, NFCService(+web),
                             NotificationsService, PublicSettingsService, FaviconService, SecurityService, mock/,
                             modules/asyncStorage.js
-src/screens/                Onboarding, Unlock, Main, Home, Create, Viewer, Scanner, Settings, Passwords, Language,
-                            Marketplace
+src/screens/                Onboarding, Unlock, Main, Home, Create, Viewer, Scanner, Settings, Passwords, Language
 src/components/             Footer, InputMask, Logo, Menu, NFCCard, QR, SecretFooterContent, SecretItem, Switch
 src/design-system/          primitives/, components/, index.js
 src/theme/                  palette, theme, common/light/dark themes, layout

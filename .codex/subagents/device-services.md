@@ -4,12 +4,12 @@
 - `src/services/*`
 - scanner hardware integration
 - backup/import platform APIs
-- notifications, NFC, camera, sharing, document picker, webview wiring
+- notifications, NFC, camera, sharing, document picker wiring
 
 ## Use when
 - Device APIs change after Expo upgrades
 - QR/NFC scanning breaks
-- Sharing, document picker, notifications, backup, or marketplace/service wiring need fixes
+- Sharing, document picker, notifications, backup, or service wiring need fixes
 
 ## Guardrails
 - Preserve fallback behavior on web where it already exists.

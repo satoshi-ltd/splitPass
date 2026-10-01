@@ -18,12 +18,6 @@ export const note = ({ title, text }) =>
 export const spec = (inner, cls = '') => `<div class="m-phone kit-spec${cls ? ` ${cls}` : ''}">${inner}</div>`;
 export const scanCrop = (inner) => `<div class="m-phone kit-spec kit-spec-crop m-scan" data-phone-theme="light">${inner}</div>`;
 
-export const setting = ({ icon, title }) =>
-  `<div class="m-setting"><div class="m-setting-left"><div class="m-setting-thumb">${ic(icon)}</div><div class="m-setting-body">${t(title, 'm-sb')}</div></div><div class="m-setting-action">${ic('chevron-right', '', 'm-c-sec')}</div></div>`;
-
-export const nfcStrip = (wordmark) =>
-  `<div class="m-nfc-card kit-nfc-mini" data-phone-theme="light"><div class="m-nfc-row">${t(wordmark, 'm-b m-l m-c-qrfg')}</div><div class="m-nfc-row">${t('0000 0000 0000 00', 'm-xs m-nfc-embossed m-c-qrfg')}${t('SATOSHI LTD.', 'm-xs m-nfc-embossed m-c-qrfg')}</div></div>`;
-
 export const lightSpec = (inner) => `<div class="m-phone kit-spec" data-phone-theme="light">${inner}</div>`;
 
 export const extensionFigure = (title) => {

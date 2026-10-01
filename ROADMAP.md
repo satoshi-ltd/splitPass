@@ -135,9 +135,6 @@ _None._
   `chore · agent · low`
   accept: `src/services/NFCService.js` reads the tag's capacity instead of hard-coding NTAG215 and refuses a payload
   that does not fit with a clear error.
-- **MARKETPLACE-ORIGINS** — Restrict the marketplace WebView
-  `decision · creator · normal`
-  accept: a decision on the origins the WebView may load; an approved list becomes an agent task with a test.
 - **EXT-CLIPBOARD-CLEAR** — The extension clears copied secrets
   `feature · agent · normal`
   accept: a password copied from the popup is cleared from the clipboard after the app's timeout when unchanged; a

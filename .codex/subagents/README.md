@@ -19,7 +19,7 @@ This directory defines the working contracts for Codex subagents that operate in
 - `ui-flow.md`
   - Screens, navigation, state wiring, UX regressions, style files.
 - `device-services.md`
-  - Camera, NFC, sharing, document picker, notifications, backup, marketplace/service wiring.
+  - Camera, NFC, sharing, document picker, notifications, backup, service wiring.
 - `docs-release.md`
   - README, AGENTS, release notes, operational checklists.
 - `release-checklist.md`

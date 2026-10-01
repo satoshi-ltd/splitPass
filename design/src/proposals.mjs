@@ -1,13 +1,10 @@
-import { L, btn, esc, extensionFigure, ic, lightSpec, nfcStrip, note, s, scanCrop, setting, spec, t } from './draw.mjs';
+import { L, btn, esc, extensionFigure, ic, lightSpec, note, s, scanCrop, spec, t } from './draw.mjs';
 
 const permissionCard = ({ title, caption, button }) =>
   scanCrop(`<div class="m-scan-permission"><div class="m-scan-permission-body">${t(title, 'm-b m-l m-c-scrim')}${t(caption, 'm-s m-c-scrim')}${button}</div></div>`);
 
 const [blockedTitle, ...blockedRest] = L.SCANNER_QR_PERMISSION_DENIED.split('. ');
 const blockedCaption = blockedRest.join('. ');
-
-const homeSubtitle = (tail) =>
-  `<div class="m-t m-b m-l m-c-sec">${esc(L.HOME_SUBTITLE_INTRO)} ${s('1', 'm-b m-l')} ${esc(tail)}</div>`;
 
 const securePopup = extensionFigure('Secure QR · passcode');
 const OVERLAY = '<div class="splitpass-empty">';
@@ -30,15 +27,6 @@ export const REVIEW = [
     accept: 'when the camera is blocked, `Scanner.qr.js` shows a title and a distinct caption, and the outlined button reads on the scrim in the light theme; a test on the copy keys and the button tone.',
     now: permissionCard({ title: L.SCANNER_QR_PERMISSION_DENIED, caption: L.SCANNER_QR_PERMISSION_DENIED, button: btn({ text: L.SCANNER_QR_PERMISSION_SETTINGS, variant: 'outlined', size: 's' }) }),
     proposed: permissionCard({ title: blockedTitle, caption: blockedCaption, button: btn({ text: L.SCANNER_QR_PERMISSION_SETTINGS, variant: 'outlined', size: 's', tone: 'scrim' }) }),
-  },
-  {
-    id: 'UI-COPY-PLURALS',
-    area: 'Home · Settings · NFC card',
-    title: 'One secret is plural, and the card has two spellings',
-    why: 'The Home subtitle joins "strong secrets." to any count, so one secret reads "1 strong secrets."; the NFC card draws "split/Card" while GET_SPLITCARD and the other card strings write "split|Card". The board draws the slash; which spelling wins is the creator\'s call.',
-    accept: 'the Home subtitle reads correctly for one secret ("1 strong secret"), and `NFCCard` and the `GET_SPLITCARD` strings spell the card name the same way.',
-    now: spec(`${homeSubtitle(L.HOME_SUBTITLE_ALL_STRONG)}${setting({ icon: 'shopping-outline', title: L.GET_SPLITCARD })}${nfcStrip('split/Card')}`),
-    proposed: spec(`${homeSubtitle('strong secret.')}${setting({ icon: 'shopping-outline', title: L.GET_SPLITCARD.replace('|', '/') })}${nfcStrip('split/Card')}`),
   },
   {
     id: 'UI-EXT-SECURE-QR-OVERLAY',

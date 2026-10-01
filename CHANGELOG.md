@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.21 — 2026-10-01
+
+- Settings no longer offers "Get your own split|Card": the card store screen is gone. NFC storage is unchanged.
+
 ## 1.4.20 — 2026-10-01
 
 - The web favicon is the split|Pass mark instead of the Expo placeholder it carried since the first commit.

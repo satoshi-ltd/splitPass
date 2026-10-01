@@ -1,6 +1,6 @@
 {
   "name": "@satoshi-ltd/splitpass",
-  "version": "1.4.20",
+  "version": "1.4.21",
   "main": "node_modules/expo/AppEntry.js",
   "private": false,
   "packageManager": "yarn@1.22.22",
@@ -65,8 +65,7 @@
     "react-native-screens": "~4.23.0",
     "react-native-svg": "15.15.3",
     "react-native-view-shot": "~4.0.3",
-    "react-native-web": "^0.21.0",
-    "react-native-webview": "13.16.0"
+    "react-native-web": "^0.21.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

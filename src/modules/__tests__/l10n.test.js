@@ -1,4 +1,5 @@
 import { VAULT_TYPE } from '../../App.constants';
+import { DE, EN, ES, FR, PT } from '../l10n.dictionaries';
 import { getDictionary, getLanguageLabel, getLocale, getVaultLabel, L10N, setLanguage, translate } from '../l10n';
 
 afterEach(() => {
@@ -110,6 +111,14 @@ describe('l10n', () => {
 
     it('returns the raw vault string for an unrecognised vault', () => {
       expect(getVaultLabel('CustomVault')).toBe('CustomVault');
+    });
+  });
+
+  describe('dictionaries', () => {
+    it('define no key for buying a split|Card', () => {
+      [EN, ES, PT, FR, DE].forEach((dictionary) => {
+        expect(Object.keys(dictionary).filter((key) => key.startsWith('GET_SPLITCARD'))).toEqual([]);
+      });
     });
   });
 });

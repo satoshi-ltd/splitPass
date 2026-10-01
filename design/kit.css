@@ -382,10 +382,6 @@ body.kit {
   padding: 0;
   overflow: hidden;
 }
-.m-nfc-card.kit-nfc-mini {
-  width: auto;
-  height: auto;
-}
 .kit-ext-scope .kit-board-label {
   color: var(--color-text-secondary);
 }

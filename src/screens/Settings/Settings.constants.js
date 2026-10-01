@@ -26,7 +26,6 @@ const DEVELOPMENT_OPTIONS = () => [
 ];
 
 const ABOUT_OPTIONS = () => [
-  { icon: ICON.SHOPPING, text: L10N.GET_SPLITCARD, screen: 'marketplace' },
   { icon: ICON.FILE, url: SATOSHI_URLS.TERMS, text: L10N.TERMS },
   { icon: ICON.FILE, url: SATOSHI_URLS.PRIVACY, text: L10N.PRIVACY },
 ];

@@ -68,9 +68,8 @@ const Settings = ({ navigation = {} }) => {
     };
   }, []);
 
-  const handleOption = ({ callback, screen, url }) => {
+  const handleOption = ({ callback, url }) => {
     if (url) Linking.openURL(url);
-    if (screen) navigation.navigate(screen);
     else if (callback === 'handleExport') handleExport();
     else if (callback === 'handleImport') handleImport();
     else if (callback === 'handleLoadDemoSecrets') handleLoadDemoSecrets();
@@ -311,7 +310,7 @@ const Settings = ({ navigation = {} }) => {
             disabled={disabled}
             icon={icon}
             title={text}
-            onPress={rest.callback || rest.screen ? () => handleOption(rest) : undefined}
+            onPress={rest.callback ? () => handleOption(rest) : undefined}
           />
         ))}
       </View>

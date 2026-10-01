@@ -71,7 +71,7 @@ Five documents, each answering one question. Put information in the one that own
 - Do not overwrite changes already present in the worktree; read diffs before editing shared files.
 - Before editing `QRParser`, `cypher`, `persistenceCrypto`, `isSeedPhrase` or `secretValueDisplay`, read their tests in
   `src/modules/__tests__/`. Keep public module signatures stable unless the same change carries the migration.
-- Before editing scanner, backup, notifications, NFC or marketplace behaviour, inspect both the service and the calling
+- Before editing scanner, backup, notifications or NFC behaviour, inspect both the service and the calling
   screen. Prefer adapter fixes over broad rewrites when an SDK upgrade breaks an API.
 - `react-native-argon2` is patched by `patch-package`; when an Android build error mentions its Gradle files, read
   `patches/react-native-argon2+4.0.0.patch` before touching app code.
