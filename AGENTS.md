@@ -62,11 +62,12 @@ Five documents, each answering one question. Put information in the one that own
 - Styles live in style files (`*.style.js`, `src/theme/*`, extension `*.css`), not inline; the app stays on JavaScript +
   `StyleSheet` / `react-native-extended-stylesheet` unless a compatibility fix requires otherwise.
 - Code and design kit stay in step: after a visible change to a token, a component, a screen or an extension view,
-  update the affected board in `design/`. Tokens: `node scripts/design-tokens.mjs`. `scripts/__tests__/design-kit.test.js`
-  fails until the generated files match.
-- A proposal with a visible effect gets a board in `design/proposals.html`: add it to `scripts/design-review.mjs` with the
-  ROADMAP ID, drawn as it is and as proposed with the kit's own classes; remove the board when the task ships. The
-  design-kit test fails on a board without a Proposed task.
+  regenerate `design/` (`yarn design`); the design-kit contract, board format and lifecycle live in
+  `design/AGENTS.md`. `scripts/__tests__/design-kit.test.js` fails until the generated files match.
+- **Views in sync.** The views (System and every interface tab) show what ships; Proposals shows what is proposed.
+  Shipping a proposal is one change: the code, the views regenerated so they show the new design, the board deleted,
+  its `ui` line deleted, and the changelog and the spec updated. A board left standing after its change shipped, or a
+  view that still draws the old look, fails the adversarial review before the commit.
 - Do not overwrite changes already present in the worktree; read diffs before editing shared files.
 - Before editing `QRParser`, `cypher`, `persistenceCrypto`, `isSeedPhrase` or `secretValueDisplay`, read their tests in
   `src/modules/__tests__/`. Keep public module signatures stable unless the same change carries the migration.

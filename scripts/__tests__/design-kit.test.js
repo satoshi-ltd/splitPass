@@ -5,13 +5,13 @@ import path from 'node:path';
 
 const ROOT = path.join(__dirname, '..', '..');
 const DESIGN = path.join(ROOT, 'design');
-const PAGES = ['index.html', 'browser-extension.html', 'mobile.html', 'open-work.html', 'proposals.html'];
+const PAGES = ['index.html', 'browser-extension.html', 'mobile.html', 'proposals.html'];
 const KIT_STYLES = ['kit.css', 'mobile.css'];
 const GENERATED_STYLES = ['mobile-tokens.css', 'extension-tokens.css', 'mobile-icons.css'];
 
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 const readDesign = (file) => read(path.join('design', file));
-const run = (script, ...args) => spawnSync(process.execPath, [path.join(ROOT, 'scripts', script), ...args], { encoding: 'utf8' });
+const run = (...args) => spawnSync(process.execPath, [path.join(DESIGN, 'build.mjs'), ...args], { encoding: 'utf8' });
 
 const EXTENSION_SCRIPTS = ['popup.js', 'content.js', 'lib/scanner-ui.js', 'lib/secret-item.js'].map((file) => read(path.join('browser-extension', file))).join('\n');
 
@@ -58,18 +58,21 @@ const TASK = (id = 'TASK-ONE', depends = '') =>
   `- **${id}** — A title with \`code\`\n  \`chore · agent · normal${depends ? ` · depends: ${depends}` : ''}\`\n  accept: it works\n  and keeps working\n`;
 
 describe('design kit', () => {
-  it('has generated token files that match src/theme and the extension theme', () => {
-    const { status, stderr } = run('design-tokens.mjs', '--check');
+  it('has generated files that match src/theme, the extension theme, the boards, ROADMAP.md, the release version and the shared header', () => {
+    const { status, stderr } = run('--check');
 
     expect(stderr).toBe('');
     expect(status).toBe(0);
   });
 
-  it('has pages that match ROADMAP.md, the release version and the shared header', () => {
-    const { status, stderr } = run('design-pages.mjs', '--check');
-
-    expect(stderr).toBe('');
-    expect(status).toBe(0);
+  it('is a self-contained module with its contract, a CLAUDE.md pointer and no generator left in scripts', () => {
+    expect(fs.existsSync(path.join(DESIGN, 'AGENTS.md'))).toBe(true);
+    if (fs.existsSync(path.join(DESIGN, 'CLAUDE.md'))) expect(readDesign('CLAUDE.md').trim()).toBe('@AGENTS.md');
+    ['build.mjs', 'src/pages.mjs', 'src/tokens.mjs', 'src/proposals.mjs', 'src/draw.mjs'].forEach((file) => {
+      expect({ file, exists: fs.existsSync(path.join(DESIGN, file)) }).toEqual({ file, exists: true });
+    });
+    expect(fs.readdirSync(path.join(ROOT, 'scripts')).filter((file) => /design/i.test(file) && file !== '__tests__')).toEqual([]);
+    expect(JSON.parse(read('package.json')).scripts.design).toBe('node design/build.mjs');
   });
 
   it('stamps the package version on every page', () => {
@@ -80,7 +83,18 @@ describe('design kit', () => {
     });
   });
 
-  it('gives every page the five-page nav and both theme buttons', () => {
+  it('has no Open work page and ends every nav with Proposals', () => {
+    expect(fs.existsSync(path.join(DESIGN, 'open-work.html'))).toBe(false);
+    PAGES.forEach((page) => {
+      const html = readDesign(page);
+      const nav = [...html.match(/<nav class="kit-nav"[^>]*>([\s\S]*?)<\/nav>/)[1].matchAll(/<a href="([^"]+)"/g)].map((match) => match[1]);
+
+      expect({ page, nav }).toEqual({ page, nav: PAGES });
+      expect(html).not.toMatch(/open-work|Open work/);
+    });
+  });
+
+  it('gives every page the nav and both theme buttons', () => {
     PAGES.forEach((page) => {
       const html = readDesign(page);
 
@@ -96,6 +110,17 @@ describe('design kit', () => {
       localReferences(readDesign(page)).forEach((ref) => {
         expect({ page, ref, exists: fs.existsSync(path.join(DESIGN, ref)) }).toEqual({ page, ref, exists: true });
       });
+    });
+  });
+
+  it('gives every page a favicon that is a copy of the project icon inside design/', () => {
+    const pages = fs.readdirSync(DESIGN).filter((file) => file.endsWith('.html'));
+    expect(pages.length).toBe(PAGES.length);
+    const source = fs.readFileSync(path.join(ROOT, 'assets', 'favicon.png'));
+    pages.forEach((page) => {
+      const hrefs = [...readDesign(page).matchAll(/<link rel="icon" href="([^"]*)">/g)].map((match) => match[1]);
+      expect({ page, hrefs }).toEqual({ page, hrefs: ['favicon.png'] });
+      expect({ page, same: fs.readFileSync(path.join(DESIGN, hrefs[0])).equals(source) }).toEqual({ page, same: true });
     });
   });
 
@@ -177,38 +202,49 @@ describe('design kit', () => {
   });
 });
 
-describe('design review boards', () => {
+describe('design proposal boards', () => {
   const html = readDesign('proposals.html');
-  const boards = [...html.matchAll(/data-review="([A-Z0-9.-]+)"/g)].map((match) => match[1]);
+  const markers = html.match(/<article class="kit-board"/g) ?? [];
+  const boards = [...html.matchAll(/<article class="kit-board" data-review="([A-Z0-9.-]+)"/g)].map((match) => match[1]);
   const roadmap = read('ROADMAP.md');
-  const proposed = roadmap.slice(roadmap.indexOf('\n## Proposed'));
-  const proposedIds = [...proposed.matchAll(/^- \*\*([A-Z][A-Z0-9.-]+)\*\* — /gm)].map((match) => match[1]);
+  const uiMeta = roadmap.match(/^ {2}`ui · /gm) ?? [];
+  const uiIds = [...roadmap.matchAll(/^- \*\*([A-Z][A-Z0-9.-]+)\*\* — .*\n {2}`ui · /gm)].map((match) => match[1]);
 
-  it('draws at least one board and announces the count', () => {
-    expect(boards.length).toBeGreaterThan(0);
-    expect(html).toContain(`${boards.length} findings from reading the screens against the design system, each drawn as it is and as proposed, each filed in ROADMAP with what proves it done.`);
+  it('parses every board marker it finds and shows an empty state only without boards', () => {
+    expect(boards).toHaveLength(markers.length);
+    expect(html.match(/data-review="/g) ?? []).toHaveLength(markers.length);
+    expect(html.includes('class="kit-empty"')).toBe(markers.length === 0);
+    expect(html).toContain(`<h2>Boards <span>${markers.length}</span></h2>`);
   });
 
-  it('files every board as a proposed roadmap task rendered on the page', () => {
-    boards.forEach((id) => {
-      expect({ id, proposed: proposedIds.includes(id) }).toEqual({ id, proposed: true });
-      expect({ id, rendered: html.includes(`id="task-${id}"`) }).toEqual({ id, rendered: true });
-    });
+  it('parses every ui task of the roadmap', () => {
+    expect(uiIds).toHaveLength(uiMeta.length);
   });
 
-  it('draws each board once, with a Now and a second column', () => {
+  it('draws a board for every ui task', () => {
+    uiIds.forEach((id) => expect({ id, board: boards.includes(id) }).toEqual({ id, board: true }));
+  });
+
+  it('keeps boards out of the roadmap unless they are approved ui tasks', () => {
+    const roadmapIds = [...roadmap.matchAll(/^- \*\*([A-Z][A-Z0-9.-]+)\*\* — /gm)].map((match) => match[1]);
+
+    boards.filter((id) => roadmapIds.includes(id)).forEach((id) => expect({ id, ui: uiIds.includes(id) }).toEqual({ id, ui: true }));
+  });
+
+  it('draws each board once, with Now, Proposed and Accept', () => {
     expect(new Set(boards).size).toBe(boards.length);
-    expect(html.match(/<p class="kit-board-label">Now<\/p>/g)).toHaveLength(boards.length);
+    expect(html.match(/<p class="kit-board-label">Now<\/p>/g) ?? []).toHaveLength(boards.length);
+    expect(html.match(/<p class="kit-board-label">Accept<\/p>/g) ?? []).toHaveLength(boards.length);
   });
 
-  it('places the boards above the roadmap lanes', () => {
-    expect(html.indexOf('id="review"')).toBeGreaterThan(-1);
-    expect(html.indexOf('id="review"')).toBeLessThan(html.indexOf('id="proposed"'));
+  it('has no ROADMAP mirror on the page', () => {
+    expect(html).not.toMatch(/kit-task|kit-count|id="(?:queue|progress|creator|proposed)"/);
   });
 });
 
 describe('design pages roadmap parser', () => {
-  const validate = (markdown) => run('design-pages.mjs', '--validate', withRoadmap(markdown));
+  const validate = (markdown) => run('--validate', withRoadmap(markdown));
+  const UI = (id) => `- **${id}** — A visual change\n  \`ui · agent · normal\`\n  accept: the board\n`;
 
   it('accepts empty lanes, grouped tasks and dependencies', () => {
     const creator = `### Group\n\n${TASK('TASK-ONE')}\n${TASK('TASK-TWO', 'TASK-ONE')}`;
@@ -218,8 +254,30 @@ describe('design pages roadmap parser', () => {
     expect(result.stdout).toContain('creator 2');
   });
 
+  it('rejects a ui task without a board', () => {
+    const { status, stderr } = validate(LANES(UI('UI-NO-BOARD')));
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('ui task UI-NO-BOARD has no board');
+  });
+
+  it('rejects a ui task left in Proposed', () => {
+    const { status, stderr } = validate(LANES('_None._', '_None._', '_None._', UI('UI-IDEA')));
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('ui task in Proposed');
+  });
+
+  it('rejects a board that is also a behavioural task', () => {
+    const board = read('design/src/proposals.mjs').match(/^ {4}id: '([A-Z0-9.-]+)'/m)[1];
+    const { status, stderr } = validate(LANES('_None._', '_None._', '_None._', TASK(board)));
+
+    expect(status).toBe(1);
+    expect(stderr).toContain(`board ${board} is also a chore task`);
+  });
+
   it('accepts the repository roadmap', () => {
-    expect(run('design-pages.mjs', '--validate', path.join(ROOT, 'ROADMAP.md')).status).toBe(0);
+    expect(run('--validate', path.join(ROOT, 'ROADMAP.md')).status).toBe(0);
   });
 
   it.each([

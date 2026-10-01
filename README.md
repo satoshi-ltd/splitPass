@@ -5,7 +5,7 @@ password, a payment card or a BIP39 seed phrase in a vault encrypted with a mast
 into shards that travel as QR codes or NFC tags and recombine later. A browser extension scans SplitPass QR codes and
 fills the saved passwords.
 
-**v1.4.19 · Expo SDK 55 · browser extension 0.1.0.**
+**v1.4.20 · Expo SDK 55 · browser extension 0.1.0.**
 
 - Stores passwords, payment cards and seed phrases locally, detecting seed phrases automatically.
 - Splits secrets into shards for external storage and recovers them from QR or NFC.
@@ -51,4 +51,4 @@ in [browser-extension/README.md](browser-extension/README.md).
 - [ROADMAP.md](ROADMAP.md) — what is left and who has to move.
 - [CHANGELOG.md](CHANGELOG.md) — what each version shipped.
 - [AGENTS.md](AGENTS.md) — rules for working on the repository.
-- Design kit: `design/index.html` (system), `browser-extension.html` (extension), `mobile.html` (app), `open-work.html`, `proposals.html`.
+- Design kit: `design/index.html` (system), `browser-extension.html` (extension), `mobile.html` (app), `proposals.html` (visual proposals); `yarn design` regenerates it, and [design/AGENTS.md](design/AGENTS.md) is its contract.

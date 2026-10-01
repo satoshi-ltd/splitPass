@@ -69,7 +69,7 @@ if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(file
   try {
     const { from, to, staged } = bump(root, target, { build: args.includes('--build'), date: option('--date') });
     if (root === repository) {
-      spawnSync(process.execPath, [path.join(repository, 'scripts', 'design-pages.mjs')], { stdio: 'inherit' });
+      spawnSync(process.execPath, [path.join(repository, 'design', 'build.mjs')], { stdio: 'inherit' });
     }
     console.log(
       `${from} → ${to}.${staged ? '' : ` Add "## ${to} — ${new Date().toISOString().slice(0, 10)}" to CHANGELOG.md.`} Then run node scripts/check-release.mjs.`,

@@ -22,7 +22,7 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 
 ## Current state
 
-- **1.4.19.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
+- **1.4.20.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
   only. iOS build number and Android version code are 12.
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
@@ -523,14 +523,16 @@ overlay and placeholder tokens; `--font-primary` Doto; the same type and spacing
 
 `design/` is the design kit — `index.html` (brand, colour, type, spacing, primitives, components), `browser-extension.html` (the
 browser extension popup and in-page panel, real extension CSS), `mobile.html` (every app screen at 390 × 844),
-`open-work.html` and `proposals.html` (rendered from ROADMAP.md). `node scripts/design-tokens.mjs` generates
+`proposals.html` (the boards of purely visual proposals). `node design/build.mjs` (`yarn design`) generates
 `design/mobile-tokens.css` from `src/theme`, `design/extension-tokens.css` from the extension's `theme.css` (it lets
 the Light / Dark switch reach the unmodified extension stylesheets) and `design/mobile-icons.css` (glyph classes of the
 icon font in `node_modules/@expo/vector-icons`, so icons need `yarn install`); `design/kit.css`, `design/kit.js` and
-`design/mobile.css` are the kit's own chrome and phone frames. `node scripts/design-pages.mjs` regenerates the two
-ROADMAP pages, draws the Design review boards of `scripts/design-review.mjs` (each keyed to a Proposed task) at the top
-of the Proposals page, and stamps the shared header and version banner into all five; both scripts take `--check`.
-`scripts/__tests__/design-kit.test.js` fails when tokens drift, a page is stale, or the kit links break.
+`design/mobile.css` are the kit's own chrome and phone frames. The same command regenerates the
+Proposals page from the boards of `design/src/proposals.mjs` (ID, area, title, why, a Now and a Proposed drawing, and
+the accept; an empty state when there are none) and stamps the shared header and version banner into all four; the
+generator takes `--check`, and `design/AGENTS.md` holds the kit's contract. A board is the whole proposal: an approved
+one is a ROADMAP Queue task of type `ui` carrying its ID, and the generator refuses a `ui` task without a board.
+`scripts/__tests__/design-kit.test.js` fails when tokens drift, a page is stale, the boards and the `ui` tasks disagree, or the kit links break.
 
 ## 10. Operations
 
@@ -663,8 +665,8 @@ src/design-system/          primitives/, components/, index.js
 src/theme/                  palette, theme, common/light/dark themes, layout
 browser-extension/          manifest.json, popup.*, content.*, background.js, camera-access.*, theme.css, item.css,
                             scanner-ui.css, lib/, assets/, tests/, safari/
-scripts/                    android-build.mjs, bump-version.mjs, check-release.mjs, design-tokens.mjs, design-pages.mjs, __tests__/
-design/                     design kit pages, mobile-tokens.css, kit.css, kit.js
+scripts/                    android-build.mjs, bump-version.mjs, check-release.mjs, __tests__/
+design/                     build.mjs, src/ (generator modules, proposal boards), AGENTS.md, kit pages, tokens, kit.css, kit.js
 store-assets/app-store/     per-version screenshots, composers, release notes
 patches/                    react-native-argon2 patch
 assets/                     icons, splash, onboarding images, Canela fonts

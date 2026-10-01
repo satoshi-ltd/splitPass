@@ -10,8 +10,9 @@ This is the task pool. [SPEC.md](SPEC.md) owns current state, contracts, operati
 Every task is one entry that a single commit can finish, with fixed fields (decisions only need their question):
 
 - **ID** — stable, never reused. Keep an existing ID when SPEC or the changelog cites it.
-- **type** — `bug`, `feature`, `chore`, `verify` (evidence from a real device or browser), `deploy` (build, submission
-  or publish outside the repository) or `decision`.
+- **type** — `bug`, `feature`, `chore`, `ui` (a visual change whose board is in `design/proposals.html`), `verify`
+  (evidence from a real device or browser), `deploy` (build, submission or publish outside the repository) or
+  `decision`.
 - **owner** — `agent` (finished in the repository and proved with tests) or `creator` (@soyjavi: a device, a native
   build, a store account, credentials or a product choice).
 - **priority** — `high`, `normal` or `low`. Within a lane, order is priority, then position.
@@ -23,8 +24,11 @@ reports, which enters at the top), **In progress** (at most one), **Needs creato
 tasks, and agent work waiting on one of them), **Proposed** (not approved, never worked on). When a task ships, delete
 it and record it in the changelog and in the SPEC section it changes.
 
-`design/open-work.html` and `design/proposals.html` render this file; edit it here and run
-`node scripts/design-pages.mjs`.
+A purely visual idea is not filed here: it is a board in `design/proposals.html` until the creator approves it, and
+then it is one Queue line of type `ui` with the board's ID, whose accept is "the board". When a task mixes logic and a
+screen, the screen is the board `UI-<TASKID>` and the logic stays under its own ID with the line "the interface follows
+board UI-<TASKID>" in its accept; a board ID never equals a non-`ui` task ID. `node design/build.mjs --check` verifies
+that every `ui` task has its board.
 
 ## Queue
 
@@ -98,7 +102,8 @@ _None._
 - **UNLOCK-FORMAT-WIPE** — An unreadable vault envelope wipes the app without a backup prompt
   `decision · creator · normal`
   accept: a decision on whether `ERR_PERSISTENCE_FORMAT` (`src/screens/Unlock/Unlock.helpers.js`) keeps wiping all
-  data at once or first offers a backup import; the three-wrong-passphrases wipe is recorded in SPEC 4 either way.
+  data at once or first offers a backup import; the three-wrong-passphrases wipe is recorded in SPEC 4 either way;
+  the interface follows board UI-UNLOCK-FORMAT-WIPE.
 - **COMPAT-GOLDEN-FIXTURES** — Freeze what earlier versions wrote
   `chore · agent · high`
   accept: committed fixtures decrypt with a known passphrase in tests: a `v1`, a `v2` and a `v3` store envelope and a
@@ -149,31 +154,20 @@ _None._
   `chore · agent · low`
   accept: `eas.json` has a production profile that builds an AAB and a `submit.production` entry, next to the APK
   profile `yarn build:prod` uses; `scripts/__tests__/android-build.test.js` still passes.
-- **EXT-TOKEN-PARITY** — Extension tokens follow the app's
-  `chore · agent · low`
-  accept: the extension's `--color-on-accent` and `--radius-full` match `onAccent` and `radiusFull` in
-  `src/theme/palette.js`, or SPEC 9 records the difference as deliberate.
 - **STORE-ASSETS-README** — Store asset notes name the current version
   `chore · agent · low`
   accept: `store-assets/app-store/1.4.14/README.md` states the version it applies to and the 1.4.15 decision from
   DEPLOY-STORE-1.4.15 is recorded.
-- **UI-SCANNER-PERMISSION** — The scanner permission card repeats itself and hides its button
-  `bug · agent · normal`
-  accept: when the camera is blocked, `Scanner.qr.js` shows a title and a distinct caption, and the outlined button
-  reads on the scrim in the light theme; a test on the copy keys and the button tone.
 - **UI-TOKEN-LITERALS** — Screens read colours and sizes from the theme
   `chore · agent · low`
   accept: the scanner header in `src/App.Navigator.jsx`, the passcode grounds in `SecretFooterContent` and the
   `fontSize: 16` in Home, Unlock and Create use theme tokens, and the Passwords metric size joins the type scale; a
   test greps the screens for literal colours.
-- **UI-COPY-PLURALS** — Home subtitle and card wordmark copy
-  `bug · agent · low`
-  accept: the Home subtitle reads correctly for one secret ("1 strong secret"), and `NFCCard` and the `GET_SPLITCARD`
-  strings spell the card name the same way.
 - **EXT-SECURE-QR-OVERLAY** — The scanner overlay reads "Starting camera" while the passcode is requested
   `bug · agent · low`
   accept: after a secure QR is detected the popup shows the passcode prompt without the camera-start message; a test
-  in `browser-extension/tests/`.
+  in `browser-extension/tests/`;
+  the interface follows board UI-EXT-SECURE-QR-OVERLAY.
 - **EXT-DEAD-CSS** — Delete extension styles no script uses
   `chore · agent · low`
   accept: `.splitpass-inline-button` and `.splitpass-inline-recent-*` are removed from `scanner-ui.css`, and the
@@ -184,12 +178,7 @@ _None._
 - **THEME-UNUSED-TOKENS** — Tokens no component reads
   `chore · agent · low`
   accept: `radiusFull`, `surfaceRaised`, `disabled`, `success`, `info` and their `on*` pairs are used by a component
-  or removed from `src/theme/palette.js`, and `design/index.html` follows after `node scripts/design-tokens.mjs`.
-- **UI-GENERATOR-STRENGTH-CONTRAST** — The password strength label is unreadable in the light theme
-  `bug · agent · normal`
-  accept: the strength label of the generator (`src/screens/Passwords`) meets 4.5:1 against the background in both
-  themes (accent on background is 2.93:1 in light today), and weak and strong differ by more than colour; a test on the
-  tone and the label.
+  or removed from `src/theme/palette.js`, and `design/index.html` follows after `yarn design`.
 - **UI-DISABLED-BUTTON-CONTRAST** — Disabled outlined and secondary buttons fall just under AA
   `chore · agent · low`
   accept: the label of a disabled outlined or secondary `Button` meets 4.5:1 against its fill in both themes

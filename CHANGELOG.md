@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.20 — 2026-10-01
+
+- The web favicon is the split|Pass mark instead of the Expo placeholder it carried since the first commit.
+- The design kit lives in one self-contained folder, with its generator, its sources, its contract and a Proposals page that holds six boards for what is still proposed.
+
 ## 1.4.19 — 2026-09-30
 
 - The design kit's Proposals page draws each visual finding as it is and as proposed; the roadmap accepts dependencies inline, and `COMPAT-GOLDEN-FIXTURES` joins the roadmap to freeze what earlier versions wrote.

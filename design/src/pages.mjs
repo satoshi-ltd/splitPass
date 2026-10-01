@@ -1,29 +1,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { REVIEW } from './design-review.mjs';
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const DESIGN = path.join(ROOT, 'design');
+import { esc } from './draw.mjs';
+import { DESIGN, ROOT, read } from './paths.mjs';
+import { REVIEW } from './proposals.mjs';
 
 const PAGES = [
   { file: 'index.html', label: 'System' },
   { file: 'browser-extension.html', label: 'Browser extension' },
   { file: 'mobile.html', label: 'Mobile' },
-  { file: 'open-work.html', label: 'Open work' },
   { file: 'proposals.html', label: 'Proposals' },
 ];
-const GENERATED = ['open-work.html', 'proposals.html'];
+const GENERATED = ['proposals.html'];
+const FAVICON = { source: 'assets/favicon.png', target: 'favicon.png' };
+const FAVICON_LINK = '<link rel="icon" href="favicon.png">';
+const FAVICON_LINK_PATTERN = /<link rel="icon" href="[^"]*">/;
 
 const LANES = [
-  { key: 'queue', title: 'Queue', lead: 'Approved agent tasks, in order. Only the creator moves a task here.', empty: 'Nothing queued. The creator moves a task here to approve it.' },
-  { key: 'progress', title: 'In progress', lead: 'The task being worked on. At most one.', empty: 'Nothing in progress.' },
-  { key: 'creator', title: 'Needs creator', lead: 'Verify, deploy and decision tasks, and agent work waiting on one of them.', empty: 'Nothing waits on the creator.' },
-  { key: 'proposed', title: 'Proposed', lead: 'Ideas that are not approved and have never been worked on.', empty: 'No proposals.' },
+  { key: 'queue', title: 'Queue' },
+  { key: 'progress', title: 'In progress' },
+  { key: 'creator', title: 'Needs creator' },
+  { key: 'proposed', title: 'Proposed' },
 ];
 const LANE_HEADINGS = { Queue: 'queue', 'In progress': 'progress', 'Needs creator': 'creator', Proposed: 'proposed' };
-const TYPES = ['bug', 'feature', 'chore', 'verify', 'deploy', 'decision'];
+const TYPES = ['bug', 'feature', 'chore', 'ui', 'verify', 'deploy', 'decision'];
 const OWNERS = ['agent', 'creator'];
 const PRIORITIES = ['high', 'normal', 'low'];
 
@@ -32,11 +32,6 @@ const ENTRY_LINE = new RegExp(`^- \\*\\*(${ID_PATTERN})\\*\\* — (\\S.*)$`);
 const META_LINE = new RegExp(`^ {2}\`([a-z]+) · ([a-z]+) · ([a-z]+)(?: · depends: (${ID_PATTERN}(?:, ${ID_PATTERN})*))?\`$`);
 const ACCEPT_LINE = /^ {2}accept: (\S.*)$/;
 const CONTINUATION_LINE = /^ {2}(\S.*)$/;
-
-const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-
-const esc = (value) =>
-  String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export const parseRoadmap = (markdown, file = 'ROADMAP.md') => {
   const fail = (line, message) => {
@@ -53,6 +48,8 @@ export const parseRoadmap = (markdown, file = 'ROADMAP.md') => {
     if (!entry) return;
     if (!entry.type) fail(entry.line, `${entry.id} has no \`type · owner · priority\` line`);
     if (!entry.accept) fail(entry.line, `${entry.id} has no accept: line`);
+    inline(entry.title, entry.id);
+    inline(entry.accept, entry.id);
     entry = null;
   };
 
@@ -103,8 +100,8 @@ export const parseRoadmap = (markdown, file = 'ROADMAP.md') => {
         group = { title: '', tasks: [] };
         lane.groups.push(group);
       }
-      entry = { id: start[1], title: start[2], line: number, depends: [], type: '', owner: '', priority: '', accept: '' };
-      ids.set(entry.id, { line: number, lane });
+      entry = { id: start[1], title: start[2], line: number, depends: [], type: '', owner: '', priority: '', accept: '', lane };
+      ids.set(entry.id, entry);
       group.tasks.push(entry);
       return;
     }
@@ -155,50 +152,13 @@ export const parseRoadmap = (markdown, file = 'ROADMAP.md') => {
     if (!ids.has(dependency)) throw new Error(`${file}:${line}: ${id} depends on ${dependency}, which is not in the roadmap`);
   }
 
-  const updated = /^Updated (\d{4}-\d{2}-\d{2})/m.exec(markdown);
-  return { updated: updated ? updated[1] : '', lanes, ids };
+  return { lanes, ids };
 };
 
 const inline = (value, where) => {
   const parts = String(value).split('`');
   if (parts.length % 2 === 0) throw new Error(`${where}: unbalanced backtick in ${JSON.stringify(value)}`);
   return parts.map((part, index) => (index % 2 ? `<code>${esc(part)}</code>` : esc(part))).join('');
-};
-
-const sortByPriority = (tasks) =>
-  tasks
-    .map((task, position) => ({ task, position }))
-    .sort((a, b) => PRIORITIES.indexOf(a.task.priority) - PRIORITIES.indexOf(b.task.priority) || a.position - b.position)
-    .map(({ task }) => task);
-
-const renderTask = (task, roadmap, page) => {
-  const link = (id) => {
-    const target = roadmap.ids.get(id).lane === roadmap.lanes.proposed ? 'proposals.html' : 'open-work.html';
-    return `<a href="${target === page ? '' : target}#task-${id}">${id}</a>`;
-  };
-  const depends = task.depends.length ? `<dt>depends</dt><dd>${task.depends.map(link).join(', ')}</dd>` : '';
-  return [
-    `<li class="kit-task" id="task-${task.id}">`,
-    `<div class="kit-task-head"><span class="kit-task-id">${task.id}</span><span class="kit-task-title">${inline(task.title, task.id)}</span></div>`,
-    `<div class="kit-task-pills"><span class="kit-pill" data-kind="${task.type}">${task.type}</span><span class="kit-pill" data-owner="${task.owner}">${task.owner}</span><span class="kit-pill" data-priority="${task.priority}">${task.priority}</span></div>`,
-    `<dl>${depends}<dt>accept</dt><dd>${inline(task.accept, task.id)}</dd></dl>`,
-    '</li>',
-  ].join('\n');
-};
-
-const renderLane = (meta, lane, roadmap, page, number) => {
-  const total = lane.groups.reduce((sum, { tasks }) => sum + tasks.length, 0);
-  const body = lane.none
-    ? `<p class="kit-empty">${esc(meta.empty)}</p>`
-    : lane.groups
-        .map(
-          (group) =>
-            `<div class="kit-group">${group.title ? `<h3>${esc(group.title)}</h3>` : ''}<ul class="kit-tasks">\n${sortByPriority(group.tasks)
-              .map((task) => renderTask(task, roadmap, page))
-              .join('\n')}\n</ul></div>`,
-        )
-        .join('\n');
-  return `<section class="kit-section" id="${meta.key}"><h2>${meta.title} <span>${String(number).padStart(2, '0')} · ${total}</span></h2><p>${esc(meta.lead)}</p>\n${body}\n</section>`;
 };
 
 const count = (lane) => lane.groups.reduce((sum, { tasks }) => sum + tasks.length, 0);
@@ -218,7 +178,7 @@ const REVIEW_SHEETS = [
 ];
 
 const headAssets = (sheets) => [
-  '<link rel="icon" href="../assets/favicon.png">',
+  FAVICON_LINK,
   sheet('https://fonts.googleapis.com/css2?family=Doto:wght@500;700;900&display=swap'),
   ...sheets.map(sheet),
   sheet('kit.css'),
@@ -259,72 +219,53 @@ const shell = ({ file, title, description, intro, facts, sections, version, shee
     '',
   ].join('\n');
 
-const renderBoard = ({ id, area, title, why, now, proposed, proposedLabel = 'Proposed' }) =>
-  `<article class="kit-board" data-review="${id}"><p class="kit-board-id">${id} · ${esc(area)} · <a href="#task-${id}">task</a></p><p class="kit-board-title">${esc(title)}</p><p class="kit-note">${esc(why)}</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame">${now}</div></div><div class="kit-board-side"><p class="kit-board-label">${esc(proposedLabel)}</p><div class="kit-board-frame">${proposed}</div></div></div></article>`;
+const renderBoard = ({ id, area, title, why, accept, now, proposed, proposedLabel = 'Proposed' }) =>
+  `<article class="kit-board" data-review="${id}"><p class="kit-board-id">${id} · ${esc(area)}</p><p class="kit-board-title">${esc(title)}</p><p class="kit-note">${esc(why)}</p><div class="kit-board-sides"><div class="kit-board-side"><p class="kit-board-label">Now</p><div class="kit-board-frame">${now}</div></div><div class="kit-board-side"><p class="kit-board-label">${esc(proposedLabel)}</p><div class="kit-board-frame">${proposed}</div></div></div><p class="kit-board-label">Accept</p><p class="kit-note">${inline(accept, id)}</p></article>`;
 
-const renderReview = (review) =>
-  `<section class="kit-section" id="review"><h2>Design review <span>01 · ${review.length}</span></h2><p>${review.length} findings from reading the screens against the design system, each drawn as it is and as proposed, each filed in ROADMAP with what proves it done.</p>\n<div class="kit-boards">\n${review.map(renderBoard).join('\n')}\n</div>\n</section>`;
+const renderBoards = (review) =>
+  `<section class="kit-section" id="boards"><h2>Boards <span>${review.length}</span></h2><p>Each proposal is drawn as it is and as proposed, with what proves it done. The creator approves one by queueing it in ROADMAP.md as a \`ui\` task with its ID.</p>\n<div class="kit-boards">\n${review.map(renderBoard).join('\n')}\n</div>\n</section>`;
 
-export const checkReview = (review, roadmap) => {
+const renderEmpty = () =>
+  '<section class="kit-section" id="boards"><h2>Boards <span>0</span></h2><p class="kit-empty">No proposals. A purely visual idea appears here as a board until the creator approves it or it is dropped.</p></section>';
+
+export const checkBoards = (review, roadmap) => {
   const seen = new Set();
-  for (const { id } of review) {
-    if (seen.has(id)) throw new Error(`design-review.mjs: board ${id} appears twice`);
+  for (const { id, accept } of review) {
+    if (seen.has(id)) throw new Error(`design/src/proposals.mjs: board ${id} appears twice`);
     seen.add(id);
-    if (!roadmap.ids.has(id)) throw new Error(`design-review.mjs: board ${id} is not a task in ROADMAP.md; remove the board or file the task`);
-    if (roadmap.ids.get(id).lane !== roadmap.lanes.proposed) throw new Error(`design-review.mjs: board ${id} is not in the Proposed lane of ROADMAP.md`);
+    if (!accept) throw new Error(`design/src/proposals.mjs: board ${id} has no accept text`);
+    if (roadmap.ids.has(id) && roadmap.ids.get(id).type !== 'ui') throw new Error(`design/src/proposals.mjs: board ${id} is also a ${roadmap.ids.get(id).type} task in ROADMAP.md; a board is the proposal, remove one`);
+  }
+  for (const [id, task] of roadmap.ids) {
+    if (task.type !== 'ui') continue;
+    if (task.lane === roadmap.lanes.proposed) throw new Error(`ROADMAP.md: ${id} is a ui task in Proposed; a visual idea is a board until approved`);
+    if (!seen.has(id)) throw new Error(`ROADMAP.md: ui task ${id} has no board in design/src/proposals.mjs`);
   }
 };
 
-export const renderGenerated = (roadmap, version, review = []) => {
-  const facts = ['source ROADMAP.md', 'regenerate node scripts/design-pages.mjs'];
-  if (roadmap.updated) facts.push(`roadmap updated ${roadmap.updated}`);
-  const [queue, progress, creator, proposed] = LANES.map(({ key }) => roadmap.lanes[key]);
-
-  const counts = (items) =>
-    `<div class="kit-counts">${items.map(([meta, lane]) => `<a class="kit-count" href="#${meta.key}"><strong>${count(lane)}</strong><span>${meta.title}</span></a>`).join('')}</div>`;
-
-  const open = [
-    [LANES[0], queue],
-    [LANES[1], progress],
-    [LANES[2], creator],
-  ];
-
-  return {
-    'open-work.html': shell({
-      file: 'open-work.html',
-      title: 'split/Pass design · Open work',
-      description: 'Queue, in progress and creator tasks rendered from ROADMAP.md.',
-      intro: {
-        title: 'Open work',
-        text: 'What is pending: the approved queue, the task in progress and everything waiting on the creator. A task leaves this page when it ships; the changelog keeps the history.',
-      },
-      facts,
-      sections: [counts(open), ...open.map(([meta, lane], index) => renderLane(meta, lane, roadmap, 'open-work.html', index + 1))].join('\n'),
-      version,
-    }),
-    'proposals.html': shell({
-      file: 'proposals.html',
-      title: 'split/Pass design · Proposals',
-      description: 'Proposed tasks rendered from ROADMAP.md.',
-      intro: {
-        title: 'Proposals',
-        text: 'Visual findings first, each drawn as it is and as proposed, then every idea that is not approved and has never been worked on. The creator moves a proposal to the queue to approve it.',
-      },
-      facts,
-      sections: [review.length ? renderReview(review) : '', counts([[LANES[3], proposed]]), renderLane(LANES[3], proposed, roadmap, 'proposals.html', review.length ? 2 : 1)].filter(Boolean).join('\n'),
-      version,
-      sheets: review.length ? REVIEW_SHEETS : BASE_SHEETS,
-    }),
-  };
-};
+export const renderGenerated = (version, review = []) => ({
+  'proposals.html': shell({
+    file: 'proposals.html',
+    title: 'split/Pass design · Proposals',
+    description: 'Purely visual proposals drawn as they are and as proposed.',
+    intro: {
+      title: 'Proposals',
+      text: 'Purely visual ideas that are not shipped, each drawn as it is and as proposed. A board leaves this page when its change ships; approved ones are queued in ROADMAP.md as ui tasks.',
+    },
+    facts: ['source design/src/proposals.mjs', 'regenerate node design/build.mjs', `${review.length} boards`],
+    sections: review.length ? renderBoards(review) : renderEmpty(),
+    version,
+    sheets: review.length ? REVIEW_SHEETS : BASE_SHEETS,
+  }),
+});
 
 const HEADER_BLOCK = /<header class="kit-header">[\s\S]*?<\/header>/;
 
 export const buildPages = () => {
   const { version } = JSON.parse(read('package.json'));
   const roadmap = parseRoadmap(read('ROADMAP.md'));
-  checkReview(REVIEW, roadmap);
-  const pages = renderGenerated(roadmap, version, REVIEW);
+  checkBoards(REVIEW, roadmap);
+  const pages = renderGenerated(version, REVIEW);
 
   for (const { file } of PAGES) {
     if (GENERATED.includes(file)) continue;
@@ -332,45 +273,31 @@ export const buildPages = () => {
     if (!fs.existsSync(target)) throw new Error(`design/${file} is missing`);
     const current = fs.readFileSync(target, 'utf8');
     if (!HEADER_BLOCK.test(current)) throw new Error(`design/${file} has no <header class="kit-header"> block to stamp`);
-    pages[file] = current.replace(HEADER_BLOCK, () => renderHeader(file, version));
+    if (!FAVICON_LINK_PATTERN.test(current)) throw new Error(`design/${file} has no <link rel="icon"> to point at the copied favicon`);
+    pages[file] = current.replace(HEADER_BLOCK, () => renderHeader(file, version)).replace(FAVICON_LINK_PATTERN, () => FAVICON_LINK);
   }
+  pages[FAVICON.target] = fs.readFileSync(path.join(ROOT, FAVICON.source));
   return pages;
 };
 
-const validate = (file) => {
+export const validateRoadmap = (file) => {
   const roadmap = parseRoadmap(fs.readFileSync(path.resolve(file), 'utf8'), path.basename(file));
-  renderGenerated(roadmap, '0.0.0');
+  checkBoards(REVIEW, roadmap);
   const counts = Object.entries(roadmap.lanes).map(([key, lane]) => `${key} ${count(lane)}`);
-  console.log(`Roadmap valid: ${counts.join(', ')}`);
+  return `Roadmap valid: ${counts.join(', ')}`;
 };
 
-const main = () => {
-  const validateAt = process.argv.indexOf('--validate');
-  if (validateAt !== -1) return validate(process.argv[validateAt + 1] ?? 'ROADMAP.md');
-  const check = process.argv.includes('--check');
+export const syncPages = ({ check }) => {
   const pages = buildPages();
   const stale = [];
 
   for (const [file, html] of Object.entries(pages)) {
     const target = path.join(DESIGN, file);
-    const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-    if (current === html) continue;
+    const current = fs.existsSync(target) ? fs.readFileSync(target) : null;
+    if (current && current.equals(Buffer.from(html))) continue;
     if (check) stale.push(file);
     else fs.writeFileSync(target, html);
   }
 
-  if (check && stale.length) {
-    console.error(`design/${stale.join(', design/')} out of date: run node scripts/design-pages.mjs`);
-    process.exit(1);
-  }
-  if (!check) console.log(`Wrote ${Object.keys(pages).map((file) => `design/${file}`).join(', ')}`);
+  return { written: check ? [] : Object.keys(pages), stale };
 };
-
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  try {
-    main();
-  } catch (error) {
-    console.error(error.message);
-    process.exit(1);
-  }
-}
