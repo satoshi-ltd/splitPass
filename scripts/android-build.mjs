@@ -8,13 +8,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const mode = process.argv[2];
 const local = process.argv.includes('--local');
 const installOnly = process.argv.includes('--install-only');
-const profile = { dev: 'development', prod: 'production' }[mode];
+const profile = { dev: 'development', prod: 'production', store: 'store' }[mode];
+const archive = mode === 'store' ? 'AAB' : 'APK';
 const fail = (message) => {
   console.error(message);
   process.exit(1);
 };
 
-if (!profile) fail('Use android-build.mjs dev|prod [--local] [--install-only]');
+if (!profile) fail('Use android-build.mjs dev|prod|store [--local] [--install-only]');
 if (installOnly && mode !== 'dev') fail('--install-only is for dev builds');
 
 const sdk =
@@ -43,7 +44,7 @@ const application = expo.android.package;
 const output = path.join(
   root,
   'release-assets',
-  `${application.split('.').pop()}-${expo.version}-android${mode === 'dev' ? '-dev' : ''}.apk`,
+  `${application.split('.').pop()}-${expo.version}-android${mode === 'dev' ? '-dev' : ''}.${archive.toLowerCase()}`,
 );
 fs.mkdirSync(path.dirname(output), { recursive: true });
 
@@ -57,14 +58,14 @@ if (!installOnly) {
       encoding: 'utf8',
     });
     const url = JSON.parse(stdout)[0]?.artifacts?.applicationArchiveUrl;
-    if (!url) fail('EAS did not report an APK URL');
+    if (!url) fail(`EAS did not report an ${archive} URL`);
     const response = await fetch(url);
-    if (!response.ok) fail(`APK download failed: ${response.status} ${response.statusText}`);
+    if (!response.ok) fail(`${archive} download failed: ${response.status} ${response.statusText}`);
     fs.writeFileSync(output, Buffer.from(await response.arrayBuffer()));
   }
 }
-if (!fs.existsSync(output)) fail(`No APK at ${output}`);
-console.log(`APK: ${output}`);
+if (!fs.existsSync(output)) fail(`No ${archive} at ${output}`);
+console.log(`${archive}: ${output}`);
 
 if (mode === 'dev') {
   const adb = path.join(sdk, 'platform-tools/adb');

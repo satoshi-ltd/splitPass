@@ -36,6 +36,8 @@ yarn build:local:dev      # dev build installed on the device or emulator
 yarn build:local:prod     # signed APK in release-assets/
 yarn build:dev            # the same dev build on EAS cloud
 yarn build:prod           # the same signed APK on EAS cloud
+yarn build:local:store    # signed AAB for Google Play in release-assets/
+yarn build:store          # the same AAB on EAS cloud
 ```
 
 Store assets live in `store-assets/`; SPEC section 10 describes the release steps.

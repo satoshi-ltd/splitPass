@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `yarn build:store` and `yarn build:local:store` build the Android App Bundle (AAB) that Google Play needs, from a new `store` EAS profile; `build:prod` still makes the APK.
+
 ## 1.4.23 — 2026-10-02
 
 - The build number moves to 13 for the next native release; nothing else changes.

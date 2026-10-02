@@ -34,7 +34,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F1E8"
       },
-      "package": "com.satoshilimited.splitpass",
+      "package": "com.satoshiltd.splitpass",
       "versionCode": 13,
       "splash": {
         "image": "./assets/splash-icon-light.png",

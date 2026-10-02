@@ -27,8 +27,8 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
   mocked and biometrics unavailable.
-- **Distribution:** App Store assets live in `store-assets/app-store/<version>/`; Android builds are signed APKs from
-  EAS or a local build, written to `release-assets/` ([10](#10-operations)). Bundle ids: iOS
+- **Distribution:** App Store assets live in `store-assets/app-store/<version>/`; Android builds are signed APKs, or
+  an AAB for Google Play, from EAS or a local build, written to `release-assets/` ([10](#10-operations)). Bundle ids: iOS
   `com.satoshi-limited.splitpass`, Android `com.satoshilimited.splitpass`; Expo owner `satoshi-ltd`.
 - **Network:** no backend, no telemetry. The app talks to the network only for opt-in website favicons and the Terms and
   Privacy links.
@@ -555,7 +555,8 @@ one is a ROADMAP Queue task of type `ui` carrying its ID, and the generator refu
 | `yarn check:release` | `scripts/check-release.mjs` |
 | `yarn site:build` | `site/scripts/build.mjs`: writes the marketing site to `site/dist/` (git-ignored) |
 | `yarn build:dev` / `build:prod` | EAS cloud Android build (`development` / `production` profile), APK downloaded to `release-assets/` |
-| `yarn build:local:dev` / `build:local:prod` | Same with `eas build --local` |
+| `yarn build:store` | EAS cloud Android build (`store` profile), AAB for Google Play downloaded to `release-assets/` |
+| `yarn build:local:dev` / `build:local:prod` / `build:local:store` | Same with `eas build --local` |
 | `yarn eas:login`, `yarn eas:whoami` | EAS account |
 
 ### 10.3 Environment
@@ -567,16 +568,17 @@ part of the repository and nothing consumes it; never commit real values.
 ### 10.4 EAS (`eas.json`)
 
 `appVersionSource: local`; `build.base` pins Node 24.14.1 and Yarn 1.22.22. Profiles `development` (development client,
-internal, APK), `preview` (internal, APK), `production` (APK). `submit.production` is empty. Android permissions:
-`CAMERA`, `NFC`; iOS `ITSAppUsesNonExemptEncryption: false`, Face ID description set; the NFC config plugin sets
-`includeNdefEntitlement: false`.
+internal, APK), `preview` (internal, APK), `production` (APK), `store` (extends `production`, AAB for Google Play).
+`submit.production` is empty. Android permissions: `CAMERA`, `NFC`; iOS `ITSAppUsesNonExemptEncryption: false`, Face
+ID description set; the NFC config plugin sets `includeNdefEntitlement: false`.
 
-### 10.5 Android builds (`scripts/android-build.mjs dev|prod [--local] [--install-only]`)
+### 10.5 Android builds (`scripts/android-build.mjs dev|prod|store [--local] [--install-only]`)
 
 1. Requires `node_modules/expo` and a `check:release` script; runs it first.
-2. Output APK: `release-assets/<package tail>-<version>-android[-dev].apk` (`release-assets/` is git-ignored).
+2. Output: `release-assets/<package tail>-<version>-android[-dev].apk`, or `.aab` for `store` (`release-assets/` is
+   git-ignored).
 3. Cloud: `npx eas-cli build --platform android --profile <profile> --json --non-interactive`, then downloads the
-   reported `applicationArchiveUrl`. `--local` runs `eas build --local --output <apk>`.
+   reported `applicationArchiveUrl`. `--local` runs `eas build --local --output <file>`.
 4. `dev` also finds or boots an emulator (default AVD above, or a physical device, or `ANDROID_SERIAL`), waits up to 3
    minutes for boot, `adb install -r` (never uninstalls or clears data), sets `adb reverse tcp:8081 tcp:8081` and starts
    `MainActivity`. Metro is started by the developer. `--install-only` skips the build.

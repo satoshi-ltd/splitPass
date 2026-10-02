@@ -23,8 +23,10 @@
     "eas:whoami": "npx eas-cli whoami",
     "build:dev": "node scripts/android-build.mjs dev",
     "build:prod": "node scripts/android-build.mjs prod",
+    "build:store": "node scripts/android-build.mjs store",
     "build:local:dev": "node scripts/android-build.mjs dev --local",
     "build:local:prod": "node scripts/android-build.mjs prod --local",
+    "build:local:store": "node scripts/android-build.mjs store --local",
     "check:release": "node scripts/check-release.mjs",
     "design": "node design/build.mjs",
     "site:build": "node site/scripts/build.mjs"
