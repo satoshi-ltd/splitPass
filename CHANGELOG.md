@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.4.24 — 2026-10-02
 
 - `yarn build:store` and `yarn build:local:store` build the Android App Bundle (AAB) that Google Play needs, from a new `store` EAS profile; `build:prod` still makes the APK.
 - The Android app no longer declares photo, video or storage read permissions it never used, as Google Play's photo and video policy requires.
+- The build number moves to 14 for the next native release.
+
+Needs: native build and Google Play submission.
 
 ## 1.4.23 — 2026-10-02
 
