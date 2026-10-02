@@ -22,8 +22,8 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 
 ## Current state
 
-- **1.4.22.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
-  only. iOS build number and Android version code are 12.
+- **1.4.23.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
+  only. iOS build number and Android version code are 13.
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
   mocked and biometrics unavailable.

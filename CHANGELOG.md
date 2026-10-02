@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.23 — 2026-10-02
+
+- The build number moves to 13 for the next native release; nothing else changes.
+
+Needs: native build and store submission.
+
 ## 1.4.22 — 2026-10-02
 
 - Settings ends with the app version and build number, so you can tell which release is installed.
