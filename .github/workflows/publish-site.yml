@@ -1,0 +1,46 @@
+name: publish-site
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - site/**
+      - package.json
+      - browser-extension/manifest.json
+      - .github/workflows/publish-site.yml
+permissions:
+  contents: read
+concurrency:
+  group: splitpass-site
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      SITE_URL: https://splitpass.satoshi-ltd.com
+      APP_STORE_URL: ${{ vars.APP_STORE_URL }}
+      PLAY_STORE_URL: ${{ vars.PLAY_STORE_URL }}
+      CLOUDFLARE_PAGES_PROJECT_NAME: ${{ vars.CLOUDFLARE_PAGES_PROJECT_NAME }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - name: Verify deployment configuration
+        run: |
+          for key in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN SITE_URL CLOUDFLARE_PAGES_PROJECT_NAME; do
+            test -n "${!key}" || { echo "::error::Missing $key"; exit 1; }
+          done
+      - run: npm install --prefix "$RUNNER_TEMP/wrangler" --no-save --package-lock=false --ignore-scripts wrangler@4
+      - run: yarn install --frozen-lockfile --ignore-scripts
+      - run: yarn jest scripts/__tests__/site.test.js
+      - name: Build static page
+        run: yarn site:build
+      - name: Deploy to Cloudflare Pages
+        run: '"$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler" pages deploy site/dist --project-name="$CLOUDFLARE_PAGES_PROJECT_NAME" --branch=main'

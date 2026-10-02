@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fffbf7" />
+    <title>split/Pass — Your secrets, never in one place.</title>
+    <meta
+      name="description"
+      content="A vault for passwords, cards and seed phrases that can split any secret into three shards. Any two bring it back; one alone gives away nothing usable. Free, no account, no cloud."
+    />
+    <meta property="og:title" content="split/Pass — Your secrets, never in one place." />
+    <meta
+      property="og:description"
+      content="Split a secret into three shards and keep them apart. Any two bring it back. Encrypted on your phone, no account, no cloud."
+    />
+    <meta property="og:type" content="website" />
+    {{CANONICAL}}
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="assets/instrument-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <script src="theme.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="wrap masthead-row">
+      <a class="brand" href="#" aria-label="split/Pass home"
+        ><span class="wordmark">split<b>/</b>Pass</span></a
+      >
+      <div class="masthead-end">
+        <span class="eyebrow release"><span class="dot"></span> v{{VERSION}}</span>
+        <a class="nav-cta eyebrow" href="#get">Download</a>
+      </div>
+      </div>
+    </header>
+    <main>
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <p class="eyebrow">A vault for the secrets that matter.</p>
+          <h1>One secret.<br /><em>Three shards.<br />Any two.</em></h1>
+          <p class="intro">
+            Keep passwords, payment cards, 2FA seeds and recovery phrases in a vault encrypted on your phone, or split
+            any of them into shards you store apart. Any two bring the secret back. One alone gives away nothing usable.
+          </p>
+          <div class="hero-download">
+            {{APP_STORE_HERO}}<a class="setup-link" href="#how">How splitting works <span aria-hidden="true">→</span></a>
+          </div>
+          <p class="fine">iPhone &amp; iPad · Android soon<br />Free. No subscription, no ads, no account.</p>
+        </div>
+        <div class="product-scene" aria-label="Three screens of the app: the vault, a shard of a secret and the recovered secret">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <div class="scene-label eyebrow">Keep it. Split it. Get it back.</div>
+          <div class="phones">
+            <figure class="phone phone-vault">
+              <img src="assets/screens/vault.png" width="390" height="844" alt="The vault: a list of saved secrets with favorites first" />
+            </figure>
+            <figure class="phone phone-shard">
+              <img src="assets/screens/shard.png" width="390" height="844" alt="Shard 1 of a seed phrase, shown as a QR code" />
+            </figure>
+            <figure class="phone phone-recovered">
+              <img src="assets/screens/recovered.png" width="390" height="844" alt="The scanner after reading two shards: the secret is recovered" />
+            </figure>
+          </div>
+        </div>
+      </section>
+      <div class="principles wrap">
+        <span>Encrypted on your device</span><span>Any two of three shards</span><span>No account, no backend</span
+        ><span>Free, no ads</span>
+      </div>
+      <section class="section wrap">
+        <div class="section-heading">
+          <p class="eyebrow">01 / Too valuable for one place</p>
+          <h2>Split it. Scatter it.<br />Scan it back.</h2>
+          <p>
+            A seed phrase, a payment card, the key to your email: some secrets shouldn’t sit in one storage location.
+            split/Pass keeps them out of one.
+          </p>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="feature-number"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="19" r="2.2" />
+                <circle cx="12" cy="12" r="2.2" />
+                <circle cx="19" cy="5" r="2.2" /></svg
+            ></span>
+            <h3>Two of three bring it back.</h3>
+            <p>
+              Split a password, card or seed phrase into three shards. Any two recombine the secret; one alone gives away
+              nothing usable. Lose a shard and you still have it.
+            </p>
+          </article>
+          <article>
+            <span class="feature-number"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="3" height="3" />
+                <rect x="18" y="18" width="3" height="3" /></svg
+            ></span>
+            <h3>Recover with a scan.</h3>
+            <p>
+              Keep a shard as a QR code or write it to an NFC card. To recover, open the Scanner and read any two with
+              your phone’s camera or NFC.
+            </p>
+          </article>
+          <article>
+            <span class="feature-number"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="10" width="16" height="11" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                <circle cx="12" cy="15.500" r="1.600" /></svg
+            ></span>
+            <h3>A vault for the rest.</h3>
+            <p>
+              Passwords, cards, 12 or 24-word seed phrases and 2FA seeds sit behind your master passphrase. Seed phrases
+              are recognised for you and 2FA codes tick on screen.
+            </p>
+          </article>
+        </div>
+        <div class="screens">
+          <figure>
+            <div class="phone"><img src="assets/screens/totp.png" width="390" height="844" loading="lazy" alt="A 2FA code with a countdown" /></div>
+            <figcaption><b>2FA that ticks.</b> Codes refresh on screen with a countdown, ready to copy.</figcaption>
+          </figure>
+          <figure>
+            <div class="phone"><img src="assets/screens/generator.png" width="390" height="844" loading="lazy" alt="The password generator with length and character controls" /></div>
+            <figcaption><b>A generator that grades itself.</b> Pick the length and the character mix; the strength label follows.</figcaption>
+          </figure>
+          <figure>
+            <div class="phone"><img src="assets/screens/settings.png" width="390" height="844" loading="lazy" alt="Settings: biometric unlock, auto-lock, backup reminders and privacy switches" /></div>
+            <figcaption><b>Privacy you switch on.</b> Biometric unlock, website logos and sharing stay off until you turn them on.</figcaption>
+          </figure>
+        </div>
+        <div class="ownership">
+          <h3>Your phone. Your passphrase.</h3>
+          <p>
+            No account, no server, no telemetry. The vault is sealed with Argon2id and AES-256-GCM. There is no recovery
+            for a lost passphrase, because there is nobody who could do it for you.
+          </p>
+        </div>
+      </section>
+      <section class="how-section" id="how">
+        <div class="wrap how-layout">
+          <div>
+            <p class="eyebrow">02 / From one secret to three shards</p>
+            <h2>One passphrase.<br />Your secrets around it.</h2>
+            <p class="intro">
+              A master passphrase encrypts the vault and, unless you choose another for the file, every backup you export. Everything else, from splitting to
+              scanning, happens on the device.
+            </p>
+            <figure class="network">
+              <svg
+                class="split-diagram"
+                viewBox="0 0 520 430"
+                role="img"
+                aria-labelledby="split-title split-description"
+              >
+                <title id="split-title">One secret, three shards, any two</title>
+                <desc id="split-description">
+                  A secret is split into three shards: a QR code on a phone, an NFC card and a paper copy in a safe.
+                  Any two of them rebuild the secret; the third is not needed.
+                </desc>
+                <ellipse class="diagram-orbit" cx="260" cy="215" rx="236" ry="170" />
+                <g class="diagram-links">
+                  <path d="M215 96C150 130 110 140 90 172" />
+                  <path d="M260 96V172" />
+                  <path d="M305 96C370 130 410 140 430 172" />
+                </g>
+                <g class="diagram-merge">
+                  <path d="M90 258C100 300 170 310 215 336" />
+                  <path d="M430 258C420 300 350 310 305 336" />
+                </g>
+                <g>
+                  <rect class="box box-secret" x="150" y="20" width="220" height="76" />
+                  <g class="dots dots-ink">
+                    <circle cx="176" cy="46" r="4" /><circle cx="196" cy="46" r="4" /><circle cx="216" cy="46" r="4" />
+                    <circle cx="236" cy="46" r="4" /><circle cx="256" cy="46" r="4" /><circle cx="276" cy="46" r="4" />
+                    <circle cx="176" cy="66" r="4" /><circle cx="196" cy="66" r="4" /><circle cx="216" cy="66" r="4" />
+                    <circle cx="236" cy="66" r="4" /><circle cx="256" cy="66" r="4" /><circle cx="276" cy="66" r="4" />
+                  </g>
+                  <text class="label" x="300" y="56">One</text>
+                  <text class="sublabel" x="300" y="74">secret</text>
+                </g>
+                <g>
+                  <rect class="box box-shard" x="20" y="172" width="140" height="86" />
+                  <g class="qr-mini">
+                    <rect x="40" y="190" width="18" height="18" /><rect x="64" y="190" width="6" height="6" />
+                    <rect x="40" y="214" width="6" height="6" /><rect x="52" y="214" width="18" height="6" />
+                    <rect x="76" y="202" width="6" height="18" />
+                  </g>
+                  <text class="label" x="96" y="204">Phone</text>
+                  <text class="sublabel" x="96" y="222">QR · shard 1</text>
+                </g>
+                <g class="shard-lost">
+                  <rect class="box box-shard" x="190" y="172" width="140" height="86" />
+                  <g class="nfc-mini">
+                    <rect x="208" y="194" width="30" height="20" />
+                    <path d="M246 196a8 8 0 0 1 0 16M252 192a14 14 0 0 1 0 24" />
+                  </g>
+                  <text class="label" x="222" y="238">NFC card</text>
+                  <text class="sublabel" x="222" y="252">shard 2</text>
+                </g>
+                <g>
+                  <rect class="box box-shard" x="360" y="172" width="140" height="86" />
+                  <g class="paper-mini">
+                    <rect x="380" y="188" width="22" height="28" />
+                    <path d="M385 196h12M385 202h12M385 208h8" />
+                  </g>
+                  <text class="label" x="416" y="204">Safe</text>
+                  <text class="sublabel" x="416" y="222">paper · shard 3</text>
+                </g>
+                <text class="note" x="260" y="288">not needed</text>
+                <g>
+                  <rect class="box box-back" x="150" y="336" width="220" height="76" />
+                  <text class="label label-back" x="176" y="368">Your secret</text>
+                  <text class="sublabel sublabel-back" x="176" y="388">back, from any two</text>
+                  <circle class="light" cx="344" cy="360" r="5" />
+                </g>
+              </svg>
+              <figcaption>One shard is noise. Two are the secret.</figcaption>
+            </figure>
+          </div>
+          <ol class="steps">
+            <li>
+              <span>01</span>
+              <div>
+                <h3>Choose a master passphrase.</h3>
+                <p>
+                  At least 8 characters and not weak. It lives in memory only while the vault is unlocked, and three
+                  wrong attempts wipe the app’s data and return to setup.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <h3>Add a secret.</h3>
+                <p>
+                  Type or generate a password, add a card, paste a seed phrase or keep a 2FA seed. Passwords come from
+                  a built-in generator with length and character controls.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <h3>Split it into three.</h3>
+                <p>
+                  Create the secret with splitting on. Three shard QR codes appear, and nothing is stored until you save
+                  a shard to the device, write it to an NFC card or share it.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>04</span>
+              <div>
+                <h3>Keep the shards apart.</h3>
+                <p>
+                  One at home, one in your wallet, one with someone you trust. Anyone holding a single shard gets
+                  nothing usable, so the pieces never need to be hidden perfectly.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>05</span>
+              <div>
+                <h3>Scan any two to recover.</h3>
+                <p>
+                  Open the Scanner and read two different shards by QR or NFC. The secret returns on screen, and
+                  copied values clear themselves from the clipboard after a while.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section class="section wrap download-section" id="get">
+        <div class="section-heading">
+          <p class="eyebrow">03 / Start with the phone you carry</p>
+          <h2>Put split/Pass to work.</h2>
+          <p>Install the app and keep your secrets apart from the first minute. Add the browser extension later if you fill passwords at a desk.</p>
+        </div>
+        <div class="download-grid">
+          <article class="download-card app-card">
+            <div class="card-top">
+              <span class="eyebrow">Phone &amp; tablet</span><span class="badge">Start here</span>
+            </div>
+            <h3>split/Pass for mobile</h3>
+            <p>The vault, the splitter and the scanner. Free, light and dark, in five languages.</p>
+            <div class="store-row">{{APP_STORE}}{{PLAY_STORE}}</div>
+            <small>Version {{VERSION}} · Free, no subscription, no ads. iPhone and iPad today, Android soon.</small>
+          </article>
+          <article class="download-card">
+            <div class="card-top"><span class="eyebrow">Open source</span></div>
+            <h3>Read every line</h3>
+            <p>
+              Apache-2.0, with the specification next to the code: payload formats, the encryption envelope, the
+              security invariants and every screen.
+            </p>
+            <code>git clone https://github.com/satoshi-ltd/splitPass.git</code
+            ><a class="button" href="https://github.com/satoshi-ltd/splitPass"
+              ><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="assets/platforms.svg#github"></use></svg
+              ><span>View the repository</span><span class="download-arrow" aria-hidden="true">↗</span></a
+            >
+          </article>
+        </div>
+      </section>
+      <section class="section wrap browser-section">
+        <div class="browser-copy">
+          <p class="eyebrow">04 / At your desk</p>
+          <h2>Scan once.<br />Fill every time.</h2>
+          <p class="intro">
+            The split/Pass Scanner extension reads a split/Pass QR with your computer’s camera, decodes it locally and
+            fills the password on the page. Each entry is saved for its own domain.
+          </p>
+          <ul class="checks">
+            <li>Passwords and 2FA codes, filled from a panel on the site you are on.</li>
+            <li>Matched to the site’s registrable domain, so a lookalike never gets your credentials.</li>
+            <li>A vault of its own under its own master password. It never reads the app’s data.</li>
+            <li>Entries expire after a period of disuse (7 days to start, longer the more you use them, or pinned), and expired ones are wiped without the password.</li>
+          </ul>
+          <a class="button" href="https://github.com/satoshi-ltd/splitPass/tree/main/browser-extension"
+            ><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="assets/platforms.svg#chrome"></use></svg
+            ><span>Get the extension</span><span class="download-arrow" aria-hidden="true">↗</span></a
+          >
+          <p class="fine">Chrome and Brave (load unpacked) · Safari via Xcode · version {{EXTENSION_VERSION}}</p>
+        </div>
+        <div class="panel-scene" aria-label="Illustration of the extension’s panel on a login page">
+          <div class="browser-window">
+            <div class="window-bar">
+              <span class="window-dots">● ● ●</span><span class="address">github.com</span><span>↗</span>
+            </div>
+            <div class="browser-body">
+              <div class="login-form">
+                <span class="field-line wide"></span>
+                <span class="field-line"></span>
+                <span class="field-line filled"></span>
+                <span class="button-line"></span>
+              </div>
+              <div class="ext-panel">
+                <div class="ext-head"><span class="wordmark small">split<b>/</b>Pass</span><small>github.com</small></div>
+                <div class="ext-row"><strong>satoshi</strong><span>Fill</span></div>
+                <div class="ext-row"><strong>satoshi · 2FA</strong><span class="code">542 389</span></div>
+                <div class="ext-qr">{{QR_PANEL}}<small>Scan a split/Pass QR to save it</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap questions">
+        <div>
+          <p class="eyebrow">Questions, answered</p>
+          <h2>Before you get started.</h2>
+        </div>
+        <div class="answers">
+          <details open>
+            <summary>What exactly is a shard?</summary>
+            <p>
+              One of three pieces made from a secret with Shamir secret sharing. Any two pieces rebuild the secret; a
+              single piece carries no usable part of it, so it can sit on a card or in a drawer without giving anything
+              away.
+            </p>
+          </details>
+          <details>
+            <summary>What does it cost?</summary>
+            <p>
+              Nothing. split/Pass is free, with no subscription, no in-app purchases and no ads, and it needs no
+              account. There is no paid tier behind it.
+            </p>
+          </details>
+          <details>
+            <summary>What if I lose a shard?</summary>
+            <p>
+              You still hold the secret: any two of the remaining shards recover it. Lose two and it is gone, so scan the
+              two you have and split it again before you lose another.
+            </p>
+          </details>
+          <details>
+            <summary>What if I forget my master passphrase?</summary>
+            <p>
+              There is no recovery. Nothing leaves your device, so nobody holds a copy of the key. Three wrong attempts
+              also wipe the app’s data. Keep an encrypted backup and the passphrase somewhere safe.
+            </p>
+          </details>
+          <details>
+            <summary>Where are my secrets stored?</summary>
+            <p>
+              In an encrypted vault on your device. There is no backend and no telemetry. The app reaches the network
+              only for website logos, which are off until you turn them on (the site’s domain name is then requested from DuckDuckGo and Google), and for the Terms and Privacy links.
+            </p>
+          </details>
+          <details>
+            <summary>Do I need NFC?</summary>
+            <p>
+              No. QR codes work on any phone with a camera. An NFC card is an optional place to keep a shard, and
+              reading it depends on your phone’s NFC support.
+            </p>
+          </details>
+          <details>
+            <summary>How do backups work?</summary>
+            <p>
+              Export writes an encrypted archive with a neutral file name and no marker that says what it is.
+              Importing replaces the vault’s contents. A weekly reminder asks for a backup, and you can turn it off.
+            </p>
+          </details>
+          <details>
+            <summary>Can someone read my screen or clipboard?</summary>
+            <p>
+              Android blocks screenshots in the app and iOS blurs the app switcher. Copied values clear from the
+              clipboard after a timer, on a best-effort basis. The vault locks after five minutes in the background, or at once if you turn on lock immediately.
+            </p>
+          </details>
+          <details>
+            <summary>Does the extension handle everything the app does?</summary>
+            <p>
+              No. It reads password, password-with-passcode and 2FA codes. Shards, cards and seed phrases stay in the
+              app, and the extension does not sync with it.
+            </p>
+          </details>
+          <details>
+            <summary>Will codes and backups from older versions still work?</summary>
+            <p>
+              Yes. Every QR code, NFC card, shard format and backup an earlier release wrote is kept readable. Older
+              vaults upgrade to the current encryption the first time you unlock them.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap">
+      <div class="footer-identity">
+        <div class="brand">
+          <span class="wordmark">split<b>/</b>Pass</span>
+        </div>
+        <span class="eyebrow">v{{VERSION}}</span>
+      </div>
+      <span
+        >By <a href="https://www.satoshi-ltd.com">Satoshi Ltd.</a> · no telemetry ·
+        <a href="https://www.satoshi-ltd.com/terms-of-use/">Terms</a> ·
+        <a href="https://www.satoshi-ltd.com/privacy-policy/">Privacy</a></span
+      >
+    </footer>
+    <button class="theme-btn" type="button" aria-label="Switch theme">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2" /><path d="M12 20v2" /><path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" /><path d="M2 12h2" /><path d="M20 12h2" /><path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" /></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
+    </button>
+  </body>
+</html>

@@ -33,7 +33,8 @@ Five documents, each answering one question. Put information in the one that own
   Queue. Anything needing a device, a native build, a store account, credentials or a product choice becomes a
   `creator` task. Ideas, including your own, go to Proposed.
 - **Commits:** never run `git commit`, `git push`, `git tag` or any ref-mutating command unless the creator asks in
-  the current turn; no AI attribution lines anywhere. Remote: `git@github.com:satoshi-ltd/splitPass.git`. There is no CI.
+  the current turn; no AI attribution lines anywhere. Remote: `git@github.com:satoshi-ltd/splitPass.git`. There is no CI; the only workflow publishes the site
+  (`.github/workflows/publish-site.yml`, SPEC 10.9).
 - **Versions:** every commit bumps the patch version: `node scripts/bump-version.mjs` rewrites `package.json`,
   `app.json` (`version`), the README and SPEC banners and the design kit banner, and dates `## Unreleased` in the
   changelog. Minor and major bumps happen only when the creator names them (`node scripts/bump-version.mjs minor`,

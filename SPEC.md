@@ -552,6 +552,7 @@ one is a ROADMAP Queue task of type `ui` carrying its ID, and the generator refu
 | `yarn android` / `ios` / `web` | Start Expo for that platform |
 | `yarn test`, `yarn test:coverage` | Jest |
 | `yarn check:release` | `scripts/check-release.mjs` |
+| `yarn site:build` | `site/scripts/build.mjs`: writes the marketing site to `site/dist/` (git-ignored) |
 | `yarn build:dev` / `build:prod` | EAS cloud Android build (`development` / `production` profile), APK downloaded to `release-assets/` |
 | `yarn build:local:dev` / `build:local:prod` | Same with `eas build --local` |
 | `yarn eas:login`, `yarn eas:whoami` | EAS account |
@@ -605,6 +606,38 @@ release-notes text.
 - expo-sharing can hang on iOS when a share target is cancelled; the auto-lock guard resets on return to `active`.
 - iOS reports `inactive` while the biometric sheet is open, so biometric re-prompts key off `background` to `active` only.
 - A stack route named `passphrase` and one named `unlock` render the same `Unlock` component.
+
+### 10.9 Marketing site (`site/`)
+
+One static page for the product, in the same layout language as the sibling Satoshi Ltd. sites (arca, alpi) and on the
+split/Pass palette (`#F46A3A` accent on `#FFFBF7` / `#12100E`, light or dark by `prefers-color-scheme`).
+
+- `index.html` is the template and `styles.css` its only stylesheet; the only script is `theme.js` (the theme switch). Fonts (Instrument Sans,
+  Fragment Mono, Doto Black subset for the wordmark) and the icons live in `assets/` and are copied flat into `dist/`.
+- `scripts/build.mjs` fills `{{VERSION}}`, `{{EXTENSION_VERSION}}` (from `package.json` and the extension manifest),
+  `{{CANONICAL}}` (`SITE_URL`), the store buttons (the App Store listing is the default of `APP_STORE_URL`, which
+  must stay on `apps.apple.com`; `PLAY_STORE_URL` on `play.google.com`, unset renders a disabled "soon" button) and a seeded, deliberately non-scannable QR drawing for the
+  extension panel.
+  It also writes `_headers` with a CSP that allows only same-origin content; the page has no inline style.
+- **Header.** The masthead is sticky, as on the arca, alpi and Môney sites: brand, the version and a Download link, over a fade into the page colour; it has no section links because the page is short. Anchors keep 90 px of scroll margin so the bar never covers a heading.
+- **Theme.** The page follows the system (`prefers-color-scheme`) until the reader presses the switch, then remembers the
+  pick in `localStorage` (`splitpass-theme`). The switch is the same control as on the arca, alpi and Môney sites: a 38 px
+  button fixed bottom right with lucide sun and moon icons (the sun shows in dark, the moon in light), driven by
+  `theme.js` and `data-theme` on `<html>`. Both palettes are the app's own tokens from `src/theme/palette.js`; the site
+  invents no colour.
+- The phones are real app screens: `scripts/screens.mjs` lifts six `.m-phone` blocks from `design/mobile.html` (English,
+  light) and writes `assets/screens/*.png` at 2x through a Chromium-based browser (`BROWSER` overrides the macOS Brave or
+  Chrome default). Rerun it after `yarn design` changes one of those screens.
+- The page claims only what this SPEC states: three-shard Shamir split, local encrypted vault, no backend, the extension's
+  supported types. Change the page in the same commit as the behaviour it describes.
+- Preview with `yarn site:build && python3 -m http.server --directory site/dist 4173`.
+- **Publication** follows arca's. `publish-site.yml` runs on a push to `main` that touches `site/**`, `package.json`,
+  the extension manifest or the workflow, and by manual dispatch from `main`; pull requests never deploy. It checks out
+  without credentials, verifies its configuration, installs Wrangler 4 outside the project, runs `site.test.js`, builds
+  with `yarn site:build` and uploads `site/dist` straight to Cloudflare Pages. Secrets: `CLOUDFLARE_ACCOUNT_ID`,
+  `CLOUDFLARE_API_TOKEN` (Pages Edit); variables: `CLOUDFLARE_PAGES_PROJECT_NAME`, optional `PLAY_STORE_URL` (and `APP_STORE_URL` to override the default listing); `SITE_URL` is set in the workflow. The canonical origin is `https://splitpass.satoshi-ltd.com`, its own
+  Pages project with Cloudflare Git auto-deploys disabled. Creating that project, the domain and the secrets is a creator
+  task in ROADMAP.
 
 ## 11. Development and tests
 
@@ -665,6 +698,7 @@ browser-extension/          manifest.json, popup.*, content.*, background.js, ca
 scripts/                    android-build.mjs, bump-version.mjs, check-release.mjs, __tests__/
 design/                     build.mjs, src/ (generator modules, proposal boards), AGENTS.md, kit pages, tokens, kit.css, kit.js
 store-assets/app-store/     per-version screenshots, composers, release notes
+site/                       index.html, styles.css, theme.js, assets/, scripts/build.mjs and screens.mjs (marketing page)
 patches/                    react-native-argon2 patch
 assets/                     icons, splash, onboarding images, Canela fonts
 __mocks__/                  Jest mocks for native Expo modules and Argon2

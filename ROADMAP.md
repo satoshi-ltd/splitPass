@@ -56,6 +56,13 @@ _None._
   accept: `store-assets/app-store/` holds screenshots for the version being submitted (today only `1.4.14`), or the
   creator confirms `1.4.14` still applies; the build is submitted to both stores.
 
+- **DEPLOY-SITE** — Publish the product site at splitpass.satoshi-ltd.com
+  `deploy · creator · normal`
+  accept: a Cloudflare Pages project for `splitpass.satoshi-ltd.com` exists with Git auto-deploys disabled; the repository
+  has secrets `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` and variable `CLOUDFLARE_PAGES_PROJECT_NAME` (plus
+  `PLAY_STORE_URL` once the Google Play listing exists; the App Store link is built in); a manual run of `publish-site` serves the page; the
+  creator confirms the repository link on the page matches whether the repository is public.
+
 - **VERIFY-ONBOARDING-CROP** — Onboarding image on short phones
   `verify · creator · low`
   accept: on a short Android and iPhone the first three onboarding slides keep the image below the safe area with

@@ -26,7 +26,8 @@
     "build:local:dev": "node scripts/android-build.mjs dev --local",
     "build:local:prod": "node scripts/android-build.mjs prod --local",
     "check:release": "node scripts/check-release.mjs",
-    "design": "node design/build.mjs"
+    "design": "node design/build.mjs",
+    "site:build": "node site/scripts/build.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/doto": "^0.4.1",

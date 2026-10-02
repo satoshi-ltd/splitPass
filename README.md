@@ -45,6 +45,11 @@ Store assets live in `store-assets/`; SPEC section 10 describes the release step
 `browser-extension/` loads unpacked in Chrome and Brave and converts for Safari. Setup, retention and camera notes are
 in [browser-extension/README.md](browser-extension/README.md).
 
+## Site
+
+`site/` holds the one-page product site. `yarn site:build` writes it to `site/dist/`; serve that folder with any static
+server. Store URLs and the canonical URL come from `APP_STORE_URL`, `PLAY_STORE_URL` and `SITE_URL`; SPEC 10.9 has the rest.
+
 ## Documents
 
 - [SPEC.md](SPEC.md) — how SplitPass works: secret model, security, storage, screens, services, extension, operations, design system.
