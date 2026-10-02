@@ -22,7 +22,7 @@ work lives in [ROADMAP.md](ROADMAP.md), shipped versions in [CHANGELOG.md](CHANG
 
 ## Current state
 
-- **1.4.21.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
+- **1.4.22.** `package.json` and `app.json` carry the same version; Expo SDK 55, React Native 0.83, React 19, JavaScript
   only. iOS build number and Android version code are 12.
 - **Ships:** the mobile app (iOS with tablet support, Android) and the browser extension `split/Pass Scanner` (manifest
   version 0.1.0, Chrome and Brave unpacked, Safari through Xcode conversion). A web target (`yarn web`) exists with NFC
@@ -330,7 +330,8 @@ Unlock also serves `export` and `import` modes (pushed from Settings).
   Reached with `writeMode` it writes the secret to an NFC card.
 - **Settings:** security (biometric, lock immediately, backup reminder, export, import), privacy (external sharing,
   clipboard auto-clear, favicons), preferences (language, system theme, dark mode), about (terms, privacy),
-  account and data (logout, reset), development (demo secrets, `__DEV__` only).
+  account and data (logout, reset), development (demo secrets, `__DEV__` only), then a footer with the version and
+  build number read from `Constants.expoConfig` (`v<version> (<build>)`).
 - **Passwords:** length slider (8 and up), counters for digits, capitals, symbols, strength label, copy (with
   clipboard clearing); picker mode also emits `password-selected`.
 

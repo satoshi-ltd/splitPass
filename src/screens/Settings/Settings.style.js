@@ -29,6 +29,10 @@ export const style = StyleSheet.create({
     marginTop: '$spaceXS',
   },
 
+  version: {
+    paddingBottom: '$spaceS',
+  },
+
   offset: {
     marginHorizontal: '$spaceM',
     width: 'auto',

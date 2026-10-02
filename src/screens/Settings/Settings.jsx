@@ -1,8 +1,10 @@
 /* global Set, __DEV__ */
+import Constants from 'expo-constants';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { Linking } from 'react-native';
 
+import { appVersion } from './helpers';
 import { ABOUT_OPTIONS, ACCOUNT_DATA_OPTIONS, DEVELOPMENT_OPTIONS, SECURITY_OPTIONS } from './Settings.constants';
 import { style } from './Settings.style';
 import { EVENT } from '../../App.constants';
@@ -419,6 +421,10 @@ const Settings = ({ navigation = {} }) => {
           ))}
         </View>
       ) : null}
+
+      <Text align="center" size="xs" tone="secondary" style={style.version}>
+        {appVersion(Constants.expoConfig)}
+      </Text>
     </AppScreen>
   );
 };

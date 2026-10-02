@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.22 — 2026-10-02
+
+- Settings ends with the app version and build number, so you can tell which release is installed.
+
 ## 1.4.21 — 2026-10-01
 
 - Settings no longer offers "Get your own split|Card": the card store screen is gone. NFC storage is unchanged.
