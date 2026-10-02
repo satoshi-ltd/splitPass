@@ -569,8 +569,10 @@ part of the repository and nothing consumes it; never commit real values.
 
 `appVersionSource: local`; `build.base` pins Node 24.14.1 and Yarn 1.22.22. Profiles `development` (development client,
 internal, APK), `preview` (internal, APK), `production` (APK), `store` (extends `production`, AAB for Google Play).
-`submit.production` is empty. Android permissions: `CAMERA`, `NFC`; iOS `ITSAppUsesNonExemptEncryption: false`, Face
-ID description set; the NFC config plugin sets `includeNdefEntitlement: false`.
+`submit.production` is empty. Android permissions: `CAMERA`, `NFC`; `blockedPermissions` strips `READ_EXTERNAL_STORAGE`,
+`READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`, which `expo-screen-capture` declares only for screenshot detection, unused
+here, and which Google Play's photo and video policy rejects. iOS `ITSAppUsesNonExemptEncryption: false`, Face ID
+description set; the NFC config plugin sets `includeNdefEntitlement: false`.
 
 ### 10.5 Android builds (`scripts/android-build.mjs dev|prod|store [--local] [--install-only]`)
 

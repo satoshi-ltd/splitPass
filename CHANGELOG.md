@@ -3,6 +3,7 @@
 ## Unreleased
 
 - `yarn build:store` and `yarn build:local:store` build the Android App Bundle (AAB) that Google Play needs, from a new `store` EAS profile; `build:prod` still makes the APK.
+- The Android app no longer declares photo, video or storage read permissions it never used, as Google Play's photo and video policy requires.
 
 ## 1.4.23 — 2026-10-02
 
