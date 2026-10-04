@@ -19,65 +19,64 @@ ORANGE = "#F7683A"
 
 REPO_ROOT = ROOT.parents[2]
 FONT_DISPLAY = REPO_ROOT / "node_modules/@expo-google-fonts/doto/900Black/Doto_900Black.ttf"
-# The bundled Canela cut has no Spanish glyphs (including accents and ñ).
-# New York keeps the same editorial serif character while rendering the localized copy intact.
+# The bundled Canela cut lacks accented glyphs; New York keeps the editorial serif and renders any localized copy.
 FONT_BODY = Path("/System/Library/Fonts/NewYork.ttf")
 FONT_BODY_BOLD = REPO_ROOT / "assets/fonts/CanelaText-Bold.otf"
 
 SLIDES = [
     {
         "source": "10-home.png",
-        "output": "01-tus-secretos.png",
-        "headline": "Tus secretos.\nSolo tuyos.",
-        "subtitle": "Contraseñas, tarjetas, seeds y 2FA en una bóveda local cifrada.",
+        "output": "01-your-secrets.png",
+        "headline": "Your secrets.\nOnly yours.",
+        "subtitle": "Passwords, cards, seeds and 2FA in an encrypted local vault.",
         "theme": "light",
         "transform": "normal",
     },
     {
         "source": "20-shards.png",
-        "output": "02-divide-y-recupera.png",
-        "headline": "Divide. Separa.\nRecupera.",
-        "subtitle": "Cualquier 2 de 3 shards reconstruyen tu secreto.",
+        "output": "02-split-and-recover.png",
+        "headline": "Split. Spread.\nRecover.",
+        "subtitle": "Any 2 of 3 shards rebuild your secret.",
         "theme": "dark",
         "transform": "normal",
     },
     {
         "source": "30-totp.png",
-        "output": "03-tu-2fa.png",
-        "headline": "Tu 2FA también\nestá aquí.",
-        "subtitle": "Códigos actualizados y listos para copiar.",
+        "output": "03-your-2fa.png",
+        "headline": "Your 2FA lives\nhere too.",
+        "subtitle": "Live codes, ready to copy.",
         "theme": "light",
         "transform": "mirror",
     },
     {
         "source": "40-card.png",
-        "output": "04-mas-que-contrasenas.png",
-        "headline": "Mucho más que\ncontraseñas.",
-        "subtitle": "Guarda tarjetas y frases semilla sin mostrarlas.",
+        "output": "04-more-than-passwords.png",
+        "headline": "Much more than\npasswords.",
+        "subtitle": "Keep cards and seed phrases without revealing them.",
         "theme": "dark",
         "transform": "rotate",
     },
     {
         "source": "50-password-generator.png",
-        "output": "05-contrasenas-fuertes.png",
-        "headline": "Contraseñas fuertes,\nsin pensarlo.",
-        "subtitle": "Elige longitud, números, mayúsculas y símbolos.",
+        "output": "05-strong-passwords.png",
+        "headline": "Strong passwords,\nzero effort.",
+        "subtitle": "Pick the length, digits, capitals and symbols.",
         "theme": "light",
         "transform": "rotate",
     },
     {
         "source": "60-nfc.png",
-        "output": "06-recupera-qr-nfc.png",
-        "headline": "Recupera por QR\no split|Card NFC.",
-        "subtitle": "Lee y guarda secretos en segundos.",
+        "output": "06-recover-qr-nfc.png",
+        "headline": "Recover by QR\nor split|Card NFC.",
+        "subtitle": "Read and save secrets in seconds.",
         "theme": "dark",
         "transform": "mirror",
     },
     {
         "source": "70-settings.png",
-        "output": "07-privacidad.png",
-        "headline": "Privacidad\na tu manera.",
-        "subtitle": "Biometría, bloqueo automático, portapapeles temporal y copias cifradas.",
+        "output": "07-privacy.png",
+        "headline": "Privacy,\nyour way.",
+        "subtitle": "Biometrics, automatic lock, timed clipboard and encrypted backups.",
         "theme": "light",
         "transform": "normal",
     },
@@ -294,7 +293,7 @@ def main() -> None:
     make_contact_sheet(
         [SOURCE_DIR / slide["source"] for slide in SLIDES],
         ROOT / "source-ipad-contact-sheet.jpg",
-        [f"Fuente {index:02d}" for index in range(1, len(SLIDES) + 1)],
+        [f"Source {index:02d}" for index in range(1, len(SLIDES) + 1)],
     )
 
     print(f"Generated {len(outputs)} iPad screenshots in {FINAL_DIR}")

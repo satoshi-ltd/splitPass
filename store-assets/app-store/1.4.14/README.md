@@ -16,13 +16,13 @@
 
 Upload the files in their numeric order. The first three communicate the core proposition in search and on the product page:
 
-1. Tus secretos. Solo tuyos.
-2. Divide. Separa. Recupera.
-3. Tu 2FA también está aquí.
-4. Mucho más que contraseñas.
-5. Contraseñas fuertes, sin pensarlo.
-6. Recupera por QR o split|Card NFC.
-7. Privacidad a tu manera.
+1. Your secrets. Only yours.
+2. Split. Spread. Recover.
+3. Your 2FA lives here too.
+4. Much more than passwords.
+5. Strong passwords, zero effort.
+6. Recover by QR or split|Card NFC.
+7. Privacy, your way.
 
 Apple accepts one to ten screenshots. The 6.9-inch iPhone set can supply the smaller iPhone slots automatically. The 13-inch iPad set is also required because `app.json` declares `supportsTablet: true`.
 
@@ -50,7 +50,7 @@ No hay un tag que identifique de forma inmutable el binario `1.3.0 (11)`. Este t
 
 ## Provenance and regeneration
 
-The app UI was captured natively from an iPhone 17 Pro Max simulator and an iPad Pro 13-inch simulator. Only demo records were used. The actual project source was not modified to inject the capture data; the temporary capture harness lived outside the repository.
+The app UI was captured natively in English (simulator locale `en_US`) from an iPhone 17 Pro Max simulator and an iPad Pro 13-inch simulator. Only demo records were used. The actual project source was not modified to inject the capture data; the temporary capture harness lived outside the repository.
 
 The two editorial backgrounds were created with the built-in ImageGen tool in generation mode, then composed with the real app UI. They are stored in `backgrounds/`.
 
